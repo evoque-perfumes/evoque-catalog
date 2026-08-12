@@ -239,7 +239,16 @@ const TERM_AR = {
   "all seasons":"كل الفصول","summer":"صيفي","winter":"شتوي","spring":"ربيعي","autumn":"خريفي","fall":"خريفي",
   "day & night":"نهار وليل","day":"نهاري","night":"ليلي/سهرة",
   "strong":"قوي","moderate":"متوسط","light":"خفيف","very strong":"قوي جدًا",
-  "hours":"ساعات","hour":"ساعة"
+  "hours":"ساعات","hour":"ساعة",
+  // أسماء نوتس/مكونات محددة شائعة (مو بس عائلات عامة) — عشان ما تضل بالإنجليزي بمنتصف جملة عربية
+  "amberwood":"خشب العنبر","saffron":"زعفران","ambergris":"عنبر بحري","fir":"صنوبر","cedar":"أرز",
+  "sandalwood":"خشب الصندل","patchouli":"باتشولي","bergamot":"برغموت","vetiver":"نجيل الهند",
+  "tonka":"فول التونكا","iris":"سوسن","lavender":"لافندر","incense":"بخور","tobacco":"تبغ",
+  "leather":"جلد","amber":"عنبر","vanilla":"فانيليا","pink pepper":"فلفل وردي","pepper":"فلفل",
+  "grapefruit":"جريب فروت","lemon":"ليمون","orange":"برتقال","mandarin":"يوسفي","bitter orange":"نارنج",
+  "coffee":"قهوة","chocolate":"شوكولاتة","cardamom":"هيل","cinnamon":"قرفة","clove":"قرنفل",
+  "musk":"مسك","white musk":"مسك أبيض","oud":"عود","rose":"ورد","jasmine":"ياسمين","orange blossom":"زهر البرتقال",
+  "ylang ylang":"يلانج يلانج","violet":"بنفسج","peony":"فاوانيا","lily":"زنبق","tuberose":"فل"
 };
 
 function translateForDisplay(text){
@@ -256,10 +265,12 @@ function translateForDisplay(text){
 }
 
 // محول رابط Google Drive بأي صيغة إلى رابط صورة مباشر قابل للعرض
+// نستخدم صيغة thumbnail (مو uc?export=view) لأنها أكثر ثباتًا لعرض الصور المضمّنة
+// في صفحات خارجية — Google أحيانًا يحجب صيغة uc?export=view لصور تُعرض بكثرة (hotlinking).
 function driveDirectImageUrl(link){
   if(!link) return "";
   const m = link.match(/[-\w]{25,}/); // يلتقط أي Drive file ID داخل أي صيغة رابط
-  return m ? `https://drive.google.com/uc?export=view&id=${m[0]}` : link;
+  return m ? `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000` : link;
 }
 
 // محلّل CSV بسيط يدعم الحقول المحاطة بعلامات اقتباس (فيها فواصل)
