@@ -96,6 +96,7 @@
     background:var(--gold); color:#20190a; font-weight:700; font-size:13px; cursor:pointer;
   }
   .add-btn.added{ background:var(--wa); color:#0b1a10; }
+  .add-btn:disabled{ background:var(--card2); color:var(--muted); cursor:not-allowed; }
   footer{ text-align:center; color:var(--muted); font-size:12px; padding:20px; border-top:1px solid var(--line); }
   .empty{ text-align:center; color:var(--muted); padding:40px; grid-column:1/-1; }
 
@@ -180,6 +181,8 @@ const I18N = {
     top: "أعلى النوتس", middle: "وسط النوتس", base: "قاعدة النوتس",
     longevity: "الثبات", sillage: "الفوحان",
     askPrice: "اسأل عن السعر",
+    outOfStock: "نفذت الكمية",
+    allOutOfStock: "نفذت الكمية حاليًا",
     add: "أضف للسلة",
     added: "✓ مُضاف — اضغط للإزالة",
     cartEmpty: "السلة فارغة",
@@ -214,6 +217,8 @@ const I18N = {
     top: "Top notes", middle: "Middle notes", base: "Base notes",
     longevity: "Longevity", sillage: "Sillage",
     askPrice: "Ask for price",
+    outOfStock: "Out of stock",
+    allOutOfStock: "Currently out of stock",
     add: "Add to cart",
     added: "✓ Added — click to remove",
     cartEmpty: "Cart is empty",
@@ -344,6 +349,9 @@ async function loadPerfumesFromSheet(){
       gender: (r[idx("Gender")]||"").toLowerCase(),
       price50: parseFloat(r[idx("50ML Price UAE (AED)")]) || null,
       price10: parseFloat(r[idx("10ML Price UAE (AED)")]) || null,
+      // عمودي المخزون اختياريان — لو مو موجودين بالشيت بعد (ما أضفتهم يدويًا)، نعتبر كل شي متوفر بشكل افتراضي
+      stock50: idx("50ML In Stock") === -1 ? true : (r[idx("50ML In Stock")] || "").trim().toLowerCase() !== "no",
+      stock10: idx("10ML In Stock") === -1 ? true : (r[idx("10ML In Stock")] || "").trim().toLowerCase() !== "no",
       accords: r[idx("Main Accords")] || "",
       notesTop: r[idx("Notes")] || "",
       notesMid: "", notesBase: "",
@@ -410,8 +418,8 @@ function matches(p){
 function priceLabel(p){
   const t = I18N[lang];
   const parts = [];
-  if(p.price50) parts.push(`50ml: ${p.price50} AED`);
-  if(p.price10) parts.push(`10ml: ${p.price10} AED`);
+  if(p.price50) parts.push(`50ml: ${p.price50} AED${p.stock50 ? "" : " (" + t.outOfStock + ")"}`);
+  if(p.price10) parts.push(`10ml: ${p.price10} AED${p.stock10 ? "" : " (" + t.outOfStock + ")"}`);
   return parts.length ? parts.join(" · ") : t.askPrice;
 }
 
@@ -455,9 +463,18 @@ function renderGrid(){
     const info = document.createElement("div");
     info.className = "info";
 
+    // نبني خيارات الحجم — لو حجم معين نفذ من الكمية، نخليه يظهر بس معطّل (مو نخفيه) عشان العميل يعرف إنه موجود بالأصل وبيرجع
     const sizeOptions = [];
-    if(p.price50) sizeOptions.push(`<option value="50">50ml — ${p.price50} AED</option>`);
-    if(p.price10) sizeOptions.push(`<option value="10">10ml — ${p.price10} AED</option>`);
+    let firstAvailableSize = null;
+    if(p.price50){
+      sizeOptions.push(`<option value="50" ${p.stock50 ? "" : "disabled"}>50ml — ${p.price50} AED${p.stock50 ? "" : " (" + t.outOfStock + ")"}</option>`);
+      if(p.stock50 && firstAvailableSize===null) firstAvailableSize = "50";
+    }
+    if(p.price10){
+      sizeOptions.push(`<option value="10" ${p.stock10 ? "" : "disabled"}>10ml — ${p.price10} AED${p.stock10 ? "" : " (" + t.outOfStock + ")"}</option>`);
+      if(p.stock10 && firstAvailableSize===null) firstAvailableSize = "10";
+    }
+    const hasAvailableSize = firstAvailableSize !== null;
 
     const accordsDisplay = translateForDisplay(p.accords);
     const notesTopDisplay = translateForDisplay(p.notesTop);
@@ -486,22 +503,32 @@ function renderGrid(){
       notesToggle.textContent = notesBox.classList.contains("open") ? t.notesToggleClose : t.notesToggleOpen;
     };
 
+    // اختار الحجم المتوفر أول شي كافتراضي بالـ select (لو موجود)
+    const sizeSelectEl = info.querySelector(".size-select");
+    if(sizeSelectEl && firstAvailableSize) sizeSelectEl.value = firstAvailableSize;
+
     const addBtn = document.createElement("button");
     addBtn.className = "add-btn";
-    addBtn.textContent = cart[p.id] ? t.added : t.add;
-    if(cart[p.id]) addBtn.classList.add("added");
-    addBtn.onclick = ()=>{
-      if(cart[p.id]){
-        delete cart[p.id];
-      } else {
-        const sizeSelect = info.querySelector(".size-select");
-        const size = sizeSelect ? sizeSelect.value : "50";
-        const price = size === "50" ? p.price50 : p.price10;
-        cart[p.id] = { brand: p.brand, name: p.name, size, price };
-      }
-      renderGrid();
-      renderCart();
-    };
+    if(!hasAvailableSize && !cart[p.id]){
+      // كل الأحجام اللي فيها سعر نفذت من الكمية — نعطّل الزر بدل ما نخلي العميل يضيف شي مو متوفر
+      addBtn.textContent = t.allOutOfStock;
+      addBtn.disabled = true;
+    } else {
+      addBtn.textContent = cart[p.id] ? t.added : t.add;
+      if(cart[p.id]) addBtn.classList.add("added");
+      addBtn.onclick = ()=>{
+        if(cart[p.id]){
+          delete cart[p.id];
+        } else {
+          const sizeSelect = info.querySelector(".size-select");
+          const size = sizeSelect ? sizeSelect.value : (firstAvailableSize || "50");
+          const price = size === "50" ? p.price50 : p.price10;
+          cart[p.id] = { brand: p.brand, name: p.name, size, price };
+        }
+        renderGrid();
+        renderCart();
+      };
+    }
 
     card.appendChild(imgWrap);
     card.appendChild(info);
