@@ -38,6 +38,16 @@
     text-align:center;
   }
   .notfound-banner a{ color:var(--wa); font-weight:700; text-decoration:none; }
+  .search-controls{
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+    max-width:900px; margin:16px auto 0; padding:0 16px;
+  }
+  .search-input, .brand-select{
+    background:var(--card2); color:var(--text); border:1px solid var(--line);
+    border-radius:10px; padding:9px 14px; font-size:13px; flex:1; min-width:160px;
+  }
+  .search-input:focus, .brand-select:focus{ outline:none; border-color:var(--gold); }
+  .badge.gender-badge{ color:var(--gold-soft); border-color:var(--gold); }
   .filters{
     display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
     padding:16px; max-width:900px; margin:0 auto;
@@ -130,6 +140,11 @@
 
 <div class="notfound-banner" id="notfoundBanner"></div>
 
+<div class="search-controls">
+  <input type="text" id="searchInput" class="search-input" />
+  <select id="brandSelect" class="brand-select"></select>
+</div>
+
 <div class="filters" id="filters"></div>
 <div class="grid" id="grid"></div>
 
@@ -166,8 +181,14 @@ const I18N = {
     loading: "جارِ تحميل العطور من الشيت...",
     errorPrefix: "ما قدرت أوصل للشيت الحي",
     errorHint: 'تأكد إن الشيت مشارك بصلاحية "Anyone with the link - Viewer".',
+    searchPlaceholder: "دور على اسم عطر أو براند...",
+    allBrands: "كل البراندات",
+    genderMen: "رجالي", genderWomen: "نسائي", genderUnisex: "للجنسين",
     filters: [
       {key:"all", label:"الكل"},
+      {key:"men", label:"رجالي"},
+      {key:"women", label:"نسائي"},
+      {key:"unisex", label:"للجنسين"},
       {key:"summer", label:"صيفي"},
       {key:"winter", label:"شتوي"},
       {key:"spring", label:"ربيعي"},
@@ -202,8 +223,14 @@ const I18N = {
     loading: "Loading perfumes from the sheet...",
     errorPrefix: "Couldn't reach the live sheet",
     errorHint: 'Make sure the sheet is shared as "Anyone with the link - Viewer".',
+    searchPlaceholder: "Search perfume or brand name...",
+    allBrands: "All brands",
+    genderMen: "Men", genderWomen: "Women", genderUnisex: "Unisex",
     filters: [
       {key:"all", label:"All"},
+      {key:"men", label:"Men"},
+      {key:"women", label:"Women"},
+      {key:"unisex", label:"Unisex"},
       {key:"summer", label:"Summer"},
       {key:"winter", label:"Winter"},
       {key:"spring", label:"Spring"},
@@ -303,6 +330,9 @@ function parseCSV(text){
   return rows;
 }
 
+// ملاحظة مهمة: لو العمود فاضي بالشيت (ما تم تعبئته بعد)، ما نحط له وسم افتراضي
+// "الكل" — نخليه بدون وسوم إطلاقًا، عشان ما يظهر خطأ تحت كل فلتر موسمي قبل لا
+// تعبي البيانات الفعلية. هو بس يظهر تحت فلتر "الكل" (اللي دايمًا يرجع true).
 function seasonsFromText(text){
   const t = (text||"").toLowerCase();
   const out = [];
@@ -311,7 +341,7 @@ function seasonsFromText(text){
   if(t.includes("winter")) out.push("winter");
   if(t.includes("spring")) out.push("spring");
   if(t.includes("autumn") || t.includes("fall")) out.push("autumn");
-  return out.length ? out : ["all"];
+  return out; // فاضي لو ما فيه بيانات — يظهر بس تحت "الكل"
 }
 
 function daynightFromText(text){
@@ -319,7 +349,17 @@ function daynightFromText(text){
   const out = [];
   if(t.includes("day")) out.push("day");
   if(t.includes("night")) out.push("night");
-  return out.length ? out : ["day","night"];
+  return out; // فاضي لو ما فيه بيانات — يظهر بس تحت "الكل"
+}
+
+// يطبّع قيمة عمود Gender لأي صيغة (Men/Male/رجالي...) إلى واحدة من: men / women / unisex
+function genderKeyFromText(text){
+  const t = (text||"").toLowerCase().trim();
+  if(!t) return "";
+  if(t.includes("unisex") || t.includes("both")) return "unisex";
+  if(t.includes("women") || t.includes("woman") || t.includes("female") || t === "her") return "women";
+  if(t.includes("men") || t.includes("man") || t.includes("male") || t === "him") return "men";
+  return "";
 }
 
 // حالة تحميل البيانات — جزء من نظام الترجمة عشان لو تبدّل اللغة أثناء
@@ -346,7 +386,7 @@ async function loadPerfumesFromSheet(){
       image: driveDirectImageUrl(r[idx("Image Link (Google Drive)")]),
       seasons: seasonsFromText(r[idx("Seasons")]),
       daynight: daynightFromText(r[idx("Day/Night")]),
-      gender: (r[idx("Gender")]||"").toLowerCase(),
+      gender: genderKeyFromText(r[idx("Gender")]),
       price50: parseFloat(r[idx("50ML Price UAE (AED)")]) || null,
       price10: parseFloat(r[idx("10ML Price UAE (AED)")]) || null,
       // عمودي المخزون اختياريان — لو مو موجودين بالشيت بعد (ما أضفتهم يدويًا)، نعتبر كل شي متوفر بشكل افتراضي
@@ -358,6 +398,13 @@ async function loadPerfumesFromSheet(){
       longevity: r[idx("Longevity")] || "", sillage: r[idx("Sillage")] || ""
     }));
 
+    // ترتيب العطور حسب اسم البراند أولًا، وبعده اسم العطر (أبجديًا)
+    perfumes.sort((a, b) => {
+      const brandCompare = a.brand.localeCompare(b.brand, "en", {sensitivity: "base"});
+      if(brandCompare !== 0) return brandCompare;
+      return a.name.localeCompare(b.name, "en", {sensitivity: "base"});
+    });
+
     loadState = "loaded";
   } catch(err){
     loadState = "error";
@@ -367,6 +414,8 @@ async function loadPerfumesFromSheet(){
 }
 
 let activeFilter = "all";
+let selectedBrand = "all";
+let searchQuery = "";
 // cart is an in-memory object only (no browser storage): { perfumeId: {size, qty} }
 let cart = {};
 
@@ -391,9 +440,31 @@ function renderAll(){
   document.getElementById("notfoundLink").href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`;
   document.getElementById("notfoundLink").target = "_blank";
 
+  renderSearchControls();
   renderFilters();
   renderGrid();
   renderCart();
+}
+
+// خانة البحث (بالاسم أو البراند) + قائمة منسدلة للبراندات — تُبنى من البراندات الموجودة فعليًا بالبيانات
+function renderSearchControls(){
+  const t = I18N[lang];
+  const searchInput = document.getElementById("searchInput");
+  searchInput.placeholder = t.searchPlaceholder;
+  searchInput.value = searchQuery;
+  searchInput.oninput = (e)=>{ searchQuery = e.target.value; renderGrid(); };
+
+  const brandSelect = document.getElementById("brandSelect");
+  const brands = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
+
+  const prevSelection = selectedBrand;
+  brandSelect.innerHTML = `<option value="all">${t.allBrands}</option>` +
+    brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${b}</option>`).join("");
+  // لو البراند المختار سابقًا ما عاد موجود (مثلاً بعد تحديث البيانات)، رجّعه لـ "الكل"
+  selectedBrand = brands.includes(prevSelection) ? prevSelection : "all";
+  brandSelect.value = selectedBrand;
+  brandSelect.onchange = (e)=>{ selectedBrand = e.target.value; renderGrid(); };
 }
 
 function renderFilters(){
@@ -410,8 +481,15 @@ function renderFilters(){
 }
 
 function matches(p){
+  // فلتر البراند وخانة البحث يشتغلون دايمًا (مستقلين عن أزرار الفلاتر فوق)
+  if(selectedBrand !== "all" && p.brand !== selectedBrand) return false;
+  if(searchQuery.trim()){
+    const q = searchQuery.trim().toLowerCase();
+    if(!(p.brand.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))) return false;
+  }
   if(activeFilter==="all") return true;
   if(activeFilter==="night" || activeFilter==="day") return p.daynight.includes(activeFilter);
+  if(activeFilter==="men" || activeFilter==="women" || activeFilter==="unisex") return p.gender === activeFilter;
   return p.seasons.includes(activeFilter) || p.seasons.includes("all");
 }
 
@@ -480,11 +558,15 @@ function renderGrid(){
     const notesTopDisplay = translateForDisplay(p.notesTop);
     const longevityDisplay = translateForDisplay(p.longevity);
     const sillageDisplay = translateForDisplay(p.sillage);
+    const genderLabel = p.gender === "men" ? t.genderMen : p.gender === "women" ? t.genderWomen : p.gender === "unisex" ? t.genderUnisex : "";
 
     info.innerHTML = `
       <div class="brand">${p.brand}</div>
       <div class="name">${p.name}</div>
-      <div class="badge-row">${accordsDisplay ? `<span class="badge">${accordsDisplay}</span>` : ""}</div>
+      <div class="badge-row">
+        ${genderLabel ? `<span class="badge gender-badge">${genderLabel}</span>` : ""}
+        ${accordsDisplay ? `<span class="badge">${accordsDisplay}</span>` : ""}
+      </div>
       <button class="notes-toggle" type="button">${t.notesToggleOpen}</button>
       <div class="notes-box">
         ${notesTopDisplay ? `<div><b>${t.top}:</b> ${notesTopDisplay}</div>` : ""}
