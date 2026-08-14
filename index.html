@@ -513,35 +513,180 @@ const I18N = {
 };
 
 // خريطة ترجمة مصطلحات العطور الشائعة (تُستخدم فقط لما اللغة = عربي)
+// ملاحظة: العبارات المكوّنة من أكثر من كلمة تُطابَق أولاً (قبل الكلمات المفردة)
+// عشان تترجم بصيغة صحيحة نحويًا بدل ترجمة كل كلمة لحالها.
 const TERM_AR = {
-  "woody":"خشبي","amber":"عنبري","warm spicy":"حار توابلي","metallic":"معدني",
+  // الفئات العامة / الأكوردات (Main Accords)
+  "woody":"خشبي","amber":"عنبر","warm spicy":"حار توابلي","metallic":"معدني",
   "fresh spicy":"منعش توابلي","musk":"مسك","musky":"مسكي","oud":"عود","floral":"زهري",
   "citrus":"حمضي","vanilla":"فانيليا","fruity":"فاكهي","sweet":"حلو","aromatic":"عطري",
-  "leather":"جلدي","powdery":"بودرة","green":"أخضر","aquatic":"مائي","rose":"ورد",
+  "leather":"جلد","powdery":"بودرة","green":"أخضر","aquatic":"مائي","rose":"ورد",
   "jasmine":"ياسمين","saffron":"زعفران","ambergris":"عنبر بحري","fir":"صنوبر","cedar":"أرز",
   "unisex":"للجنسين","men":"رجالي","women":"نسائي",
   "all seasons":"كل الفصول","summer":"صيفي","winter":"شتوي","spring":"ربيعي","autumn":"خريفي","fall":"خريفي",
   "day & night":"نهار وليل","day":"نهاري","night":"ليلي/سهرة",
   "strong":"قوي","moderate":"متوسط","light":"خفيف","very strong":"قوي جدًا",
   "hours":"ساعات","hour":"ساعة",
-  "amberwood":"خشب العنبر","sandalwood":"خشب الصندل","patchouli":"باتشولي","bergamot":"برغموت","vetiver":"نجيل الهند",
-  "tonka":"فول التونكا","iris":"سوسن","lavender":"لافندر","incense":"بخور","tobacco":"تبغ",
+  "amberwood":"خشب العنبر","amber wood":"خشب العنبر","amber woods":"أخشاب العنبر",
+  "sandalwood":"خشب الصندل","patchouli":"باتشولي","bergamot":"برغموت","vetiver":"نجيل الهند",
+  "tonka":"فول التونكا","tonka bean":"فول التونكا","iris":"سوسن","lavender":"لافندر","incense":"بخور","tobacco":"تبغ",
   "pink pepper":"فلفل وردي","pepper":"فلفل",
   "grapefruit":"جريب فروت","lemon":"ليمون","orange":"برتقال","mandarin":"يوسفي","bitter orange":"نارنج",
   "coffee":"قهوة","chocolate":"شوكولاتة","cardamom":"هيل","cinnamon":"قرفة","clove":"قرنفل",
   "white musk":"مسك أبيض","orange blossom":"زهر البرتقال",
-  "ylang ylang":"يلانج يلانج","violet":"بنفسج","peony":"فاوانيا","lily":"زنبق","tuberose":"فل"
+  "ylang ylang":"يلانج يلانج","ylang-ylang":"يلانج يلانج","violet":"بنفسج","peony":"فاوانيا","lily":"زنبق","tuberose":"فل",
+  "amber floral":"عنبري زهري","amber woody":"عنبري خشبي","animalic":"حيواني","boozy":"كحولي",
+  "clean synthetics":"مركّبات نظيفة","creamy":"كريمي","dry":"جاف","fresh":"منعش",
+  "fruity floral":"فاكهي زهري","gourmand":"حلويات","gourmand floral":"حلويات زهري",
+  "gourmand/chocolate":"حلويات/شوكولاتة","hashish/cannabis accord":"نفحة حشيش/قنب","herbal":"عشبي",
+  "honey":"عسل","marine":"بحري","marine/aquatic":"بحري مائي","oriental":"شرقي","oud/woody":"عود/خشبي",
+  "resinous":"راتنجي","sensual":"حسي","smoky":"دخاني","soft":"ناعم","spicy":"توابلي",
+  "sweet milk":"حليب حلو","warm chypre":"شيبر دافئ","warm resinous":"راتنجي دافئ",
+  "white floral":"زهري أبيض","woody oriental":"خشبي شرقي","woody-musky":"خشبي مسكي",
+
+  // مكونات وملاحظات العطر (Notes) — من الكتالوج الفعلي
+  "african marigold":"آذريون أفريقي","ambergris tincture":"صبغة العنبر البحري",
+  "aromatic/fresh top notes":"نفحات علوية عطرية/منعشة","blood mandarin":"يوسفي أحمر",
+  "bulgarian rose":"الورد البلغاري","cambodian oud":"عود كمبودي","cashmeran":"كشميران",
+  "cherry":"كرز","coffee & rum accord":"نفحة قهوة ورَم","cognac":"كونياك",
+  "damask rose":"الورد الدمشقي","frankincense":"لبان","galbanum":"قلبانوم",
+  "grasse jasmine":"ياسمين جراس","greek saffron":"زعفران يوناني",
+  "green cannabis leaves/hashish accord":"أوراق قنب خضراء/نفحة حشيش","heliotrope":"هليوتروب",
+  "herbal top notes":"نفحات عشبية علوية","indian sandalwood":"خشب الصندل الهندي",
+  "italian lemon":"ليمون إيطالي","jasmine sambac":"ياسمين سامباك","java vetiver":"نجيل الهند الجاوي",
+  "juniper berries":"توت العرعر","mandarin orange":"برتقال يوسفي","may rose":"ورد مايو",
+  "moroccan rose":"الورد المغربي","osmanthus":"أوسمانثوس","pineapple":"أناناس",
+  "pink lady apple":"تفاح بينك ليدي","pink grapefruit":"جريب فروت وردي","rhubarb":"راوند",
+  "roasted espresso coffee":"قهوة إسبريسو محمصة","roasted leather":"جلد محمّص",
+  "sicilian orange":"برتقال صقلي","somali frankincense":"لبان صومالي","somali incense":"بخور صومالي",
+  "somali myrrh":"مرّ صومالي","sorrento lemon":"ليمون سورينتو","tahitian vanilla":"فانيليا تاهيتية",
+  "turkish rose":"الورد التركي","virginia cedar":"أرز فرجينيا","aldehydes":"ألدهيدات",
+  "ambergris (oceanic/salty)":"عنبر بحري (محيطي/مالح)","ambrette":"أمبريت","ambrox":"أمبروكس",
+  "ambroxan":"أمبروكسان","apple":"تفاح","base not clearly documented":"القاعدة غير موثّقة بوضوح",
+  "bay leaf":"ورق الغار","benzoin":"بنزوين","berry sugar":"سكر التوت",
+  "black currant":"الكشمش الأسود","blackcurrant":"الكشمش الأسود","blue ginger":"الزنجبيل الأزرق",
+  "cade oil":"زيت القطران","cassia":"القرفة الصينية","cedarwood":"خشب الأرز","civet":"الزباد",
+  "cocoa":"كاكاو","coconut":"جوز الهند","coconut flakes":"رقائق جوز الهند",
+  "coriander seed":"بذور الكزبرة","cyclamen":"السيكلامين","davana":"دافانا","dry amber":"عنبر جاف",
+  "elderflower":"زهر البيلسان","freesia":"الفريزيا","geranium":"جيرانيوم","ginger":"زنجبيل",
+  "green notes":"نفحات خضراء","habanolide":"هابانوليد","hawthorn":"الزعرور","hyacinth":"السنبل",
+  "immortelle":"زهرة الخلود","karo karounde":"كارو كاروندي","labdanum":"اللادن",
+  "leather accord":"نفحة الجلد","lemongrass":"عشب الليمون","lily of the valley":"زنبق الوادي",
+  "lingonberry":"توت لينغون","lychee":"ليتشي","magnolia":"ماغنوليا","marine notes":"نفحات بحرية",
+  "mate":"متة","mint":"نعناع","moss":"طحلب","musk rose":"ورد المسك","musks":"مسك",
+  "myrrh":"مرّ","myrtle":"الآس","nectarine blossom":"زهر الخوخ الأملس","neroli":"نيرولي",
+  "nutmeg":"جوزة الطيب","oak":"البلوط","oakmoss":"طحلب البلوط","orchid":"الأوركيد",
+  "orris":"جذور السوسن","pear":"كمثرى","petitgrain":"بيتيغرين","pimento":"بيمنتو",
+  "pink marshmallow":"مارشميلو وردي","pink musk":"مسك وردي","praline":"برالين",
+  "praline/frankincense accord":"نفحة برالين/لبان","raspberry":"توت العليق",
+  "residual rosewood":"خشب الورد المتبقي","resins":"راتنجات","rosewood":"خشب الورد",
+  "salted butter caramel":"كراميل الزبدة المملحة","strawberry":"فراولة","styrax":"الستيراكس",
+  "suede":"شامواه","sugar cane":"قصب السكر","tobacco accord":"نفحة التبغ","tobacco/tonka":"تبغ/فول التونكا",
+  "violet leaf":"أوراق البنفسج","water lily":"زنبق الماء","whipped vanilla":"فانيليا مخفوقة",
+  "white oud":"عود أبيض","white rose":"ورد أبيض","white thyme":"زعتر أبيض","white woods":"أخشاب بيضاء",
+  "woody notes":"نفحات خشبية","top notes":"نفحات علوية","base notes":"نفحات قاعدية",
+
+  // الثبات (Longevity) — عبارات كاملة من الكتالوج
+  "above average (10+ hours per reviewers)":"أعلى من المتوسط (+10 ساعات حسب المراجعين)",
+  "above average (8.4/10)":"أعلى من المتوسط (8.4/10)",
+  "above average (8.2/10)":"أعلى من المتوسط (8.2/10)",
+  "above average, strong":"أعلى من المتوسط، قوي",
+  "excellent/long lasting":"ممتاز/ثبات طويل",
+  "exceptional (10-12 hours)":"استثنائي (10-12 ساعة)",
+  "exceptional (~15 hours)":"استثنائي (~15 ساعة)",
+  "long lasting (10-12 hours)":"ثبات طويل (10-12 ساعة)",
+  "long lasting (6-10 hours)":"ثبات طويل (6-10 ساعات)",
+  "long lasting (6-8 hours)":"ثبات طويل (6-8 ساعات)",
+  "long lasting (7-9 hours)":"ثبات طويل (7-9 ساعات)",
+  "long lasting (extrait)":"ثبات طويل (تركيز Extrait)",
+  "long lasting (all-day)":"ثبات طويل (طوال اليوم)",
+  "long lasting (retailer claim, not independently verified)":"ثبات طويل (حسب ادعاء البائع، غير مؤكد بشكل مستقل)",
+  "long lasting":"ثبات طويل","very long lasting":"ثبات طويل جدًا","very long lasting (all-day)":"ثبات طويل جدًا (طوال اليوم)",
+  "moderate (4-6 hours)":"متوسط (4-6 ساعات)","moderate (5-6 hours)":"متوسط (5-6 ساعات)",
+  "not verified (extrait concentration suggests good longevity)":"غير مؤكد (تركيز Extrait يوحي بثبات جيد)",
+  "not verified (new release 2025)":"غير مؤكد (إصدار جديد 2025)",
+  "not verified (new release)":"غير مؤكد (إصدار جديد)",
+  "not verified numerically (parfum concentration suggests very long lasting)":"غير مؤكد رقميًا (تركيز Parfum يوحي بثبات طويل جدًا)",
+  "not verified numerically (known as very strong/long lasting, intensified version of delina)":"غير مؤكد رقميًا (معروف بأنه قوي جدًا/ثبات طويل، نسخة مكثّفة من Delina)",
+  "not verified numerically":"غير مؤكد رقميًا","not verified":"غير مؤكد","not officially published by brand":"لم يُنشر رسميًا من قبل البراند",
+  "treat any note list found online as unconfirmed":"أي قائمة مكونات على الإنترنت تُعتبر غير مؤكدة",
+  "strong, long lasting":"قوي، ثبات طويل","strong/long lasting":"قوي/ثبات طويل",
+  "weak/short (~3 hours - known criticism)":"ضعيف/قصير (~3 ساعات - انتقاد معروف)",
+  "known criticism":"انتقاد معروف","new release":"إصدار جديد","retailer claim":"ادعاء البائع",
+  "independently verified":"مؤكد بشكل مستقل","independently":"بشكل مستقل","numerically":"رقميًا",
+  "intensified version of":"نسخة مكثّفة من","concentration suggests":"التركيز يوحي بـ",
+  "suggests good longevity":"يوحي بثبات جيد","suggests":"يوحي بـ","concentration":"تركيز",
+  "known as":"معروف بأنه","known":"معروف","criticism":"انتقاد","claim":"ادعاء","weak":"ضعيف","short":"قصير",
+  "all-day":"طوال اليوم","extrait":"تركيز Extrait","parfum":"برفان (Parfum)","version":"نسخة",
+
+  // الانتشار / الحضور (Sillage)
+  "light-moderate":"خفيف-متوسط","moderate-strong":"متوسط-قوي",
+  "strong (per brand)":"قوي (حسب البراند)","per brand":"حسب البراند",
+
+  // النهار/الليل (Day/Night)
+  "day & night (leans night)":"نهار وليل (يميل لليل)",
+  "day & night (luxury/special occasions)":"نهار وليل (فخم/للمناسبات الخاصة)",
+  "evening/casual (per one retailer)":"سهرة/كاجوال (حسب أحد التجار)",
+  "night (also wearable professionally)":"ليلي (يمكن ارتداؤه رسميًا أيضًا)",
+  "night (brand describes as for 'special evenings')":"ليلي (يصفه البراند بأنه لـ'سهرات خاصة')",
+  "per one retailer":"حسب أحد التجار","one retailer":"أحد التجار","retailer":"تاجر","reviewers":"مراجعين",
+  "wearable professionally":"يمكن ارتداؤه رسميًا","wearable":"يمكن ارتداؤه","professionally":"رسميًا",
+  "casual":"كاجوال","evening":"سهرة","evenings":"سهرات","special evenings":"سهرات خاصة",
+  "special occasions":"مناسبات خاصة","special":"خاص","occasions":"مناسبات",
+  "brand describes as for":"البراند يصفه بأنه لـ","describes":"يصف","leans night":"يميل لليل","leans":"يميل",
+  "also":"أيضًا","one":"واحد","luxury":"فخم",
+
+  // المواسم (Seasons)
+  "all seasons (leans autumn/winter)":"كل الفصول (يميل للخريف/الشتاء)",
+  "leans autumn/winter":"يميل للخريف/الشتاء",
+  "summer (also wearable year-round)":"صيفي (يمكن ارتداؤه طوال السنة أيضًا)",
+  "summer (versatile year-round)":"صيفي (متعدد الاستخدام طوال السنة)",
+  "winter (works year-round)":"شتوي (يصلح طوال السنة)","works year-round":"يصلح طوال السنة",
+  "year-round":"طوال السنة","works":"يصلح","versatile":"متعدد الاستخدام",
+  "autumn, winter (likely, unconfirmed)":"الخريف، الشتاء (على الأرجح، غير مؤكد)",
+  "likely, unconfirmed":"على الأرجح، غير مؤكد","likely":"على الأرجح","unconfirmed":"غير مؤكد",
+  "possibly":"ربما","officially":"رسميًا","published":"منشور","documented":"موثّق","clearly":"بوضوح",
+  "found online":"موجودة على الإنترنت","found":"موجودة","online":"على الإنترنت"
 };
+
+// نبني قائمة مفاتيح الترجمة مرتّبة من الأطول للأقصر (عدد كلمات ثم عدد أحرف)
+// عشان العبارات المركّبة تترجم أولاً قبل الكلمات المفردة اللي بداخلها
+const TERM_KEYS_SORTED = Object.keys(TERM_AR).sort((a,b)=>{
+  const wa = a.split(/\s+/).length, wb = b.split(/\s+/).length;
+  if(wb !== wa) return wb - wa;
+  return b.length - a.length;
+});
+
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+// \b الإنجليزية ما تشتغل صح إذا أول/آخر حرف بالعبارة رمز غير حرفي مثل ) أو ( أو / أو ~
+// عشان كذا نبني حدود يدوية: نستخدم \b بس لو الطرف حرف/رقم فعلاً
+function boundedPattern(key){
+  const escaped = escapeRegExp(key);
+  const startsWord = /^[a-zA-Z0-9]/.test(key);
+  const endsWord = /[a-zA-Z0-9]$/.test(key);
+  return (startsWord ? "\\b" : "") + escaped + (endsWord ? "\\b" : "");
+}
+
+// يطبّق قاموس الترجمة على أي نص حر (مكونات، ثبات، انتشار، مواسم...)
+// يترجم العبارات والكلمات المعروفة، ويترك أي كلمة غير معروفة (أسماء علم، أرقام) كما هي
+function applyTermDict(text){
+  let result = text;
+  for(const key of TERM_KEYS_SORTED){
+    const re = new RegExp(boundedPattern(key), "gi");
+    if(re.test(result)){
+      result = result.replace(re, TERM_AR[key]);
+    }
+  }
+  return result;
+}
 
 function translateForDisplay(text){
   if(lang !== "ar" || !text) return text || "";
-  return text.split(",").map(part=>{
-    const trimmed = part.trim();
-    const key = trimmed.toLowerCase();
-    if(TERM_AR[key]) return TERM_AR[key];
-    let replaced = trimmed.replace(/\bhours\b/i, TERM_AR["hours"]).replace(/\bhour\b/i, TERM_AR["hour"]);
-    return replaced;
-  }).join(lang==="ar" ? "، " : ", ");
+  let result = applyTermDict(text);
+  // فواصل عربية بدل الفواصل الإنجليزية، بعد الترجمة
+  result = result.replace(/\s*;\s*/g, "؛ ").replace(/\s*,\s*/g, "، ");
+  return result;
 }
 
 // محول رابط Google Drive بأي صيغة إلى رابط صورة مباشر قابل للعرض
