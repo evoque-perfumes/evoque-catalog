@@ -154,13 +154,9 @@
   .card .imgwrap img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
   .card:hover .imgwrap img{ transform:scale(1.06); }
   .card .imgwrap .placeholder{ color:var(--muted); font-size:12px; text-align:center; padding:8px; }
-  .gender-chip{
-    position:absolute; top:10px; inset-inline-start:10px; background:rgba(23,19,16,.72); color:var(--gold-soft);
-    border-radius:999px; padding:5px 10px; font-size:10.5px; display:flex; align-items:center; gap:5px; backdrop-filter:blur(3px);
-  }
-  .gender-chip .icon{ width:11px; height:11px; }
-  /* شارة الخصم مقصودة تكون داخل بطاقة المعلومات (تحت الصورة) لا فوق الصورة —
-     عشان ما تغطي أي جزء من تصميم صورة العطر (ألوان/نصوص Canva تختلف من صورة لصورة). */
+  /* شارتي الخصم والجنس مقصودتين تكونان داخل بطاقة المعلومات (تحت الصورة) لا فوق
+     الصورة — عشان ما تغطيان أي جزء من تصميم صورة العطر (ألوان/عناوين Canva تختلف
+     من صورة لصورة). */
   .old-price{
     color:var(--muted-soft); font-weight:400; font-size:10.5px; text-decoration:line-through;
     margin-inline-end:4px; display:inline-block;
@@ -181,6 +177,8 @@
     display:flex; align-items:center; gap:5px; font-size:10.5px; background:var(--bg-soft); color:var(--muted);
     padding:4px 10px; border-radius:999px; border:1px solid var(--line);
   }
+  .badge.badge-gender{ background:var(--ink); color:var(--gold-soft); border-color:var(--ink); }
+  .badge.badge-gender .icon{ color:var(--gold-soft); }
   .badge .icon{ width:11px; height:11px; color:var(--gold-deep); }
 
   .notes-toggle{
@@ -1037,14 +1035,11 @@ function renderGrid(){
     } else {
       imgWrap.innerHTML = `<div class="placeholder">${t.imgPending}</div>`;
     }
-    if(genderLabel){
-      imgWrap.insertAdjacentHTML("beforeend", `<div class="gender-chip">${svgIcon(ICONS[p.gender])}<span>${genderLabel}</span></div>`);
-    }
-    // ملاحظة مهمة: شارة الخصم ما تنحط فوق الصورة (overlay) عشان صور العطور نفسها
-    // تصاميم كانفا فيها ألوان وأحيانًا نصوص/شعارات مدمجة بالصورة — أي شارة فوقها
-    // ممكن تغطي جزء منها بشكل غير متوقع حسب كل صورة. فبدالها نعرض شارة الخصم
-    // داخل بطاقة المعلومات تحت الصورة (منطقة بيضاء ثابتة) عشان تكون واضحة دايمًا
-    // ومضمونة إنها ما تغطي شي.
+    // ملاحظة مهمة: ولا شارة (خصم/جنس) تنحط فوق الصورة (overlay) عشان صور العطور
+    // نفسها تصاميم كانفا فيها ألوان وأحيانًا نصوص/عناوين مدمجة بالصورة نفسها —
+    // أي شارة فوقها ممكن تغطي جزء منها بشكل غير متوقع حسب كل صورة. فبدالها نعرض
+    // كل الشارات داخل بطاقة المعلومات تحت الصورة (منطقة بيضاء ثابتة) عشان تكون
+    // واضحة دايمًا ومضمونة إنها ما تغطي شي أبدًا، بغض النظر عن تصميم أي صورة.
     const discountPct = bestDiscountPct(p);
 
     const info = document.createElement("div");
@@ -1064,7 +1059,7 @@ function renderGrid(){
         ${discountPct > 0 ? `<div class="discount-tag">${svgIcon("ic-sparkle")}<span>${lang==="ar" ? `خصم ${discountPct}٪` : `-${discountPct}%`}</span></div>` : ""}
       </div>
       <div class="name">${toTitleCase(p.name)}</div>
-      ${firstAccord ? `<div class="badge-row"><span class="badge">${svgIcon("ic-sparkle")}${firstAccord}</span></div>` : ""}
+      ${(genderLabel || firstAccord) ? `<div class="badge-row">${genderLabel ? `<span class="badge badge-gender">${svgIcon(ICONS[p.gender])}${genderLabel}</span>` : ""}${firstAccord ? `<span class="badge">${svgIcon("ic-sparkle")}${firstAccord}</span>` : ""}</div>` : ""}
       <button class="notes-toggle" type="button"><span>${t.notesToggleOpen}</span>${svgIcon("ic-chevron","chev")}</button>
       <div class="notes-box">
         ${notesTopDisplay ? `<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.top}:</b> ${notesTopDisplay}</div></div>` : ""}
