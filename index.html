@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evoque Perfume — الكتالوج الجاهز</title>
+<title>Evoque Perfume | عطور فاخرة بديلة للأصلي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -161,6 +161,7 @@
   .gender-chip .icon{ width:11px; height:11px; }
 
   .card .info{ padding:16px 16px 4px; flex:1; display:flex; flex-direction:column; gap:7px; }
+  .impressions-tag{ font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted-soft); font-weight:600; }
   .card .brand{ font-size:11px; color:var(--gold-deep); letter-spacing:.5px; font-weight:600; }
   .card .name{ font-family:'Cormorant Garamond', serif; font-size:21px; font-weight:600; color:var(--ink); line-height:1.2; }
   .badge-row{ display:flex; gap:6px; flex-wrap:wrap; margin:1px 0; }
@@ -213,9 +214,18 @@
   /* ===== Floating cart bar ===== */
   .cart-bar{
     position:fixed; bottom:0; left:0; right:0; background:var(--dark);
-    padding:13px 18px; display:flex; align-items:center; justify-content:space-between;
-    gap:12px; z-index:50; box-shadow:0 -8px 24px rgba(0,0,0,.25);
+    padding:10px 18px 13px; display:flex; flex-direction:column; gap:8px;
+    z-index:50; box-shadow:0 -8px 24px rgba(0,0,0,.25);
   }
+  .cart-bottom-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .payment-row{ display:none; gap:6px; flex-wrap:wrap; justify-content:center; padding-bottom:2px; }
+  .payment-pill{
+    background:rgba(255,255,255,.07); border:1px solid rgba(233,215,174,.25); color:var(--gold-soft);
+    border-radius:999px; padding:6px 13px; font-size:11px; display:flex; align-items:center; gap:5px;
+    cursor:pointer; font-family:'Poppins';
+  }
+  .payment-pill .icon{ width:12px; height:12px; }
+  .payment-pill.active{ background:var(--gold); color:#20190c; border-color:var(--gold); font-weight:600; }
   .cart-bar .cart-info{ font-size:12.5px; color:var(--gold-soft); display:flex; align-items:center; gap:8px; }
   .cart-bar .cart-info .icon{ width:17px; height:17px; }
   .cart-bar .cart-info b{ color:#fff; }
@@ -290,6 +300,7 @@
     <input class="search-input" id="searchInput" type="text">
   </div>
   <select class="brand-select" id="brandSelect"></select>
+  <select class="brand-select" id="countrySelect"></select>
 </div>
 
 <div class="results-count" id="resultsCount"></div>
@@ -300,8 +311,11 @@
 <div class="show-more-wrap" id="showMoreWrap"></div>
 
 <div class="cart-bar">
-  <div class="cart-info" id="cartInfo"><svg class="icon"><use href="#ic-cart"/></svg></div>
-  <a class="checkout-btn" id="checkoutBtn"><svg class="icon"><use href="#ic-whatsapp"/></svg><span id="checkoutLabel"></span></a>
+  <div class="payment-row" id="paymentRow"></div>
+  <div class="cart-bottom-row">
+    <div class="cart-info" id="cartInfo"><svg class="icon"><use href="#ic-cart"/></svg></div>
+    <a class="checkout-btn" id="checkoutBtn"><svg class="icon"><use href="#ic-whatsapp"/></svg><span id="checkoutLabel"></span></a>
+  </div>
 </div>
 
 <footer>
@@ -325,12 +339,27 @@ const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=
 
 let perfumes = [];
 let lang = "ar";
+let country = "AE"; // "AE" (الإمارات، AED) | "OM" (عُمان، OMR) — يحدد أي أعمدة أسعار نقرأ ومين خيارات الدفع المتاحة
+
+const COUNTRIES = {
+  AE: { currencyAr:"د.إ", currencyEn:"AED", labelAr:"الإمارات", labelEn:"UAE", tabby:true },
+  OM: { currencyAr:"ر.ع", currencyEn:"OMR", labelAr:"عُمان", labelEn:"Oman", tabby:false }
+};
 
 const ICONS = {
   men:"ic-men", women:"ic-women", unisex:"ic-infinity",
   summer:"ic-sun", winter:"ic-flake", spring:"ic-bloom", autumn:"ic-leaf",
   day:"ic-sun", night:"ic-moon", all:"ic-sparkle"
 };
+
+// يرجع سعر الحجم المطلوب حسب الدولة المختارة حاليًا (null لو ما فيه سعر لهذي الدولة بعد)
+function priceFor(p, size){
+  if(country === "OM") return size==="50" ? p.price50Om : p.price10Om;
+  return size==="50" ? p.price50 : p.price10;
+}
+function currencyLabel(){
+  return lang==="ar" ? COUNTRIES[country].currencyAr : COUNTRIES[country].currencyEn;
+}
 
 // نحول اسم البراند/العطر لصيغة Title Case (أول حرف كل كلمة كبير والباقي صغير) بدل الأحرف الكبيرة بالكامل
 // القيمة الأصلية بالشيت تبقى ALL CAPS زي ما هي (ما نغيّرها بالمصدر ولا بالفلترة/المطابقة) — هذا تنسيق عرض فقط
@@ -352,8 +381,15 @@ const I18N = {
     loading: "جارِ تحميل العطور من الشيت...",
     errorPrefix: "ما قدرت أوصل للشيت الحي",
     errorHint: 'تأكد إن الشيت مشارك بصلاحية "Anyone with the link - Viewer".',
+    pageTitle: "Evoque Perfume | عطور فاخرة بديلة للأصلي",
     searchPlaceholder: "ابحث باسم العطر أو البراند...",
     allBrands: "كل البراندات",
+    countryLabel: "الدولة",
+    paymentTitle: "طريقة الدفع المفضلة",
+    paymentCOD: "الدفع عند الاستلام",
+    paymentTabby: "تابي (ادفع لاحقًا)",
+    paymentBank: "تحويل بنكي",
+    tabbyNote: "متاح لعملاء الإمارات حاليًا",
     genderMen: "رجالي", genderWomen: "نسائي", genderUnisex: "للجنسين",
     filters: [
       {key:"all", label:"الكل", icon:"all"},
@@ -368,6 +404,7 @@ const I18N = {
       {key:"night", label:"سهرة", icon:"night"},
     ],
     trust:[
+      {icon:"ic-check", text:"منشأة مرخصة رسميًا"},
       {icon:"ic-shield", text:"ضمان استرجاع المبلغ"},
       {icon:"ic-sparkle", text:"بديل فاخر للعطور الأصلية"},
       {icon:"ic-whatsapp", text:"اطلب مباشرة عبر واتساب"},
@@ -400,6 +437,7 @@ const I18N = {
     withoutDelivery: "(بدون التوصيل)",
     checkout: "إتمام الطلب عبر واتساب",
     orderMsgIntro: "أبي أطلب من Evoque Perfume:\n\n",
+    orderMsgPayment: "طريقة الدفع المفضلة",
     orderMsgAskPrice: "استفسار عن السعر",
     orderMsgTotal: "المجموع التقريبي",
     footer: "© 2026 Evoque Perfume — الأسعار والتفاصيل تُقرأ حيًا من الكتالوج الرسمي وتتحدث تلقائيًا"
@@ -411,8 +449,15 @@ const I18N = {
     loading: "Loading perfumes from the sheet...",
     errorPrefix: "Couldn't reach the live sheet",
     errorHint: 'Make sure the sheet is shared as "Anyone with the link - Viewer".',
+    pageTitle: "Evoque Perfume | Luxury Inspired Fragrances",
     searchPlaceholder: "Search by perfume or brand...",
     allBrands: "All brands",
+    countryLabel: "Country",
+    paymentTitle: "Preferred payment method",
+    paymentCOD: "Cash on delivery",
+    paymentTabby: "Tabby (pay later)",
+    paymentBank: "Bank transfer",
+    tabbyNote: "Available for UAE customers for now",
     genderMen: "Men", genderWomen: "Women", genderUnisex: "Unisex",
     filters: [
       {key:"all", label:"All", icon:"all"},
@@ -427,6 +472,7 @@ const I18N = {
       {key:"night", label:"Evening", icon:"night"},
     ],
     trust:[
+      {icon:"ic-check", text:"Officially licensed business"},
       {icon:"ic-shield", text:"Money-back guarantee"},
       {icon:"ic-sparkle", text:"Premium alternative to originals"},
       {icon:"ic-whatsapp", text:"Order directly on WhatsApp"},
@@ -459,6 +505,7 @@ const I18N = {
     withoutDelivery: "(excl. delivery)",
     checkout: "Checkout via WhatsApp",
     orderMsgIntro: "I'd like to order from Evoque Perfume:\n\n",
+    orderMsgPayment: "Preferred payment method",
     orderMsgAskPrice: "price on request",
     orderMsgTotal: "Approximate total",
     footer: "© 2026 Evoque Perfume — Prices and details are read live from the official catalog and update automatically"
@@ -581,6 +628,9 @@ async function loadPerfumesFromSheet(){
       gender: genderKeyFromText(r[idx("Gender")]),
       price50: parseFloat(r[idx("50ML Price UAE (AED)")]) || null,
       price10: parseFloat(r[idx("10ML Price UAE (AED)")]) || null,
+      // عمودي سعر عُمان اختياريان — لو مو موجودين بالشيت بعد أو فاضين، يظهر "السعر عند الطلب" لما تكون عُمان مختارة
+      price50Om: idx("50ML Price Oman (OMR)") === -1 ? null : (parseFloat(r[idx("50ML Price Oman (OMR)")]) || null),
+      price10Om: idx("10ML Price Oman (OMR)") === -1 ? null : (parseFloat(r[idx("10ML Price Oman (OMR)")]) || null),
       stock50: idx("50ML In Stock") === -1 ? true : (r[idx("50ML In Stock")] || "").trim().toLowerCase() !== "no",
       stock10: idx("10ML In Stock") === -1 ? true : (r[idx("10ML In Stock")] || "").trim().toLowerCase() !== "no",
       accords: r[idx("Main Accords")] || "",
@@ -608,7 +658,8 @@ let selectedBrand = "all";
 let searchQuery = "";
 const PAGE_SIZE = 12;
 let visibleCount = PAGE_SIZE;
-let cart = {}; // in-memory only, no browser storage: { perfumeId: {brand,name,size,price} }
+let cart = {}; // in-memory only, no browser storage: { perfumeId: {size} } — نجيب البراند/الاسم/السعر وقت العرض من مصفوفة perfumes نفسها
+let paymentMethod = "cod"; // "cod" | "tabby" | "bank"
 
 /* ===== Offers banner (نصوص العروض ثابتة ومطابقة لتعليمات المتجر — تُحدَّث يدويًا هنا لو تغيّرت العروض) ===== */
 let offerIndex = 0;
@@ -654,7 +705,27 @@ function setLang(newLang){
   document.documentElement.dir = I18N[lang].dir;
   document.getElementById("btnAr").classList.toggle("active", lang==="ar");
   document.getElementById("btnEn").classList.toggle("active", lang==="en");
+  document.title = I18N[lang].pageTitle;
   renderAll();
+}
+
+function renderCountrySelect(){
+  const t = I18N[lang];
+  const sel = document.getElementById("countrySelect");
+  sel.innerHTML = Object.keys(COUNTRIES).map(code => {
+    const c = COUNTRIES[code];
+    const label = lang==="ar" ? c.labelAr : c.labelEn;
+    const currency = lang==="ar" ? c.currencyAr : c.currencyEn;
+    return `<option value="${code}">${label} (${currency})</option>`;
+  }).join("");
+  sel.value = country;
+  sel.onchange = (e)=>{
+    country = e.target.value;
+    // ما نمزج عملتين بسلة وحدة — نمسح السلة عند تبديل الدولة تفاديًا لأي التباس بالسعر
+    cart = {};
+    if(!COUNTRIES[country].tabby && paymentMethod==="tabby") paymentMethod = "cod";
+    renderAll();
+  };
 }
 
 function renderAll(){
@@ -673,6 +744,7 @@ function renderAll(){
 
   renderOffers();
   renderTrust();
+  renderCountrySelect();
   renderSearchControls();
   renderFilters();
   renderGrid();
@@ -786,6 +858,7 @@ function renderGrid(){
     const firstAccord = accordsDisplay ? accordsDisplay.split(lang==="ar" ? "، " : ", ")[0] : "";
 
     info.innerHTML = `
+      <div class="impressions-tag">Impressions</div>
       <div class="brand">${toTitleCase(p.brand)}</div>
       <div class="name">${toTitleCase(p.name)}</div>
       ${firstAccord ? `<div class="badge-row"><span class="badge">${svgIcon("ic-sparkle")}${firstAccord}</span></div>` : ""}
@@ -808,12 +881,17 @@ function renderGrid(){
 
     const bottom = document.createElement("div");
     bottom.className = "card-bottom";
+    // وجود الحجم أصلاً يُحدَّد من سعر الإمارات (المرجع الأساسي) — سعر عُمان قد يكون فاضي مؤقتًا وهذا لا يخفي الحجم، بس يعرض "اسأل عن السعر"
     let selectedSize = (p.price50 && p.stock50) ? "50" : ((p.price10 && p.stock10) ? "10" : null);
 
     function sizeRowHtml(){
       const parts = [];
-      if(p.price50) parts.push(`<div class="size-pill ${selectedSize==="50"?"active":""} ${!p.stock50?"disabled":""}" data-size="50">50ml<b>${p.price50} ${lang==="ar"?"د.إ":"AED"}</b>${!p.stock50?`<div style="font-size:9px;color:var(--muted);">${t.outOfStock}</div>`:""}</div>`);
-      if(p.price10) parts.push(`<div class="size-pill ${selectedSize==="10"?"active":""} ${!p.stock10?"disabled":""}" data-size="10">10ml<b>${p.price10} ${lang==="ar"?"د.إ":"AED"}</b>${!p.stock10?`<div style="font-size:9px;color:var(--muted);">${t.outOfStock}</div>`:""}</div>`);
+      [["50", p.price50, p.stock50], ["10", p.price10, p.stock10]].forEach(([sz, existsPrice, inStock])=>{
+        if(!existsPrice) return;
+        const shownPrice = priceFor(p, sz);
+        const priceHtml = shownPrice != null ? `${shownPrice} ${currencyLabel()}` : t.askPrice;
+        parts.push(`<div class="size-pill ${selectedSize===sz?"active":""} ${!inStock?"disabled":""}" data-size="${sz}">${sz}ml<b>${priceHtml}</b>${!inStock?`<div style="font-size:9px;color:var(--muted);">${t.outOfStock}</div>`:""}</div>`);
+      });
       return parts.length ? `<div class="size-row">${parts.join("")}</div>` : `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${t.askPrice}</div>`;
     }
 
@@ -847,8 +925,7 @@ function renderGrid(){
       if(cart[p.id]){
         delete cart[p.id];
       } else if(selectedSize){
-        const price = selectedSize === "50" ? p.price50 : p.price10;
-        cart[p.id] = { brand: p.brand, name: p.name, size: selectedSize, price };
+        cart[p.id] = { size: selectedSize };
       }
       refreshAddBtn();
       renderCart();
@@ -861,26 +938,55 @@ function renderGrid(){
   });
 }
 
+function paymentLabel(t, method){
+  return method==="tabby" ? t.paymentTabby : method==="bank" ? t.paymentBank : t.paymentCOD;
+}
+
+function renderPaymentRow(hasItems){
+  const t = I18N[lang];
+  const wrap = document.getElementById("paymentRow");
+  if(!hasItems){ wrap.style.display = "none"; wrap.innerHTML = ""; return; }
+  wrap.style.display = "flex";
+  const methods = [["cod", "ic-truck"], ["tabby", "ic-sparkle"], ["bank", "ic-shield"]]
+    .filter(([key])=> key!=="tabby" || COUNTRIES[country].tabby);
+  wrap.innerHTML = methods.map(([key, icon])=>
+    `<button type="button" class="payment-pill ${paymentMethod===key?"active":""}" data-method="${key}">${svgIcon(icon)}<span>${paymentLabel(t,key)}</span></button>`
+  ).join("");
+  wrap.querySelectorAll(".payment-pill").forEach(btn=>{
+    btn.onclick = ()=>{ paymentMethod = btn.dataset.method; renderCart(); };
+  });
+}
+
 function renderCart(){
   const t = I18N[lang];
-  const items = Object.values(cart);
+  const cartIds = Object.keys(cart);
   const cartInfo = document.getElementById("cartInfo");
   const checkoutBtn = document.getElementById("checkoutBtn");
 
-  if(items.length === 0){
+  renderPaymentRow(cartIds.length > 0);
+
+  if(cartIds.length === 0){
     cartInfo.innerHTML = svgIcon("ic-cart") + `<span>${t.cartEmpty}</span>`;
     checkoutBtn.style.opacity = ".35"; checkoutBtn.style.pointerEvents = "none";
     return;
   }
 
+  const items = cartIds.map(id => {
+    const p = perfumes.find(x => x.id === id);
+    const size = cart[id].size;
+    return p ? { p, size, price: priceFor(p, size) } : null;
+  }).filter(Boolean);
+
+  const cur = currencyLabel();
   const total = items.reduce((sum,i)=> sum + (i.price||0), 0);
-  cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${items.length}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${lang==="ar"?"د.إ":"AED"}</b> ${t.withoutDelivery}</span>`;
+  cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${items.length}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}</span>`;
   checkoutBtn.style.opacity = "1"; checkoutBtn.style.pointerEvents = "auto";
   let msg = t.orderMsgIntro;
   items.forEach((i,idx)=>{
-    msg += `${idx+1}. ${toTitleCase(i.brand)} - ${toTitleCase(i.name)} (${i.size}ml) — ${i.price ? i.price + " AED" : t.orderMsgAskPrice}\n`;
+    msg += `${idx+1}. ${toTitleCase(i.p.brand)} - ${toTitleCase(i.p.name)} (${i.size}ml) — ${i.price != null ? i.price + " " + cur : t.orderMsgAskPrice}\n`;
   });
-  msg += `\n${t.orderMsgTotal}: ${total} AED ${t.withoutDelivery}`;
+  msg += `\n${t.orderMsgTotal}: ${total} ${cur} ${t.withoutDelivery}`;
+  msg += `\n${t.orderMsgPayment}: ${paymentLabel(t, paymentMethod)}`;
   checkoutBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   checkoutBtn.target = "_blank";
 }
