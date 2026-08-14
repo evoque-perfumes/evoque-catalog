@@ -159,6 +159,15 @@
     border-radius:999px; padding:5px 10px; font-size:10.5px; display:flex; align-items:center; gap:5px; backdrop-filter:blur(3px);
   }
   .gender-chip .icon{ width:11px; height:11px; }
+  .discount-ribbon{
+    position:absolute; top:10px; inset-inline-end:10px; background:#a23b3b; color:#fff;
+    border-radius:999px; padding:5px 10px; font-size:10.5px; font-weight:700; display:flex; align-items:center; gap:4px; backdrop-filter:blur(3px);
+  }
+  .discount-ribbon .icon{ width:11px; height:11px; }
+  .old-price{
+    color:var(--muted-soft); font-weight:400; font-size:10.5px; text-decoration:line-through;
+    margin-inline-end:4px; display:inline-block;
+  }
 
   .card .info{ padding:16px 16px 4px; flex:1; display:flex; flex-direction:column; gap:7px; }
   .impressions-tag{ font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted-soft); font-weight:600; }
@@ -356,6 +365,23 @@ const ICONS = {
 function priceFor(p, size){
   if(country === "OM") return size==="50" ? p.price50Om : p.price10Om;
   return size==="50" ? p.price50 : p.price10;
+}
+// السعر قبل الخصم (لو موجود ومكتوب بالشيت) — يُعرض مشطوب فوق السعر الحالي
+function priceBeforeFor(p, size){
+  if(country === "OM") return size==="50" ? p.price50OmBefore : p.price10OmBefore;
+  return size==="50" ? p.price50Before : p.price10Before;
+}
+// نسبة الخصم % لأعلى خصم متاح على أي حجم — تُستخدم لشارة الخصم على الصورة
+function bestDiscountPct(p){
+  let best = 0;
+  ["50","10"].forEach(sz=>{
+    const now = priceFor(p, sz), before = priceBeforeFor(p, sz);
+    if(now && before && before > now){
+      const pct = Math.round((1 - now/before) * 100);
+      if(pct > best) best = pct;
+    }
+  });
+  return best;
 }
 function currencyLabel(){
   return lang==="ar" ? COUNTRIES[country].currencyAr : COUNTRIES[country].currencyEn;
@@ -689,6 +715,17 @@ function translateForDisplay(text){
   return result;
 }
 
+// يعرض المكونات/الأكوردات بالعربي: يفضّل النص العربي المكتوب يدويًا من الصورة (Main Accords (AR) / Notes (AR))
+// لو موجود، وإلا يرجع للترجمة التلقائية بالقاموس كحل احتياطي (للعطور اللي ما تعبّت لها ترجمة يدوية بعد)
+function accordsDisplayFor(p){
+  if(lang === "ar") return p.accordsAR ? p.accordsAR : translateForDisplay(p.accords);
+  return p.accords || "";
+}
+function notesDisplayFor(p){
+  if(lang === "ar") return p.notesTopAR ? p.notesTopAR : translateForDisplay(p.notesTop);
+  return p.notesTop || "";
+}
+
 // محول رابط Google Drive بأي صيغة إلى رابط صورة مباشر قابل للعرض
 function driveDirectImageUrl(link){
   if(!link) return "";
@@ -776,10 +813,17 @@ async function loadPerfumesFromSheet(){
       // عمودي سعر عُمان اختياريان — لو مو موجودين بالشيت بعد أو فاضين، يظهر "السعر عند الطلب" لما تكون عُمان مختارة
       price50Om: idx("50ML Price Oman (OMR)") === -1 ? null : (parseFloat(r[idx("50ML Price Oman (OMR)")]) || null),
       price10Om: idx("10ML Price Oman (OMR)") === -1 ? null : (parseFloat(r[idx("10ML Price Oman (OMR)")]) || null),
+      // أعمدة "السعر قبل الخصم" اختيارية بالكامل — فاضية = ما فيه خصم يُعرض لهذا العطر
+      price50Before: idx("50ML Price UAE (AED) - Before Discount") === -1 ? null : (parseFloat(r[idx("50ML Price UAE (AED) - Before Discount")]) || null),
+      price10Before: idx("10ML Price UAE (AED) - Before Discount") === -1 ? null : (parseFloat(r[idx("10ML Price UAE (AED) - Before Discount")]) || null),
+      price50OmBefore: idx("50ML Price Oman (OMR) - Before Discount") === -1 ? null : (parseFloat(r[idx("50ML Price Oman (OMR) - Before Discount")]) || null),
+      price10OmBefore: idx("10ML Price Oman (OMR) - Before Discount") === -1 ? null : (parseFloat(r[idx("10ML Price Oman (OMR) - Before Discount")]) || null),
       stock50: idx("50ML In Stock") === -1 ? true : (r[idx("50ML In Stock")] || "").trim().toLowerCase() !== "no",
       stock10: idx("10ML In Stock") === -1 ? true : (r[idx("10ML In Stock")] || "").trim().toLowerCase() !== "no",
       accords: r[idx("Main Accords")] || "",
+      accordsAR: idx("Main Accords (AR)") === -1 ? "" : (r[idx("Main Accords (AR)")] || ""),
       notesTop: r[idx("Notes")] || "",
+      notesTopAR: idx("Notes (AR)") === -1 ? "" : (r[idx("Notes (AR)")] || ""),
       notesMid: "", notesBase: "",
       longevity: r[idx("Longevity")] || "", sillage: r[idx("Sillage")] || ""
     }));
@@ -991,12 +1035,16 @@ function renderGrid(){
     if(genderLabel){
       imgWrap.insertAdjacentHTML("beforeend", `<div class="gender-chip">${svgIcon(ICONS[p.gender])}<span>${genderLabel}</span></div>`);
     }
+    const discountPct = bestDiscountPct(p);
+    if(discountPct > 0){
+      imgWrap.insertAdjacentHTML("beforeend", `<div class="discount-ribbon">${svgIcon("ic-sparkle")}<span>${lang==="ar" ? `خصم ${discountPct}٪` : `-${discountPct}%`}</span></div>`);
+    }
 
     const info = document.createElement("div");
     info.className = "info";
 
-    const accordsDisplay = translateForDisplay(p.accords);
-    const notesTopDisplay = translateForDisplay(p.notesTop);
+    const accordsDisplay = accordsDisplayFor(p);
+    const notesTopDisplay = notesDisplayFor(p);
     const longevityDisplay = translateForDisplay(p.longevity);
     const sillageDisplay = translateForDisplay(p.sillage);
     const hasDetails = notesTopDisplay || longevityDisplay || sillageDisplay;
@@ -1034,7 +1082,10 @@ function renderGrid(){
       [["50", p.price50, p.stock50], ["10", p.price10, p.stock10]].forEach(([sz, existsPrice, inStock])=>{
         if(!existsPrice) return;
         const shownPrice = priceFor(p, sz);
-        const priceHtml = shownPrice != null ? `${shownPrice} ${currencyLabel()}` : t.askPrice;
+        const beforePrice = priceBeforeFor(p, sz);
+        const hasDiscount = shownPrice != null && beforePrice != null && beforePrice > shownPrice;
+        const oldPriceHtml = hasDiscount ? `<s class="old-price">${beforePrice} ${currencyLabel()}</s>` : "";
+        const priceHtml = shownPrice != null ? `${oldPriceHtml}${shownPrice} ${currencyLabel()}` : t.askPrice;
         parts.push(`<div class="size-pill ${selectedSize===sz?"active":""} ${!inStock?"disabled":""}" data-size="${sz}">${sz}ml<b>${priceHtml}</b>${!inStock?`<div style="font-size:9px;color:var(--muted);">${t.outOfStock}</div>`:""}</div>`);
       });
       return parts.length ? `<div class="size-row">${parts.join("")}</div>` : `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${t.askPrice}</div>`;
