@@ -159,11 +159,8 @@
     border-radius:999px; padding:5px 10px; font-size:10.5px; display:flex; align-items:center; gap:5px; backdrop-filter:blur(3px);
   }
   .gender-chip .icon{ width:11px; height:11px; }
-  .discount-ribbon{
-    position:absolute; top:10px; inset-inline-end:10px; background:#a23b3b; color:#fff;
-    border-radius:999px; padding:5px 10px; font-size:10.5px; font-weight:700; display:flex; align-items:center; gap:4px; backdrop-filter:blur(3px);
-  }
-  .discount-ribbon .icon{ width:11px; height:11px; }
+  /* شارة الخصم مقصودة تكون داخل بطاقة المعلومات (تحت الصورة) لا فوق الصورة —
+     عشان ما تغطي أي جزء من تصميم صورة العطر (ألوان/نصوص Canva تختلف من صورة لصورة). */
   .old-price{
     color:var(--muted-soft); font-weight:400; font-size:10.5px; text-decoration:line-through;
     margin-inline-end:4px; display:inline-block;
@@ -171,7 +168,13 @@
 
   .card .info{ padding:16px 16px 4px; flex:1; display:flex; flex-direction:column; gap:7px; }
   .impressions-tag{ font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted-soft); font-weight:600; }
+  .name-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .card .brand{ font-size:11px; color:var(--gold-deep); letter-spacing:.5px; font-weight:600; }
+  .discount-tag{
+    flex:none; background:#a23b3b; color:#fff; border-radius:999px; padding:3px 8px 3px 7px;
+    font-size:10px; font-weight:700; display:flex; align-items:center; gap:3px; line-height:1;
+  }
+  .discount-tag .icon{ width:10px; height:10px; }
   .card .name{ font-family:'Cormorant Garamond', serif; font-size:21px; font-weight:600; color:var(--ink); line-height:1.2; }
   .badge-row{ display:flex; gap:6px; flex-wrap:wrap; margin:1px 0; }
   .badge{
@@ -1037,10 +1040,12 @@ function renderGrid(){
     if(genderLabel){
       imgWrap.insertAdjacentHTML("beforeend", `<div class="gender-chip">${svgIcon(ICONS[p.gender])}<span>${genderLabel}</span></div>`);
     }
+    // ملاحظة مهمة: شارة الخصم ما تنحط فوق الصورة (overlay) عشان صور العطور نفسها
+    // تصاميم كانفا فيها ألوان وأحيانًا نصوص/شعارات مدمجة بالصورة — أي شارة فوقها
+    // ممكن تغطي جزء منها بشكل غير متوقع حسب كل صورة. فبدالها نعرض شارة الخصم
+    // داخل بطاقة المعلومات تحت الصورة (منطقة بيضاء ثابتة) عشان تكون واضحة دايمًا
+    // ومضمونة إنها ما تغطي شي.
     const discountPct = bestDiscountPct(p);
-    if(discountPct > 0){
-      imgWrap.insertAdjacentHTML("beforeend", `<div class="discount-ribbon">${svgIcon("ic-sparkle")}<span>${lang==="ar" ? `خصم ${discountPct}٪` : `-${discountPct}%`}</span></div>`);
-    }
 
     const info = document.createElement("div");
     info.className = "info";
@@ -1054,7 +1059,10 @@ function renderGrid(){
 
     info.innerHTML = `
       <div class="impressions-tag">Impressions</div>
-      <div class="brand">${toTitleCase(p.brand)}</div>
+      <div class="name-row">
+        <div class="brand">${toTitleCase(p.brand)}</div>
+        ${discountPct > 0 ? `<div class="discount-tag">${svgIcon("ic-sparkle")}<span>${lang==="ar" ? `خصم ${discountPct}٪` : `-${discountPct}%`}</span></div>` : ""}
+      </div>
       <div class="name">${toTitleCase(p.name)}</div>
       ${firstAccord ? `<div class="badge-row"><span class="badge">${svgIcon("ic-sparkle")}${firstAccord}</span></div>` : ""}
       <button class="notes-toggle" type="button"><span>${t.notesToggleOpen}</span>${svgIcon("ic-chevron","chev")}</button>
