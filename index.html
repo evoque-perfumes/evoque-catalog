@@ -1028,7 +1028,9 @@ function renderGrid(){
     const imgWrap = document.createElement("div");
     imgWrap.className = "imgwrap";
     if(p.image){
-      imgWrap.innerHTML = `<img src="${p.image}" alt="${p.brand} ${p.name}" loading="lazy">`;
+      // لو الصورة فشلت بالتحميل (رابط معطّل/بطيء)، ما نسيب أيقونة الصورة المكسورة ونص alt يطلعون
+      // فوق بعض مع شارات الجنس/الخصم — نستبدلها بنفس بلوك "الصورة قيد الإضافة" تلقائيًا.
+      imgWrap.innerHTML = `<img src="${p.image}" alt="${p.brand} ${p.name}" loading="lazy" onerror="const w=this.parentElement; this.remove(); w.insertAdjacentHTML('afterbegin','&lt;div class=&quot;placeholder&quot;&gt;${t.imgPending}&lt;/div&gt;');">`;
     } else {
       imgWrap.innerHTML = `<div class="placeholder">${t.imgPending}</div>`;
     }
