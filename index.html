@@ -542,6 +542,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 
         <label id="lblCountry"></label>
         <select id="ofCountrySelect"></select>
+        <div style="font-size:11px; color:var(--muted); margin-top:5px;" id="ofCountryHint"></div>
 
         <div id="ofAeBlock" style="display:none;">
           <label id="lblEmirate"></label>
@@ -746,6 +747,7 @@ const I18N = {
     lblAddress: "العنوان التفصيلي (الشارع، البناية، أقرب معلم)",
     lblNotes: "ملاحظات (اختياري)",
     lblCountry: "الدولة",
+    ofCountryHint: "الدولة مرتبطة بعملة الأسعار المختارة أعلى الصفحة. لتغييرها اختر الدولة الجديدة من القائمة العلوية بالموقع قبل إضافة العطور للسلة.",
     lblEmirate: "الإمارة",
     lblWilayat: "الولاية",
     wilayatOtherOption: "أخرى (اكتبها)",
@@ -852,6 +854,7 @@ const I18N = {
     lblAddress: "Detailed Address (Street, Building, Nearest Landmark)",
     lblNotes: "Notes (optional)",
     lblCountry: "Country",
+    ofCountryHint: "The country follows the currency selected at the top of the page. To change it, pick the new country from the top of the site before adding perfumes to your cart.",
     lblEmirate: "Emirate",
     lblWilayat: "Wilayat",
     wilayatOtherOption: "Other (type it)",
@@ -1742,21 +1745,18 @@ function populateWilayatSelect(){
 }
 
 function populateOrderCountrySelect(){
+  // الدولة هنا للعرض فقط (Disabled) — نفس الدولة المختارة أعلى الصفحة، لأنها هي اللي حددت
+  // عملة وأسعار العطور الموجودة بالسلة أصلًا. تغييرها من هنا لازم يفرّغ السلة (تعارض أسعار
+  // بين عملتين)، وهذا يضيع طلب العميل وهو بنص الخطوة — فخليناها ثابتة بهذي المرحلة،
+  // وأي تغيير للدولة يصير من القائمة العلوية بالموقع قبل ما يضيف عطور للسلة.
   const sel = document.getElementById("ofCountrySelect");
   sel.innerHTML = Object.keys(COUNTRIES).map(code => {
     const label = lang==="ar" ? COUNTRIES[code].labelAr : COUNTRIES[code].labelEn;
     return `<option value="${code}">${label}</option>`;
   }).join("");
   sel.value = country;
-  sel.onchange = function(){
-    // نفس منطق قائمة الدولة الرئيسية: كل دولة أسعارها بعملة مختلفة، فتغيير الدولة يفرّغ السلة
-    country = this.value;
-    cart = {};
-    if(!COUNTRIES[country].tabby && paymentMethod==="tabby") paymentMethod = "cod";
-    closeOrderModal();
-    renderAll();
-    openCartModal();
-  };
+  sel.disabled = true;
+  sel.onchange = null;
 }
 
 function updateAddressBlocksVisibility(){
@@ -1803,6 +1803,7 @@ function applyOrderFormLabels(){
   document.getElementById("lblPhone").textContent = t.lblPhone;
   document.getElementById("lblEmail").textContent = t.lblEmail;
   document.getElementById("lblCountry").textContent = t.lblCountry;
+  document.getElementById("ofCountryHint").textContent = t.ofCountryHint;
   document.getElementById("lblEmirate").textContent = t.lblEmirate;
   document.getElementById("lblWilayat").textContent = t.lblWilayat;
   document.getElementById("lblDeliveryMethod").textContent = t.lblDeliveryMethod;
@@ -1876,6 +1877,8 @@ const ORDER_MODAL_BODY_DEFAULT_HTML = document.getElementById("orderModalBody").
 function resetOrderForm(){
   document.getElementById("orderModalBody").innerHTML = ORDER_MODAL_BODY_DEFAULT_HTML;
   document.querySelector(".order-modal-foot").style.display = "";
+  const submitBtn = document.getElementById("orderSubmitBtn");
+  submitBtn.disabled = false; // بدون هذا، الزر يضل مقفل بعد أول طلب ويمنع العميل من طلب ثاني بنفس الزيارة
   applyOrderFormLabels();
   wireOrderForm();
 }
