@@ -343,6 +343,21 @@
     font-family:'Poppins'; background:var(--bg); color:var(--ink);
   }
   .order-modal-body textarea{ resize:vertical; min-height:60px; }
+  .order-modal-body input:disabled{ opacity:.7; background:var(--bg-soft); }
+  .of-radio-row{ display:flex; gap:8px; margin-top:2px; }
+  .of-radio-pill{
+    display:flex !important; align-items:center; gap:6px; flex:1; border:1px solid var(--line);
+    border-radius:10px; padding:9px 10px; font-size:12.5px; margin:0 !important; cursor:pointer; color:var(--ink);
+  }
+  .of-radio-pill input{ width:auto !important; accent-color:var(--gold-deep); }
+  .order-shipping-summary{
+    margin-top:16px; background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
+    padding:12px 14px; font-size:13px; line-height:2;
+  }
+  .order-shipping-summary .os-row{ display:flex; justify-content:space-between; }
+  .order-shipping-summary .os-total{ font-weight:700; border-top:1px dashed var(--line); margin-top:4px; padding-top:6px; }
+  .order-shipping-summary .os-free{ color:var(--gold-deep); font-weight:600; }
+  .order-shipping-summary s{ color:var(--muted); margin-inline-end:5px; }
   .order-modal-foot{ padding:14px 18px; border-top:1px solid var(--line); }
   .order-submit-btn{
     width:100%; background:var(--gold-deep); color:#fff; border:none; padding:13px; border-radius:12px;
@@ -523,10 +538,32 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
         <input type="tel" id="ofPhone" required autocomplete="tel">
         <label id="lblEmail"></label>
         <input type="email" id="ofEmail" required autocomplete="email">
+
+        <label id="lblCountry"></label>
+        <input type="text" id="ofCountryDisplay" disabled>
+
+        <div id="ofAeBlock" style="display:none;">
+          <label id="lblEmirate"></label>
+          <select id="ofEmirate"></select>
+        </div>
+
+        <div id="ofOmBlock" style="display:none;">
+          <label id="lblWilayat"></label>
+          <select id="ofWilayat"></select>
+          <input type="text" id="ofWilayatOther" style="display:none; margin-top:8px;">
+          <label id="lblDeliveryMethod"></label>
+          <div class="of-radio-row">
+            <label class="of-radio-pill"><input type="radio" name="ofOmDelivery" value="door" checked> <span id="lblDeliveryDoor"></span></label>
+            <label class="of-radio-pill"><input type="radio" name="ofOmDelivery" value="nool"> <span id="lblDeliveryNool"></span></label>
+          </div>
+        </div>
+
         <label id="lblAddress"></label>
         <textarea id="ofAddress" required autocomplete="street-address"></textarea>
         <label id="lblNotes"></label>
         <textarea id="ofNotes"></textarea>
+
+        <div class="order-shipping-summary" id="orderShippingSummary"></div>
       </form>
     </div>
     <div class="order-modal-foot">
@@ -557,7 +594,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 // ------------------------------------------------------------------
 const WHATSAPP_NUMBER = "971522275255";
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
-const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbyIfFZmuZDTduDy7rG3RfiSZ0qR6lpB7uGQexTvFY5y2qSOa9IhWaIU5gdjJ-U6RGy4/exec";
+const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwYKeNSa5dE4ldpsvZXGTx3tg97RP36864v9IBcGqyaT9_6jcvYcPVD-d7bM0UbxEd3/exec";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
@@ -698,14 +735,26 @@ const I18N = {
     lblName: "الاسم الكامل",
     lblPhone: "رقم الهاتف",
     lblEmail: "البريد الإلكتروني",
-    lblAddress: "العنوان بالتفصيل (الإمارة/الولاية، المنطقة، الشارع)",
+    lblAddress: "العنوان التفصيلي (الشارع، البناية، أقرب معلم)",
     lblNotes: "ملاحظات (اختياري)",
+    lblCountry: "الدولة",
+    lblEmirate: "الإمارة",
+    lblWilayat: "الولاية",
+    wilayatOtherOption: "أخرى (اكتبها)",
+    wilayatOtherPlaceholder: "اكتب اسم الولاية",
+    lblDeliveryMethod: "طريقة التوصيل",
+    lblDeliveryDoor: "توصيل للمنزل",
+    lblDeliveryNool: "استلام من مكتب NOOL",
+    shipSubtotal: "المجموع الفرعي",
+    shipFee: "رسوم التوصيل",
+    shipFree: "مجاني 🎁",
+    shipGrandTotal: "الإجمالي شامل التوصيل",
     orderSubmitBtn: "إرسال الطلب",
     orderSubmitting: "جاري الإرسال...",
     orderFormNote: "بعد الإرسال بنتواصل معك عبر واتساب لتأكيد الطلب.",
     orderSuccessTitle: "🎉 تم استلام طلبك!",
     orderSuccessMsgPrefix: "رقم طلبك",
-    orderSuccessMsg: "شكرًا لطلبك من Evoque Perfume. راح نتواصل معك قريبًا عبر واتساب لتأكيد التفاصيل.",
+    orderSuccessMsg: "شكرًا لطلبك من Evoque Perfume. رقم طلبك الرسمي وكل التفاصيل بانتظارك بالإيميل، وراح نتواصل معك قريبًا عبر واتساب لتأكيد التفاصيل.",
     orderErrorMsg: "حدث خطأ بإرسال الطلب. تقدر تكمل الطلب مباشرة عبر واتساب:",
     waFallbackLabel: "تواصل عبر واتساب",
     footer: "© 2026 Evoque Perfume — الأسعار والتفاصيل تُقرأ حيًا من الكتالوج الرسمي وتتحدث تلقائيًا"
@@ -792,14 +841,26 @@ const I18N = {
     lblName: "Full Name",
     lblPhone: "Phone Number",
     lblEmail: "Email Address",
-    lblAddress: "Full Address (Emirate/State, Area, Street)",
+    lblAddress: "Detailed Address (Street, Building, Nearest Landmark)",
     lblNotes: "Notes (optional)",
+    lblCountry: "Country",
+    lblEmirate: "Emirate",
+    lblWilayat: "Wilayat",
+    wilayatOtherOption: "Other (type it)",
+    wilayatOtherPlaceholder: "Type the wilayat name",
+    lblDeliveryMethod: "Delivery Method",
+    lblDeliveryDoor: "Home Delivery",
+    lblDeliveryNool: "Pickup from NOOL office",
+    shipSubtotal: "Subtotal",
+    shipFee: "Delivery Fee",
+    shipFree: "Free 🎁",
+    shipGrandTotal: "Total incl. delivery",
     orderSubmitBtn: "Submit Order",
     orderSubmitting: "Submitting...",
     orderFormNote: "After submitting, we'll contact you on WhatsApp to confirm your order.",
     orderSuccessTitle: "🎉 Your order has been received!",
     orderSuccessMsgPrefix: "Order number",
-    orderSuccessMsg: "Thank you for ordering from Evoque Perfume. We'll reach out on WhatsApp shortly to confirm the details.",
+    orderSuccessMsg: "Thank you for ordering from Evoque Perfume. Your official order number and full details are on their way to your email, and we'll reach out on WhatsApp shortly to confirm.",
     orderErrorMsg: "There was an error submitting your order. You can complete it directly via WhatsApp:",
     waFallbackLabel: "Contact via WhatsApp",
     footer: "© 2026 Evoque Perfume — Prices and details are read live from the official catalog and update automatically"
@@ -812,11 +873,37 @@ const I18N = {
    بالعربي والإنجليزي. الترتيب من الأكبر للأصغر مو مهم — الكود يرتبها تلقائيًا.
    ====================================================================== */
 const OFFERS_CONFIG = [
-  { size:"50", minQty:10, reward:{ ar:"توصيل مجاني + عطرين 10مل + معطر سيارة مجانًا", en:"Free delivery + 2 free 10ml perfumes + free car diffuser" } },
-  { size:"50", minQty:5,  reward:{ ar:"توصيل مجاني", en:"Free delivery" } },
+  { size:"50", minQty:10, freeShipping:true, reward:{ ar:"توصيل مجاني + عطرين 10مل + معطر سيارة مجانًا", en:"Free delivery + 2 free 10ml perfumes + free car diffuser" } },
+  { size:"50", minQty:5,  freeShipping:true, reward:{ ar:"توصيل مجاني", en:"Free delivery" } },
   { size:"50", minQty:3,  reward:{ ar:"هدية مجانية (عطر 10مل أو معطر سيارة)", en:"Free gift (10ml perfume or car diffuser)" } },
   { size:"10", minQty:10, reward:{ ar:"عطر 10مل مجاني + معطر سيارة مجانًا", en:"Free 10ml perfume + free car diffuser" } },
   { size:"10", minQty:5,  reward:{ ar:"معطر سيارة مجاني", en:"Free car diffuser" } },
+];
+
+function hasFreeShipping(offerStatus){
+  return offerStatus.unlocked.some(o => o.freeShipping);
+}
+
+/* ===== إعدادات الشحن — عدّل الأرقام هنا فقط لو تغيّرت أسعار التوصيل ===== */
+const SHIPPING_RATES = {
+  AE: { standard: 25, western: 50 },
+  OM: { door: 3, nool: 2 }
+};
+
+const UAE_EMIRATES = ["أبوظبي","دبي","الشارقة","عجمان","أم القيوين","رأس الخيمة","الفجيرة","المنطقة الغربية (أبوظبي)"];
+
+const OMAN_WILAYATS = [
+  { gov:"محافظة مسقط", items:["مسقط","مطرح","بوشر","السيب","العامرات","القريات"] },
+  { gov:"محافظة شمال الباطنة", items:["الخابورة","صحم","صحار","لوى","شناص","السويق"] },
+  { gov:"محافظة جنوب الباطنة", items:["بركاء","المصنعة","الرستاق","وادي المعاول","نخل"] },
+  { gov:"محافظة الداخلية", items:["سمائل","بدبد","نزوى","الحمراء","بهلاء","منح","إزكي","أدم"] },
+  { gov:"محافظة الظاهرة", items:["عبري","ضنك","ينقل"] },
+  { gov:"محافظة البريمي", items:["البريمي","محضة","السنينة"] },
+  { gov:"محافظة مسندم", items:["مدحاء","دبا","خصب","بخا"] },
+  { gov:"محافظة جنوب الشرقية", items:["صور","جعلان بني بو حسن","جعلان بني بو علي","الكامل والوافي","مصيرة"] },
+  { gov:"محافظة شمال الشرقية", items:["دماء والطائيين","القابل","إبراء","المضيبي","بدية"] },
+  { gov:"محافظة الوسطى", items:["هيماء","محوت","الدقم","الجازر"] },
+  { gov:"محافظة ظفار", items:["صلالة","طاقة","مرباط","سدح","رخيوت","ضلكوت","ثمريت","المزيونة","مقشن","شليم وجزر الحلانيات"] }
 ];
 
 function getBestOffer(size, qty){
@@ -1228,13 +1315,7 @@ function renderAll(){
 
   document.getElementById("orderFormBtnLabel").textContent = t.orderFormBtnLabel;
   document.getElementById("orderModalTitle").textContent = t.orderModalTitle;
-  document.getElementById("lblName").textContent = t.lblName;
-  document.getElementById("lblPhone").textContent = t.lblPhone;
-  document.getElementById("lblEmail").textContent = t.lblEmail;
-  document.getElementById("lblAddress").textContent = t.lblAddress;
-  document.getElementById("lblNotes").textContent = t.lblNotes;
-  document.getElementById("orderSubmitBtn").textContent = t.orderSubmitBtn;
-  document.getElementById("orderFormNote").textContent = t.orderFormNote;
+  applyOrderFormLabels();
 
   const banner = document.getElementById("notfoundBanner");
   banner.innerHTML = t.notfound;
@@ -1635,29 +1716,129 @@ document.getElementById("cartModalOverlay").onclick = (e)=>{
 };
 
 /* ===== نموذج الطلب (Order Form) — بديل/تكملة اختيارية جنب واتساب المباشر ===== */
-function buildOrderId(){
-  return "EV" + Date.now().toString(36).toUpperCase();
+
+/* رقم الطلب الرسمي (تسلسلي، يبدأ 1001 كل شهر) يُولّد من السيرفر (Code.gs) — هذا الرقم هنا للمرجع بالواتساب فقط لو فشل الاتصال بالسيرفر بالكامل قبل ما يوصل أي طلب */
+
+function populateEmirateSelect(){
+  const sel = document.getElementById("ofEmirate");
+  sel.innerHTML = UAE_EMIRATES.map(e => `<option value="${e}">${e}</option>`).join("");
 }
 
-function buildOrderPayload(orderId){
+function populateWilayatSelect(){
+  const t = I18N[lang];
+  const sel = document.getElementById("ofWilayat");
+  const groups = OMAN_WILAYATS.map(g =>
+    `<optgroup label="${g.gov}">${g.items.map(w=>`<option value="${w}">${w}</option>`).join("")}</optgroup>`
+  ).join("");
+  sel.innerHTML = groups + `<option value="__other__">${t.wilayatOtherOption}</option>`;
+}
+
+function updateAddressBlocksVisibility(){
+  const isAe = country === "AE";
+  document.getElementById("ofAeBlock").style.display = isAe ? "" : "none";
+  document.getElementById("ofOmBlock").style.display = isAe ? "none" : "";
+  document.getElementById("ofCountryDisplay").value = lang==="ar" ? COUNTRIES[country].labelAr : COUNTRIES[country].labelEn;
+}
+
+function currentShippingFee(){
+  const isAe = country === "AE";
+  if(isAe){
+    const emirateSel = document.getElementById("ofEmirate");
+    const isWestern = emirateSel && emirateSel.value === "المنطقة الغربية (أبوظبي)";
+    return isWestern ? SHIPPING_RATES.AE.western : SHIPPING_RATES.AE.standard;
+  } else {
+    const doorRadio = document.querySelector('input[name="ofOmDelivery"]:checked');
+    const method = doorRadio ? doorRadio.value : "door";
+    return method === "nool" ? SHIPPING_RATES.OM.nool : SHIPPING_RATES.OM.door;
+  }
+}
+
+function renderShippingSummary(){
   const t = I18N[lang];
   const items = cartItemsList();
   const cur = currencyLabel();
-  const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
+  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
   const offerStatus = computeOffersStatus(items);
+  const freeShip = hasFreeShipping(offerStatus);
+  const fee = currentShippingFee();
+  const grand = subtotal + (freeShip ? 0 : fee);
+  const feeHtml = freeShip
+    ? `<s>${fee} ${cur}</s> <span class="os-free">${t.shipFree}</span>`
+    : `${fee} ${cur}`;
+  document.getElementById("orderShippingSummary").innerHTML = `
+    <div class="os-row"><span>${t.shipSubtotal}</span><span>${subtotal} ${cur}</span></div>
+    <div class="os-row"><span>${t.shipFee}</span><span>${feeHtml}</span></div>
+    <div class="os-row os-total"><span>${t.shipGrandTotal}</span><span>${grand} ${cur}</span></div>
+  `;
+}
+
+function applyOrderFormLabels(){
+  const t = I18N[lang];
+  document.getElementById("lblName").textContent = t.lblName;
+  document.getElementById("lblPhone").textContent = t.lblPhone;
+  document.getElementById("lblEmail").textContent = t.lblEmail;
+  document.getElementById("lblCountry").textContent = t.lblCountry;
+  document.getElementById("lblEmirate").textContent = t.lblEmirate;
+  document.getElementById("lblWilayat").textContent = t.lblWilayat;
+  document.getElementById("lblDeliveryMethod").textContent = t.lblDeliveryMethod;
+  document.getElementById("lblDeliveryDoor").textContent = t.lblDeliveryDoor;
+  document.getElementById("lblDeliveryNool").textContent = t.lblDeliveryNool;
+  document.getElementById("ofWilayatOther").placeholder = t.wilayatOtherPlaceholder;
+  document.getElementById("lblAddress").textContent = t.lblAddress;
+  document.getElementById("lblNotes").textContent = t.lblNotes;
+  document.getElementById("orderSubmitBtn").textContent = t.orderSubmitBtn;
+  document.getElementById("orderFormNote").textContent = t.orderFormNote;
+
+  populateEmirateSelect();
+  populateWilayatSelect();
+  updateAddressBlocksVisibility();
+  renderShippingSummary();
+
+  document.getElementById("ofEmirate").onchange = renderShippingSummary;
+  document.getElementById("ofWilayat").onchange = function(){
+    document.getElementById("ofWilayatOther").style.display = this.value === "__other__" ? "" : "none";
+  };
+  document.querySelectorAll('input[name="ofOmDelivery"]').forEach(r => r.onchange = renderShippingSummary);
+}
+
+function buildOrderPayload(){
+  const t = I18N[lang];
+  const items = cartItemsList();
+  const cur = currencyLabel();
+  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
+  const offerStatus = computeOffersStatus(items);
+  const freeShip = hasFreeShipping(offerStatus);
+  const shippingFee = currentShippingFee();
+  const grandTotal = subtotal + (freeShip ? 0 : shippingFee);
+
+  const isAe = country === "AE";
+  let emirateOrWilayat = "", deliveryMethod = "";
+  if(isAe){
+    emirateOrWilayat = document.getElementById("ofEmirate").value;
+  } else {
+    const wSel = document.getElementById("ofWilayat").value;
+    emirateOrWilayat = wSel === "__other__" ? document.getElementById("ofWilayatOther").value.trim() : wSel;
+    const doorRadio = document.querySelector('input[name="ofOmDelivery"]:checked');
+    deliveryMethod = (doorRadio ? doorRadio.value : "door") === "nool" ? t.lblDeliveryNool : t.lblDeliveryDoor;
+  }
+
   return {
-    orderId,
     dateISO: new Date().toISOString(),
     lang,
     name: document.getElementById("ofName").value.trim(),
     phone: document.getElementById("ofPhone").value.trim(),
     email: document.getElementById("ofEmail").value.trim(),
+    country: lang==="ar" ? COUNTRIES[country].labelAr : COUNTRIES[country].labelEn,
+    emirateOrWilayat,
+    deliveryMethod,
     address: document.getElementById("ofAddress").value.trim(),
     notes: document.getElementById("ofNotes").value.trim(),
-    country,
     currency: cur,
     paymentMethod: paymentLabel(t, paymentMethod),
-    total,
+    subtotal,
+    shippingFee: freeShip ? 0 : shippingFee,
+    shippingFree: freeShip,
+    total: grandTotal,
     offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
     items: items.map(i => ({
       brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: i.size, qty: i.qty, lineTotal: i.lineTotal
@@ -1669,14 +1850,7 @@ const ORDER_MODAL_BODY_DEFAULT_HTML = document.getElementById("orderModalBody").
 function resetOrderForm(){
   document.getElementById("orderModalBody").innerHTML = ORDER_MODAL_BODY_DEFAULT_HTML;
   document.querySelector(".order-modal-foot").style.display = "";
-  const t = I18N[lang];
-  document.getElementById("lblName").textContent = t.lblName;
-  document.getElementById("lblPhone").textContent = t.lblPhone;
-  document.getElementById("lblEmail").textContent = t.lblEmail;
-  document.getElementById("lblAddress").textContent = t.lblAddress;
-  document.getElementById("lblNotes").textContent = t.lblNotes;
-  document.getElementById("orderSubmitBtn").textContent = t.orderSubmitBtn;
-  document.getElementById("orderFormNote").textContent = t.orderFormNote;
+  applyOrderFormLabels();
   wireOrderForm();
 }
 function openOrderModal(){
@@ -1696,22 +1870,32 @@ function wireOrderForm(){
 document.getElementById("orderForm").addEventListener("submit", function(e){
   e.preventDefault();
   const t = I18N[lang];
+
+  if(country !== "AE"){
+    const wSel = document.getElementById("ofWilayat");
+    const wOther = document.getElementById("ofWilayatOther");
+    if(wSel.value === "__other__" && !wOther.value.trim()){
+      wOther.focus();
+      return;
+    }
+  }
+
   const submitBtn = document.getElementById("orderSubmitBtn");
   submitBtn.disabled = true;
   submitBtn.textContent = t.orderSubmitting;
 
-  const orderId = buildOrderId();
-  const payload = buildOrderPayload(orderId);
+  const payload = buildOrderPayload();
 
   const waMsgLines = [
-    lang==="ar" ? `طلب جديد #${orderId}` : `New order #${orderId}`,
+    lang==="ar" ? `طلب جديد` : `New order`,
     `${payload.name} — ${payload.phone}`,
+    `${payload.country} — ${payload.emirateOrWilayat}${payload.deliveryMethod ? " — " + payload.deliveryMethod : ""}`,
     payload.address
   ];
   payload.items.forEach((i,idx)=>{
     waMsgLines.push(`${idx+1}. ${i.brand} - ${i.name} (${i.size}ml) x${i.qty}`);
   });
-  waMsgLines.push(`${t.orderMsgTotal}: ${payload.total} ${payload.currency}`);
+  waMsgLines.push(`${t.shipGrandTotal}: ${payload.total} ${payload.currency}`);
   waMsgLines.push(`${t.orderMsgPayment}: ${payload.paymentMethod}`);
   const waFallbackHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsgLines.join("\n"))}`;
 
@@ -1720,7 +1904,7 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
       <div class="order-success">
         <div class="oc-icon">🎉</div>
         <h4>${t.orderSuccessTitle}</h4>
-        <p><b>${t.orderSuccessMsgPrefix}: ${orderId}</b><br>${t.orderSuccessMsg}</p>
+        <p>${t.orderSuccessMsg}</p>
       </div>`;
     document.querySelector(".order-modal-foot").style.display = "none";
     cart = {}; renderAll();
@@ -1741,13 +1925,17 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
     return;
   }
 
+  // ملاحظة: نستخدم no-cors لأن Google Apps Script ما يرجّع Access-Control-Allow-Origin
+  // بردود POST، فالمتصفح يمنع قراءة الرد حتى لو نفّذ الطلب بنجاح بالسيرفر (Opaque Response).
+  // فنعتبر أي استجابة (حتى لو غير قابلة للقراءة) = نجاح، وما نحاول نقرأ محتواها.
+  // الفشل الحقيقي الوحيد هنا هو مشكلة شبكة فعلية (لا إنترنت / الرابط خطأ).
   fetch(ORDER_ENDPOINT, {
     method: "POST",
+    mode: "no-cors",
     headers: { "Content-Type": "text/plain;charset=utf-8" }, // نتجنب preflight مع Apps Script
     body: JSON.stringify(payload)
   })
-  .then(res => res.json())
-  .then(data => { if(data && data.ok){ showSuccess(); } else { showError(); } })
+  .then(()=> showSuccess())
   .catch(()=> showError());
 });
 }
