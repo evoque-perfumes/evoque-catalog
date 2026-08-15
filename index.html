@@ -1443,5 +1443,17 @@ resetOfferTimer();
 loadPerfumesFromSheet();
 
 </script>
+<!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
+<script>
+(function(){
+  function trackWhatsAppClick(){
+    if (typeof fbq === "function") { fbq('track', 'Contact'); }
+  }
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('#waHeaderBtn, #checkoutBtn');
+    if (el) { trackWhatsAppClick(); }
+  }, true);
+})();
+</script>
 </body>
 </html>
