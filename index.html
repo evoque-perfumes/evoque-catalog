@@ -272,6 +272,12 @@
   }
   .cart-modal-item .remove-btn .icon{ width:16px; height:16px; }
   .cart-modal-empty{ text-align:center; color:var(--muted); padding:40px 10px; }
+  .offer-banner{ border-radius:12px; padding:12px 14px; margin-bottom:12px; font-size:12.5px; line-height:1.7; }
+  .offer-banner-won{ background:var(--gold-pale); border:1px solid var(--gold); color:var(--ink); }
+  .offer-banner-won .offer-banner-title{ font-weight:700; color:var(--gold-deep); margin-bottom:3px; font-size:13px; }
+  .offer-banner-won .offer-banner-item{ display:flex; align-items:center; gap:6px; }
+  .offer-banner-won .offer-banner-item::before{ content:"✓"; color:var(--gold-deep); font-weight:700; }
+  .offer-banner-progress{ background:var(--bg-soft); border:1px dashed var(--gold); color:var(--muted); text-align:center; }
   .cart-modal-total{ padding:14px 18px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:600; }
 
   footer{ text-align:center; color:var(--muted-soft); font-size:12px; padding:34px 20px 24px; background:var(--dark); }
@@ -602,6 +608,11 @@ const I18N = {
     orderMsgPayment: "طريقة الدفع المفضلة",
     orderMsgAskPrice: "استفسار عن السعر",
     orderMsgTotal: "المجموع التقريبي",
+    offerUnlockedTitle: "🎉 مبروك! حصلت على:",
+    offerNextPrefix: "ضيف",
+    offerNextMid50: "عطر 50مل كمان واحصل على:",
+    offerNextMid10: "عطر 10مل كمان واحصل على:",
+    orderMsgOfferLine: "🎁 العرض المستحق",
     footer: "© 2026 Evoque Perfume — الأسعار والتفاصيل تُقرأ حيًا من الكتالوج الرسمي وتتحدث تلقائيًا"
   },
   en: {
@@ -676,9 +687,47 @@ const I18N = {
     orderMsgPayment: "Preferred payment method",
     orderMsgAskPrice: "price on request",
     orderMsgTotal: "Approximate total",
+    offerUnlockedTitle: "🎉 Congrats! You've unlocked:",
+    offerNextPrefix: "Add",
+    offerNextMid50: "more 50ml perfume to unlock:",
+    offerNextMid10: "more 10ml perfume to unlock:",
+    orderMsgOfferLine: "🎁 Offer earned",
     footer: "© 2026 Evoque Perfume — Prices and details are read live from the official catalog and update automatically"
   }
 };
+
+/* ======================================================================
+   إعدادات العروض (Offers) — عدّل هنا فقط لما يتغيّر أي عرض بالمستقبل
+   كل عرض له: الحجم اللي يُحتسب عليه (50 أو 10)، أقل كمية مطلوبة، ونص الهدية
+   بالعربي والإنجليزي. الترتيب من الأكبر للأصغر مو مهم — الكود يرتبها تلقائيًا.
+   ====================================================================== */
+const OFFERS_CONFIG = [
+  { size:"50", minQty:10, reward:{ ar:"توصيل مجاني + عطرين 10مل + معطر سيارة مجانًا", en:"Free delivery + 2 free 10ml perfumes + free car diffuser" } },
+  { size:"50", minQty:5,  reward:{ ar:"توصيل مجاني", en:"Free delivery" } },
+  { size:"50", minQty:3,  reward:{ ar:"هدية مجانية (عطر 10مل أو معطر سيارة)", en:"Free gift (10ml perfume or car diffuser)" } },
+  { size:"10", minQty:10, reward:{ ar:"عطر 10مل مجاني + معطر سيارة مجانًا", en:"Free 10ml perfume + free car diffuser" } },
+  { size:"10", minQty:5,  reward:{ ar:"معطر سيارة مجاني", en:"Free car diffuser" } },
+];
+
+function getBestOffer(size, qty){
+  const matches = OFFERS_CONFIG.filter(o => o.size === size && qty >= o.minQty).sort((a,b)=> b.minQty - a.minQty);
+  return matches[0] || null;
+}
+function getNextOffer(size, qty){
+  const upcoming = OFFERS_CONFIG.filter(o => o.size === size && qty < o.minQty).sort((a,b)=> a.minQty - b.minQty);
+  return upcoming[0] || null;
+}
+function computeOffersStatus(items){
+  const qty50 = items.filter(i=>i.size==="50").reduce((s,i)=>s+i.qty,0);
+  const qty10 = items.filter(i=>i.size==="10").reduce((s,i)=>s+i.qty,0);
+  const unlocked = [getBestOffer("50",qty50), getBestOffer("10",qty10)].filter(Boolean);
+  const next50 = getNextOffer("50",qty50);
+  const next10 = getNextOffer("10",qty10);
+  let nextHint = null;
+  if(next50 && (!next10 || (next50.minQty-qty50) <= (next10.minQty-qty10))) nextHint = {...next50, remaining: next50.minQty-qty50, sizeKey:"50"};
+  else if(next10) nextHint = {...next10, remaining: next10.minQty-qty10, sizeKey:"10"};
+  return { unlocked, nextHint };
+}
 
 // خريطة ترجمة مصطلحات العطور الشائعة (تُستخدم فقط لما اللغة = عربي)
 // ملاحظة: العبارات المكوّنة من أكثر من كلمة تُطابَق أولاً (قبل الكلمات المفردة)
@@ -1364,7 +1413,9 @@ function renderCart(){
 
   const totalQty = items.reduce((sum,i)=> sum + i.qty, 0);
   const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
-  cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${totalQty}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}</span>`;
+  const offerStatus = computeOffersStatus(items);
+  const offerBadge = offerStatus.unlocked.length ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🎁</span>` : "";
+  cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${totalQty}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}${offerBadge}</span>`;
   checkoutBtn.style.opacity = "1"; checkoutBtn.style.pointerEvents = "auto";
   let msg = t.orderMsgIntro;
   items.forEach((i,idx)=>{
@@ -1373,6 +1424,9 @@ function renderCart(){
   });
   msg += `\n${t.orderMsgTotal}: ${total} ${cur} ${t.withoutDelivery}`;
   msg += `\n${t.orderMsgPayment}: ${paymentLabel(t, paymentMethod)}`;
+  if(offerStatus.unlocked.length){
+    offerStatus.unlocked.forEach(o=>{ msg += `\n${t.orderMsgOfferLine}: ${o.reward[lang]}`; });
+  }
   checkoutBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   checkoutBtn.target = "_blank";
 
@@ -1394,7 +1448,22 @@ function renderCartModal(){
     return;
   }
 
-  body.innerHTML = items.map(i => `
+  const offerStatus = computeOffersStatus(items);
+  let offerBannerHtml = "";
+  if(offerStatus.unlocked.length){
+    offerBannerHtml = `<div class="offer-banner offer-banner-won">
+      <div class="offer-banner-title">${t.offerUnlockedTitle}</div>
+      ${offerStatus.unlocked.map(o=>`<div class="offer-banner-item">${o.reward[lang]}</div>`).join("")}
+    </div>`;
+  } else if(offerStatus.nextHint){
+    const h = offerStatus.nextHint;
+    const mid = h.sizeKey === "50" ? t.offerNextMid50 : t.offerNextMid10;
+    offerBannerHtml = `<div class="offer-banner offer-banner-progress">
+      ${t.offerNextPrefix} <b>${h.remaining}</b> ${mid} <b>${h.reward[lang]}</b>
+    </div>`;
+  }
+
+  body.innerHTML = offerBannerHtml + items.map(i => `
     <div class="cart-modal-item" data-id="${i.id}">
       ${i.p.image ? `<img src="${i.p.image}" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:var(--bg-soft);flex:none;"></div>`}
       <div class="ci-info">
