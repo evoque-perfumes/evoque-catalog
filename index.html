@@ -313,6 +313,51 @@
   }
   .checkout-btn .icon{ width:15px; height:15px; }
   .checkout-btn:disabled{ opacity:.35; cursor:not-allowed; }
+  .checkout-row{ display:flex; align-items:center; gap:8px; }
+  .order-form-btn{
+    background:rgba(255,255,255,.07); border:1px solid rgba(233,215,174,.3); color:var(--gold-soft);
+    padding:12px 14px; border-radius:12px; font-weight:600; font-size:12px; cursor:pointer;
+    white-space:nowrap; display:flex; align-items:center; gap:6px; font-family:'Poppins';
+  }
+  .order-form-btn:disabled{ opacity:.35; cursor:not-allowed; }
+  .order-form-btn .icon{ width:14px; height:14px; }
+
+  /* ===== Order form modal ===== */
+  .order-modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(23,19,16,.55); z-index:80;
+    align-items:flex-end; justify-content:center;
+  }
+  .order-modal-overlay.open{ display:flex; }
+  .order-modal{
+    background:var(--surface); width:100%; max-width:480px; max-height:88vh; border-radius:20px 20px 0 0;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  @media (min-width:640px){ .order-modal-overlay{ align-items:center; } .order-modal{ border-radius:20px; max-height:82vh; } }
+  .order-modal-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line); }
+  .order-modal-head h3{ margin:0; font-family:'Cormorant Garamond'; font-size:19px; }
+  .order-modal-body{ overflow-y:auto; padding:16px 18px; flex:1; }
+  .order-modal-body label{ display:block; font-size:12px; color:var(--muted); margin:12px 0 5px; }
+  .order-modal-body label:first-child{ margin-top:0; }
+  .order-modal-body input, .order-modal-body select, .order-modal-body textarea{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:13.5px;
+    font-family:'Poppins'; background:var(--bg); color:var(--ink);
+  }
+  .order-modal-body textarea{ resize:vertical; min-height:60px; }
+  .order-modal-foot{ padding:14px 18px; border-top:1px solid var(--line); }
+  .order-submit-btn{
+    width:100%; background:var(--gold-deep); color:#fff; border:none; padding:13px; border-radius:12px;
+    font-weight:600; font-size:14px; cursor:pointer; font-family:'Poppins';
+  }
+  .order-submit-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .order-form-note{ font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.7; text-align:center; }
+  .order-success{ text-align:center; padding:30px 10px; }
+  .order-success .oc-icon{ font-size:40px; margin-bottom:10px; }
+  .order-success h4{ font-family:'Cormorant Garamond'; font-size:22px; margin:0 0 8px; }
+  .order-success p{ font-size:13.5px; color:var(--muted); line-height:1.8; margin:0 0 16px; }
+  .order-wa-fallback{
+    display:inline-flex; align-items:center; gap:8px; background:var(--wa); color:#fff; text-decoration:none;
+    padding:11px 20px; border-radius:12px; font-weight:600; font-size:13px;
+  }
 
   @media (max-width:520px){
     .logo-img{ width:52%; }
@@ -446,7 +491,10 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <div class="payment-row" id="paymentRow"></div>
   <div class="cart-bottom-row">
     <button type="button" class="cart-info" id="cartInfo"><svg class="icon"><use href="#ic-cart"/></svg></button>
-    <a class="checkout-btn" id="checkoutBtn"><svg class="icon"><use href="#ic-whatsapp"/></svg><span id="checkoutLabel"></span></a>
+    <div class="checkout-row">
+      <button type="button" class="order-form-btn" id="orderFormBtn"><svg class="icon"><use href="#ic-bag"/></svg><span id="orderFormBtnLabel"></span></button>
+      <a class="checkout-btn" id="checkoutBtn"><svg class="icon"><use href="#ic-whatsapp"/></svg><span id="checkoutLabel"></span></a>
+    </div>
   </div>
 </div>
 
@@ -458,6 +506,33 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
     </div>
     <div class="cart-modal-body" id="cartModalBody"></div>
     <div class="cart-modal-total" id="cartModalTotal"></div>
+  </div>
+</div>
+
+<div class="order-modal-overlay" id="orderModalOverlay">
+  <div class="order-modal">
+    <div class="order-modal-head">
+      <h3 id="orderModalTitle"></h3>
+      <button type="button" class="cart-modal-close" id="orderModalClose">&times;</button>
+    </div>
+    <div class="order-modal-body" id="orderModalBody">
+      <form id="orderForm">
+        <label id="lblName"></label>
+        <input type="text" id="ofName" required autocomplete="name">
+        <label id="lblPhone"></label>
+        <input type="tel" id="ofPhone" required autocomplete="tel">
+        <label id="lblEmail"></label>
+        <input type="email" id="ofEmail" required autocomplete="email">
+        <label id="lblAddress"></label>
+        <textarea id="ofAddress" required autocomplete="street-address"></textarea>
+        <label id="lblNotes"></label>
+        <textarea id="ofNotes"></textarea>
+      </form>
+    </div>
+    <div class="order-modal-foot">
+      <button type="submit" form="orderForm" class="order-submit-btn" id="orderSubmitBtn"></button>
+      <div class="order-form-note" id="orderFormNote"></div>
+    </div>
   </div>
 </div>
 
@@ -481,6 +556,8 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 // ما يُشارك أبدًا مع أي أحد — العميل ما يقدر يوصله من هذي الصفحة إطلاقًا.
 // ------------------------------------------------------------------
 const WHATSAPP_NUMBER = "971522275255";
+// رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
+const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbxUDxKuXNmK1ga6d8sKEH9ymTn1YZhfCpFoQGFwkwY/dev";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
@@ -616,6 +693,21 @@ const I18N = {
     offerNextMid50: "عطر 50مل كمان واحصل على:",
     offerNextMid10: "عطر 10مل كمان واحصل على:",
     orderMsgOfferLine: "🎁 العرض المستحق",
+    orderFormBtnLabel: "اطلب بنموذج",
+    orderModalTitle: "تفاصيل الطلب",
+    lblName: "الاسم الكامل",
+    lblPhone: "رقم الهاتف",
+    lblEmail: "البريد الإلكتروني",
+    lblAddress: "العنوان بالتفصيل (الإمارة/الولاية، المنطقة، الشارع)",
+    lblNotes: "ملاحظات (اختياري)",
+    orderSubmitBtn: "إرسال الطلب",
+    orderSubmitting: "جاري الإرسال...",
+    orderFormNote: "بعد الإرسال بنتواصل معك عبر واتساب لتأكيد الطلب.",
+    orderSuccessTitle: "🎉 تم استلام طلبك!",
+    orderSuccessMsgPrefix: "رقم طلبك",
+    orderSuccessMsg: "شكرًا لطلبك من Evoque Perfume. راح نتواصل معك قريبًا عبر واتساب لتأكيد التفاصيل.",
+    orderErrorMsg: "حدث خطأ بإرسال الطلب. تقدر تكمل الطلب مباشرة عبر واتساب:",
+    waFallbackLabel: "تواصل عبر واتساب",
     footer: "© 2026 Evoque Perfume — الأسعار والتفاصيل تُقرأ حيًا من الكتالوج الرسمي وتتحدث تلقائيًا"
   },
   en: {
@@ -695,6 +787,21 @@ const I18N = {
     offerNextMid50: "more 50ml perfume to unlock:",
     offerNextMid10: "more 10ml perfume to unlock:",
     orderMsgOfferLine: "🎁 Offer earned",
+    orderFormBtnLabel: "Order via Form",
+    orderModalTitle: "Order Details",
+    lblName: "Full Name",
+    lblPhone: "Phone Number",
+    lblEmail: "Email Address",
+    lblAddress: "Full Address (Emirate/State, Area, Street)",
+    lblNotes: "Notes (optional)",
+    orderSubmitBtn: "Submit Order",
+    orderSubmitting: "Submitting...",
+    orderFormNote: "After submitting, we'll contact you on WhatsApp to confirm your order.",
+    orderSuccessTitle: "🎉 Your order has been received!",
+    orderSuccessMsgPrefix: "Order number",
+    orderSuccessMsg: "Thank you for ordering from Evoque Perfume. We'll reach out on WhatsApp shortly to confirm the details.",
+    orderErrorMsg: "There was an error submitting your order. You can complete it directly via WhatsApp:",
+    waFallbackLabel: "Contact via WhatsApp",
     footer: "© 2026 Evoque Perfume — Prices and details are read live from the official catalog and update automatically"
   }
 };
@@ -1119,6 +1226,16 @@ function renderAll(){
   document.getElementById("checkoutLabel").textContent = t.checkout;
   document.getElementById("waHeaderBtn").href = `https://wa.me/${WHATSAPP_NUMBER}`;
 
+  document.getElementById("orderFormBtnLabel").textContent = t.orderFormBtnLabel;
+  document.getElementById("orderModalTitle").textContent = t.orderModalTitle;
+  document.getElementById("lblName").textContent = t.lblName;
+  document.getElementById("lblPhone").textContent = t.lblPhone;
+  document.getElementById("lblEmail").textContent = t.lblEmail;
+  document.getElementById("lblAddress").textContent = t.lblAddress;
+  document.getElementById("lblNotes").textContent = t.lblNotes;
+  document.getElementById("orderSubmitBtn").textContent = t.orderSubmitBtn;
+  document.getElementById("orderFormNote").textContent = t.orderFormNote;
+
   const banner = document.getElementById("notfoundBanner");
   banner.innerHTML = t.notfound;
   const waMsg = lang === "ar" ? "أبي أسأل عن عطر مو موجود في الصفحة، اسمه: " : "I'd like to ask about a perfume not on the page, it's called: ";
@@ -1516,6 +1633,125 @@ document.getElementById("cartModalClose").onclick = closeCartModal;
 document.getElementById("cartModalOverlay").onclick = (e)=>{
   if(e.target.id === "cartModalOverlay") closeCartModal();
 };
+
+/* ===== نموذج الطلب (Order Form) — بديل/تكملة اختيارية جنب واتساب المباشر ===== */
+function buildOrderId(){
+  return "EV" + Date.now().toString(36).toUpperCase();
+}
+
+function buildOrderPayload(orderId){
+  const t = I18N[lang];
+  const items = cartItemsList();
+  const cur = currencyLabel();
+  const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
+  const offerStatus = computeOffersStatus(items);
+  return {
+    orderId,
+    dateISO: new Date().toISOString(),
+    lang,
+    name: document.getElementById("ofName").value.trim(),
+    phone: document.getElementById("ofPhone").value.trim(),
+    email: document.getElementById("ofEmail").value.trim(),
+    address: document.getElementById("ofAddress").value.trim(),
+    notes: document.getElementById("ofNotes").value.trim(),
+    country,
+    currency: cur,
+    paymentMethod: paymentLabel(t, paymentMethod),
+    total,
+    offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
+    items: items.map(i => ({
+      brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: i.size, qty: i.qty, lineTotal: i.lineTotal
+    }))
+  };
+}
+
+const ORDER_MODAL_BODY_DEFAULT_HTML = document.getElementById("orderModalBody").innerHTML;
+function resetOrderForm(){
+  document.getElementById("orderModalBody").innerHTML = ORDER_MODAL_BODY_DEFAULT_HTML;
+  document.querySelector(".order-modal-foot").style.display = "";
+  const t = I18N[lang];
+  document.getElementById("lblName").textContent = t.lblName;
+  document.getElementById("lblPhone").textContent = t.lblPhone;
+  document.getElementById("lblEmail").textContent = t.lblEmail;
+  document.getElementById("lblAddress").textContent = t.lblAddress;
+  document.getElementById("lblNotes").textContent = t.lblNotes;
+  document.getElementById("orderSubmitBtn").textContent = t.orderSubmitBtn;
+  document.getElementById("orderFormNote").textContent = t.orderFormNote;
+  wireOrderForm();
+}
+function openOrderModal(){
+  if(cartItemsList().length === 0){ openCartModal(); return; }
+  resetOrderForm();
+  document.getElementById("orderModalOverlay").classList.add("open");
+}
+function closeOrderModal(){ document.getElementById("orderModalOverlay").classList.remove("open"); }
+
+document.getElementById("orderFormBtn").onclick = openOrderModal;
+document.getElementById("orderModalClose").onclick = closeOrderModal;
+document.getElementById("orderModalOverlay").onclick = (e)=>{
+  if(e.target.id === "orderModalOverlay") closeOrderModal();
+};
+
+function wireOrderForm(){
+document.getElementById("orderForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const t = I18N[lang];
+  const submitBtn = document.getElementById("orderSubmitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = t.orderSubmitting;
+
+  const orderId = buildOrderId();
+  const payload = buildOrderPayload(orderId);
+
+  const waMsgLines = [
+    lang==="ar" ? `طلب جديد #${orderId}` : `New order #${orderId}`,
+    `${payload.name} — ${payload.phone}`,
+    payload.address
+  ];
+  payload.items.forEach((i,idx)=>{
+    waMsgLines.push(`${idx+1}. ${i.brand} - ${i.name} (${i.size}ml) x${i.qty}`);
+  });
+  waMsgLines.push(`${t.orderMsgTotal}: ${payload.total} ${payload.currency}`);
+  waMsgLines.push(`${t.orderMsgPayment}: ${payload.paymentMethod}`);
+  const waFallbackHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsgLines.join("\n"))}`;
+
+  function showSuccess(){
+    document.getElementById("orderModalBody").innerHTML = `
+      <div class="order-success">
+        <div class="oc-icon">🎉</div>
+        <h4>${t.orderSuccessTitle}</h4>
+        <p><b>${t.orderSuccessMsgPrefix}: ${orderId}</b><br>${t.orderSuccessMsg}</p>
+      </div>`;
+    document.querySelector(".order-modal-foot").style.display = "none";
+    cart = {}; renderAll();
+  }
+  function showError(){
+    document.getElementById("orderModalBody").innerHTML = `
+      <div class="order-success">
+        <div class="oc-icon">⚠️</div>
+        <p>${t.orderErrorMsg}</p>
+        <a class="order-wa-fallback" href="${waFallbackHref}" target="_blank">${t.waFallbackLabel}</a>
+      </div>`;
+    document.querySelector(".order-modal-foot").style.display = "none";
+  }
+
+  if(!ORDER_ENDPOINT || ORDER_ENDPOINT.indexOf("PASTE_") === 0){
+    // السكربت الخلفي لسا ما انربط — نعرض رسالة واتساب بديلة بدل ما نكسر تجربة العميل
+    showError();
+    return;
+  }
+
+  fetch(ORDER_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // نتجنب preflight مع Apps Script
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => { if(data && data.ok){ showSuccess(); } else { showError(); } })
+  .catch(()=> showError());
+});
+}
+wireOrderForm();
 
 document.getElementById("btnAr").onclick = ()=> setLang("ar");
 document.getElementById("btnEn").onclick = ()=> setLang("en");
