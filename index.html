@@ -1351,11 +1351,8 @@ async function loadPerfumesFromJson(){
   const res = await fetch("./data.json", { cache: "no-store" });
   if(!res.ok) throw new Error("HTTP " + res.status);
   const data = await res.json();
-  // data.json الفعلي على الريبو مصفوفة مباشرة [...] (شوف scripts/build-catalog-json.js) —
-  // نتعامل مع الشكلين احتياطًا (مصفوفة مباشرة أو {perfumes:[...]}) عشان ما ننكسر لو تغيّر لاحقًا.
-  const list = Array.isArray(data) ? data : (data && Array.isArray(data.perfumes) ? data.perfumes : null);
-  if(!list || list.length === 0) throw new Error("empty data.json");
-  perfumes = list;
+  if(!data || !Array.isArray(data.perfumes) || data.perfumes.length === 0) throw new Error("empty data.json");
+  perfumes = data.perfumes;
 }
 
 // الخطة الاحتياطية: قراءة حية من الشيت مباشرة (نفس الطريقة القديمة) — تُستخدم
