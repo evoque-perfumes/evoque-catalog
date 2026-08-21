@@ -1189,6 +1189,22 @@ let loadState = "loading"; // "loading" | "error" | "loaded"
 let loadErrorMsg = "";
 
 async function loadPerfumesFromSheet(){
+  // 1) مسار سريع: جرب أول شي ملف data.json الجاهز (يُبنى تلقائيًا كل 20 دقيقة عبر GitHub Action
+  //    من نفس شيت الموقع) — أسرع بكثير من قراءة الشيت الحي، ويقلل فشل تحميل الصور وقت الضغط.
+  try{
+    const jsonRes = await fetch("./data.json", { cache: "no-store" });
+    if(jsonRes.ok){
+      const data = await jsonRes.json();
+      if(Array.isArray(data) && data.length){
+        perfumes = data;
+        loadState = "loaded";
+        renderAll();
+        return;
+      }
+    }
+  } catch(e){ /* data.json مو موجود بعد أو فشل — نكمل تلقائيًا على القراءة الحية بالأسفل (fallback) */ }
+
+  // 2) القراءة الحية من الشيت مباشرة — الطريقة الأصلية، تبقى fallback دائم إذا فشل data.json
   try{
     const res = await fetch(CSV_URL);
     if(!res.ok) throw new Error("HTTP " + res.status);
