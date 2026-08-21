@@ -5,21 +5,21 @@
 <meta name="google-site-verification" content="Wuuojk-1YyPYwo0wtkhtMuzxASfKotJuvAUrvhG9mAE" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evoque Perfume | متجر عطور فاخرة بديلة في الإمارات وعُمان</title>
+<title>عطور للجنسين فاخرة | Evoque Perfume</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Markazi+Text:wght@500;600;700&family=Tajawal:wght@300;400;500;700&family=Jost:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/catalog.css">
 <!-- ===== إضافات SEO ===== -->
-<meta name="description" content="متجر Evoque Perfume لعطور بديلة فاخرة في الإمارات وعُمان — تصفح الأكثر مبيعًا واختر تصنيفك (رجالي/نسائي/للجنسين)، وتواصل معنا مباشرة عبر واتساب.">
-<link rel="canonical" href="https://evoqueperfumes.com/">
+<meta name="description" content="تشكيلة Evoque Perfume من العطور الفاخرة البديلة للجنسين — فلتر حسب الموسم والوقت، وأكمل طلبك مباشرة عبر واتساب.">
+<link rel="canonical" href="https://evoqueperfumes.com/unisex.html">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Evoque Perfume | متجر عطور فاخرة بديلة في الإمارات وعُمان">
-<meta property="og:description" content="تصفح عطورنا الأكثر مبيعًا واختر تصنيفك — رجالي، نسائي، أو للجنسين. اطلب مباشرة عبر واتساب.">
-<meta property="og:url" content="https://evoqueperfumes.com/">
+<meta property="og:title" content="عطور للجنسين فاخرة | Evoque Perfume">
+<meta property="og:description" content="عطور فاخرة بديلة للجنسين بأسعار تناسب الجميع — تصفح التشكيلة كاملة.">
+<meta property="og:url" content="https://evoqueperfumes.com/unisex.html">
 <meta property="og:image" content="https://evoqueperfumes.com/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -27,15 +27,15 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://evoqueperfumes.com/og-image.jpg">
-<meta name="twitter:title" content="Evoque Perfume | متجر عطور فاخرة بديلة في الإمارات وعُمان">
-<meta name="twitter:description" content="عطور بديلة فاخرة بأسعار تناسب الجميع — تصفح الأكثر مبيعًا واختر تصنيفك.">
+<meta name="twitter:title" content="عطور للجنسين فاخرة | Evoque Perfume">
+<meta name="twitter:description" content="عطور فاخرة بديلة للجنسين — تصفح التشكيلة كاملة.">
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "OnlineStore",
   "name": "Evoque Perfume",
-  "url": "https://evoqueperfumes.com/",
+  "url": "https://evoqueperfumes.com/unisex.html",
   "areaServed": ["United Arab Emirates", "Oman"]
 }
 </script>
@@ -161,20 +161,23 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 
 <div class="notfound-banner" id="notfoundBanner"></div>
 
-<section class="section-head" id="bestSellersHead">
-  <div class="eyebrow" id="bestSellersEyebrow"></div>
-  <h2 id="bestSellersTitle"></h2>
-  <p id="bestSellersSubtitle"></p>
-</section>
-<div class="grid" id="grid"></div>
+<p class="category-intro" id="categoryIntro"></p>
 
-<div class="category-nav-wrap">
-  <section class="section-head" id="shopByCategoryHead">
-    <h2 id="shopByCategoryTitle"></h2>
-    <p id="shopByCategorySubtitle"></p>
-  </section>
-  <div class="category-nav" id="categoryNav"></div>
+<div class="search-controls">
+  <div class="search-field">
+    <svg class="icon"><use href="#ic-search"/></svg>
+    <input class="search-input" id="searchInput" type="text">
+  </div>
+  <select class="brand-select" id="brandSelect"></select>
+  <select class="brand-select" id="countrySelect"></select>
 </div>
+
+<div class="results-count" id="resultsCount"></div>
+
+<div class="filters" id="filters"></div>
+
+<div class="grid" id="grid"></div>
+<div class="show-more-wrap" id="showMoreWrap"></div>
 
 <div class="cart-bar">
   <div class="payment-row" id="paymentRow"></div>
@@ -268,7 +271,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 </footer>
 
 <script>
-  window.EVOQUE_PAGE = { mode: "home" };
+  window.EVOQUE_PAGE = { mode: "category", gender: "unisex" };
 </script>
 <script src="assets/catalog.js"></script>
 
