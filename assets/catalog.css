@@ -1,15 +1,20 @@
   :root{
-    /* ===== Evoque Night/Ivory identity palette (BRAND_IDENTITY_VISUAL.md) ===== */
-    --bg:#FAF6EF; --bg-soft:#F1E9DC; --surface:#ffffff;
-    --ink:#221F1C; --muted:#8a7d68; --muted-soft:#b7a98e;
-    --gold:#C9A15E; --gold-deep:#A9835C; --gold-soft:#F3ECDD; --gold-pale:#F1E9DC;
-    --dark:#17130F; --dark2:#221a13;
+    /* ===== Evoque "Modern Bold" identity palette — 21 أغسطس 2026 =====
+       المرحلة 2 من إعادة الهيكلة: نفس أسماء المتغيرات القديمة (--gold, --dark, إلخ)
+       محافظ عليها كما هي بالكامل (تُستخدم بعشرات الأماكن بهذا الملف) — بس غيّرنا
+       *قيمها* فقط لتناسب الهوية الجديدة: أبيض/أسود حاد التباين + لون أحمر جريء
+       بدل الذهبي/الكريمي الدافئ القديم (Night/Ivory). هذا يخلي التغيير يطبّق بكل
+       مكان تلقائيًا بدون خطر نسيان أي selector. */
+    --bg:#FFFFFF; --bg-soft:#F2F2F5; --surface:#ffffff;
+    --ink:#111111; --muted:#68686f; --muted-soft:#9a9aa1;
+    --gold:#E11D2E; --gold-deep:#B0121F; --gold-soft:#F5F5F5; --gold-pale:#FDEAEA;
+    --dark:#0A0A0A; --dark2:#141414;
     --amber1:#F0C57D; --amber2:#8A4A1E;
     --emerald:#2F4A3D; --emerald-deep:#213830;
-    --line:#e6dcc6; --wa:#25d366; --wa-deep:#1ea952;
-    --shadow:0 10px 30px rgba(34,28,21,.08);
-    --shadow-lg:0 20px 50px rgba(34,28,21,.16);
-    --radius:18px;
+    --line:#E5E5E8; --wa:#25d366; --wa-deep:#1ea952;
+    --shadow:0 10px 30px rgba(0,0,0,.06);
+    --shadow-lg:0 20px 50px rgba(0,0,0,.14);
+    --radius:14px;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -21,30 +26,32 @@
   }
   html[lang="ar"] body{ font-family:'Tajawal','Poppins','Segoe UI',Tahoma,sans-serif; }
   html[lang="en"] body{ font-family:'Jost','Poppins','Segoe UI',Tahoma,sans-serif; }
-  h1,h2,h3,.serif{ font-family:'Cormorant Garamond', 'Poppins', serif; }
-  html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3, html[lang="ar"] .serif{ font-family:'Markazi Text','Tajawal',serif; }
+  /* الهوية الجديدة "عصري بسيط جريء": عناوين بخط Sans-serif عريض وحاد بدل الخط
+     الكلاسيكي المزخرف (Cormorant Garamond / Markazi Text) القديم */
+  h1,h2,h3,.serif{ font-family:'Poppins','Segoe UI',sans-serif; font-weight:800; letter-spacing:-.01em; }
+  html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3, html[lang="ar"] .serif{ font-family:'Cairo','Tajawal',sans-serif; font-weight:800; letter-spacing:0; }
   .icon{ width:1em; height:1em; display:inline-block; vertical-align:-0.15em; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
   a{ color:inherit; }
 
   /* ===== Header ===== */
   header{
     position:relative; text-align:center; padding:10px 16px 12px;
-    background:linear-gradient(180deg, #1c1712 0%, var(--dark) 45%, #3d352c 100%);
+    background:linear-gradient(180deg, #000000 0%, var(--dark) 45%, #1a1a1a 100%);
     color:var(--gold-pale);
   }
   .top-row{ display:flex; align-items:center; justify-content:space-between; max-width:1100px; margin:0 auto 6px; }
   .lang-switch{
     display:flex; align-items:center; gap:4px; background:rgba(255,255,255,.06);
-    border:1px solid rgba(233,215,174,.25); border-radius:999px; padding:3px; font-size:12px;
+    border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:3px; font-size:12px;
   }
   .lang-switch button{
     border:none; background:transparent; color:var(--gold-soft); padding:6px 13px;
     border-radius:999px; cursor:pointer; font-family:'Poppins'; font-size:12px; letter-spacing:.3px;
     display:flex; align-items:center; gap:5px; transition:.2s;
   }
-  .lang-switch button.active{ background:var(--gold); color:#20190c; font-weight:600; }
+  .lang-switch button.active{ background:var(--gold); color:#fff; font-weight:600; }
   .icon-btn{
-    width:34px; height:34px; border-radius:50%; border:1px solid rgba(233,215,174,.25);
+    width:34px; height:34px; border-radius:50%; border:1px solid rgba(255,255,255,.25);
     background:rgba(255,255,255,.06); color:var(--gold-soft); display:flex; align-items:center;
     justify-content:center; font-size:15px; cursor:pointer;
   }
@@ -56,7 +63,7 @@
   .offers-banner{
     position:relative; overflow:hidden;
     background:linear-gradient(90deg, var(--gold-deep), var(--gold) 45%, var(--gold-deep));
-    color:#241a09;
+    color:#fff;
   }
   .offers-track{ position:relative; height:46px; max-width:1100px; margin:0 auto; }
   .offer-slide{
@@ -68,9 +75,9 @@
   .offer-slide .icon{ width:16px; height:16px; flex:none; }
   .offers-dots{ position:absolute; inset-inline-end:14px; top:50%; transform:translateY(-50%); display:flex; gap:5px; }
   .offers-dots button{
-    width:6px; height:6px; border-radius:50%; border:none; background:rgba(36,26,9,.3); padding:0; cursor:pointer;
+    width:6px; height:6px; border-radius:50%; border:none; background:rgba(255,255,255,.35); padding:0; cursor:pointer;
   }
-  .offers-dots button.active{ background:#241a09; width:16px; border-radius:4px; }
+  .offers-dots button.active{ background:#fff; width:16px; border-radius:4px; }
 
   /* ===== Trust bar ===== */
   .trust-bar{
@@ -163,11 +170,11 @@
   .name-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .card .brand{ font-size:11px; color:var(--gold-deep); letter-spacing:.5px; font-weight:600; }
   .discount-tag{
-    flex:none; background:#a23b3b; color:#fff; border-radius:999px; padding:3px 8px 3px 7px;
+    flex:none; background:var(--gold-deep); color:#fff; border-radius:999px; padding:3px 8px 3px 7px;
     font-size:10px; font-weight:700; display:flex; align-items:center; gap:3px; line-height:1;
   }
   .discount-tag .icon{ width:10px; height:10px; }
-  .card .name{ font-family:'Cormorant Garamond', serif; font-size:21px; font-weight:600; color:var(--ink); line-height:1.2; }
+  .card .name{ font-family:'Poppins',sans-serif; font-weight:800; font-size:21px; font-weight:600; color:var(--ink); line-height:1.2; }
   .badge-row{ display:flex; gap:6px; flex-wrap:wrap; margin:1px 0; }
   .badge{
     display:flex; align-items:center; gap:5px; font-size:10.5px; background:var(--bg-soft); color:var(--muted);
@@ -231,13 +238,13 @@
 
   /* ===== Cart modal ===== */
   .view-cart-btn{
-    background:none; border:1px solid rgba(233,215,174,.3); color:var(--gold-soft); border-radius:999px;
+    background:none; border:1px solid rgba(255,255,255,.3); color:var(--gold-soft); border-radius:999px;
     padding:5px 9px; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:5px; font-family:'Poppins';
     flex:none;
   }
   .view-cart-btn .icon{ width:12px; height:12px; }
   .cart-modal-overlay{
-    display:none; position:fixed; inset:0; background:rgba(20,16,11,.55); z-index:80;
+    display:none; position:fixed; inset:0; background:rgba(10,10,10,.6); z-index:80;
     align-items:flex-end; justify-content:center;
   }
   .cart-modal-overlay.open{ display:flex; }
@@ -248,7 +255,7 @@
   .cart-modal-head{
     display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line);
   }
-  .cart-modal-head h3{ margin:0; font-family:'Cormorant Garamond'; font-size:19px; }
+  .cart-modal-head h3{ margin:0; font-family:'Poppins',sans-serif; font-weight:800; font-size:19px; }
   .cart-modal-close{ background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); line-height:1; padding:4px; }
   .cart-modal-body{ overflow-y:auto; padding:8px 18px; flex:1; }
   .cart-modal-item{
@@ -263,7 +270,7 @@
   .cart-modal-item .qty-stepper{ width:auto; background:var(--bg-soft); color:var(--ink); }
   .cart-modal-item .qty-stepper button{ background:var(--surface); color:var(--ink); width:26px; height:26px; font-size:14px; box-shadow:0 1px 2px rgba(0,0,0,.1); }
   .cart-modal-item .remove-btn{
-    background:none; border:none; color:#a23b3b; cursor:pointer; padding:4px; display:flex; align-items:center;
+    background:none; border:none; color:var(--gold-deep); cursor:pointer; padding:4px; display:flex; align-items:center;
   }
   .cart-modal-item .remove-btn .icon{ width:16px; height:16px; }
   .cart-modal-empty{ text-align:center; color:var(--muted); padding:40px 10px; }
@@ -276,7 +283,7 @@
   .cart-modal-total{ padding:14px 18px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:600; }
 
   footer{ text-align:center; color:var(--muted-soft); font-size:12px; padding:34px 20px 24px; background:var(--dark); }
-  footer .foot-logo{ color:var(--gold-soft); font-family:'Cormorant Garamond'; font-size:20px; letter-spacing:1px; margin-bottom:6px; }
+  footer .foot-logo{ color:var(--gold-soft); font-family:'Poppins',sans-serif; font-weight:800; font-size:20px; letter-spacing:1px; margin-bottom:6px; }
   footer .foot-line{ width:34px; height:1px; background:var(--gold); opacity:.5; margin:10px auto; }
   .empty{ text-align:center; color:var(--muted); padding:50px; grid-column:1/-1; }
 
@@ -289,12 +296,12 @@
   .cart-bottom-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .payment-row{ display:none; gap:6px; flex-wrap:wrap; justify-content:center; padding-bottom:2px; }
   .payment-pill{
-    background:rgba(255,255,255,.07); border:1px solid rgba(233,215,174,.25); color:var(--gold-soft);
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.25); color:var(--gold-soft);
     border-radius:999px; padding:6px 13px; font-size:11px; display:flex; align-items:center; gap:5px;
     cursor:pointer; font-family:'Poppins';
   }
   .payment-pill .icon{ width:12px; height:12px; }
-  .payment-pill.active{ background:var(--gold); color:#20190c; border-color:var(--gold); font-weight:600; }
+  .payment-pill.active{ background:var(--gold); color:#fff; border-color:var(--gold); font-weight:600; }
   .cart-bar .cart-info{
     font-size:12.5px; color:var(--gold-soft); display:flex; align-items:center; gap:8px;
     background:none; border:none; padding:6px 4px; font-family:'Poppins'; text-align:start; cursor:pointer;
@@ -310,7 +317,7 @@
   .checkout-btn:disabled{ opacity:.35; cursor:not-allowed; }
   .checkout-row{ display:flex; align-items:center; gap:8px; }
   .order-form-btn{
-    background:rgba(255,255,255,.07); border:1px solid rgba(233,215,174,.3); color:var(--gold-soft);
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.3); color:var(--gold-soft);
     padding:12px 14px; border-radius:12px; font-weight:600; font-size:12px; cursor:pointer;
     white-space:nowrap; display:flex; align-items:center; gap:6px; font-family:'Poppins';
   }
@@ -319,7 +326,7 @@
 
   /* ===== Order form modal ===== */
   .order-modal-overlay{
-    display:none; position:fixed; inset:0; background:rgba(23,19,16,.55); z-index:80;
+    display:none; position:fixed; inset:0; background:rgba(10,10,10,.6); z-index:80;
     align-items:flex-end; justify-content:center;
   }
   .order-modal-overlay.open{ display:flex; }
@@ -329,7 +336,7 @@
   }
   @media (min-width:640px){ .order-modal-overlay{ align-items:center; } .order-modal{ border-radius:20px; max-height:82vh; } }
   .order-modal-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line); }
-  .order-modal-head h3{ margin:0; font-family:'Cormorant Garamond'; font-size:19px; }
+  .order-modal-head h3{ margin:0; font-family:'Poppins',sans-serif; font-weight:800; font-size:19px; }
   .order-modal-body{ overflow-y:auto; padding:16px 18px; flex:1; }
   .order-modal-body label{ display:block; font-size:12px; color:var(--muted); margin:12px 0 5px; }
   .order-modal-body label:first-child{ margin-top:0; }
@@ -362,7 +369,7 @@
   .order-form-note{ font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.7; text-align:center; }
   .order-success{ text-align:center; padding:30px 10px; }
   .order-success .oc-icon{ font-size:40px; margin-bottom:10px; }
-  .order-success h4{ font-family:'Cormorant Garamond'; font-size:22px; margin:0 0 8px; }
+  .order-success h4{ font-family:'Poppins',sans-serif; font-weight:800; font-size:22px; margin:0 0 8px; }
   .order-success p{ font-size:13.5px; color:var(--muted); line-height:1.8; margin:0 0 16px; }
   .order-wa-fallback{
     display:inline-flex; align-items:center; gap:8px; background:var(--wa); color:#fff; text-decoration:none;
@@ -425,16 +432,16 @@
   .lang-modal-overlay.open{ display:flex; }
   .lang-modal{ text-align:center; max-width:360px; }
   .lang-modal .lm-mark{ width:40px; height:40px; margin:0 auto 18px; color:var(--gold); }
-  .lang-modal h3{ color:#fff; font-family:'Cormorant Garamond', serif; font-size:24px; margin:0 0 8px; }
+  .lang-modal h3{ color:#fff; font-family:'Poppins',sans-serif; font-weight:800; font-size:24px; margin:0 0 8px; }
   .lang-modal p{ color:var(--muted-soft); font-size:13px; margin:0 0 26px; }
   .lang-modal-btns{ display:flex; flex-direction:column; gap:10px; }
   .lang-modal-btn{
     display:flex; align-items:center; justify-content:center; gap:10px;
-    padding:14px 20px; border-radius:14px; border:1px solid rgba(233,215,174,.3);
+    padding:14px 20px; border-radius:14px; border:1px solid rgba(255,255,255,.3);
     background:rgba(255,255,255,.05); color:var(--gold-soft); font-size:14.5px; font-weight:600;
     cursor:pointer; font-family:'Poppins','Tajawal';
   }
-  .lang-modal-btn:hover{ background:var(--gold); color:#20190c; border-color:var(--gold); }
+  .lang-modal-btn:hover{ background:var(--gold); color:#fff; border-color:var(--gold); }
   .lang-modal-btn .icon{ width:17px; height:17px; }
 
   /* ===================================================================
@@ -460,8 +467,8 @@
   }
   .lightbox-info{ padding:24px 26px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
   .lightbox-brand{ font-size:11.5px; color:var(--gold-deep); letter-spacing:.5px; font-weight:600; }
-  .lightbox-name{ font-family:'Cormorant Garamond', serif; font-size:26px; font-weight:600; color:var(--ink); line-height:1.2; }
-  html[lang="ar"] .lightbox-name{ font-family:'Markazi Text','Tajawal',serif; }
+  .lightbox-name{ font-family:'Poppins',sans-serif; font-weight:800; font-size:26px; font-weight:600; color:var(--ink); line-height:1.2; }
+  html[lang="ar"] .lightbox-name{ font-family:'Cairo','Tajawal',sans-serif; font-weight:800; }
   .lightbox-details{ font-size:13px; color:var(--muted); line-height:1.9; margin-top:6px; }
   .lightbox-details .row{ display:flex; gap:7px; align-items:flex-start; margin-bottom:8px; }
   .lightbox-details .row .icon{ width:14px; height:14px; margin-top:3px; color:var(--gold-deep); flex:none; }
@@ -479,8 +486,8 @@
     color:var(--gold-soft); text-decoration:none; font-size:12.5px; font-weight:500;
     padding:6px 14px; border-radius:999px; border:1px solid transparent; transition:.15s;
   }
-  .site-nav-link:hover{ border-color:rgba(233,215,174,.35); }
-  .site-nav-link.active{ background:var(--gold); color:#20190c; font-weight:700; }
+  .site-nav-link:hover{ border-color:rgba(255,255,255,.35); }
+  .site-nav-link.active{ background:var(--gold); color:#fff; font-weight:700; }
 
   .category-intro{
     max-width:700px; margin:14px auto 0; padding:0 16px; text-align:center;
@@ -507,8 +514,8 @@
   }
   .category-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-lg); }
   .category-card-icon{ width:34px; height:34px; color:var(--gold-deep); margin-bottom:6px; }
-  .category-card-title{ font-family:'Cormorant Garamond', serif; font-size:22px; font-weight:600; }
-  html[lang="ar"] .category-card-title{ font-family:'Markazi Text','Tajawal',serif; }
+  .category-card-title{ font-family:'Poppins',sans-serif; font-weight:800; font-size:22px; font-weight:600; }
+  html[lang="ar"] .category-card-title{ font-family:'Cairo','Tajawal',sans-serif; font-weight:800; }
   .category-card-desc{ font-size:12.5px; color:var(--muted); line-height:1.6; max-width:220px; }
   .category-card-cta{
     display:flex; align-items:center; gap:6px; margin-top:10px; font-size:12.5px; font-weight:700;
@@ -523,7 +530,7 @@
   }
 
   .header-country-select{
-    background:rgba(255,255,255,.06); color:var(--gold-soft); border:1px solid rgba(233,215,174,.25);
+    background:rgba(255,255,255,.06); color:var(--gold-soft); border:1px solid rgba(255,255,255,.25);
     border-radius:999px; padding:6px 10px; font-size:11px; font-family:'Poppins'; cursor:pointer;
   }
-  .header-country-select option{ color:#20190c; }
+  .header-country-select option{ color:var(--ink); }
