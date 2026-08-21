@@ -1,0 +1,36 @@
+name: Update catalog data.json
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"   # كل 20 دقيقة
+  workflow_dispatch: {}       # يسمح بتشغيله يدويًا من تبويب Actions
+
+permissions:
+  contents: write
+
+jobs:
+  build-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build data.json from Google Sheet
+        run: node scripts/build-catalog-json.js
+
+      - name: Commit data.json if changed
+        run: |
+          if git diff --quiet -- data.json; then
+            echo "لا تغييرات — تخطي الـ commit."
+          else
+            git config user.name "evoque-catalog-bot"
+            git config user.email "actions@github.com"
+            git add data.json
+            git commit -m "chore: auto-update data.json [skip ci]"
+            git push
+          fi
