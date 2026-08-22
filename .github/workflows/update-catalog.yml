@@ -1,9 +1,13 @@
+# ملاحظة (22 أغسطس 2026): هذا الـ workflow كان يشتغل تلقائيًا كل 20 دقيقة
+# ويبني data.json من Google Sheet. تم إيقاف الجدولة التلقائية لأن إدارة
+# المنتجات صارت من لوحة التحكم (admin-upload.html) وتكتب على data.json
+# مباشرة — لو خليناه شغال بيرجع يكتب فوق أي تعديل يصير من اللوحة بأول
+# دورة تشغيل تالية (كل 20 دقيقة) ويمسحه. خليناه موجود بس بتشغيل يدوي
+# (workflow_dispatch) لو احتجنا نرجع نبني data.json من الشيت كخطة طوارئ.
 name: Update catalog data.json
 
 on:
-  schedule:
-    - cron: "*/20 * * * *"   # كل 20 دقيقة
-  workflow_dispatch: {}       # يسمح بتشغيله يدويًا من تبويب Actions
+  workflow_dispatch: {}       # يسمح بتشغيله يدويًا من تبويب Actions فقط — الجدولة التلقائية متوقفة
 
 permissions:
   contents: write
