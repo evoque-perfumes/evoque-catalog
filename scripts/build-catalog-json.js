@@ -20,6 +20,40 @@ function driveDirectImageUrl(link) {
   return m ? `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000` : link;
 }
 
+/* ===== الصور المستضافة محليًا (22 أغسطس 2026) =====
+   بدل الاعتماد الدائم على Google Drive (بطيء وغير موثوق تحت الضغط)، نبني أول شي
+   اسم ملف متوقع لكل عطر (براند + اسم، بأحرف صغيرة وشرطات) ونتأكد هل فيه صورة
+   مرفوعة فعليًا بمجلد assets/perfumes/ بهذا الاسم. لو موجودة نستخدمها (مسار محلي —
+   أسرع بكثير ويستفيد من نفس الكاش اللي يستخدمه باقي الموقع). لو مو موجودة بعد،
+   نرجع تلقائيًا لرابط Google Drive القديم — نفس عطر ما ينكسر عرضه لحد ما تُرفع صورته.
+   نفس منطق التوليد هذا لازم يتطابق تمامًا مع أي قائمة أسماء ملفات نعطيها لصاحب
+   الموقع — لا تغيّره هنا بدون ما تحدّث القائمة المعطاة له. */
+const PERFUMES_IMG_DIR = path.join(__dirname, "..", "assets", "perfumes");
+const IMG_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+
+function slugify(brand, name) {
+  let s = `${brand} ${name}`.trim().toLowerCase();
+  s = s.normalize("NFKD").replace(/[̀-ͯ]/g, ""); // فصل الحروف عن علامات التشكيل الملحقة بيها (é -> e)
+  s = s.replace(/[^a-z0-9؀-ۿ]+/g, "-");
+  s = s.replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return s;
+}
+
+function localImagePath(brand, name) {
+  if (!fs.existsSync(PERFUMES_IMG_DIR)) return null;
+  const slug = slugify(brand, name);
+  for (const ext of IMG_EXTENSIONS) {
+    if (fs.existsSync(path.join(PERFUMES_IMG_DIR, slug + ext))) {
+      return `assets/perfumes/${slug}${ext}`;
+    }
+  }
+  return null;
+}
+
+function resolveImage(brand, name, driveLink) {
+  return localImagePath(brand, name) || driveDirectImageUrl(driveLink);
+}
+
 // محلّل CSV بسيط يدعم الحقول المحاطة بعلامات اقتباس (فيها فواصل) — مطابق لنفس الدالة بـ index.html
 function parseCSV(text) {
   const rows = [];
@@ -89,7 +123,7 @@ async function main() {
       id: "row-" + i,
       brand: r[idx("Brand")] || "",
       name: r[idx("Name")] || "",
-      image: driveDirectImageUrl(r[idx("Image Link (Google Drive)")]),
+      image: resolveImage(r[idx("Brand")] || "", r[idx("Name")] || "", r[idx("Image Link (Google Drive)")]),
       seasons: seasonsFromText(r[idx("Seasons")]),
       daynight: daynightFromText(r[idx("Day/Night")]),
       gender: genderKeyFromText(r[idx("Gender")]),
