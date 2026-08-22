@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>رفع صور العطور — Evoque Perfume</title>
+<title>لوحة تحكم منتجات Evoque</title>
 <style>
   :root{
     --bg:#0A0A0A; --panel:#151515; --line:#2a2a2a; --ink:#fff; --muted:#9a9aa1;
@@ -16,13 +16,13 @@
     margin:0; font-family:'Segoe UI', Tahoma, Arial, sans-serif; background:var(--bg); color:var(--ink);
     min-height:100vh; padding:24px 16px 80px;
   }
-  .wrap{max-width:760px; margin:0 auto;}
+  .wrap{max-width:860px; margin:0 auto;}
   h1{font-size:22px; font-weight:800; margin:0 0 4px;}
-  .sub{color:var(--muted); font-size:14px; margin:0 0 24px;}
+  .sub{color:var(--muted); font-size:14px; margin:0 0 20px; line-height:1.7;}
   .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px;}
   .panel h2{font-size:15px; margin:0 0 12px; color:var(--muted); font-weight:700;}
   label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
-  input[type=text], input[type=password], select{
+  input[type=text], input[type=password], input[type=number], select{
     width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
     background:#0f0f0f; color:var(--ink); font-size:14px; margin-bottom:14px;
   }
@@ -30,6 +30,15 @@
     width:100%; padding:10px; border-radius:8px; border:1px dashed #444;
     background:#0f0f0f; color:var(--ink); font-size:13px; margin-bottom:14px;
   }
+  .field{margin-bottom:0;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:0 14px;}
+  .grid4{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0 14px;}
+  @media (max-width:640px){ .grid4{grid-template-columns:1fr 1fr;} }
+  fieldset{border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin:0 0 14px; }
+  legend{color:var(--muted); font-size:12.5px; padding:0 6px;}
+  .chkrow{display:flex; gap:16px; flex-wrap:wrap;}
+  .chkrow label{display:flex; align-items:center; gap:6px; color:var(--ink); font-size:13.5px; margin:0; cursor:pointer;}
+  .chkrow input{width:auto; margin:0;}
   .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   button{
     background:var(--red); color:#fff; border:none; border-radius:8px; padding:12px 20px;
@@ -39,6 +48,10 @@
   button:disabled{background:#3a3a3a; cursor:not-allowed; color:#888;}
   button.secondary{background:#2a2a2a;}
   button.secondary:hover{background:#3a3a3a;}
+  button.ghost{background:transparent; border:1px solid var(--line); color:var(--muted);}
+  button.ghost.active{background:var(--red); color:#fff; border-color:var(--red);}
+  button.danger{background:#2a1414; border:1px solid #5a2323; color:#ff8a93;}
+  button.danger:hover{background:#3a1a1a;}
   .status{font-size:13px; margin-top:10px; padding:10px 12px; border-radius:8px; display:none; line-height:1.7;}
   .status.show{display:block;}
   .status.ok{background:rgba(30,169,82,.12); border:1px solid rgba(30,169,82,.4); color:#5ee08a;}
@@ -49,7 +62,6 @@
   .preview .meta{font-size:12.5px; color:var(--muted); line-height:1.8;}
   .progress-bar{height:8px; background:#0f0f0f; border-radius:5px; overflow:hidden; margin:10px 0; border:1px solid var(--line);}
   .progress-fill{height:100%; background:var(--green); width:0%; transition:width .3s;}
-  .progress-label{font-size:12.5px; color:var(--muted); margin-bottom:4px;}
   .search-wrap{position:relative;}
   .dropdown{
     position:absolute; top:100%; right:0; left:0; background:#0f0f0f; border:1px solid var(--line);
@@ -67,18 +79,25 @@
     border-radius:8px; padding:8px 12px; font-size:13.5px; margin-bottom:14px;
   }
   .selected-chip button{background:none; padding:0; font-size:16px; color:var(--muted); line-height:1;}
-  small.hint{color:#77777d; font-size:12px; display:block; margin-top:-8px; margin-bottom:14px;}
+  small.hint{color:#77777d; font-size:12px; display:block; margin-top:-8px; margin-bottom:14px; line-height:1.6;}
   a{color:#e0b25e;}
   .toggle-token{background:none; color:var(--muted); font-size:12px; padding:0; margin-top:-8px; margin-bottom:14px; text-decoration:underline; cursor:pointer;}
   .stats{display:flex; gap:16px; margin-bottom:6px;}
   .stat{font-size:13px;}
   .stat b{font-size:18px; display:block;}
+  .banner{background:rgba(200,138,26,.1); border:1px solid rgba(200,138,26,.35); color:#e0b25e; padding:12px 14px; border-radius:8px; font-size:13px; line-height:1.8; margin-bottom:16px;}
+  #formPanel{display:none;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>رفع صور العطور</h1>
-  <p class="sub">اختر العطر من القائمة، ارفع صورته، والنظام يتكفّل بالباقي — اسم الملف، المكان الصحيح، كل شي تلقائي.</p>
+  <h1>لوحة تحكم منتجات Evoque</h1>
+  <p class="sub">إضافة عطر جديد أو تعديل عطر موجود — الاسم، الأسعار، المخزون، والصورة — كل شي من مكان وحد، وينحفظ مباشرة على الموقع الحي.</p>
+
+  <div class="banner">
+    ملاحظة: الشيت القديم (Google Sheet) ما عاد يتحدث تلقائيًا. من الحين، كل إضافة أو تعديل
+    لازم تصير من هالصفحة فقط عشان يظهر بالموقع.
+  </div>
 
   <div class="panel" id="tokenPanel">
     <h2>1) مفتاح الدخول (مرة وحدة بس بكل جلسة)</h2>
@@ -86,9 +105,9 @@
     <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
     <button type="button" class="toggle-token" id="toggleTokenBtn">إظهار المفتاح</button>
     <small class="hint">
-      هذا المفتاح يبقى بمتصفحك فقط (بذاكرة الجلسة)، ما يترسل لأي مكان غير GitHub مباشرة، ويختفي لما تسكر التبويب.
+      هذا المفتاح يبقى بمتصفحك فقط، ما يترسل لأي مكان غير GitHub مباشرة، ويختفي لما تسكر التبويب (إلا لو فعّلت "احفظ المفتاح").
       إذا ما عندك مفتاح: من حسابك بـ GitHub روح Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token،
-      اختر الصلاحية بس على ريبو evoque-catalog، وامنحه صلاحية "Contents: Read and write". هذا المفتاح هو اللي يعطيك صلاحية الرفع — بدونه الصفحة نفسها ما تقدر تسوي شي حتى لو حد ثاني وصلها.
+      اختر الصلاحية بس على ريبو evoque-catalog، وامنحه صلاحية "Contents: Read and write".
     </small>
     <div class="row">
       <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
@@ -98,30 +117,128 @@
   </div>
 
   <div class="panel">
-    <h2>2) اختر العطر</h2>
-    <div class="stats" id="statsRow" style="display:none;">
-      <div class="stat">إجمالي العطور<b id="statTotal">—</b></div>
-      <div class="stat">صورها مرفوعة<b id="statDone" style="color:#5ee08a;">—</b></div>
-      <div class="stat">باقي</div>
+    <h2>2) شنو تبا تسوي؟</h2>
+    <div class="row" style="margin-bottom:14px;">
+      <button type="button" class="ghost active" id="modeAddBtn">➕ إضافة عطر جديد</button>
+      <button type="button" class="ghost" id="modeEditBtn">✏️ تعديل عطر موجود</button>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="اكتب اسم البراند أو العطر...">
-      <div class="dropdown" id="dropdown"></div>
+
+    <div id="editSearchWrap" style="display:none;">
+      <div class="stats" id="statsRow" style="display:none;">
+        <div class="stat">إجمالي العطور<b id="statTotal">—</b></div>
+        <div class="stat">لها صورة<b id="statDone" style="color:#5ee08a;">—</b></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="row" style="margin-bottom:10px;">
+        <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--ink);">
+          <input type="checkbox" id="hideUploadedChk" checked style="width:auto; margin:0;">
+          إخفِ العطور اللي عندها صورة مسبقًا (عشان ما تكرر نفس العطر بالغلط)
+        </label>
+      </div>
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="اكتب اسم البراند أو العطر عشان تعدّله...">
+        <div class="dropdown" id="dropdown"></div>
+      </div>
+      <div id="selectedChipWrap"></div>
     </div>
-    <div id="selectedChipWrap"></div>
   </div>
 
-  <div class="panel">
-    <h2>3) ارفع الصورة</h2>
-    <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/webp">
-    <div class="preview" id="previewWrap" style="display:none;">
-      <img id="previewImg" alt="">
-      <div class="meta" id="previewMeta"></div>
+  <div class="panel" id="formPanel">
+    <h2 id="formPanelTitle">3) بيانات العطر</h2>
+
+    <div class="grid2">
+      <div class="field"><label for="f_brand">البراند</label><input type="text" id="f_brand" placeholder="مثال: GUCCI"></div>
+      <div class="field"><label for="f_name">اسم العطر</label><input type="text" id="f_name" placeholder="مثال: INTENSE OUD"></div>
     </div>
+
+    <label for="f_gender">الجنس</label>
+    <select id="f_gender">
+      <option value="men">رجالي</option>
+      <option value="women">نسائي</option>
+      <option value="unisex" selected>للجنسين</option>
+    </select>
+
+    <fieldset>
+      <legend>المواسم المناسبة</legend>
+      <div class="chkrow">
+        <label><input type="checkbox" class="f_season" value="all"> كل المواسم</label>
+        <label><input type="checkbox" class="f_season" value="summer"> صيف</label>
+        <label><input type="checkbox" class="f_season" value="winter"> شتاء</label>
+        <label><input type="checkbox" class="f_season" value="spring"> ربيع</label>
+        <label><input type="checkbox" class="f_season" value="autumn"> خريف</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>وقت الاستخدام</legend>
+      <div class="chkrow">
+        <label><input type="checkbox" class="f_daynight" value="day"> نهاري</label>
+        <label><input type="checkbox" class="f_daynight" value="night"> ليلي</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>الأسعار — الإمارات (AED)</legend>
+      <div class="grid4">
+        <div class="field"><label for="f_price50">50مل</label><input type="number" id="f_price50" min="0" step="0.01"></div>
+        <div class="field"><label for="f_price10">10مل</label><input type="number" id="f_price10" min="0" step="0.01"></div>
+        <div class="field"><label for="f_price50Before">50مل قبل الخصم</label><input type="number" id="f_price50Before" min="0" step="0.01"></div>
+        <div class="field"><label for="f_price10Before">10مل قبل الخصم</label><input type="number" id="f_price10Before" min="0" step="0.01"></div>
+      </div>
+      <small class="hint">خانات "قبل الخصم" اختيارية — عبّيها بس لو تبا يظهر شريط خصم على العطر. خليها فاضية إذا ما فيه خصم.</small>
+    </fieldset>
+
+    <fieldset>
+      <legend>الأسعار — عُمان (OMR) — اختياري</legend>
+      <div class="grid4">
+        <div class="field"><label for="f_price50Om">50مل</label><input type="number" id="f_price50Om" min="0" step="0.01"></div>
+        <div class="field"><label for="f_price10Om">10مل</label><input type="number" id="f_price10Om" min="0" step="0.01"></div>
+        <div class="field"><label for="f_price50OmBefore">50مل قبل الخصم</label><input type="number" id="f_price50OmBefore" min="0" step="0.01"></div>
+        <div class="field"><label for="f_price10OmBefore">10مل قبل الخصم</label><input type="number" id="f_price10OmBefore" min="0" step="0.01"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>المخزون</legend>
+      <div class="chkrow">
+        <label><input type="checkbox" id="f_stock50" checked> 50مل متوفر</label>
+        <label><input type="checkbox" id="f_stock10" checked> 10مل متوفر</label>
+      </div>
+    </fieldset>
+
+    <div class="grid2">
+      <div class="field"><label for="f_accords">الأكوردات (إنجليزي)</label><input type="text" id="f_accords" placeholder="Woody, Amber, Spicy"></div>
+      <div class="field"><label for="f_accordsAR">الأكوردات (عربي) — اختياري</label><input type="text" id="f_accordsAR" placeholder="خشبي، عنبر، توابل"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label for="f_notesTop">النوتات (إنجليزي)</label><input type="text" id="f_notesTop" placeholder="Bergamot, Oud, Vanilla"></div>
+      <div class="field"><label for="f_notesTopAR">النوتات (عربي) — اختياري</label><input type="text" id="f_notesTopAR" placeholder="برغموت، عود، فانيليا"></div>
+    </div>
+    <small class="hint">لو تركت الحقل العربي فاضي، الموقع يترجم المصطلحات الإنجليزية المعروفة تلقائيًا.</small>
+
+    <div class="grid2">
+      <div class="field"><label for="f_longevity">الثبات</label><input type="text" id="f_longevity" placeholder="مثال: 8-10 ساعات"></div>
+      <div class="field"><label for="f_sillage">الفوحان</label><input type="text" id="f_sillage" placeholder="مثال: متوسط إلى قوي"></div>
+    </div>
+
+    <fieldset>
+      <legend>الصورة</legend>
+      <small class="hint" style="margin-top:0;">ارفع الصورة بأي حجم — النظام يصغّرها ويضغطها تلقائيًا لأصغر حجم ممكن بدون ما تأثر على وضوحها قبل ما يرفعها.</small>
+      <div id="currentImageWrap" style="display:none; margin-bottom:10px;">
+        <label>الصورة الحالية</label>
+        <div class="preview"><img id="currentImg" alt=""><div class="meta">لو ما رفعت صورة جديدة، هذي تضل هي المعروضة.</div></div>
+      </div>
+      <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/webp">
+      <div class="preview" id="previewWrap" style="display:none;">
+        <img id="previewImg" alt="">
+        <div class="meta" id="previewMeta"></div>
+      </div>
+    </fieldset>
+
     <div class="row">
-      <button type="button" id="uploadBtn" disabled>ارفع الصورة الآن</button>
-      <button type="button" id="clearBtn" class="secondary">مسح واختيار عطر ثاني</button>
+      <button type="button" id="saveBtn" disabled>حفظ ونشر على الموقع</button>
+      <button type="button" id="resetBtn" class="secondary">مسح النموذج</button>
+      <button type="button" id="deleteBtn" class="danger" style="display:none;">حذف هذا العطر نهائيًا</button>
     </div>
     <div class="status" id="statusBox"></div>
   </div>
@@ -132,13 +249,15 @@
 const OWNER = "evoque-perfumes";
 const REPO = "evoque-catalog";
 const BRANCH = "main";
-const DATA_JSON_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data.json?t=` + Date.now();
+const DATA_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
+const DATA_JSON_PATH = "data.json";
 
-let perfumes = [];
-let existingFiles = new Set(); // filenames (with ext) already in assets/perfumes/
-let selectedPerfume = null;
-let selectedFile = null;
+let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
+let existingFiles = new Set();
+let mode = "add";            // "add" | "edit"
+let editingOriginal = null;  // العطر الأصلي قبل التعديل (null لو إضافة)
+let deleteArmed = false;
 
 function slugify(brand, name){
   let s = `${brand} ${name}`.trim().toLowerCase();
@@ -148,6 +267,9 @@ function slugify(brand, name){
   return s;
 }
 
+function utf8ToBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function base64ToUtf8(b64){ return decodeURIComponent(escape(atob(b64.replace(/\n/g, "")))); }
+
 function getToken(){ return document.getElementById("tokenInput").value.trim(); }
 
 function showStatus(msg, type){
@@ -156,52 +278,42 @@ function showStatus(msg, type){
   box.className = "status show " + type;
 }
 function hideStatus(){
-  const box = document.getElementById("statusBox");
-  box.className = "status";
+  document.getElementById("statusBox").className = "status";
 }
 
+// ===== تحميل قائمة العطور (للعرض والبحث فقط — التحديث الفعلي يصير عبر GitHub API مباشرة) =====
 async function loadData(){
-  showStatus("جارِ تحميل قائمة العطور...", "info");
   try{
-    const res = await fetch(DATA_JSON_URL, {cache:"no-store"});
+    const res = await fetch(DATA_JSON_RAW_URL, {cache:"no-store"});
     if(!res.ok) throw new Error("HTTP " + res.status);
     perfumes = await res.json();
   }catch(e){
-    showStatus("ما قدرت أجيب قائمة العطور. تأكد من اتصالك بالإنترنت وحدّث الصفحة. (" + e.message + ")", "err");
+    showStatus("ما قدرت أجيب قائمة العطور الحالية. حدّث الصفحة وجرّب مرة ثانية. (" + e.message + ")", "err");
     return;
   }
   await loadExistingFiles();
-  hideStatus();
   document.getElementById("statTotal").textContent = perfumes.length;
-  document.getElementById("statDone").textContent = existingFiles.size ? countDone() : 0;
   document.getElementById("statsRow").style.display = "flex";
   updateProgress();
 }
 
-function countDone(){
-  let n = 0;
-  perfumes.forEach(p => { if(hasImage(p)) n++; });
-  return n;
-}
-
 function hasImage(p){
+  if(p.image && p.image.indexOf("assets/perfumes/") !== -1) return true;
   const slug = slugify(p.brand, p.name);
   return [".jpg",".jpeg",".png",".webp"].some(ext => existingFiles.has(slug+ext));
 }
 
 async function loadExistingFiles(){
-  // لا نحتاج مفتاح دخول لقراءة قائمة الملفات — القراءة عامة، الكتابة بس تحتاج المفتاح
   try{
     const res = await fetch(`${API_BASE}/assets/perfumes?ref=${BRANCH}`);
-    if(res.status === 404){ existingFiles = new Set(); return; } // المجلد ما انعمل بعد
+    if(res.status === 404){ existingFiles = new Set(); return; }
     if(!res.ok) throw new Error("HTTP " + res.status);
     const list = await res.json();
     existingFiles = new Set(list.filter(f => f.type === "file").map(f => f.name));
-  }catch(e){
-    existingFiles = new Set();
-  }
+  }catch(e){ existingFiles = new Set(); }
 }
 
+function countDone(){ let n=0; perfumes.forEach(p => { if(hasImage(p)) n++; }); return n; }
 function updateProgress(){
   const total = perfumes.length || 1;
   const done = countDone();
@@ -209,16 +321,41 @@ function updateProgress(){
   document.getElementById("progressFill").style.width = Math.round(100*done/total) + "%";
 }
 
+// ===== وضع إضافة/تعديل =====
+function setMode(newMode){
+  mode = newMode;
+  document.getElementById("modeAddBtn").classList.toggle("active", mode === "add");
+  document.getElementById("modeEditBtn").classList.toggle("active", mode === "edit");
+  document.getElementById("editSearchWrap").style.display = mode === "edit" ? "block" : "none";
+  document.getElementById("deleteBtn").style.display = mode === "edit" && editingOriginal ? "inline-block" : "none";
+
+  if(mode === "add"){
+    editingOriginal = null;
+    resetForm();
+    document.getElementById("formPanelTitle").textContent = "3) بيانات العطر الجديد";
+    document.getElementById("formPanel").style.display = "block";
+  } else {
+    document.getElementById("formPanel").style.display = editingOriginal ? "block" : "none";
+    document.getElementById("selectedChipWrap").innerHTML = "";
+    document.getElementById("searchInput").value = "";
+  }
+  hideStatus();
+  updateSaveBtnState();
+}
+document.getElementById("modeAddBtn").addEventListener("click", () => setMode("add"));
+document.getElementById("modeEditBtn").addEventListener("click", () => setMode("edit"));
+
+// ===== البحث للتعديل =====
 function renderDropdown(query){
   const dd = document.getElementById("dropdown");
   const q = (query||"").trim().toLowerCase();
+  const hideUploaded = document.getElementById("hideUploadedChk").checked;
   let list = perfumes;
-  if(q){
-    list = perfumes.filter(p => (p.brand+" "+p.name).toLowerCase().includes(q));
-  }
+  if(hideUploaded) list = list.filter(p => !hasImage(p));
+  if(q) list = list.filter(p => (p.brand+" "+p.name).toLowerCase().includes(q));
   list = list.slice(0, 40);
   if(list.length === 0){
-    dd.innerHTML = `<div class="dropdown-item">ما فيه نتائج</div>`;
+    dd.innerHTML = `<div class="dropdown-item">${hideUploaded ? "ما فيه عطور باقية بدون صورة (أو ما فيه نتائج مطابقة) — بإمكانك تلغي فلتر الإخفاء فوق لو تبا تعدّل عطر عنده صورة أصلًا." : "ما فيه نتائج"}</div>`;
     dd.classList.add("show");
     return;
   }
@@ -226,102 +363,209 @@ function renderDropdown(query){
     const done = hasImage(p);
     return `<div class="dropdown-item" data-id="${p.id}">
       <span class="name">${p.brand} — ${p.name}</span>
-      <span class="badge ${done ? "done" : "pending"}">${done ? "مرفوعة" : "ناقصة"}</span>
+      <span class="badge ${done ? "done" : "pending"}">${done ? "له صورة" : "بدون صورة"}</span>
     </div>`;
   }).join("");
   dd.classList.add("show");
   dd.querySelectorAll(".dropdown-item[data-id]").forEach(el => {
     el.addEventListener("click", () => {
       const p = perfumes.find(x => x.id === el.dataset.id);
-      selectPerfume(p);
+      selectPerfumeForEdit(p);
       dd.classList.remove("show");
     });
   });
 }
-
-function selectPerfume(p){
-  selectedPerfume = p;
-  const slug = slugify(p.brand, p.name);
-  const wrap = document.getElementById("selectedChipWrap");
-  const done = hasImage(p);
-  wrap.innerHTML = `<div class="selected-chip">
-    <span>${p.brand} — ${p.name} <small style="color:#777">(${slug})</small> ${done ? '✅' : ''}</span>
-    <button type="button" id="deselectBtn" title="إلغاء الاختيار">×</button>
-  </div>`;
-  document.getElementById("deselectBtn").addEventListener("click", () => {
-    selectedPerfume = null;
-    wrap.innerHTML = "";
-    document.getElementById("searchInput").value = "";
-    updateUploadBtnState();
-  });
-  document.getElementById("searchInput").value = "";
-  updateUploadBtnState();
-}
-
-function updateUploadBtnState(){
-  document.getElementById("uploadBtn").disabled = !(selectedPerfume && selectedFile && getToken());
-}
-
 document.getElementById("searchInput").addEventListener("input", (e) => renderDropdown(e.target.value));
 document.getElementById("searchInput").addEventListener("focus", (e) => renderDropdown(e.target.value));
+document.getElementById("hideUploadedChk").addEventListener("change", () => renderDropdown(document.getElementById("searchInput").value));
 document.addEventListener("click", (e) => {
   if(!e.target.closest(".search-wrap")) document.getElementById("dropdown").classList.remove("show");
 });
 
-document.getElementById("fileInput").addEventListener("change", (e) => {
+function selectPerfumeForEdit(p){
+  editingOriginal = p;
+  const wrap = document.getElementById("selectedChipWrap");
+  wrap.innerHTML = `<div class="selected-chip">
+    <span>${p.brand} — ${p.name}</span>
+    <button type="button" id="deselectBtn" title="إلغاء">×</button>
+  </div>`;
+  document.getElementById("deselectBtn").addEventListener("click", () => {
+    editingOriginal = null;
+    wrap.innerHTML = "";
+    document.getElementById("formPanel").style.display = "none";
+    document.getElementById("deleteBtn").style.display = "none";
+  });
+  document.getElementById("searchInput").value = "";
+  fillForm(p);
+  document.getElementById("formPanelTitle").textContent = `3) تعديل: ${p.brand} — ${p.name}`;
+  document.getElementById("formPanel").style.display = "block";
+  document.getElementById("deleteBtn").style.display = "inline-block";
+  deleteArmed = false;
+  document.getElementById("deleteBtn").textContent = "حذف هذا العطر نهائيًا";
+  hideStatus();
+  updateSaveBtnState();
+}
+
+function fillForm(p){
+  document.getElementById("f_brand").value = p.brand || "";
+  document.getElementById("f_name").value = p.name || "";
+  document.getElementById("f_gender").value = p.gender || "unisex";
+  document.querySelectorAll(".f_season").forEach(cb => cb.checked = (p.seasons||[]).includes(cb.value));
+  document.querySelectorAll(".f_daynight").forEach(cb => cb.checked = (p.daynight||[]).includes(cb.value));
+  document.getElementById("f_price50").value = p.price50 ?? "";
+  document.getElementById("f_price10").value = p.price10 ?? "";
+  document.getElementById("f_price50Om").value = p.price50Om ?? "";
+  document.getElementById("f_price10Om").value = p.price10Om ?? "";
+  document.getElementById("f_price50Before").value = p.price50Before ?? "";
+  document.getElementById("f_price10Before").value = p.price10Before ?? "";
+  document.getElementById("f_price50OmBefore").value = p.price50OmBefore ?? "";
+  document.getElementById("f_price10OmBefore").value = p.price10OmBefore ?? "";
+  document.getElementById("f_stock50").checked = p.stock50 !== false;
+  document.getElementById("f_stock10").checked = p.stock10 !== false;
+  document.getElementById("f_accords").value = p.accords || "";
+  document.getElementById("f_accordsAR").value = p.accordsAR || "";
+  document.getElementById("f_notesTop").value = p.notesTop || "";
+  document.getElementById("f_notesTopAR").value = p.notesTopAR || "";
+  document.getElementById("f_longevity").value = p.longevity || "";
+  document.getElementById("f_sillage").value = p.sillage || "";
+
+  const curWrap = document.getElementById("currentImageWrap");
+  if(p.image){
+    document.getElementById("currentImg").src = p.image;
+    curWrap.style.display = "flex";
+  } else {
+    curWrap.style.display = "none";
+  }
+  document.getElementById("fileInput").value = "";
+  document.getElementById("previewWrap").style.display = "none";
+  selectedFile = null;
+}
+
+function resetForm(){
+  document.getElementById("f_brand").value = "";
+  document.getElementById("f_name").value = "";
+  document.getElementById("f_gender").value = "unisex";
+  document.querySelectorAll(".f_season").forEach(cb => cb.checked = false);
+  document.querySelectorAll(".f_daynight").forEach(cb => cb.checked = false);
+  ["f_price50","f_price10","f_price50Om","f_price10Om","f_price50Before","f_price10Before","f_price50OmBefore","f_price10OmBefore"]
+    .forEach(id => document.getElementById(id).value = "");
+  document.getElementById("f_stock50").checked = true;
+  document.getElementById("f_stock10").checked = true;
+  document.getElementById("f_accords").value = "";
+  document.getElementById("f_accordsAR").value = "";
+  document.getElementById("f_notesTop").value = "";
+  document.getElementById("f_notesTopAR").value = "";
+  document.getElementById("f_longevity").value = "";
+  document.getElementById("f_sillage").value = "";
+  document.getElementById("currentImageWrap").style.display = "none";
+  document.getElementById("fileInput").value = "";
+  document.getElementById("previewWrap").style.display = "none";
+  selectedFile = null;
+}
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if(mode === "edit" && editingOriginal) fillForm(editingOriginal);
+  else resetForm();
+  hideStatus();
+});
+
+// ===== الصورة =====
+let selectedFile = null;
+
+// ===== ضغط تلقائي للصورة قبل الرفع =====
+// نصغّر الصورة لعرض أقصى معقول للموقع، ونعيد ترميزها لأصغر حجم ممكن بدون
+// فقدان وضوح ملحوظ: لو ما فيها شفافية (أغلب صور المنتجات) نحولها JPEG بجودة
+// عالية (أكبر توفير بالحجم)، ولو فيها شفافية نبقيها PNG (JPEG يفسد الشفافية).
+const MAX_DIMENSION = 1100;
+const JPEG_QUALITY_START = 0.85;
+const JPEG_QUALITY_FLOOR = 0.55;
+const TARGET_MAX_BYTES = 700 * 1024;
+
+function loadImageFromFile(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { resolve(img); };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+function canvasToBlob(canvas, type, quality){
+  return new Promise(resolve => canvas.toBlob(resolve, type, quality));
+}
+
+async function compressImageIfPossible(file){
+  if(!file.type.startsWith("image/")) return { blob: file, note: "" };
+  try{
+    const img = await loadImageFromFile(file);
+    let w = img.naturalWidth, h = img.naturalHeight;
+    if(w > MAX_DIMENSION){
+      h = Math.round(h * (MAX_DIMENSION / w));
+      w = MAX_DIMENSION;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, w, h);
+
+    // نتأكد هل فيها شفافية فعلية (نفحص عينة بكسلات بدل كل بكسل لسرعة أفضل)
+    let hasAlpha = false;
+    try{
+      const data = ctx.getImageData(0, 0, w, h).data;
+      for(let i = 3; i < data.length; i += 4 * 41){
+        if(data[i] < 250){ hasAlpha = true; break; }
+      }
+    }catch(e){ hasAlpha = true; } // احتياطًا لو صار خطأ بالفحص، نخلي الصورة PNG (أكثر أمانًا)
+
+    let blob, note;
+    if(hasAlpha){
+      blob = await canvasToBlob(canvas, "image/png");
+      note = "PNG (فيها شفافية، خليناها كما هي بس صغّرنا الحجم)";
+    } else {
+      let quality = JPEG_QUALITY_START;
+      blob = await canvasToBlob(canvas, "image/jpeg", quality);
+      while(blob.size > TARGET_MAX_BYTES && quality > JPEG_QUALITY_FLOOR){
+        quality -= 0.08;
+        blob = await canvasToBlob(canvas, "image/jpeg", quality);
+      }
+      note = "JPEG بجودة عالية";
+    }
+
+    if(!blob || blob.size >= file.size){
+      return { blob: file, note: "(خليناها بحجمها الأصلي، ما فيه داعي للضغط)" };
+    }
+    return { blob, note };
+  }catch(e){
+    return { blob: file, note: "" }; // لو صار خطأ بالضغط، نرفع الصورة الأصلية بدل ما نوقف العملية
+  }
+}
+
+document.getElementById("fileInput").addEventListener("change", async (e) => {
   const f = e.target.files[0];
-  if(!f){ selectedFile = null; document.getElementById("previewWrap").style.display="none"; updateUploadBtnState(); return; }
-  selectedFile = f;
+  if(!f){ selectedFile = null; document.getElementById("previewWrap").style.display="none"; return; }
+
+  document.getElementById("previewMeta").innerHTML = "جارِ ضغط الصورة...";
+  document.getElementById("previewWrap").style.display = "flex";
+  const reader0 = new FileReader();
+  reader0.onload = ev => { document.getElementById("previewImg").src = ev.target.result; };
+  reader0.readAsDataURL(f);
+
+  const originalKB = (f.size/1024).toFixed(0);
+  const { blob, note } = await compressImageIfPossible(f);
+  selectedFile = blob;
+  const finalKB = (blob.size/1024).toFixed(0);
+
   const reader = new FileReader();
   reader.onload = ev => {
     document.getElementById("previewImg").src = ev.target.result;
+    const savedPct = f.size > blob.size ? Math.round(100 - (blob.size/f.size)*100) : 0;
     document.getElementById("previewMeta").innerHTML =
-      `${f.name}<br>${(f.size/1024).toFixed(0)} كيلوبايت` +
-      (f.size > 500*1024 ? `<br><span style="color:#e0b25e">⚠ حجم كبير نسبيًا، بس بيرفع عادي</span>` : "");
+      (savedPct > 0
+        ? `الحجم الأصلي: ${originalKB} كيلوبايت ← بعد الضغط: <b style="color:#5ee08a">${finalKB} كيلوبايت</b> (وفّرنا ${savedPct}%)`
+        : `${finalKB} كيلوبايت`) +
+      (note ? `<br><span style="color:#77777d">${note}</span>` : "");
     document.getElementById("previewWrap").style.display = "flex";
   };
-  reader.readAsDataURL(f);
-  updateUploadBtnState();
-});
-
-document.getElementById("tokenInput").addEventListener("input", updateUploadBtnState);
-document.getElementById("toggleTokenBtn").addEventListener("click", () => {
-  const inp = document.getElementById("tokenInput");
-  const btn = document.getElementById("toggleTokenBtn");
-  if(inp.type === "password"){ inp.type = "text"; btn.textContent = "إخفاء المفتاح"; }
-  else { inp.type = "password"; btn.textContent = "إظهار المفتاح"; }
-});
-
-document.getElementById("clearBtn").addEventListener("click", () => {
-  selectedPerfume = null; selectedFile = null;
-  document.getElementById("selectedChipWrap").innerHTML = "";
-  document.getElementById("searchInput").value = "";
-  document.getElementById("fileInput").value = "";
-  document.getElementById("previewWrap").style.display = "none";
-  hideStatus();
-  updateUploadBtnState();
-});
-
-// حفظ/استرجاع المفتاح بذاكرة المتصفح المحلية لو المستخدم فعّل الخيار (اختياري، بقرار المستخدم)
-window.addEventListener("DOMContentLoaded", () => {
-  try{
-    const saved = localStorage.getItem("evoque_admin_token");
-    if(saved){
-      document.getElementById("tokenInput").value = saved;
-      document.getElementById("rememberToken").checked = true;
-    }
-  }catch(e){}
-});
-document.getElementById("rememberToken").addEventListener("change", (e) => {
-  try{
-    if(e.target.checked) localStorage.setItem("evoque_admin_token", getToken());
-    else localStorage.removeItem("evoque_admin_token");
-  }catch(e){}
-});
-document.getElementById("tokenInput").addEventListener("change", () => {
-  try{
-    if(document.getElementById("rememberToken").checked) localStorage.setItem("evoque_admin_token", getToken());
-  }catch(e){}
+  reader.readAsDataURL(blob);
 });
 
 function fileToBase64(file){
@@ -333,70 +577,236 @@ function fileToBase64(file){
   });
 }
 
-document.getElementById("uploadBtn").addEventListener("click", async () => {
-  if(!selectedPerfume || !selectedFile) return;
+// ===== توكن =====
+document.getElementById("tokenInput").addEventListener("input", updateSaveBtnState);
+document.getElementById("toggleTokenBtn").addEventListener("click", () => {
+  const inp = document.getElementById("tokenInput");
+  const btn = document.getElementById("toggleTokenBtn");
+  if(inp.type === "password"){ inp.type = "text"; btn.textContent = "إخفاء المفتاح"; }
+  else { inp.type = "password"; btn.textContent = "إظهار المفتاح"; }
+});
+window.addEventListener("DOMContentLoaded", () => {
+  try{
+    const saved = localStorage.getItem("evoque_admin_token");
+    if(saved){ document.getElementById("tokenInput").value = saved; document.getElementById("rememberToken").checked = true; }
+  }catch(e){}
+  setMode("add");
+});
+document.getElementById("rememberToken").addEventListener("change", (e) => {
+  try{
+    if(e.target.checked) localStorage.setItem("evoque_admin_token", getToken());
+    else localStorage.removeItem("evoque_admin_token");
+  }catch(e){}
+});
+document.getElementById("tokenInput").addEventListener("change", () => {
+  try{ if(document.getElementById("rememberToken").checked) localStorage.setItem("evoque_admin_token", getToken()); }catch(e){}
+});
+
+function updateSaveBtnState(){
+  const brand = document.getElementById("f_brand").value.trim();
+  const name = document.getElementById("f_name").value.trim();
+  document.getElementById("saveBtn").disabled = !(brand && name && getToken());
+}
+["f_brand","f_name"].forEach(id => document.getElementById(id).addEventListener("input", updateSaveBtnState));
+
+function readFormAsPerfume(existingImage){
+  const num = id => {
+    const v = document.getElementById(id).value;
+    return v === "" ? null : parseFloat(v);
+  };
+  return {
+    brand: document.getElementById("f_brand").value.trim(),
+    name: document.getElementById("f_name").value.trim(),
+    image: existingImage || "",
+    seasons: Array.from(document.querySelectorAll(".f_season:checked")).map(cb => cb.value),
+    daynight: Array.from(document.querySelectorAll(".f_daynight:checked")).map(cb => cb.value),
+    gender: document.getElementById("f_gender").value,
+    price50: num("f_price50"), price10: num("f_price10"),
+    price50Om: num("f_price50Om"), price10Om: num("f_price10Om"),
+    price50Before: num("f_price50Before"), price10Before: num("f_price10Before"),
+    price50OmBefore: num("f_price50OmBefore"), price10OmBefore: num("f_price10OmBefore"),
+    stock50: document.getElementById("f_stock50").checked,
+    stock10: document.getElementById("f_stock10").checked,
+    accords: document.getElementById("f_accords").value.trim(),
+    accordsAR: document.getElementById("f_accordsAR").value.trim(),
+    notesTop: document.getElementById("f_notesTop").value.trim(),
+    notesTopAR: document.getElementById("f_notesTopAR").value.trim(),
+    notesMid: "", notesBase: "",
+    longevity: document.getElementById("f_longevity").value.trim(),
+    sillage: document.getElementById("f_sillage").value.trim()
+  };
+}
+
+function sortPerfumes(list){
+  return list.slice().sort((a,b) => {
+    const bc = a.brand.localeCompare(b.brand, "en", {sensitivity:"base"});
+    if(bc !== 0) return bc;
+    return a.name.localeCompare(b.name, "en", {sensitivity:"base"});
+  });
+}
+
+// ===== قراءة/كتابة data.json مباشرة عبر GitHub Contents API (مصدر الحقيقة اللحظي، لتفادي تعارض الكاش) =====
+async function getDataJsonWithSha(token){
+  const res = await fetch(`${API_BASE}/${DATA_JSON_PATH}?ref=${BRANCH}`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة data.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  const list = JSON.parse(base64ToUtf8(info.content));
+  return { list, sha: info.sha };
+}
+
+async function putDataJson(list, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(list)),
+    branch: BRANCH,
+    sha: sha
+  };
+  const res = await fetch(`${API_BASE}/${DATA_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function uploadPhoto(slug, file, token, label){
+  const extMap = {"image/png":".png", "image/jpeg":".jpg", "image/jpg":".jpg", "image/webp":".webp"};
+  const ext = extMap[file.type] || "." + (file.name.split(".").pop() || "jpg").toLowerCase();
+  const targetPath = `assets/perfumes/${slug}${ext}`;
+
+  let sha = null;
+  const checkRes = await fetch(`${API_BASE}/${targetPath}?ref=${BRANCH}`, { headers: { "Authorization": `Bearer ${token}` } });
+  if(checkRes.status === 200){ sha = (await checkRes.json()).sha; }
+  else if(checkRes.status !== 404){
+    const err = await checkRes.json().catch(()=>({}));
+    throw new Error("تعذّر التحقق من الصورة الحالية: " + (err.message || checkRes.status));
+  }
+
+  const base64Content = await fileToBase64(file);
+  const body = { message: `Add/update photo: ${label}`, content: base64Content, branch: BRANCH };
+  if(sha) body.sha = sha;
+
+  const putRes = await fetch(`${API_BASE}/${targetPath}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!putRes.ok){
+    const err = await putRes.json().catch(()=>({}));
+    throw new Error(err.message || ("HTTP " + putRes.status));
+  }
+  existingFiles.add(slug + ext);
+  return `assets/perfumes/${slug}${ext}`;
+}
+
+document.getElementById("saveBtn").addEventListener("click", async () => {
   const token = getToken();
   if(!token){ showStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
 
-  const slug = slugify(selectedPerfume.brand, selectedPerfume.name);
-  const extMap = {"image/png":".png", "image/jpeg":".jpg", "image/jpg":".jpg", "image/webp":".webp"};
-  const ext = extMap[selectedFile.type] || "." + (selectedFile.name.split(".").pop() || "jpg").toLowerCase();
-  const targetPath = `assets/perfumes/${slug}${ext}`;
+  const brand = document.getElementById("f_brand").value.trim();
+  const name = document.getElementById("f_name").value.trim();
+  if(!brand || !name){ showStatus("البراند واسم العطر إلزاميين.", "err"); return; }
 
-  document.getElementById("uploadBtn").disabled = true;
-  showStatus("جارِ رفع الصورة...", "info");
+  const newSlug = slugify(brand, name);
+  const saveBtn = document.getElementById("saveBtn");
+  saveBtn.disabled = true;
 
   try{
-    // نتأكد هل فيه ملف موجود بنفس المسار (نفس الصيغة) عشان نطلع sha ونعدّله بدل ما ننشئ نسخة تعارض
-    let sha = null;
-    const checkRes = await fetch(`${API_BASE}/${targetPath}?ref=${BRANCH}`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-    if(checkRes.status === 200){
-      const info = await checkRes.json();
-      sha = info.sha;
-    } else if(checkRes.status !== 404){
-      const errBody = await checkRes.json().catch(()=>({}));
-      throw new Error("تعذّر التحقق من الملف الحالي: " + (errBody.message || checkRes.status));
+    // 1) نتأكد ما فيه تعارض بالاسم (نفس البراند+الاسم = نفس id)
+    showStatus("جارِ التحقق من البيانات...", "info");
+    const { list: currentList, sha: currentSha } = await getDataJsonWithSha(token);
+    const conflict = currentList.find(p => p.id === newSlug && (!editingOriginal || p.id !== editingOriginal.id));
+    if(conflict){
+      throw new Error(`فيه عطر ثاني بنفس الاسم "${brand} — ${name}" مسجّل مسبقًا. استخدم وضع "تعديل" بدل الإضافة، أو غيّر الاسم شوي.`);
     }
 
-    const base64Content = await fileToBase64(selectedFile);
-    const body = {
-      message: `Add/update photo: ${selectedPerfume.brand} — ${selectedPerfume.name}`,
-      content: base64Content,
-      branch: BRANCH
-    };
-    if(sha) body.sha = sha;
-
-    const putRes = await fetch(`${API_BASE}/${targetPath}`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-
-    if(!putRes.ok){
-      const errBody = await putRes.json().catch(()=>({}));
-      throw new Error(errBody.message || ("HTTP " + putRes.status));
+    // 2) رفع الصورة الجديدة (لو فيه) — قبل تعديل data.json عشان لو صار خطأ هنا ما نلمس البيانات
+    let imagePath = editingOriginal ? editingOriginal.image : "";
+    if(selectedFile){
+      showStatus("جارِ رفع الصورة...", "info");
+      imagePath = await uploadPhoto(newSlug, selectedFile, token, `${brand} — ${name}`);
     }
 
-    existingFiles.add(slug + ext);
+    // 3) تجهيز السجل الجديد
+    const newRecord = readFormAsPerfume(imagePath);
+    newRecord.id = newSlug;
+
+    // 4) نطبّق التعديل على أحدث نسخة من data.json (نفس السحبة اللي جبنا منها sha، لتفادي فقدان تعديلات ثانية)
+    let updatedList;
+    if(editingOriginal){
+      updatedList = currentList.filter(p => p.id !== editingOriginal.id);
+    } else {
+      updatedList = currentList.slice();
+    }
+    updatedList.push(newRecord);
+    updatedList = sortPerfumes(updatedList);
+
+    showStatus("جارِ الحفظ والنشر...", "info");
+    const commitMsg = editingOriginal
+      ? `Update perfume: ${brand} — ${name}`
+      : `Add new perfume: ${brand} — ${name}`;
+    await putDataJson(updatedList, currentSha, token, commitMsg);
+
+    perfumes = updatedList;
     updateProgress();
-    showStatus(`تم! انرفعت صورة "${selectedPerfume.brand} — ${selectedPerfume.name}" بنجاح على ${targetPath}. تأخذ دقايق تظهر بالموقع الحي.`, "ok");
+    showStatus(`تم الحفظ! "${brand} — ${name}" ${editingOriginal ? "انعدّل" : "انضاف"} بنجاح. تأخذ بضع دقايق تظهر التغييرات بالموقع الحي بسبب الكاش.`, "ok");
 
-    // تجهيز تلقائي للعطر التالي الناقص صورته
-    document.getElementById("fileInput").value = "";
-    document.getElementById("previewWrap").style.display = "none";
-    selectedFile = null;
-    selectedPerfume = null;
-    document.getElementById("selectedChipWrap").innerHTML = "";
-    updateUploadBtnState();
-
+    if(editingOriginal){
+      editingOriginal = { ...newRecord };
+    } else {
+      // خلي النموذج جاهز لإضافة عطر ثاني
+      resetForm();
+    }
   }catch(e){
-    showStatus("صار خطأ أثناء الرفع: " + e.message + " — تأكد إن المفتاح فيه صلاحية Contents: Read and write على هذا الريبو بالذات.", "err");
-    document.getElementById("uploadBtn").disabled = false;
+    showStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    updateSaveBtnState();
+  }
+});
+
+document.getElementById("deleteBtn").addEventListener("click", async () => {
+  if(!editingOriginal) return;
+  if(!deleteArmed){
+    deleteArmed = true;
+    document.getElementById("deleteBtn").textContent = "اضغط مرة ثانية للتأكيد ⚠️";
+    setTimeout(() => {
+      deleteArmed = false;
+      const btn = document.getElementById("deleteBtn");
+      if(btn) btn.textContent = "حذف هذا العطر نهائيًا";
+    }, 4000);
+    return;
+  }
+  const token = getToken();
+  if(!token){ showStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+
+  document.getElementById("deleteBtn").disabled = true;
+  try{
+    showStatus("جارِ الحذف...", "info");
+    const { list: currentList, sha: currentSha } = await getDataJsonWithSha(token);
+    const updatedList = currentList.filter(p => p.id !== editingOriginal.id);
+    await putDataJson(updatedList, currentSha, token, `Delete perfume: ${editingOriginal.brand} — ${editingOriginal.name}`);
+    perfumes = updatedList;
+    updateProgress();
+    showStatus(`تم حذف "${editingOriginal.brand} — ${editingOriginal.name}" نهائيًا من الموقع.`, "ok");
+    editingOriginal = null;
+    document.getElementById("selectedChipWrap").innerHTML = "";
+    document.getElementById("formPanel").style.display = "none";
+    document.getElementById("deleteBtn").style.display = "none";
+  }catch(e){
+    showStatus("صار خطأ أثناء الحذف: " + e.message, "err");
+  }finally{
+    deleteArmed = false;
+    const btn = document.getElementById("deleteBtn");
+    if(btn){ btn.textContent = "حذف هذا العطر نهائيًا"; btn.disabled = false; }
   }
 });
 
