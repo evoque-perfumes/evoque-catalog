@@ -119,9 +119,15 @@
   <div class="panel">
     <h2>2) شنو تبا تسوي؟</h2>
     <div class="row" style="margin-bottom:14px;">
-      <button type="button" class="ghost active" id="modeAddBtn">➕ إضافة عطر جديد</button>
-      <button type="button" class="ghost" id="modeEditBtn">✏️ تعديل عطر موجود</button>
+      <button type="button" class="ghost active" id="modePhotoBtn">📷 رفع صورة فقط (الأسرع)</button>
+      <button type="button" class="ghost" id="modeEditBtn">✏️ تعديل بيانات عطر</button>
+      <button type="button" class="ghost" id="modeAddBtn">➕ إضافة عطر جديد</button>
     </div>
+    <small class="hint" style="margin-top:0;">
+      عندك 182 عطر موجودين ببياناتهم كاملة أصلًا (من الشيت القديم) — كل اللي ناقصهم الصورة.
+      استخدم "رفع صورة فقط" عشان ترفع الصور بسرعة بدون ما تفتح نموذج طويل. استخدم "تعديل بيانات عطر"
+      بس لو تبا تغيّر سعر أو مخزون أو أي معلومة ثانية.
+    </small>
 
     <div id="editSearchWrap" style="display:none;">
       <div class="stats" id="statsRow" style="display:none;">
@@ -136,11 +142,30 @@
         </label>
       </div>
       <div class="search-wrap">
-        <input type="text" id="searchInput" placeholder="اكتب اسم البراند أو العطر عشان تعدّله...">
+        <input type="text" id="searchInput" placeholder="اكتب اسم البراند أو العطر...">
         <div class="dropdown" id="dropdown"></div>
       </div>
       <div id="selectedChipWrap"></div>
     </div>
+  </div>
+
+  <div class="panel" id="quickPhotoPanel" style="display:none;">
+    <h2 id="quickPhotoPanelTitle">3) رفع الصورة</h2>
+    <div id="qp_currentImageWrap" style="display:none; margin-bottom:10px;">
+      <label>الصورة الحالية</label>
+      <div class="preview"><img id="qp_currentImg" alt=""><div class="meta">لو ما رفعت صورة جديدة، هذي تضل هي المعروضة.</div></div>
+    </div>
+    <small class="hint" style="margin-top:0;">ارفع الصورة بأي حجم — النظام يصغّرها ويضغطها تلقائيًا قبل ما يرفعها.</small>
+    <input type="file" id="qp_fileInput" accept="image/png, image/jpeg, image/jpg, image/webp">
+    <div class="preview" id="qp_previewWrap" style="display:none;">
+      <img id="qp_previewImg" alt="">
+      <div class="meta" id="qp_previewMeta"></div>
+    </div>
+    <div class="row">
+      <button type="button" id="qp_saveBtn" disabled>ارفع واحفظ</button>
+      <button type="button" id="qp_skipBtn" class="secondary">تخطّي لعطر ثاني</button>
+    </div>
+    <div class="status" id="qp_statusBox"></div>
   </div>
 
   <div class="panel" id="formPanel">
@@ -305,7 +330,7 @@ function hasImage(p){
 
 async function loadExistingFiles(){
   try{
-    const res = await fetch(`${API_BASE}/assets/perfumes?ref=${BRANCH}`);
+    const res = await fetch(`${API_BASE}/assets/perfumes?ref=${BRANCH}`, {cache: "no-store"});
     if(res.status === 404){ existingFiles = new Set(); return; }
     if(!res.ok) throw new Error("HTTP " + res.status);
     const list = await res.json();
@@ -326,26 +351,34 @@ function setMode(newMode){
   mode = newMode;
   document.getElementById("modeAddBtn").classList.toggle("active", mode === "add");
   document.getElementById("modeEditBtn").classList.toggle("active", mode === "edit");
-  document.getElementById("editSearchWrap").style.display = mode === "edit" ? "block" : "none";
+  document.getElementById("modePhotoBtn").classList.toggle("active", mode === "photo");
+  document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
   document.getElementById("deleteBtn").style.display = mode === "edit" && editingOriginal ? "inline-block" : "none";
 
+  document.getElementById("selectedChipWrap").innerHTML = "";
+  document.getElementById("searchInput").value = "";
+  editingOriginal = null;
+
   if(mode === "add"){
-    editingOriginal = null;
     resetForm();
     document.getElementById("formPanelTitle").textContent = "3) بيانات العطر الجديد";
     document.getElementById("formPanel").style.display = "block";
-  } else {
-    document.getElementById("formPanel").style.display = editingOriginal ? "block" : "none";
-    document.getElementById("selectedChipWrap").innerHTML = "";
-    document.getElementById("searchInput").value = "";
+    document.getElementById("quickPhotoPanel").style.display = "none";
+  } else if(mode === "edit"){
+    document.getElementById("formPanel").style.display = "none";
+    document.getElementById("quickPhotoPanel").style.display = "none";
+  } else { // photo
+    document.getElementById("formPanel").style.display = "none";
+    document.getElementById("quickPhotoPanel").style.display = "none";
   }
   hideStatus();
   updateSaveBtnState();
 }
 document.getElementById("modeAddBtn").addEventListener("click", () => setMode("add"));
 document.getElementById("modeEditBtn").addEventListener("click", () => setMode("edit"));
+document.getElementById("modePhotoBtn").addEventListener("click", () => setMode("photo"));
 
-// ===== البحث للتعديل =====
+// ===== البحث (تعديل + رفع صورة فقط يشتركان بنفس مربع البحث) =====
 function renderDropdown(query){
   const dd = document.getElementById("dropdown");
   const q = (query||"").trim().toLowerCase();
@@ -370,7 +403,8 @@ function renderDropdown(query){
   dd.querySelectorAll(".dropdown-item[data-id]").forEach(el => {
     el.addEventListener("click", () => {
       const p = perfumes.find(x => x.id === el.dataset.id);
-      selectPerfumeForEdit(p);
+      if(mode === "photo") selectPerfumeForPhotoOnly(p);
+      else selectPerfumeForEdit(p);
       dd.classList.remove("show");
     });
   });
@@ -380,6 +414,120 @@ document.getElementById("searchInput").addEventListener("focus", (e) => renderDr
 document.getElementById("hideUploadedChk").addEventListener("change", () => renderDropdown(document.getElementById("searchInput").value));
 document.addEventListener("click", (e) => {
   if(!e.target.closest(".search-wrap")) document.getElementById("dropdown").classList.remove("show");
+});
+
+// ===== وضع "رفع صورة فقط" (سريع — بدون فتح نموذج البيانات الكامل) =====
+let qpSelectedFile = null;
+
+function selectPerfumeForPhotoOnly(p){
+  editingOriginal = p;
+  const wrap = document.getElementById("selectedChipWrap");
+  wrap.innerHTML = `<div class="selected-chip">
+    <span>${p.brand} — ${p.name}</span>
+    <button type="button" id="deselectBtn" title="إلغاء">×</button>
+  </div>`;
+  document.getElementById("deselectBtn").addEventListener("click", () => {
+    editingOriginal = null;
+    wrap.innerHTML = "";
+    document.getElementById("quickPhotoPanel").style.display = "none";
+  });
+  document.getElementById("searchInput").value = "";
+
+  document.getElementById("quickPhotoPanelTitle").textContent = `3) رفع صورة: ${p.brand} — ${p.name}`;
+  const curWrap = document.getElementById("qp_currentImageWrap");
+  if(p.image){
+    document.getElementById("qp_currentImg").src = p.image;
+    curWrap.style.display = "flex";
+  } else {
+    curWrap.style.display = "none";
+  }
+  document.getElementById("qp_fileInput").value = "";
+  document.getElementById("qp_previewWrap").style.display = "none";
+  qpSelectedFile = null;
+  document.getElementById("qp_saveBtn").disabled = true;
+  document.getElementById("qp_statusBox").className = "status";
+  document.getElementById("quickPhotoPanel").style.display = "block";
+}
+
+document.getElementById("qp_fileInput").addEventListener("change", async (e) => {
+  const f = e.target.files[0];
+  if(!f){ qpSelectedFile = null; document.getElementById("qp_previewWrap").style.display="none"; document.getElementById("qp_saveBtn").disabled = true; return; }
+
+  document.getElementById("qp_previewMeta").innerHTML = "جارِ ضغط الصورة...";
+  document.getElementById("qp_previewWrap").style.display = "flex";
+  const reader0 = new FileReader();
+  reader0.onload = ev => { document.getElementById("qp_previewImg").src = ev.target.result; };
+  reader0.readAsDataURL(f);
+
+  const originalKB = (f.size/1024).toFixed(0);
+  const { blob, note } = await compressImageIfPossible(f);
+  qpSelectedFile = blob;
+  const finalKB = (blob.size/1024).toFixed(0);
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById("qp_previewImg").src = ev.target.result;
+    const savedPct = f.size > blob.size ? Math.round(100 - (blob.size/f.size)*100) : 0;
+    document.getElementById("qp_previewMeta").innerHTML =
+      (savedPct > 0
+        ? `الحجم الأصلي: ${originalKB} كيلوبايت ← بعد الضغط: <b style="color:#5ee08a">${finalKB} كيلوبايت</b> (وفّرنا ${savedPct}%)`
+        : `${finalKB} كيلوبايت`) +
+      (note ? `<br><span style="color:#77777d">${note}</span>` : "");
+    document.getElementById("qp_previewWrap").style.display = "flex";
+  };
+  reader.readAsDataURL(blob);
+  document.getElementById("qp_saveBtn").disabled = !(getToken() && editingOriginal);
+});
+document.getElementById("tokenInput").addEventListener("input", () => {
+  document.getElementById("qp_saveBtn").disabled = !(getToken() && editingOriginal && qpSelectedFile);
+});
+
+document.getElementById("qp_skipBtn").addEventListener("click", () => {
+  editingOriginal = null;
+  document.getElementById("selectedChipWrap").innerHTML = "";
+  document.getElementById("quickPhotoPanel").style.display = "none";
+  document.getElementById("searchInput").focus();
+});
+
+document.getElementById("qp_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token || !editingOriginal || !qpSelectedFile) return;
+  const p = editingOriginal;
+  const slug = p.id; // الـ id أصلًا هو نفس الـ slug
+  const btn = document.getElementById("qp_saveBtn");
+  const statusBox = document.getElementById("qp_statusBox");
+  btn.disabled = true;
+
+  function showQpStatus(msg, type){ statusBox.textContent = msg; statusBox.className = "status show " + type; }
+
+  try{
+    showQpStatus("جارِ رفع الصورة...", "info");
+    const imagePath = await uploadPhoto(slug, qpSelectedFile, token, `${p.brand} — ${p.name}`);
+
+    showQpStatus("جارِ تحديث بيانات الموقع...", "info");
+    const updatedList = await updateDataJsonWithRetry(token, (list) => {
+      const idx = list.findIndex(x => x.id === p.id);
+      if(idx === -1) throw new Error("العطر ما انلقى بـ data.json — يمكن انحذف أو تغيّر اسمه من مكان ثاني.");
+      list[idx] = { ...list[idx], image: imagePath };
+      return list;
+    }, `Add photo: ${p.brand} — ${p.name}`);
+
+    perfumes = updatedList;
+    updateProgress();
+    showQpStatus(`تم! صورة "${p.brand} — ${p.name}" انرفعت وانحفظت. تأخذ بضع دقايق تظهر بالموقع الحي.`, "ok");
+
+    // تجهيز تلقائي للعطر التالي
+    setTimeout(() => {
+      editingOriginal = null;
+      document.getElementById("selectedChipWrap").innerHTML = "";
+      document.getElementById("quickPhotoPanel").style.display = "none";
+      document.getElementById("searchInput").focus();
+      renderDropdown(document.getElementById("searchInput").value);
+    }, 900);
+  }catch(e){
+    showQpStatus("صار خطأ: " + e.message, "err");
+    btn.disabled = false;
+  }
 });
 
 function selectPerfumeForEdit(p){
@@ -590,7 +738,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("evoque_admin_token");
     if(saved){ document.getElementById("tokenInput").value = saved; document.getElementById("rememberToken").checked = true; }
   }catch(e){}
-  setMode("add");
+  setMode("photo");
 });
 document.getElementById("rememberToken").addEventListener("change", (e) => {
   try{
@@ -647,7 +795,11 @@ function sortPerfumes(list){
 
 // ===== قراءة/كتابة data.json مباشرة عبر GitHub Contents API (مصدر الحقيقة اللحظي، لتفادي تعارض الكاش) =====
 async function getDataJsonWithSha(token){
+  // مهم: cache:"no-store" ضروري هنا — بدونه المتصفح ممكن يرجّع نسخة sha قديمة
+  // من كاش سابق (خصوصًا لو سويت رفعتين ورا بعض بسرعة)، وهذا يسبب خطأ 409
+  // "تعديل ثاني بنفس اللحظة" حتى لو ما فيه فعليًا أي تعارض حقيقي.
   const res = await fetch(`${API_BASE}/${DATA_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
   if(!res.ok){
@@ -678,13 +830,31 @@ async function putDataJson(list, sha, token, commitMsg){
   }
 }
 
+// يقرأ data.json، يطبّق mutateFn عليه، ويحفظه. لو صار تعارض (409) — يعيد
+// المحاولة تلقائيًا (يقرأ نسخة جديدة ويطبّق التعديل من جديد) قبل ما يوقف
+// بخطأ، عشان المستخدم ما يضطر يحدّث الصفحة يدويًا بين كل رفعة والثانية.
+async function updateDataJsonWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { list, sha } = await getDataJsonWithSha(token);
+  const newList = mutateFn(list);
+  try{
+    await putDataJson(newList, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateDataJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newList;
+}
+
 async function uploadPhoto(slug, file, token, label){
   const extMap = {"image/png":".png", "image/jpeg":".jpg", "image/jpg":".jpg", "image/webp":".webp"};
   const ext = extMap[file.type] || "." + (file.name.split(".").pop() || "jpg").toLowerCase();
   const targetPath = `assets/perfumes/${slug}${ext}`;
 
   let sha = null;
-  const checkRes = await fetch(`${API_BASE}/${targetPath}?ref=${BRANCH}`, { headers: { "Authorization": `Bearer ${token}` } });
+  const checkRes = await fetch(`${API_BASE}/${targetPath}?ref=${BRANCH}`, { cache: "no-store", headers: { "Authorization": `Bearer ${token}` } });
   if(checkRes.status === 200){ sha = (await checkRes.json()).sha; }
   else if(checkRes.status !== 404){
     const err = await checkRes.json().catch(()=>({}));
@@ -723,8 +893,8 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   try{
     // 1) نتأكد ما فيه تعارض بالاسم (نفس البراند+الاسم = نفس id)
     showStatus("جارِ التحقق من البيانات...", "info");
-    const { list: currentList, sha: currentSha } = await getDataJsonWithSha(token);
-    const conflict = currentList.find(p => p.id === newSlug && (!editingOriginal || p.id !== editingOriginal.id));
+    const { list: checkList } = await getDataJsonWithSha(token);
+    const conflict = checkList.find(p => p.id === newSlug && (!editingOriginal || p.id !== editingOriginal.id));
     if(conflict){
       throw new Error(`فيه عطر ثاني بنفس الاسم "${brand} — ${name}" مسجّل مسبقًا. استخدم وضع "تعديل" بدل الإضافة، أو غيّر الاسم شوي.`);
     }
@@ -740,21 +910,17 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     const newRecord = readFormAsPerfume(imagePath);
     newRecord.id = newSlug;
 
-    // 4) نطبّق التعديل على أحدث نسخة من data.json (نفس السحبة اللي جبنا منها sha، لتفادي فقدان تعديلات ثانية)
-    let updatedList;
-    if(editingOriginal){
-      updatedList = currentList.filter(p => p.id !== editingOriginal.id);
-    } else {
-      updatedList = currentList.slice();
-    }
-    updatedList.push(newRecord);
-    updatedList = sortPerfumes(updatedList);
-
+    // 4) نطبّق التعديل على أحدث نسخة من data.json (نجيبها من جديد وقت الحفظ الفعلي،
+    // لتفادي استخدام sha قديم لو صار وقت بين الفحص ورفع الصورة والحفظ)
     showStatus("جارِ الحفظ والنشر...", "info");
     const commitMsg = editingOriginal
       ? `Update perfume: ${brand} — ${name}`
       : `Add new perfume: ${brand} — ${name}`;
-    await putDataJson(updatedList, currentSha, token, commitMsg);
+    const updatedList = await updateDataJsonWithRetry(token, (list) => {
+      let next = editingOriginal ? list.filter(p => p.id !== editingOriginal.id) : list.slice();
+      next.push(newRecord);
+      return sortPerfumes(next);
+    }, commitMsg);
 
     perfumes = updatedList;
     updateProgress();
@@ -791,9 +957,9 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
   document.getElementById("deleteBtn").disabled = true;
   try{
     showStatus("جارِ الحذف...", "info");
-    const { list: currentList, sha: currentSha } = await getDataJsonWithSha(token);
-    const updatedList = currentList.filter(p => p.id !== editingOriginal.id);
-    await putDataJson(updatedList, currentSha, token, `Delete perfume: ${editingOriginal.brand} — ${editingOriginal.name}`);
+    const updatedList = await updateDataJsonWithRetry(token, (list) => {
+      return list.filter(p => p.id !== editingOriginal.id);
+    }, `Delete perfume: ${editingOriginal.brand} — ${editingOriginal.name}`);
     perfumes = updatedList;
     updateProgress();
     showStatus(`تم حذف "${editingOriginal.brand} — ${editingOriginal.name}" نهائيًا من الموقع.`, "ok");
