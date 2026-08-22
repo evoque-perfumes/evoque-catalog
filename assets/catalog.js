@@ -33,13 +33,15 @@ const CATEGORY_PAGES = {
 // قائمة "الأكثر مبيعًا" اللي تظهر بالصفحة الرئيسية فقط — قائمة أولية اخترناها
 // نحن (Evoque AI Marketing Director) بشكل مبدئي بناءً على قوة البراند واكتمال
 // بيانات العطر (مو بيانات مبيعات فعلية بعد). عدّل القيم هنا بأي وقت — كل قيمة
-// هي id العطر كما يظهر بـ data.json (مثال: "row-14"). خله متوازن قد الإمكان
-// بين رجالي/نسائي/للجنسين عشان الانطباع الأول يعكس كل تشكيلة المتجر.
+// هي id العطر كما يظهر بـ data.json (مثال: "giorgio-armani-si-passione" —
+// صار مبني على البراند+الاسم بدل رقم الصف، عشان يضل ثابت حتى لو انضافت أو
+// انحذفت عطور من لوحة التحكم لاحقًا). خله متوازن قد الإمكان بين
+// رجالي/نسائي/للجنسين عشان الانطباع الأول يعكس كل تشكيلة المتجر.
 // ------------------------------------------------------------------
 const BEST_SELLER_IDS = [
-  "row-14", "row-20", "row-26", // رجالي: Givenchy Gentleman Reserve Privée, Gucci Guilty Absolute Man, Guerlain L'Homme Ideal L'Intense
-  "row-2",  "row-3",  "row-12", // نسائي: Giorgio Armani Si Passione, Giorgio Armani My Way, Givenchy Ange ou Demon
-  "row-17", "row-21", "row-23"  // للجنسين: Gucci Intense Oud, Guerlain Ambre Samar, Guerlain Cherry Oud
+  "givenchy-gentleman-reserve-privee", "gucci-gucci-guilty-absolute-man", "guerlain-l-homme-ideal-l-intense", // رجالي
+  "giorgio-armani-si-passione", "giorgio-armani-my-way", "givenchy-ange-ou-demon", // نسائي
+  "gucci-intense-oud", "guerlain-ambre-samar", "guerlain-cherry-oud" // للجنسين
 ];
 
 let perfumes = [];
@@ -695,8 +697,16 @@ async function loadPerfumesFromJson(){
   perfumes = list;
 }
 
-// الخطة الاحتياطية: قراءة حية من الشيت مباشرة (نفس الطريقة القديمة) — تُستخدم
-// فقط لو data.json ما وصل بعد (أول نشر قبل ما يشتغل الـ Action) أو صار فيه خطأ فيه.
+// خطة طوارئ فقط (22 أغسطس 2026): الشيت ما عاد هو مصدر البيانات الأساسي — كل
+// الإضافة/التعديل صار من لوحة التحكم (admin-upload.html) وتنكتب مباشرة بـ
+// data.json. هذا المسار يشتغل بس لو data.json نفسه صار فيه خطأ أو ما وصل.
+function slugifyClient(brand, name){
+  let s = `${brand} ${name}`.trim().toLowerCase();
+  s = s.normalize("NFKD").replace(/[̀-ͯ]/g, "");
+  s = s.replace(/[^a-z0-9؀-ۿ]+/g, "-");
+  s = s.replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return s;
+}
 async function loadPerfumesFromLiveSheet(){
   const res = await fetch(CSV_URL);
   if(!res.ok) throw new Error("HTTP " + res.status);
@@ -708,7 +718,7 @@ async function loadPerfumesFromLiveSheet(){
   const idx = name => headers.indexOf(name);
 
   perfumes = rows.slice(1).filter(r => r[idx("Brand")] && r[idx("Name")]).map((r, i) => ({
-    id: "row-" + i,
+    id: slugifyClient(r[idx("Brand")] || "", r[idx("Name")] || "") || ("row-" + i),
     brand: r[idx("Brand")] || "",
     name: r[idx("Name")] || "",
     image: driveDirectImageUrl(r[idx("Image Link (Google Drive)")]),
