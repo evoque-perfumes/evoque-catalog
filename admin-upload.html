@@ -122,11 +122,13 @@
       <button type="button" class="ghost active" id="modePhotoBtn">📷 رفع صورة فقط (الأسرع)</button>
       <button type="button" class="ghost" id="modeEditBtn">✏️ تعديل بيانات عطر</button>
       <button type="button" class="ghost" id="modeAddBtn">➕ إضافة عطر جديد</button>
+      <button type="button" class="ghost" id="modeBulkBtn">📦 رفع كل الصور دفعة وحدة</button>
     </div>
     <small class="hint" style="margin-top:0;">
       عندك 182 عطر موجودين ببياناتهم كاملة أصلًا (من الشيت القديم) — كل اللي ناقصهم الصورة.
       استخدم "رفع صورة فقط" عشان ترفع الصور بسرعة بدون ما تفتح نموذج طويل. استخدم "تعديل بيانات عطر"
-      بس لو تبا تغيّر سعر أو مخزون أو أي معلومة ثانية.
+      بس لو تبا تغيّر سعر أو مخزون أو أي معلومة ثانية. استخدم "رفع كل الصور دفعة وحدة" لو عندك مجلد
+      فيه كل الصور مسمّاة بنفس اسم البراند والعطر — يطابقها وحده ويرفعها كلها بدون ما تختار كل عطر يدويًا.
     </small>
 
     <div id="editSearchWrap" style="display:none;">
@@ -166,6 +168,39 @@
       <button type="button" id="qp_skipBtn" class="secondary">تخطّي لعطر ثاني</button>
     </div>
     <div class="status" id="qp_statusBox"></div>
+  </div>
+
+  <div class="panel" id="bulkPanel" style="display:none;">
+    <h2>3) رفع دفعة صور تلقائي</h2>
+    <small class="hint" style="margin-top:0;">
+      اختر المجلد اللي فيه كل صور العطور (لازم كل ملف مسمّى بنفس صيغة "البراند _ اسم العطر" —
+      نفس التسمية اللي كانت بجوجل درايف). النظام يطابق كل ملف مع العطر الصحيح تلقائيًا، ويعرض لك
+      قائمة مراجعة قبل ما يرفع أي شي.
+    </small>
+    <label for="bulk_folderInput">اختر مجلد الصور</label>
+    <input type="file" id="bulk_folderInput" webkitdirectory multiple accept="image/*">
+    <div id="bulk_previewWrap" style="display:none;">
+      <div class="stats" id="bulk_statsRow">
+        <div class="stat">ملفات صور موجودة<b id="bulk_statFiles">—</b></div>
+        <div class="stat">تطابقت تلقائيًا<b id="bulk_statMatched" style="color:#5ee08a;">—</b></div>
+        <div class="stat">بتُرفع الحين<b id="bulk_statToUpload" style="color:#5ee08a;">—</b></div>
+      </div>
+      <div class="row" style="margin:10px 0;">
+        <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--ink);">
+          <input type="checkbox" id="bulk_forceChk" style="width:auto; margin:0;">
+          أعد رفع الصورة حتى لو العطر عنده صورة مسبقًا (افتراضيًا نتجاوز اللي عندها صورة)
+        </label>
+      </div>
+      <div id="bulk_issuesBox"></div>
+      <div class="row">
+        <button type="button" id="bulk_startBtn">ابدأ الرفع التلقائي</button>
+        <button type="button" id="bulk_stopBtn" class="secondary" style="display:none;">إيقاف بعد العنصر الحالي</button>
+      </div>
+      <div class="progress-bar" style="margin-top:14px;"><div class="progress-fill" id="bulk_progressFill" style="width:0%;"></div></div>
+      <div id="bulk_progressLabel" style="color:var(--muted); font-size:13px; margin:6px 0;"></div>
+      <div id="bulk_log" style="max-height:280px; overflow-y:auto; background:#0f0f0f; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12.5px; line-height:1.9; display:none;"></div>
+    </div>
+    <div class="status" id="bulk_statusBox"></div>
   </div>
 
   <div class="panel" id="formPanel">
@@ -352,8 +387,10 @@ function setMode(newMode){
   document.getElementById("modeAddBtn").classList.toggle("active", mode === "add");
   document.getElementById("modeEditBtn").classList.toggle("active", mode === "edit");
   document.getElementById("modePhotoBtn").classList.toggle("active", mode === "photo");
+  document.getElementById("modeBulkBtn").classList.toggle("active", mode === "bulk");
   document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
   document.getElementById("deleteBtn").style.display = mode === "edit" && editingOriginal ? "inline-block" : "none";
+  document.getElementById("bulkPanel").style.display = mode === "bulk" ? "block" : "none";
 
   document.getElementById("selectedChipWrap").innerHTML = "";
   document.getElementById("searchInput").value = "";
@@ -367,7 +404,10 @@ function setMode(newMode){
   } else if(mode === "edit"){
     document.getElementById("formPanel").style.display = "none";
     document.getElementById("quickPhotoPanel").style.display = "none";
-  } else { // photo
+  } else if(mode === "photo"){
+    document.getElementById("formPanel").style.display = "none";
+    document.getElementById("quickPhotoPanel").style.display = "none";
+  } else { // bulk
     document.getElementById("formPanel").style.display = "none";
     document.getElementById("quickPhotoPanel").style.display = "none";
   }
@@ -377,6 +417,7 @@ function setMode(newMode){
 document.getElementById("modeAddBtn").addEventListener("click", () => setMode("add"));
 document.getElementById("modeEditBtn").addEventListener("click", () => setMode("edit"));
 document.getElementById("modePhotoBtn").addEventListener("click", () => setMode("photo"));
+document.getElementById("modeBulkBtn").addEventListener("click", () => setMode("bulk"));
 
 // ===== البحث (تعديل + رفع صورة فقط يشتركان بنفس مربع البحث) =====
 function renderDropdown(query){
@@ -877,6 +918,163 @@ async function uploadPhoto(slug, file, token, label){
   existingFiles.add(slug + ext);
   return `assets/perfumes/${slug}${ext}`;
 }
+
+// ===== وضع "رفع دفعة صور تلقائي" (bulk) =====
+// نفترض إن كل ملف مسمّى بصيغة "البراند _ اسم العطر.jpg" أو "البراند - اسم العطر.png"
+// (نفس التسمية اللي كانت مستخدمة بجوجل درايف). نحوّل اسم الملف لنفس الـ slug اللي
+// يتولّد من بيانات العطر (slugify) ونطابقهم مباشرة — نفس الدالة المستخدمة أصلًا
+// لتوليد id العطر ومسار صورته، فالمطابقة مضمونة ومتّسقة مع باقي النظام.
+let bulkMatched = [];        // [{file, perfume}]
+let bulkUnmatchedFiles = []; // [{file, guessBrand, guessName}]
+let bulkStopFlag = false;
+let bulkRunning = false;
+
+function filenameToBrandName(filename){
+  const base = filename.replace(/\.(png|jpe?g|webp)$/i, "");
+  const m = base.split(/\s[_-]\s/);
+  if(m.length >= 2){
+    return { brand: m[0], name: m.slice(1).join(" - ") };
+  }
+  return { brand: base, name: "" };
+}
+
+function matchBulkFiles(fileList){
+  bulkMatched = [];
+  bulkUnmatchedFiles = [];
+  const imageFiles = Array.from(fileList).filter(f => f.type.startsWith("image/"));
+  imageFiles.forEach(file => {
+    const { brand, name } = filenameToBrandName(file.name);
+    const slug = slugify(brand, name);
+    const perfume = perfumes.find(p => p.id === slug);
+    if(perfume) bulkMatched.push({ file, perfume });
+    else bulkUnmatchedFiles.push({ file, guessBrand: brand, guessName: name });
+  });
+}
+
+function renderBulkPreview(){
+  const force = document.getElementById("bulk_forceChk").checked;
+  const matchedIds = new Set(bulkMatched.map(m => m.perfume.id));
+  const perfumesWithoutFile = perfumes.filter(p => !matchedIds.has(p.id));
+  const toUpload = bulkMatched.filter(m => force || !hasImage(m.perfume));
+  const alreadyDoneCount = bulkMatched.length - toUpload.length;
+
+  document.getElementById("bulk_statFiles").textContent = bulkMatched.length + bulkUnmatchedFiles.length;
+  document.getElementById("bulk_statMatched").textContent = bulkMatched.length;
+  document.getElementById("bulk_statToUpload").textContent = toUpload.length;
+
+  let issuesHtml = "";
+  if(alreadyDoneCount > 0){
+    issuesHtml += `<small class="hint" style="margin-top:0;">${alreadyDoneCount} عطر من اللي تطابقت عنده صورة مسبقًا — راح نتجاوزه (فعّل الخيار فوق لو تبا تعيد رفعه).</small>`;
+  }
+  if(bulkUnmatchedFiles.length > 0){
+    issuesHtml += `<div class="status show err" style="margin-top:10px;">
+      ${bulkUnmatchedFiles.length} ملف ما قدرنا نطابقه مع أي عطر بالقائمة (راجع الاسم يدويًا، ما راح ينرفع تلقائيًا):<br>
+      ${bulkUnmatchedFiles.slice(0,20).map(u => `— ${u.file.name}`).join("<br>")}
+      ${bulkUnmatchedFiles.length > 20 ? `<br>... و${bulkUnmatchedFiles.length-20} ملف ثاني` : ""}
+    </div>`;
+  }
+  if(perfumesWithoutFile.length > 0){
+    issuesHtml += `<div class="status show info" style="margin-top:10px;">
+      ${perfumesWithoutFile.length} عطر بالقائمة ما فيه له ملف صورة بهالمجلد:<br>
+      ${perfumesWithoutFile.slice(0,20).map(p => `— ${p.brand} — ${p.name}`).join("<br>")}
+      ${perfumesWithoutFile.length > 20 ? `<br>... و${perfumesWithoutFile.length-20} عطر ثاني` : ""}
+    </div>`;
+  }
+  document.getElementById("bulk_issuesBox").innerHTML = issuesHtml;
+  document.getElementById("bulk_previewWrap").style.display = "block";
+  document.getElementById("bulk_startBtn").disabled = toUpload.length === 0;
+}
+
+document.getElementById("bulk_folderInput").addEventListener("change", (e) => {
+  matchBulkFiles(e.target.files);
+  renderBulkPreview();
+});
+document.getElementById("bulk_forceChk").addEventListener("change", renderBulkPreview);
+
+function bulkLog(msg){
+  const box = document.getElementById("bulk_log");
+  box.style.display = "block";
+  box.innerHTML += msg + "<br>";
+  box.scrollTop = box.scrollHeight;
+}
+function bulkShowStatus(msg, type){
+  const box = document.getElementById("bulk_statusBox");
+  box.textContent = msg;
+  box.className = "status show " + type;
+}
+
+document.getElementById("bulk_stopBtn").addEventListener("click", () => {
+  bulkStopFlag = true;
+  document.getElementById("bulk_stopBtn").disabled = true;
+  document.getElementById("bulk_stopBtn").textContent = "بيتوقف بعد ما يخلّص العنصر الحالي...";
+});
+
+document.getElementById("bulk_startBtn").addEventListener("click", async () => {
+  if(bulkRunning) return;
+  const token = getToken();
+  if(!token){ bulkShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+
+  const force = document.getElementById("bulk_forceChk").checked;
+  const toUpload = bulkMatched.filter(m => force || !hasImage(m.perfume));
+  if(toUpload.length === 0){ bulkShowStatus("ما فيه شي يحتاج رفع الحين.", "info"); return; }
+
+  bulkRunning = true;
+  bulkStopFlag = false;
+  document.getElementById("bulk_startBtn").disabled = true;
+  document.getElementById("bulk_folderInput").disabled = true;
+  document.getElementById("bulk_stopBtn").style.display = "inline-block";
+  document.getElementById("bulk_stopBtn").disabled = false;
+  document.getElementById("bulk_stopBtn").textContent = "إيقاف بعد العنصر الحالي";
+  document.getElementById("bulk_log").innerHTML = "";
+  bulkShowStatus(`جارِ الرفع... 0 / ${toUpload.length}`, "info");
+
+  let successCount = 0;
+  const failedItems = [];
+
+  for(let i = 0; i < toUpload.length; i++){
+    if(bulkStopFlag){
+      bulkLog(`⏸️ تم الإيقاف بطلبك — تم رفع ${successCount} من ${toUpload.length}. باقي العطور تضل بنفس مكانها، تقدر تكمل من جديد أي وقت (اللي انرفع ما بيتكرر).`);
+      break;
+    }
+    const { file, perfume } = toUpload[i];
+    document.getElementById("bulk_progressLabel").textContent = `${i+1} / ${toUpload.length} — ${perfume.brand} — ${perfume.name}`;
+    document.getElementById("bulk_progressFill").style.width = Math.round(100 * (i) / toUpload.length) + "%";
+    try{
+      const { blob } = await compressImageIfPossible(file);
+      const imagePath = await uploadPhoto(perfume.id, blob, token, `${perfume.brand} — ${perfume.name}`);
+      const updatedList = await updateDataJsonWithRetry(token, (list) => {
+        const idx = list.findIndex(x => x.id === perfume.id);
+        if(idx === -1) throw new Error("العطر ما انلقى بـ data.json — يمكن انحذف أو تغيّر اسمه من مكان ثاني.");
+        list[idx] = { ...list[idx], image: imagePath };
+        return list;
+      }, `Bulk add photo: ${perfume.brand} — ${perfume.name}`);
+      perfumes = updatedList;
+      successCount++;
+      bulkLog(`✅ ${perfume.brand} — ${perfume.name}`);
+    }catch(e){
+      failedItems.push({ perfume, error: e.message });
+      bulkLog(`❌ ${perfume.brand} — ${perfume.name}: ${e.message}`);
+    }
+    document.getElementById("bulk_progressFill").style.width = Math.round(100 * (i+1) / toUpload.length) + "%";
+    bulkShowStatus(`جارِ الرفع... ${i+1} / ${toUpload.length}`, "info");
+    updateProgress();
+  }
+
+  bulkRunning = false;
+  document.getElementById("bulk_startBtn").disabled = false;
+  document.getElementById("bulk_folderInput").disabled = false;
+  document.getElementById("bulk_stopBtn").style.display = "none";
+
+  if(!bulkStopFlag){
+    if(failedItems.length === 0){
+      bulkShowStatus(`تم! انرفعت ${successCount} صورة بنجاح، بدون أي خطأ. تأخذ بضع دقايق تظهر بالموقع الحي.`, "ok");
+    }else{
+      bulkShowStatus(`خلص الرفع: ${successCount} نجحت، ${failedItems.length} فشلت (شوف السجل تحت). أعد تشغيل "ابدأ الرفع" من جديد عشان يعيد المحاولة بس على اللي فشلت (اللي نجحت ما بتتكرر).`, "err");
+    }
+  }
+  // نحدّث المعاينة عشان تعكس الوضع الجديد (اللي نجح صار "له صورة" وما بيظهر ضمن "بترفع الحين" لو أعدت الفحص)
+  renderBulkPreview();
+});
 
 document.getElementById("saveBtn").addEventListener("click", async () => {
   const token = getToken();
