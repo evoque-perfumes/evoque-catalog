@@ -86,6 +86,10 @@
   .stat{font-size:13px;}
   .stat b{font-size:18px; display:block;}
   .banner{background:rgba(200,138,26,.1); border:1px solid rgba(200,138,26,.35); color:#e0b25e; padding:12px 14px; border-radius:8px; font-size:13px; line-height:1.8; margin-bottom:16px;}
+  .static-list{background:#0f0f0f; border:1px solid var(--line); border-radius:8px; max-height:320px; overflow-y:auto; margin:10px 0;}
+  .stat-clickable{cursor:pointer; padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:#0f0f0f; transition:border-color .15s; flex:1;}
+  .stat-clickable:hover{border-color:#555;}
+  .stat-clickable.active{border-color:var(--red); background:rgba(225,29,46,.08);}
   #formPanel{display:none;}
 </style>
 </head>
@@ -123,26 +127,41 @@
       <button type="button" class="ghost" id="modeEditBtn">✏️ تعديل بيانات عطر</button>
       <button type="button" class="ghost" id="modeAddBtn">➕ إضافة عطر جديد</button>
       <button type="button" class="ghost" id="modeBulkBtn">📦 رفع كل الصور دفعة وحدة</button>
+      <button type="button" class="ghost" id="modeStockBtn">📊 المخزون</button>
     </div>
     <small class="hint" style="margin-top:0;">
       عندك 182 عطر موجودين ببياناتهم كاملة أصلًا (من الشيت القديم) — كل اللي ناقصهم الصورة.
       استخدم "رفع صورة فقط" عشان ترفع الصور بسرعة بدون ما تفتح نموذج طويل. استخدم "تعديل بيانات عطر"
       بس لو تبا تغيّر سعر أو مخزون أو أي معلومة ثانية. استخدم "رفع كل الصور دفعة وحدة" لو عندك مجلد
       فيه كل الصور مسمّاة بنفس اسم البراند والعطر — يطابقها وحده ويرفعها كلها بدون ما تختار كل عطر يدويًا.
+      استخدم "المخزون" عشان تشوف وتحدّث حالة "متوفر/خلص" بسرعة، أو تشوف العطور اللي بياناتها ناقصة.
     </small>
 
     <div id="editSearchWrap" style="display:none;">
-      <div class="stats" id="statsRow" style="display:none;">
-        <div class="stat">إجمالي العطور<b id="statTotal">—</b></div>
-        <div class="stat">لها صورة<b id="statDone" style="color:#5ee08a;">—</b></div>
+      <div id="progressStatsWrap">
+        <div class="stats" id="statsRow" style="display:none;">
+          <div class="stat">إجمالي العطور<b id="statTotal">—</b></div>
+          <div class="stat">لها صورة<b id="statDone" style="color:#5ee08a;">—</b></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="row" style="margin-bottom:10px;">
+      <div class="row" id="hideUploadedRow" style="margin-bottom:10px;">
         <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--ink);">
           <input type="checkbox" id="hideUploadedChk" checked style="width:auto; margin:0;">
           إخفِ العطور اللي عندها صورة مسبقًا (عشان ما تكرر نفس العطر بالغلط)
         </label>
       </div>
+
+      <div id="stockCategoryWrap" style="display:none;">
+        <div class="row" style="margin-bottom:6px; align-items:stretch;">
+          <div class="stat-clickable" id="stockCatMissing"><div style="color:var(--muted); font-size:13px;">بياناتها ناقصة</div><b id="stockCatMissingCount" style="font-size:20px; display:block;">—</b></div>
+          <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">فيها حجم مب متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#e0b25e;">—</b></div>
+          <div class="stat-clickable" id="stockCatIn"><div style="color:var(--muted); font-size:13px;">متوفرة بالكامل</div><b id="stockCatInCount" style="font-size:20px; display:block; color:#5ee08a;">—</b></div>
+        </div>
+        <small class="hint" style="margin-top:0;">اضغط أي تصنيف فوق تشوف قائمته، أو ابحث باسم العطر تحت مباشرة.</small>
+        <div class="static-list" id="stockCategoryList" style="display:none;"></div>
+      </div>
+
       <div class="search-wrap">
         <input type="text" id="searchInput" placeholder="اكتب اسم البراند أو العطر...">
         <div class="dropdown" id="dropdown"></div>
@@ -201,6 +220,23 @@
       <div id="bulk_log" style="max-height:280px; overflow-y:auto; background:#0f0f0f; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12.5px; line-height:1.9; display:none;"></div>
     </div>
     <div class="status" id="bulk_statusBox"></div>
+  </div>
+
+  <div class="panel" id="stockQuickPanel" style="display:none;">
+    <h2 id="stockQuickPanelTitle">4) حالة التوفر</h2>
+    <fieldset>
+      <legend>المخزون</legend>
+      <div class="chkrow">
+        <label><input type="checkbox" id="sq_stock10"> 10مل متوفر</label>
+        <label><input type="checkbox" id="sq_stock50"> 50مل متوفر</label>
+      </div>
+    </fieldset>
+    <small class="hint">لو ألغيت التحديد عن حجم، الموقع يعرض "نفدت الكمية" مكان زر الإضافة للسلة لهذا الحجم بس — باقي بيانات العطر ما تتغيّر.</small>
+    <div class="row">
+      <button type="button" id="sq_saveBtn">احفظ حالة التوفر</button>
+      <button type="button" id="sq_editFullBtn" class="secondary">تعديل بيانات العطر كاملة</button>
+    </div>
+    <div class="status" id="sq_statusBox"></div>
   </div>
 
   <div class="panel" id="formPanel">
@@ -379,7 +415,133 @@ function updateProgress(){
   const done = countDone();
   document.getElementById("statDone").textContent = done;
   document.getElementById("progressFill").style.width = Math.round(100*done/total) + "%";
+  updateStockCounts();
+  if(stockCategoryActive) renderStockCategoryList(stockCategoryActive);
 }
+
+// ===== وضع "المخزون" (تحديد أي عطر متوفر/خلص + العطور اللي بياناتها ناقصة) =====
+const STOCK_CHECK_FIELDS = ["accords", "notesTop", "longevity", "sillage", "seasons", "daynight"];
+const STOCK_FIELD_LABELS = { accords:"الأكوردات", notesTop:"النوتات", longevity:"الثبات", sillage:"الفوحان", seasons:"المواسم", daynight:"وقت الاستخدام" };
+function getMissingFields(p){
+  return STOCK_CHECK_FIELDS.filter(f => {
+    const v = p[f];
+    return v === undefined || v === null || v === "" || (Array.isArray(v) && v.length === 0);
+  });
+}
+function isMissingData(p){ return getMissingFields(p).length > 0; }
+function isOutOfStock(p){ return !p.stock10 || !p.stock50; }
+
+let stockCategoryActive = null; // 'missing' | 'out' | 'in' | null
+let stockSelected = null;
+
+function updateStockCounts(){
+  if(!document.getElementById("stockCatMissingCount")) return;
+  document.getElementById("stockCatMissingCount").textContent = perfumes.filter(isMissingData).length;
+  document.getElementById("stockCatOutCount").textContent = perfumes.filter(isOutOfStock).length;
+  document.getElementById("stockCatInCount").textContent = perfumes.filter(p => !isOutOfStock(p)).length;
+}
+
+function renderStockCategoryList(cat){
+  stockCategoryActive = cat;
+  document.getElementById("stockCatMissing").classList.toggle("active", cat === "missing");
+  document.getElementById("stockCatOut").classList.toggle("active", cat === "out");
+  document.getElementById("stockCatIn").classList.toggle("active", cat === "in");
+
+  let list;
+  if(cat === "missing") list = perfumes.filter(isMissingData);
+  else if(cat === "out") list = perfumes.filter(isOutOfStock);
+  else list = perfumes.filter(p => !isOutOfStock(p));
+  list = list.slice().sort((a,b) => (a.brand+" "+a.name).localeCompare(b.brand+" "+b.name, "en", {sensitivity:"base"}));
+
+  const box = document.getElementById("stockCategoryList");
+  box.style.display = "block";
+  if(list.length === 0){
+    box.innerHTML = `<div class="dropdown-item">ما فيه عطور بهالتصنيف 🎉</div>`;
+    return;
+  }
+  box.innerHTML = list.map(p => {
+    let badgeText, badgeClass;
+    if(cat === "missing"){
+      badgeText = "ناقص: " + getMissingFields(p).map(f => STOCK_FIELD_LABELS[f]).join("، ");
+      badgeClass = "pending";
+    } else {
+      badgeText = `10مل: ${p.stock10 ? "✓" : "✗"} — 50مل: ${p.stock50 ? "✓" : "✗"}`;
+      badgeClass = isOutOfStock(p) ? "pending" : "done";
+    }
+    return `<div class="dropdown-item" data-id="${p.id}">
+      <span class="name">${p.brand} — ${p.name}</span><br>
+      <span class="badge ${badgeClass}" style="margin-inline-start:0; margin-top:4px; display:inline-block;">${badgeText}</span>
+    </div>`;
+  }).join("");
+  box.querySelectorAll(".dropdown-item[data-id]").forEach(el => {
+    el.addEventListener("click", () => {
+      const p = perfumes.find(x => x.id === el.dataset.id);
+      if(cat === "missing"){ setMode("edit"); selectPerfumeForEdit(p); }
+      else selectPerfumeForStock(p);
+    });
+  });
+}
+document.getElementById("stockCatMissing").addEventListener("click", () => renderStockCategoryList("missing"));
+document.getElementById("stockCatOut").addEventListener("click", () => renderStockCategoryList("out"));
+document.getElementById("stockCatIn").addEventListener("click", () => renderStockCategoryList("in"));
+
+function selectPerfumeForStock(p){
+  stockSelected = p;
+  const wrap = document.getElementById("selectedChipWrap");
+  wrap.innerHTML = `<div class="selected-chip">
+    <span>${p.brand} — ${p.name}</span>
+    <button type="button" id="deselectBtn" title="إلغاء">×</button>
+  </div>`;
+  document.getElementById("deselectBtn").addEventListener("click", () => {
+    stockSelected = null;
+    wrap.innerHTML = "";
+    document.getElementById("stockQuickPanel").style.display = "none";
+  });
+  document.getElementById("searchInput").value = "";
+  document.getElementById("sq_stock10").checked = !!p.stock10;
+  document.getElementById("sq_stock50").checked = !!p.stock50;
+  document.getElementById("stockQuickPanelTitle").textContent = `4) حالة التوفر: ${p.brand} — ${p.name}`;
+  document.getElementById("stockQuickPanel").style.display = "block";
+  document.getElementById("sq_statusBox").className = "status";
+}
+
+function sqShowStatus(msg, type){
+  const box = document.getElementById("sq_statusBox");
+  box.textContent = msg;
+  box.className = "status show " + type;
+}
+
+document.getElementById("sq_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token || !stockSelected){ sqShowStatus("لازم تدخل مفتاح الدخول أول وتختار عطر.", "err"); return; }
+  const p = stockSelected;
+  const newStock10 = document.getElementById("sq_stock10").checked;
+  const newStock50 = document.getElementById("sq_stock50").checked;
+  const btn = document.getElementById("sq_saveBtn");
+  btn.disabled = true;
+  try{
+    sqShowStatus("جارِ الحفظ...", "info");
+    const updatedList = await updateDataJsonWithRetry(token, (list) => {
+      const idx = list.findIndex(x => x.id === p.id);
+      if(idx === -1) throw new Error("العطر ما انلقى بـ data.json — يمكن انحذف أو تغيّر اسمه من مكان ثاني.");
+      list[idx] = { ...list[idx], stock10: newStock10, stock50: newStock50 };
+      return list;
+    }, `Update stock: ${p.brand} — ${p.name}`);
+    perfumes = updatedList;
+    updateProgress();
+    sqShowStatus(`تم تحديث حالة التوفر لـ"${p.brand} — ${p.name}". تأخذ بضع دقايق تظهر بالموقع الحي.`, "ok");
+  }catch(e){
+    sqShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
+document.getElementById("sq_editFullBtn").addEventListener("click", () => {
+  if(!stockSelected) return;
+  const p = stockSelected;
+  setMode("edit");
+  selectPerfumeForEdit(p);
+});
 
 // ===== وضع إضافة/تعديل =====
 function setMode(newMode){
@@ -388,7 +550,20 @@ function setMode(newMode){
   document.getElementById("modeEditBtn").classList.toggle("active", mode === "edit");
   document.getElementById("modePhotoBtn").classList.toggle("active", mode === "photo");
   document.getElementById("modeBulkBtn").classList.toggle("active", mode === "bulk");
-  document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
+  document.getElementById("modeStockBtn").classList.toggle("active", mode === "stock");
+  document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock") ? "block" : "none";
+  document.getElementById("progressStatsWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
+  document.getElementById("hideUploadedRow").style.display = (mode === "edit" || mode === "photo") ? "flex" : "none";
+  document.getElementById("stockCategoryWrap").style.display = mode === "stock" ? "block" : "none";
+  document.getElementById("stockQuickPanel").style.display = "none";
+  stockCategoryActive = null;
+  stockSelected = null;
+  if(mode !== "stock"){
+    document.getElementById("stockCategoryList").innerHTML = "";
+    document.getElementById("stockCatMissing").classList.remove("active");
+    document.getElementById("stockCatOut").classList.remove("active");
+    document.getElementById("stockCatIn").classList.remove("active");
+  }
   document.getElementById("deleteBtn").style.display = mode === "edit" && editingOriginal ? "inline-block" : "none";
   document.getElementById("bulkPanel").style.display = mode === "bulk" ? "block" : "none";
 
@@ -418,12 +593,13 @@ document.getElementById("modeAddBtn").addEventListener("click", () => setMode("a
 document.getElementById("modeEditBtn").addEventListener("click", () => setMode("edit"));
 document.getElementById("modePhotoBtn").addEventListener("click", () => setMode("photo"));
 document.getElementById("modeBulkBtn").addEventListener("click", () => setMode("bulk"));
+document.getElementById("modeStockBtn").addEventListener("click", () => setMode("stock"));
 
-// ===== البحث (تعديل + رفع صورة فقط يشتركان بنفس مربع البحث) =====
+// ===== البحث (تعديل + رفع صورة فقط + المخزون يشتركون بنفس مربع البحث) =====
 function renderDropdown(query){
   const dd = document.getElementById("dropdown");
   const q = (query||"").trim().toLowerCase();
-  const hideUploaded = document.getElementById("hideUploadedChk").checked;
+  const hideUploaded = (mode === "photo" || mode === "edit") && document.getElementById("hideUploadedChk").checked;
   let list = perfumes;
   if(hideUploaded) list = list.filter(p => !hasImage(p));
   if(q) list = list.filter(p => (p.brand+" "+p.name).toLowerCase().includes(q));
@@ -434,10 +610,17 @@ function renderDropdown(query){
     return;
   }
   dd.innerHTML = list.map(p => {
-    const done = hasImage(p);
+    let badgeHtml;
+    if(mode === "stock"){
+      const out = isOutOfStock(p);
+      badgeHtml = `<span class="badge ${out ? "pending" : "done"}">10مل:${p.stock10?"✓":"✗"} 50مل:${p.stock50?"✓":"✗"}</span>`;
+    } else {
+      const done = hasImage(p);
+      badgeHtml = `<span class="badge ${done ? "done" : "pending"}">${done ? "له صورة" : "بدون صورة"}</span>`;
+    }
     return `<div class="dropdown-item" data-id="${p.id}">
       <span class="name">${p.brand} — ${p.name}</span>
-      <span class="badge ${done ? "done" : "pending"}">${done ? "له صورة" : "بدون صورة"}</span>
+      ${badgeHtml}
     </div>`;
   }).join("");
   dd.classList.add("show");
@@ -445,6 +628,7 @@ function renderDropdown(query){
     el.addEventListener("click", () => {
       const p = perfumes.find(x => x.id === el.dataset.id);
       if(mode === "photo") selectPerfumeForPhotoOnly(p);
+      else if(mode === "stock") selectPerfumeForStock(p);
       else selectPerfumeForEdit(p);
       dd.classList.remove("show");
     });
