@@ -100,9 +100,9 @@ const I18N = {
     dir: "rtl",
     sub: "عطور فاخرة بديلة للأصلي — اختار، شوف التفاصيل، وأكمل طلبك عبر واتساب",
     notfound: 'ما لقيت العطر اللي تبيه؟ <a id="notfoundLink" href="#">اكتب لنا اسمه عبر واتساب</a> ونتأكد لك منه.',
-    loading: "جارِ تحميل العطور من الشيت...",
-    errorPrefix: "ما قدرت أوصل للشيت الحي",
-    errorHint: 'تأكد إن الشيت مشارك بصلاحية "Anyone with the link - Viewer".',
+    loading: "جارِ تحميل العطور...",
+    errorPrefix: "حدث خطأ مؤقت بتحميل العطور",
+    errorHint: "جرّب تحديث الصفحة، ولو استمرت المشكلة تواصل وياك عبر واتساب.",
     pageTitle: "Evoque Perfume | عطور فاخرة بديلة للأصلي",
     searchPlaceholder: "ابحث باسم العطر أو البراند...",
     allBrands: "كل البراندات",
@@ -234,9 +234,9 @@ const I18N = {
     dir: "ltr",
     sub: "Luxury inspired fragrances — pick one, see the details, and finish your order on WhatsApp",
     notfound: 'Couldn\'t find the perfume you want? <a id="notfoundLink" href="#">Message us its name on WhatsApp</a> and we\'ll check for you.',
-    loading: "Loading perfumes from the sheet...",
-    errorPrefix: "Couldn't reach the live sheet",
-    errorHint: 'Make sure the sheet is shared as "Anyone with the link - Viewer".',
+    loading: "Loading perfumes...",
+    errorPrefix: "There was a temporary error loading perfumes",
+    errorHint: "Try refreshing the page, or contact us on WhatsApp if the issue continues.",
     pageTitle: "Evoque Perfume | Luxury Inspired Fragrances",
     searchPlaceholder: "Search by perfume or brand...",
     allBrands: "All brands",
@@ -680,7 +680,12 @@ let loadErrorMsg = "";
 // فترة من الشيت الحي (شوف scripts/build-catalog-json.js). أسرع بكثير من قراءة
 // الشيت مباشرة لأنه ملف عادي على نفس السيرفر (يستفيد من كاش الـ CDN).
 async function loadPerfumesFromJson(){
-  const res = await fetch("./data.json", { cache: "no-store" });
+  // ملاحظة أداء (21 أغسطس 2026): كان هذا الطلب بـ cache:"no-store" فيجبر تحميل
+  // كامل الملف من الصفر بكل زيارة وبكل تنقّل بين الصفحات (رجالي/نسائي/للجنسين)
+  // بدون أي استفادة من كاش المتصفح أو الـ CDN — هذا كان يسبب بطء ملحوظ خصوصًا
+  // بالتنقل بين الصفحات. شلناه لنستفيد من الكاش العادي (البيانات أصلًا تتحدّث
+  // كل 20 دقيقة فقط عبر GitHub Action، فمو ضروري نجبر تحميل جديد كل مرة).
+  const res = await fetch("./data.json");
   if(!res.ok) throw new Error("HTTP " + res.status);
   const data = await res.json();
   // data.json الفعلي على الريبو مصفوفة مباشرة [...] (شوف scripts/build-catalog-json.js) —
@@ -1081,7 +1086,7 @@ function renderGrid(explicitList){
     return;
   }
   if(loadState === "error"){
-    grid.innerHTML = `<div class="empty">${t.errorPrefix} (${loadErrorMsg}).<br>${t.errorHint}</div>`;
+    grid.innerHTML = `<div class="empty">${t.errorPrefix}.<br>${t.errorHint}</div>`;
     return;
   }
 
