@@ -475,6 +475,29 @@
   .lightbox-details b{ color:var(--ink); font-weight:600; }
 
   /* ===================================================================
+     تقييمات العملاء — بطاقة العطر (ملخص صغير) + نافذة التكبير (القائمة الكاملة)
+     تُدار البيانات من لوحة التحكم admin-upload.html (وضع "⭐ التقييمات")
+     =================================================================== */
+  .stars{ display:inline-flex; gap:1px; line-height:1; }
+  .stars .star{ color:var(--bg-soft); font-size:12px; }
+  .stars .star.filled{ color:var(--gold-deep); }
+  .card-rating{ display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--muted); margin:1px 0; }
+  .card-rating .stars .star{ font-size:11px; }
+  .card-rating b, .card-rating span{ color:var(--muted); }
+
+  .reviews-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; margin-top:14px; padding-top:14px; border-top:1px solid var(--gold-pale); }
+  .reviews-head h3{ margin:0; font-size:14px; font-weight:700; color:var(--ink); }
+  .reviews-summary{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); }
+  .reviews-summary b{ color:var(--ink); font-size:13px; }
+  .reviews-empty{ font-size:12.5px; color:var(--muted); line-height:1.8; margin-top:8px; }
+  .reviews-list{ display:flex; flex-direction:column; gap:10px; margin-top:10px; max-height:220px; overflow-y:auto; padding-inline-end:4px; }
+  .review-card{ background:var(--bg-soft); border:1px solid var(--gold-pale); border-radius:10px; padding:10px 12px; }
+  .review-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .review-name{ font-size:12.5px; font-weight:700; color:var(--ink); }
+  .review-comment{ font-size:12.5px; color:var(--muted); line-height:1.7; margin:6px 0 4px; }
+  .review-date{ font-size:10.5px; color:var(--muted-soft); }
+
+  /* ===================================================================
      إعادة الهيكلة لعدة صفحات — 21 أغسطس 2026
      شريط تنقل التصنيفات (بالهيدر) + قسم الأكثر مبيعًا وبطاقات التصنيف (بالرئيسية)
      =================================================================== */
