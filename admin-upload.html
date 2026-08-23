@@ -288,11 +288,10 @@
           </select>
         </div>
       </div>
-      <div class="field"><label for="rv_commentAr">نص التقييم (عربي)</label><textarea id="rv_commentAr" rows="3" placeholder="رأي العميل بالعطر..."></textarea></div>
-      <div class="field"><label for="rv_commentEn">نص التقييم (إنجليزي) — اختياري</label><textarea id="rv_commentEn" rows="3" placeholder="Customer's opinion of the fragrance..."></textarea></div>
+      <div class="field"><label for="rv_comment">نص التقييم — اختياري</label><textarea id="rv_comment" rows="3" placeholder="رأي العميل بالعطر..."></textarea></div>
       <div class="field"><label for="rv_date">التاريخ</label><input type="text" id="rv_date" placeholder="YYYY-MM-DD"></div>
     </fieldset>
-    <small class="hint">أدخل تقييمات حقيقية من عملاء فعليين بس (رسائل شكر بواتساب، تقييمات إنستقرام، إلخ) — لا تُدخل تقييمات وهمية. تقدر تحذف أي تقييم بأي وقت من القائمة فوق.</small>
+    <small class="hint">التقييمات تجي الحين مباشرة من العملاء عبر الموقع (تظهر لهم فورًا)، وتقدر تضيف تقييمات حقيقية من عندك يدويًا هنا كمان (رسائل شكر بواتساب، تقييمات إنستقرام، إلخ) — لا تُدخل تقييمات وهمية. تقدر تحذف أي تقييم بأي وقت من القائمة فوق.</small>
     <div class="row">
       <button type="button" id="rv_saveBtn">حفظ التقييم</button>
       <button type="button" id="rv_cancelEditBtn" class="secondary" style="display:none;">إلغاء التعديل</button>
@@ -690,8 +689,7 @@ function resetReviewForm(){
   reviewsEditingId = null;
   document.getElementById("rv_name").value = "";
   document.getElementById("rv_rating").value = "5";
-  document.getElementById("rv_commentAr").value = "";
-  document.getElementById("rv_commentEn").value = "";
+  document.getElementById("rv_comment").value = "";
   document.getElementById("rv_date").value = todayStr();
   document.getElementById("rv_formLegend").textContent = "إضافة تقييم جديد";
   document.getElementById("rv_saveBtn").textContent = "حفظ التقييم";
@@ -713,12 +711,11 @@ function renderReviewsList(){
   wrap.innerHTML = list.map(r => `
     <div class="review-row" data-id="${r.id}">
       <div class="review-row-top">
-        <span class="review-row-name">${(r.name||"").replace(/</g,"&lt;")}</span>
+        <span class="review-row-name">${(r.name||"").replace(/</g,"&lt;") || "<i>بدون اسم</i>"}</span>
         <span class="review-row-stars">${"★".repeat(Number(r.rating)||0)}${"☆".repeat(5-(Number(r.rating)||0))}</span>
       </div>
-      ${r.commentAr ? `<div class="review-row-comment">🇦🇪 ${r.commentAr.replace(/</g,"&lt;")}</div>` : ""}
-      ${r.commentEn ? `<div class="review-row-comment">EN: ${r.commentEn.replace(/</g,"&lt;")}</div>` : ""}
-      <div class="review-row-meta">${r.date || ""} ${r.visible === false ? "— (مخفي عن الموقع)" : ""}</div>
+      ${r.comment ? `<div class="review-row-comment">${r.comment.replace(/</g,"&lt;")}</div>` : (r.commentAr || r.commentEn) ? `<div class="review-row-comment">${(r.commentAr||r.commentEn).replace(/</g,"&lt;")}</div>` : ""}
+      <div class="review-row-meta">${r.source === "customer" ? "🌐 من العميل مباشرة عبر الموقع" : "🛠️ أضيف يدويًا"} — ${r.date || ""} ${r.visible === false ? "— (مخفي عن الموقع)" : ""}</div>
       <div class="review-row-actions">
         <button type="button" class="secondary rv-edit-btn">✏️ تعديل</button>
         <button type="button" class="secondary rv-delete-btn">🗑️ حذف</button>
@@ -733,8 +730,7 @@ function renderReviewsList(){
       reviewsEditingId = id;
       document.getElementById("rv_name").value = r.name || "";
       document.getElementById("rv_rating").value = String(r.rating || 5);
-      document.getElementById("rv_commentAr").value = r.commentAr || "";
-      document.getElementById("rv_commentEn").value = r.commentEn || "";
+      document.getElementById("rv_comment").value = r.comment || r.commentAr || r.commentEn || "";
       document.getElementById("rv_date").value = r.date || todayStr();
       document.getElementById("rv_formLegend").textContent = "تعديل تقييم";
       document.getElementById("rv_saveBtn").textContent = "حفظ التعديل";
@@ -796,14 +792,14 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
   const token = getToken();
   if(!token || !reviewsSelected){ rvShowStatus("لازم تدخل مفتاح الدخول أول وتختار عطر.", "err"); return; }
   const name = document.getElementById("rv_name").value.trim();
-  const commentAr = document.getElementById("rv_commentAr").value.trim();
-  const commentEn = document.getElementById("rv_commentEn").value.trim();
-  if(!name || (!commentAr && !commentEn)){
-    rvShowStatus("لازم تعبي اسم العميل ونص التقييم (عربي أو إنجليزي على الأقل).", "err");
+  const comment = document.getElementById("rv_comment").value.trim();
+  const ratingCheck = parseInt(document.getElementById("rv_rating").value, 10);
+  if(!ratingCheck || ratingCheck < 1 || ratingCheck > 5){
+    rvShowStatus("لازم تختار عدد النجوم.", "err");
     return;
   }
   const p = reviewsSelected;
-  const rating = parseInt(document.getElementById("rv_rating").value, 10) || 5;
+  const rating = ratingCheck;
   const date = document.getElementById("rv_date").value.trim() || todayStr();
   const btn = document.getElementById("rv_saveBtn");
   btn.disabled = true;
@@ -814,7 +810,7 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
       updatedList = await updateReviewsJsonWithRetry(token, (list) => {
         const idx = list.findIndex(x => x.id === reviewsEditingId);
         if(idx === -1) throw new Error("التقييم ما انلقى — يمكن انحذف من مكان ثاني.");
-        list[idx] = { ...list[idx], name, rating, commentAr, commentEn, date };
+        list[idx] = { ...list[idx], name, rating, comment, commentAr: undefined, commentEn: undefined, date };
         return list;
       }, `Update review: ${p.brand} — ${p.name}`);
       rvShowStatus("تم حفظ التعديل.", "ok");
@@ -822,8 +818,9 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
       const newReview = {
         id: `${p.id}-${Date.now()}`,
         perfumeId: p.id,
-        name, rating, commentAr, commentEn, date,
-        visible: true
+        name, rating, comment, date,
+        visible: true,
+        source: "admin"
       };
       updatedList = await updateReviewsJsonWithRetry(token, (list) => { list.push(newReview); return list; }, `Add review: ${p.brand} — ${p.name}`);
       rvShowStatus("تم إضافة التقييم. يأخذ بضع دقايق يظهر بالموقع الحي.", "ok");
