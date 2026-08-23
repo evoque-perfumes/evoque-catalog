@@ -497,6 +497,28 @@
   .review-comment{ font-size:12.5px; color:var(--muted); line-height:1.7; margin:6px 0 4px; }
   .review-date{ font-size:10.5px; color:var(--muted-soft); }
 
+  /* ===== فورم إضافة تقييم من العميل مباشرة ===== */
+  .review-form-wrap{ margin-top:16px; padding-top:14px; border-top:1px solid var(--gold-pale); }
+  .review-form-wrap h4{ margin:0 0 8px; font-size:13px; font-weight:700; color:var(--ink); }
+  .review-star-picker{ display:flex; gap:4px; margin-bottom:10px; direction:ltr; justify-content:flex-start; }
+  .review-star-picker .star-pick{ font-size:22px; color:var(--bg-soft); cursor:pointer; transition:color .12s ease; line-height:1; user-select:none; }
+  .review-star-picker .star-pick.active{ color:var(--gold-deep); }
+  .review-form-wrap input[type="text"], .review-form-wrap textarea{
+    width:100%; box-sizing:border-box; font-family:inherit; font-size:12.5px; color:var(--ink);
+    background:var(--bg-soft); border:1px solid var(--gold-pale); border-radius:8px;
+    padding:9px 11px; margin-bottom:8px; resize:vertical;
+  }
+  .review-form-wrap input[type="text"]:focus, .review-form-wrap textarea:focus{ outline:none; border-color:var(--gold-deep); }
+  .review-hp-field{ position:absolute !important; left:-9999px !important; width:1px !important; height:1px !important; overflow:hidden !important; opacity:0; }
+  #reviewSubmitBtn{
+    background:var(--ink); color:#fff; border:none; border-radius:8px; padding:9px 18px;
+    font-size:12.5px; font-weight:700; cursor:pointer; transition:opacity .15s ease;
+  }
+  #reviewSubmitBtn:disabled{ opacity:.6; cursor:default; }
+  .review-form-msg{ font-size:12px; margin-top:8px; line-height:1.7; }
+  .review-form-msg.ok{ color:#2e7d32; }
+  .review-form-msg.err{ color:#c62828; }
+
   /* ===================================================================
      إعادة الهيكلة لعدة صفحات — 21 أغسطس 2026
      شريط تنقل التصنيفات (بالهيدر) + قسم الأكثر مبيعًا وبطاقات التصنيف (بالرئيسية)
