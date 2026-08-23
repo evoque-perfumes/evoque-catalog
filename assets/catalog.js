@@ -7,6 +7,9 @@
 const WHATSAPP_NUMBER = "971522275255";
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwC3s_nTuYaQ_OVku-gcrX3Lv2idt7DY1kHV4EJl9CfiGdRIOedetUBPjPMShc8-ffB/exec";
+// رابط Google Apps Script Web App منفصل لاستقبال تقييمات العملاء — انشره حسب
+// دليل reviews-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
+const REVIEWS_ENDPOINT = "PASTE_REVIEWS_ENDPOINT_HERE";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
@@ -45,7 +48,7 @@ const BEST_SELLER_IDS = [
 ];
 
 let perfumes = [];
-let reviews = []; // reviews.json — تقييمات العملاء: [{id, perfumeId, name, rating, commentAr, commentEn, date}]
+let reviews = []; // reviews.json — تقييمات العملاء: [{id, perfumeId, name, rating, comment, date, visible, source}]
 let lang = "ar";
 let country = "AE"; // "AE" (الإمارات، AED) | "OM" (عُمان، OMR) — يحدد أي أعمدة أسعار نقرأ ومين خيارات الدفع المتاحة
 
@@ -154,6 +157,16 @@ const I18N = {
     reviewsTitle: "آراء عملائنا",
     reviewsEmpty: "ما فيه تقييمات لهذا العطر بعد — كن أول من يقيّمه بعد تجربته!",
     reviewsCount: (n) => n === 1 ? "تقييم واحد" : n === 2 ? "تقييمان" : `${n} تقييمات`,
+    reviewAnon: "عميل Evoque",
+    reviewFormTitle: "شاركنا رأيك بهذا العطر",
+    reviewNamePlaceholder: "اسمك (اختياري)",
+    reviewCommentPlaceholder: "شو رأيك بالعطر؟ (اختياري)",
+    reviewSubmitBtn: "إرسال التقييم",
+    reviewSubmitting: "جاري الإرسال...",
+    reviewNeedRating: "الرجاء اختيار عدد النجوم أولًا.",
+    reviewThanks: "شكرًا لك! تم إرسال تقييمك.",
+    reviewError: "صار خطأ بإرسال التقييم، حاول مرة ثانية لاحقًا.",
+    reviewEndpointMissing: "خدمة التقييمات غير مفعّلة حاليًا، حاول لاحقًا.",
     top: "أهم المكونات", middle: "وسط النوتس", base: "قاعدة النوتس",
     longevity: "الثبات", sillage: "الفوحان",
     askPrice: "اسأل عن السعر",
@@ -291,6 +304,16 @@ const I18N = {
     reviewsTitle: "Customer reviews",
     reviewsEmpty: "No reviews yet for this fragrance — be the first to review it after trying it!",
     reviewsCount: (n) => n === 1 ? "1 review" : `${n} reviews`,
+    reviewAnon: "Evoque customer",
+    reviewFormTitle: "Share your opinion about this fragrance",
+    reviewNamePlaceholder: "Your name (optional)",
+    reviewCommentPlaceholder: "What do you think of it? (optional)",
+    reviewSubmitBtn: "Submit review",
+    reviewSubmitting: "Submitting...",
+    reviewNeedRating: "Please choose a star rating first.",
+    reviewThanks: "Thank you! Your review has been submitted.",
+    reviewError: "There was an error submitting your review. Please try again later.",
+    reviewEndpointMissing: "Reviews are temporarily unavailable, please try again later.",
     top: "Key notes", middle: "Middle notes", base: "Base notes",
     longevity: "Longevity", sillage: "Sillage",
     askPrice: "Ask for price",
@@ -741,13 +764,18 @@ function starsHtml(rating){
   return `<span class="stars">${out}</span>`;
 }
 
-function reviewDateDisplay(dateStr){
-  if(!dateStr) return "";
-  try{
-    const d = new Date(dateStr + "T00:00:00");
-    return d.toLocaleDateString(lang === "ar" ? "ar" : "en-GB", { year:"numeric", month:"short", day:"numeric" });
-  }catch(e){ return dateStr; }
+// يهرّب أي أحرف HTML خطرة — دفاع أساسي ضد حقن أكواد (XSS) عبر اسم/تعليق العميل،
+// لازم يُستخدم مع أي نص مصدره العميل قبل ما ينحط بالصفحة (innerHTML)
+function escapeHtml(str){
+  return String(str||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
 }
+
+let selectedReviewRating = 0; // النجوم المختارة حاليًا بفورم تقييم مفتوح
 
 function renderReviewsSection(p){
   const t = I18N[lang];
@@ -766,18 +794,119 @@ function renderReviewsSection(p){
   if(list.length === 0){
     html += `<div class="reviews-empty">${t.reviewsEmpty}</div>`;
   } else {
-    html += `<div class="reviews-list">` + list.map(r => `
+    // ملاحظة: التاريخ مقصود ما يظهر للعميل هنا إطلاقًا — يظهر فقط بلوحة التحكم
+    html += `<div class="reviews-list">` + list.map(r => {
+      const commentText = r.comment || (lang==="ar" ? (r.commentAr||r.commentEn) : (r.commentEn||r.commentAr)) || "";
+      return `
       <div class="review-card">
         <div class="review-top">
-          <span class="review-name">${(r.name||"").replace(/</g,"&lt;")}</span>
+          <span class="review-name">${escapeHtml(r.name) || t.reviewAnon}</span>
           ${starsHtml(r.rating)}
         </div>
-        <p class="review-comment">${((lang==="ar" ? (r.commentAr||r.commentEn) : (r.commentEn||r.commentAr))||"").replace(/</g,"&lt;")}</p>
-        <div class="review-date">${reviewDateDisplay(r.date)}</div>
+        ${commentText ? `<p class="review-comment">${escapeHtml(commentText)}</p>` : ""}
       </div>
-    `).join("") + `</div>`;
+    `;}).join("") + `</div>`;
   }
+
+  // ----- فورم إضافة تقييم جديد من العميل مباشرة -----
+  html += `
+    <div class="review-form-wrap">
+      <h4>${t.reviewFormTitle}</h4>
+      <div class="review-star-picker" id="reviewStarPicker">
+        ${[1,2,3,4,5].map(i => `<span class="star-pick" data-val="${i}">★</span>`).join("")}
+      </div>
+      <input type="text" id="reviewNameInput" placeholder="${t.reviewNamePlaceholder}" maxlength="60">
+      <textarea id="reviewCommentInput" rows="3" placeholder="${t.reviewCommentPlaceholder}" maxlength="500"></textarea>
+      <input type="text" id="reviewHpField" name="hp_check" class="review-hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="button" id="reviewSubmitBtn">${t.reviewSubmitBtn}</button>
+      <div class="review-form-msg" id="reviewFormMsg"></div>
+    </div>
+  `;
+
   wrap.innerHTML = html;
+  wireReviewForm(p);
+}
+
+function wireReviewForm(p){
+  selectedReviewRating = 0;
+  const picker = document.getElementById("reviewStarPicker");
+  if(!picker) return;
+  const stars = picker.querySelectorAll(".star-pick");
+  function paintStars(upto){
+    stars.forEach(s => s.classList.toggle("active", Number(s.dataset.val) <= upto));
+  }
+  stars.forEach(s => {
+    s.addEventListener("mouseenter", () => paintStars(Number(s.dataset.val)));
+    s.addEventListener("click", () => { selectedReviewRating = Number(s.dataset.val); paintStars(selectedReviewRating); });
+  });
+  picker.addEventListener("mouseleave", () => paintStars(selectedReviewRating));
+
+  const btn = document.getElementById("reviewSubmitBtn");
+  if(btn) btn.addEventListener("click", () => submitReview(p));
+}
+
+function submitReview(p){
+  const t = I18N[lang];
+  const msgBox = document.getElementById("reviewFormMsg");
+
+  if(!selectedReviewRating){
+    msgBox.textContent = t.reviewNeedRating;
+    msgBox.className = "review-form-msg err";
+    return;
+  }
+
+  const name = document.getElementById("reviewNameInput").value.trim().slice(0, 60);
+  const comment = document.getElementById("reviewCommentInput").value.trim().slice(0, 500);
+  const hp = document.getElementById("reviewHpField").value.trim();
+  const rating = selectedReviewRating;
+
+  if(!REVIEWS_ENDPOINT || REVIEWS_ENDPOINT.indexOf("PASTE_") === 0){
+    msgBox.textContent = t.reviewEndpointMissing;
+    msgBox.className = "review-form-msg err";
+    return;
+  }
+
+  const btn = document.getElementById("reviewSubmitBtn");
+  btn.disabled = true;
+  btn.textContent = t.reviewSubmitting;
+
+  const payload = { perfumeId: p.id, brand: p.brand, name: p.name, reviewerName: name, rating, comment, hp };
+
+  // نفس تقنية نموذج الطلب بالضبط: فورم مخفي + iframe مخفي (Navigation حقيقي) —
+  // ما يتأثر بقيود CORS ولا بإضافات حجب الإعلانات اللي توقف fetch/XHR أحيانًا.
+  try{
+    const form = document.getElementById("reviewHiddenForm");
+    const iframe = document.getElementById("reviewHiddenFrame");
+    form.action = REVIEWS_ENDPOINT;
+    document.getElementById("reviewHiddenPayload").value = JSON.stringify(payload);
+
+    let settled = false;
+    function finish(){
+      if(settled) return;
+      settled = true;
+      iframe.onload = null;
+      // إضافة تفاؤلية فورية — العميل يشوف تقييمه فورًا بدون ما ينتظر إعادة بناء الموقع
+      reviews.push({
+        id: `${p.id}-local-${Date.now()}`,
+        perfumeId: p.id,
+        name, rating, comment,
+        date: "",
+        visible: true
+      });
+      renderReviewsSection(p);
+      const freshMsg = document.getElementById("reviewFormMsg");
+      if(freshMsg){ freshMsg.textContent = t.reviewThanks; freshMsg.className = "review-form-msg ok"; }
+    }
+    iframe.onload = finish;
+    setTimeout(finish, 4000);
+    form.submit();
+  }catch(err){
+    console.error("Evoque review submit error:", err);
+    msgBox.textContent = t.reviewError;
+    msgBox.className = "review-form-msg err";
+    btn.disabled = false;
+    btn.textContent = t.reviewSubmitBtn;
+  }
 }
 
 // خطة طوارئ فقط (22 أغسطس 2026): الشيت ما عاد هو مصدر البيانات الأساسي — كل
