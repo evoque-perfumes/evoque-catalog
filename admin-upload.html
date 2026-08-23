@@ -140,6 +140,7 @@
       <button type="button" class="ghost" id="modeStockBtn">📊 المخزون</button>
       <button type="button" class="ghost" id="modeExcelBtn">📥 استيراد عطور من إكسل</button>
       <button type="button" class="ghost" id="modeReviewsBtn">⭐ التقييمات</button>
+      <button type="button" class="ghost" id="modeBankBtn">🏦 بيانات البنك</button>
     </div>
     <small class="hint" style="margin-top:0;">
       عندك 182 عطر موجودين ببياناتهم كاملة أصلًا (من الشيت القديم) — كل اللي ناقصهم الصورة.
@@ -149,6 +150,7 @@
       استخدم "المخزون" عشان تشوف وتحدّث حالة "متوفر/خلص" بسرعة، أو تشوف العطور اللي بياناتها ناقصة.
       استخدم "استيراد من إكسل" عشان تضيف عدة عطور جديدة دفعة وحدة من ملف إكسل، بدل ما تعبي كل عطر يدويًا.
       استخدم "التقييمات" عشان تضيف تقييم عميل حقيقي على عطر معيّن، أو تعدّل/تحذف تقييم موجود — التقييمات تظهر للزوار مباشرة تحت تفاصيل العطر بالموقع.
+      استخدم "بيانات البنك" عشان تدخل أو تعدّل حساب التحويل البنكي اللي يشوفه العميل بالموقع لما يختار "تحويل بنكي" — منفصل للإمارات وعُمان، وتقدر تغيّره أي وقت.
     </small>
 
     <div id="editSearchWrap" style="display:none;">
@@ -299,6 +301,49 @@
     <div class="status" id="rv_statusBox"></div>
   </div>
 
+  <div class="panel" id="bankInfoPanel" style="display:none;">
+    <h2>3) بيانات الحساب البنكي</h2>
+    <small class="hint" style="margin-top:0;">
+      هذي البيانات تظهر للعميل بالموقع مباشرة لما يختار "تحويل بنكي" بنموذج الطلب — منفصلة للإمارات
+      وعُمان. اترك أي حقل فاضي لو ما تبا يظهر (مثلًا لو ما عندك سويفت كود). اضغط "تحميل آخر نسخة" لو
+      فتحت هذا الوضع بعد فترة طويلة، عشان تتأكد إنك تعدّل على أحدث بيانات محفوظة.
+    </small>
+    <div class="row" style="margin-bottom:6px;">
+      <button type="button" id="bank_reloadBtn" class="secondary">تحميل آخر نسخة</button>
+    </div>
+
+    <fieldset>
+      <legend>🇦🇪 الإمارات</legend>
+      <div class="grid2">
+        <div class="field"><label for="bank_ae_bankName">اسم البنك</label><input type="text" id="bank_ae_bankName" placeholder="مثال: بنك الإمارات دبي الوطني"></div>
+        <div class="field"><label for="bank_ae_accountName">اسم صاحب الحساب</label><input type="text" id="bank_ae_accountName"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="bank_ae_accountNumber">رقم الحساب</label><input type="text" id="bank_ae_accountNumber"></div>
+        <div class="field"><label for="bank_ae_iban">رقم الآيبان (IBAN)</label><input type="text" id="bank_ae_iban"></div>
+      </div>
+      <div class="field"><label for="bank_ae_swift">رمز السويفت (SWIFT) — اختياري</label><input type="text" id="bank_ae_swift"></div>
+    </fieldset>
+
+    <fieldset style="margin-top:16px;">
+      <legend>🇴🇲 عُمان</legend>
+      <div class="grid2">
+        <div class="field"><label for="bank_om_bankName">اسم البنك</label><input type="text" id="bank_om_bankName" placeholder="مثال: بنك مسقط"></div>
+        <div class="field"><label for="bank_om_accountName">اسم صاحب الحساب</label><input type="text" id="bank_om_accountName"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="bank_om_accountNumber">رقم الحساب</label><input type="text" id="bank_om_accountNumber"></div>
+        <div class="field"><label for="bank_om_iban">رقم الآيبان (IBAN)</label><input type="text" id="bank_om_iban"></div>
+      </div>
+      <div class="field"><label for="bank_om_swift">رمز السويفت (SWIFT) — اختياري</label><input type="text" id="bank_om_swift"></div>
+    </fieldset>
+
+    <div class="row">
+      <button type="button" id="bank_saveBtn">احفظ بيانات البنك</button>
+    </div>
+    <div class="status" id="bank_statusBox"></div>
+  </div>
+
   <div class="panel" id="excelPanel" style="display:none;">
     <h2>3) استيراد عطور جديدة من إكسل</h2>
     <small class="hint" style="margin-top:0;">
@@ -445,14 +490,17 @@ const REPO = "evoque-catalog";
 const BRANCH = "main";
 const DATA_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data.json?t=` + Date.now();
 const REVIEWS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/reviews.json?t=` + Date.now();
+const BANK_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/bank-info.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
+const BANK_JSON_PATH = "bank-info.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
 let reviewsData = [];        // آخر نسخة معروفة من reviews.json (للعرض/البحث فقط)
 let reviewsSelected = null;  // العطر المختار حاليًا بوضع "التقييمات"
 let reviewsEditingId = null; // id التقييم الحالي المفتوح للتعديل (null = فورم إضافة جديد)
+let bankInfoData = { AE:{}, OM:{} }; // آخر نسخة معروفة من bank-info.json
 let existingFiles = new Set();
 let mode = "add";            // "add" | "edit"
 let editingOriginal = null;  // العطر الأصلي قبل التعديل (null لو إضافة)
@@ -845,12 +893,14 @@ function setMode(newMode){
   document.getElementById("modeStockBtn").classList.toggle("active", mode === "stock");
   document.getElementById("modeExcelBtn").classList.toggle("active", mode === "excel");
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
+  document.getElementById("modeBankBtn").classList.toggle("active", mode === "bank");
   document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock" || mode === "reviews") ? "block" : "none";
   document.getElementById("progressStatsWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
   document.getElementById("hideUploadedRow").style.display = (mode === "edit" || mode === "photo") ? "flex" : "none";
   document.getElementById("stockCategoryWrap").style.display = mode === "stock" ? "block" : "none";
   document.getElementById("stockQuickPanel").style.display = "none";
   document.getElementById("reviewsQuickPanel").style.display = "none";
+  document.getElementById("bankInfoPanel").style.display = mode === "bank" ? "block" : "none";
   stockCategoryActive = null;
   stockSelected = null;
   reviewsSelected = null;
@@ -893,6 +943,7 @@ document.getElementById("modeBulkBtn").addEventListener("click", () => setMode("
 document.getElementById("modeStockBtn").addEventListener("click", () => setMode("stock"));
 document.getElementById("modeExcelBtn").addEventListener("click", () => setMode("excel"));
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
+document.getElementById("modeBankBtn").addEventListener("click", () => { setMode("bank"); loadBankInfoIntoForm(); });
 
 // ===== البحث (تعديل + رفع صورة فقط + المخزون يشتركون بنفس مربع البحث) =====
 function renderDropdown(query){
@@ -1427,6 +1478,137 @@ async function updateReviewsJsonWithRetry(token, mutateFn, commitMsg, attempt){
   }
   return newList;
 }
+
+// ===== قراءة/كتابة bank-info.json — نفس منطق reviews.json بالضبط، بس كائن وحد
+// (بيانات البنك للإمارات وعُمان) بدل قائمة =====
+function bankShowStatus(msg, type){
+  const box = document.getElementById("bank_statusBox");
+  box.textContent = msg;
+  box.className = "status show " + type;
+}
+
+async function getBankInfoWithSha(token){
+  const res = await fetch(`${API_BASE}/${BANK_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { obj: { AE:{}, OM:{} }, sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة bank-info.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  const obj = JSON.parse(base64ToUtf8(info.content));
+  return { obj: (obj && typeof obj === "object") ? obj : { AE:{}, OM:{} }, sha: info.sha };
+}
+
+async function putBankInfoJson(obj, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(obj, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${BANK_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. اضغط \"تحميل آخر نسخة\" وجرّب مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updateBankInfoWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { obj, sha } = await getBankInfoWithSha(token);
+  const newObj = mutateFn(obj);
+  try{
+    await putBankInfoJson(newObj, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateBankInfoWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newObj;
+}
+
+function fillBankForm(obj){
+  const ae = (obj && obj.AE) || {};
+  const om = (obj && obj.OM) || {};
+  document.getElementById("bank_ae_bankName").value = ae.bankName || "";
+  document.getElementById("bank_ae_accountName").value = ae.accountName || "";
+  document.getElementById("bank_ae_accountNumber").value = ae.accountNumber || "";
+  document.getElementById("bank_ae_iban").value = ae.iban || "";
+  document.getElementById("bank_ae_swift").value = ae.swift || "";
+  document.getElementById("bank_om_bankName").value = om.bankName || "";
+  document.getElementById("bank_om_accountName").value = om.accountName || "";
+  document.getElementById("bank_om_accountNumber").value = om.accountNumber || "";
+  document.getElementById("bank_om_iban").value = om.iban || "";
+  document.getElementById("bank_om_swift").value = om.swift || "";
+}
+
+function readBankForm(){
+  return {
+    AE: {
+      bankName: document.getElementById("bank_ae_bankName").value.trim(),
+      accountName: document.getElementById("bank_ae_accountName").value.trim(),
+      accountNumber: document.getElementById("bank_ae_accountNumber").value.trim(),
+      iban: document.getElementById("bank_ae_iban").value.trim(),
+      swift: document.getElementById("bank_ae_swift").value.trim()
+    },
+    OM: {
+      bankName: document.getElementById("bank_om_bankName").value.trim(),
+      accountName: document.getElementById("bank_om_accountName").value.trim(),
+      accountNumber: document.getElementById("bank_om_accountNumber").value.trim(),
+      iban: document.getElementById("bank_om_iban").value.trim(),
+      swift: document.getElementById("bank_om_swift").value.trim()
+    }
+  };
+}
+
+// تحميل أحدث نسخة معروفة (نستخدم رابط raw العام — ما يحتاج توكن — نفس أسلوب data.json/reviews.json)
+async function loadBankInfoIntoForm(){
+  try{
+    bankShowStatus("جارِ التحميل...", "info");
+    const res = await fetch(BANK_JSON_RAW_URL, { cache: "no-store" });
+    if(res.ok){
+      bankInfoData = await res.json();
+    } else if(res.status === 404){
+      bankInfoData = { AE:{}, OM:{} };
+    } else {
+      throw new Error("HTTP " + res.status);
+    }
+    fillBankForm(bankInfoData);
+    hideStatus();
+    document.getElementById("bank_statusBox").className = "status";
+  }catch(e){
+    bankShowStatus("ما قدرت أجيب بيانات البنك الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
+  }
+}
+
+document.getElementById("bank_reloadBtn").addEventListener("click", loadBankInfoIntoForm);
+
+document.getElementById("bank_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ bankShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  const btn = document.getElementById("bank_saveBtn");
+  btn.disabled = true;
+  try{
+    bankShowStatus("جارِ الحفظ والنشر...", "info");
+    const formData = readBankForm();
+    const updated = await updateBankInfoWithRetry(token, () => formData, "Update bank transfer details");
+    bankInfoData = updated;
+    bankShowStatus("تم الحفظ! بيانات البنك محدّثة على الموقع الحين.", "ok");
+  }catch(e){
+    bankShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
 
 async function uploadPhoto(slug, file, token, label){
   const extMap = {"image/png":".png", "image/jpeg":".jpg", "image/jpg":".jpg", "image/webp":".webp"};

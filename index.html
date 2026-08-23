@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@300;400;500;700&family=Jost:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/catalog.css?v=20260823b">
+<link rel="stylesheet" href="assets/catalog.css?v=20260823c">
 <!-- ===== إضافات SEO ===== -->
 <meta name="description" content="متجر Evoque Perfume لعطور بديلة فاخرة في الإمارات وعُمان — تصفح الأكثر مبيعًا واختر تصنيفك (رجالي/نسائي/للجنسين)، وتواصل معنا مباشرة عبر واتساب.">
 <link rel="canonical" href="https://evoqueperfumes.com/">
@@ -178,7 +178,6 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 </div>
 
 <div class="cart-bar">
-  <div class="payment-row" id="paymentRow"></div>
   <div class="cart-bottom-row">
     <button type="button" class="cart-info" id="cartInfo"><svg class="icon"><use href="#ic-cart"/></svg></button>
     <div class="checkout-row">
@@ -217,6 +216,10 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
         <label id="lblCountry"></label>
         <select id="ofCountrySelect"></select>
         <div style="font-size:11px; color:var(--muted); margin-top:5px;" id="ofCountryHint"></div>
+
+        <label id="lblPaymentMethodModal"></label>
+        <div class="payment-row" id="ofPaymentRow"></div>
+        <div class="bank-details-box" id="ofBankDetails" style="display:none;"></div>
 
         <div id="ofAeBlock" style="display:none;">
           <label id="lblEmirate"></label>
@@ -277,7 +280,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 <script>
   window.EVOQUE_PAGE = { mode: "home" };
 </script>
-<script src="assets/catalog.js?v=20260823b"></script>
+<script src="assets/catalog.js?v=20260823c"></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>

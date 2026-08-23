@@ -1,0 +1,16 @@
+{
+  "AE": {
+    "bankName": "",
+    "accountName": "",
+    "accountNumber": "",
+    "iban": "",
+    "swift": ""
+  },
+  "OM": {
+    "bankName": "",
+    "accountName": "",
+    "accountNumber": "",
+    "iban": "",
+    "swift": ""
+  }
+}
