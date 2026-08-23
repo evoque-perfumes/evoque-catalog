@@ -1051,6 +1051,7 @@ let selectedBrand = "all";
 let searchQuery = "";
 const PAGE_SIZE = 12;
 let visibleCount = PAGE_SIZE;
+let showMoreObserver = null; // يراقب عنصر التحميل التلقائي أثناء التمرير (Infinite Scroll)
 let cart = {}; // in-memory only, no browser storage: { perfumeId: {size, qty} } — نجيب البراند/الاسم/السعر وقت العرض من مصفوفة perfumes نفسها
 let paymentMethod = "cod"; // "cod" | "tabby" | "bank"
 
@@ -1393,13 +1394,25 @@ function renderGrid(explicitList){
   const list = isExplicit ? fullList : fullList.slice(0, visibleCount);
   if(resultsCountEl) resultsCountEl.textContent = t.resultsCount(list.length, fullList.length);
 
+  // تحميل تلقائي أثناء التمرير (Infinite Scroll) — بدون أي زر يضغطه العميل:
+  // نراقب عنصر حساس (sentinel) شفاف بنهاية القائمة، ولما يقترب من الظهور
+  // بالشاشة (قبل ما يوصله العميل فعليًا بمسافة كافية، عشان يكون سلس بدون وقفة)
+  // نزيد visibleCount ونعيد الرسم تلقائيًا.
+  if(showMoreObserver){ showMoreObserver.disconnect(); showMoreObserver = null; }
   if(!isExplicit && fullList.length > visibleCount && showMoreWrap){
-    const moreBtn = document.createElement("button");
-    moreBtn.className = "show-more-btn";
-    moreBtn.type = "button";
-    moreBtn.innerHTML = `<span>${t.showMore}</span>` + svgIcon("ic-chevron");
-    moreBtn.onclick = ()=>{ visibleCount += PAGE_SIZE; renderGrid(); };
-    showMoreWrap.appendChild(moreBtn);
+    const sentinel = document.createElement("div");
+    sentinel.className = "scroll-sentinel";
+    showMoreWrap.appendChild(sentinel);
+    showMoreObserver = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          showMoreObserver.disconnect();
+          visibleCount += PAGE_SIZE;
+          renderGrid();
+        }
+      });
+    }, { rootMargin: "600px 0px 600px 0px" });
+    showMoreObserver.observe(sentinel);
   }
 
   list.forEach(p=>{
