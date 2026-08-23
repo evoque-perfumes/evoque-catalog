@@ -9,26 +9,27 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f8f4ec; --surface:#ffffff; --ink:#221c15; --muted:#8a7d68;
-    --gold:#b3873f; --gold-deep:#8a6528; --gold-soft:#e9d7ae; --gold-pale:#f4e9cf;
-    --dark:#171310; --line:#e6dcc6; --wa:#25d366;
-    --shadow:0 10px 30px rgba(34,28,21,.08); --radius:18px;
+    --bg:#FFFFFF; --surface:#ffffff; --ink:#111111; --muted:#68686f;
+    --gold:#E11D2E; --gold-deep:#B0121F; --gold-soft:#F5F5F5; --gold-pale:#FDEAEA;
+    --dark:#0A0A0A; --line:#E5E5E8; --wa:#25d366;
+    --shadow:0 10px 30px rgba(0,0,0,.06); --radius:14px;
   }
   *{box-sizing:border-box;}
-  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Poppins','Segoe UI',Tahoma,sans-serif; -webkit-font-smoothing:antialiased; }
-  h1,h2,.serif{ font-family:'Cormorant Garamond','Poppins',serif; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Tajawal','Poppins','Segoe UI',Tahoma,sans-serif; -webkit-font-smoothing:antialiased; }
+  h1,.serif{ font-family:'Cairo','Tajawal',sans-serif; font-weight:800; }
   a{ color:var(--gold-deep); }
   header{
-    text-align:center; padding:34px 16px 26px;
-    background:linear-gradient(180deg,#1c1712 0%,var(--dark) 45%,#3d352c 100%);
+    text-align:center; padding:30px 16px 26px;
+    background:linear-gradient(180deg, #000000 0%, var(--dark) 45%, #1a1a1a 100%);
     color:var(--gold-pale);
   }
-  header .logo{ font-family:'Cormorant Garamond',serif; font-size:32px; color:#fff; margin:0; }
-  header .logo span{ display:block; font-size:13px; letter-spacing:4px; color:var(--gold-soft); margin-top:2px; font-family:'Poppins'; }
-  .back-link{ display:inline-block; margin-top:14px; font-size:12.5px; color:var(--gold-soft); text-decoration:none; border:1px solid rgba(233,215,174,.3); border-radius:999px; padding:7px 16px; }
+  header .logo-img{ display:block; margin:0 auto; max-width:150px; width:38%; height:auto; }
+  .header-divider{ width:36px; height:2px; background:var(--gold); margin:10px auto 0; border-radius:2px; opacity:.8; }
+  .back-link{ display:inline-block; margin-top:16px; font-size:12.5px; color:var(--gold-soft); text-decoration:none; border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:7px 16px; }
+  .back-link:hover{ border-color:rgba(255,255,255,.5); }
   main{ max-width:760px; margin:0 auto; padding:36px 20px 60px; }
   .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:32px 28px; }
   h1.page-title{ font-size:30px; margin:0 0 6px; color:var(--ink); }
@@ -47,8 +48,9 @@
 <body>
 
 <header>
-  <p class="logo">Evoque<span>PERFUMES</span></p>
-  <a class="back-link" href="index.html">← رجوع للكتالوج</a>
+  <img class="logo-img" alt="Evoque Perfume" src="assets/evoque-logo.png">
+  <div class="header-divider"></div>
+  <a class="back-link" href="index.html">&larr; رجوع للكتالوج</a>
 </header>
 
 <main>
