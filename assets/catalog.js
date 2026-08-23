@@ -167,6 +167,8 @@ const I18N = {
     reviewThanks: "شكرًا لك! تم إرسال تقييمك.",
     reviewError: "صار خطأ بإرسال التقييم، حاول مرة ثانية لاحقًا.",
     reviewEndpointMissing: "خدمة التقييمات غير مفعّلة حاليًا، حاول لاحقًا.",
+    reviewPrev: "التقييم السابق",
+    reviewNext: "التقييم التالي",
     top: "أهم المكونات", middle: "وسط النوتس", base: "قاعدة النوتس",
     longevity: "الثبات", sillage: "الفوحان",
     askPrice: "اسأل عن السعر",
@@ -314,6 +316,8 @@ const I18N = {
     reviewThanks: "Thank you! Your review has been submitted.",
     reviewError: "There was an error submitting your review. Please try again later.",
     reviewEndpointMissing: "Reviews are temporarily unavailable, please try again later.",
+    reviewPrev: "Previous review",
+    reviewNext: "Next review",
     top: "Key notes", middle: "Middle notes", base: "Base notes",
     longevity: "Longevity", sillage: "Sillage",
     askPrice: "Ask for price",
@@ -776,13 +780,20 @@ function escapeHtml(str){
 }
 
 let selectedReviewRating = 0; // النجوم المختارة حاليًا بفورم تقييم مفتوح
+let reviewCarouselIndex = 0;  // التقييم المعروض حاليًا بالكاروسيل
+let reviewCarouselTimer = null;
+const REVIEW_CAROUSEL_INTERVAL_MS = 4500;
 
+// نبني الهيكل العام مرة وحدة فقط لما يفتح اللايتبوكس (رأس + كاروسيل + فورم إضافة
+// تقييم)، وبعدها التنقل بين التقييمات (تلقائي أو بالأسهم) يعيد بناء الكاروسيل
+// فقط — بدون ما يلمس فورم "شاركنا رأيك" حتى لو العميل كان يكتب فيه وقتها.
 function renderReviewsSection(p){
   const t = I18N[lang];
   const wrap = document.getElementById("lightboxReviews");
   if(!wrap) return;
   const summary = ratingSummary(p.id);
   const list = reviewsFor(p.id);
+  reviewCarouselIndex = 0;
 
   let html = `<div class="reviews-head">`;
   html += `<h3>${t.reviewsTitle}</h3>`;
@@ -791,22 +802,7 @@ function renderReviewsSection(p){
   }
   html += `</div>`;
 
-  if(list.length === 0){
-    html += `<div class="reviews-empty">${t.reviewsEmpty}</div>`;
-  } else {
-    // ملاحظة: التاريخ مقصود ما يظهر للعميل هنا إطلاقًا — يظهر فقط بلوحة التحكم
-    html += `<div class="reviews-list">` + list.map(r => {
-      const commentText = r.comment || (lang==="ar" ? (r.commentAr||r.commentEn) : (r.commentEn||r.commentAr)) || "";
-      return `
-      <div class="review-card">
-        <div class="review-top">
-          <span class="review-name">${escapeHtml(r.name) || t.reviewAnon}</span>
-          ${starsHtml(r.rating)}
-        </div>
-        ${commentText ? `<p class="review-comment">${escapeHtml(commentText)}</p>` : ""}
-      </div>
-    `;}).join("") + `</div>`;
-  }
+  html += `<div id="reviewsCarouselWrap"></div>`;
 
   // ----- فورم إضافة تقييم جديد من العميل مباشرة -----
   html += `
@@ -824,7 +820,75 @@ function renderReviewsSection(p){
   `;
 
   wrap.innerHTML = html;
+  renderReviewCarousel(p, list);
+  startReviewCarouselTimer(p, list);
   wireReviewForm(p);
+}
+
+// يبني/يعيد بناء الكاروسيل فقط (تقييم واحد بالشاشة + سهم يمين/يسار + نقاط) —
+// ما يمس فورم إضافة التقييم إطلاقًا
+function renderReviewCarousel(p, list){
+  const t = I18N[lang];
+  const cWrap = document.getElementById("reviewsCarouselWrap");
+  if(!cWrap) return;
+
+  if(list.length === 0){
+    if(reviewCarouselTimer){ clearInterval(reviewCarouselTimer); reviewCarouselTimer = null; }
+    cWrap.innerHTML = `<div class="reviews-empty">${t.reviewsEmpty}</div>`;
+    return;
+  }
+
+  if(reviewCarouselIndex >= list.length) reviewCarouselIndex = 0;
+  if(reviewCarouselIndex < 0) reviewCarouselIndex = list.length - 1;
+  const r = list[reviewCarouselIndex];
+  // ملاحظة: التاريخ مقصود ما يظهر للعميل هنا إطلاقًا — يظهر فقط بلوحة التحكم
+  const commentText = r.comment || (lang==="ar" ? (r.commentAr||r.commentEn) : (r.commentEn||r.commentAr)) || "";
+  const multi = list.length > 1;
+
+  cWrap.innerHTML = `
+    <div class="reviews-carousel">
+      ${multi ? `<button type="button" class="review-nav review-nav-prev" id="reviewNavPrev" aria-label="${t.reviewPrev}">‹</button>` : ""}
+      <div class="review-carousel-track">
+        <div class="review-card">
+          <div class="review-top">
+            <span class="review-name">${escapeHtml(r.name) || t.reviewAnon}</span>
+            ${starsHtml(r.rating)}
+          </div>
+          ${commentText ? `<p class="review-comment">${escapeHtml(commentText)}</p>` : ""}
+        </div>
+      </div>
+      ${multi ? `<button type="button" class="review-nav review-nav-next" id="reviewNavNext" aria-label="${t.reviewNext}">›</button>` : ""}
+    </div>
+    ${multi ? `<div class="review-dots">${list.map((_,i)=>`<span class="review-dot ${i===reviewCarouselIndex?"active":""}" data-idx="${i}"></span>`).join("")}</div>` : ""}
+  `;
+
+  if(!multi){
+    if(reviewCarouselTimer){ clearInterval(reviewCarouselTimer); reviewCarouselTimer = null; }
+    return;
+  }
+
+  function goTo(idx){
+    reviewCarouselIndex = idx;
+    renderReviewCarousel(p, list);
+    startReviewCarouselTimer(p, list); // تفاعل يدوي = تصفير مؤقت التبديل التلقائي
+  }
+  document.getElementById("reviewNavPrev").addEventListener("click", () => goTo(reviewCarouselIndex - 1));
+  document.getElementById("reviewNavNext").addEventListener("click", () => goTo(reviewCarouselIndex + 1));
+  cWrap.querySelectorAll(".review-dot").forEach(dot => {
+    dot.addEventListener("click", () => goTo(Number(dot.dataset.idx)));
+  });
+}
+
+function startReviewCarouselTimer(p, list){
+  if(reviewCarouselTimer) clearInterval(reviewCarouselTimer);
+  if(list.length <= 1) return;
+  reviewCarouselTimer = setInterval(() => {
+    reviewCarouselIndex = (reviewCarouselIndex + 1) % list.length;
+    renderReviewCarousel(p, list);
+  }, REVIEW_CAROUSEL_INTERVAL_MS);
+}
+function stopReviewCarouselTimer(){
+  if(reviewCarouselTimer){ clearInterval(reviewCarouselTimer); reviewCarouselTimer = null; }
 }
 
 function wireReviewForm(p){
@@ -886,14 +950,15 @@ function submitReview(p){
       settled = true;
       iframe.onload = null;
       // إضافة تفاؤلية فورية — العميل يشوف تقييمه فورًا بدون ما ينتظر إعادة بناء الموقع
+      const localDate = new Date().toISOString().slice(0, 10); // للترتيب فقط — ما يظهر للعميل
       reviews.push({
         id: `${p.id}-local-${Date.now()}`,
         perfumeId: p.id,
         name, rating, comment,
-        date: "",
+        date: localDate,
         visible: true
       });
-      renderReviewsSection(p);
+      renderReviewsSection(p); // يعيد بناء الكل — التقييم الجديد يطلع أول واحد بالكاروسيل (الأحدث)
       const freshMsg = document.getElementById("reviewFormMsg");
       if(freshMsg){ freshMsg.textContent = t.reviewThanks; freshMsg.className = "review-form-msg ok"; }
     }
@@ -1084,7 +1149,10 @@ function openLightbox(p){
   renderReviewsSection(p);
   document.getElementById("lightboxOverlay").classList.add("open");
 }
-function closeLightbox(){ document.getElementById("lightboxOverlay").classList.remove("open"); }
+function closeLightbox(){
+  document.getElementById("lightboxOverlay").classList.remove("open");
+  stopReviewCarouselTimer(); // نوقف مؤقت التبديل التلقائي عشان ما يشتغل بالخلفية وهو مقفول
+}
 
 function setLang(newLang){
   lang = newLang;
