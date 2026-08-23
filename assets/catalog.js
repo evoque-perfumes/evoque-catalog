@@ -49,6 +49,7 @@ const BEST_SELLER_IDS = [
 
 let perfumes = [];
 let reviews = []; // reviews.json — تقييمات العملاء: [{id, perfumeId, name, rating, comment, date, visible, source}]
+let bankInfo = {}; // bank-info.json — بيانات الحساب البنكي لكل دولة، تُدار من لوحة التحكم (وضع "🏦 بيانات البنك")
 let lang = "ar";
 let country = "AE"; // "AE" (الإمارات، AED) | "OM" (عُمان، OMR) — يحدد أي أعمدة أسعار نقرأ ومين خيارات الدفع المتاحة
 
@@ -202,7 +203,17 @@ const I18N = {
     lblAddress: "العنوان التفصيلي (الشارع، البناية، أقرب معلم)",
     lblNotes: "ملاحظات (اختياري)",
     lblCountry: "الدولة",
-    ofCountryHint: "الدولة مرتبطة بعملة الأسعار المختارة أعلى الصفحة. لتغييرها اختر الدولة الجديدة من القائمة العلوية بالموقع قبل إضافة العطور للسلة.",
+    ofCountryHint: "تقدر تغيّر دولتك من هنا أي وقت — الأسعار والعملة ورسوم التوصيل تتحدث تلقائيًا.",
+    bankDetailsTitle: "بيانات الحساب البنكي",
+    bankFieldBankName: "اسم البنك",
+    bankFieldAccountName: "اسم صاحب الحساب",
+    bankFieldAccountNumber: "رقم الحساب",
+    bankFieldIban: "رقم الآيبان (IBAN)",
+    bankFieldSwift: "رمز السويفت (SWIFT)",
+    bankInfoUnavailable: "بيانات الحساب البنكي غير متوفرة حاليًا، تواصل معنا عبر واتساب وبنرسلها لك.",
+    bankReceiptHint: "بعد إتمام التحويل، أرسل لنا صورة الإيصال عبر واتساب عشان نعتمد طلبك.",
+    sendReceiptBtn: "أرسل إيصال التحويل عبر واتساب",
+    tabbyFeeLabel: "رسوم تابي",
     lblEmirate: "الإمارة",
     lblWilayat: "الولاية",
     wilayatOtherOption: "أخرى (اكتبها)",
@@ -351,7 +362,17 @@ const I18N = {
     lblAddress: "Detailed Address (Street, Building, Nearest Landmark)",
     lblNotes: "Notes (optional)",
     lblCountry: "Country",
-    ofCountryHint: "The country follows the currency selected at the top of the page. To change it, pick the new country from the top of the site before adding perfumes to your cart.",
+    ofCountryHint: "You can change your country here anytime — prices, currency and delivery fees update automatically.",
+    bankDetailsTitle: "Bank account details",
+    bankFieldBankName: "Bank name",
+    bankFieldAccountName: "Account holder name",
+    bankFieldAccountNumber: "Account number",
+    bankFieldIban: "IBAN",
+    bankFieldSwift: "SWIFT code",
+    bankInfoUnavailable: "Bank details aren't available right now — contact us on WhatsApp and we'll send them to you.",
+    bankReceiptHint: "After completing the transfer, please send us a photo of the receipt on WhatsApp so we can approve your order.",
+    sendReceiptBtn: "Send transfer receipt on WhatsApp",
+    tabbyFeeLabel: "Tabby fee",
     lblEmirate: "Emirate",
     lblWilayat: "Wilayat",
     wilayatOtherOption: "Other (type it)",
@@ -419,11 +440,20 @@ function hasFreeShipping(offerStatus){
   return offerStatus.unlocked.some(o => o.freeShipping);
 }
 
-/* ===== إعدادات الشحن — عدّل الأرقام هنا فقط لو تغيّرت أسعار التوصيل ===== */
+/* ===== إعدادات الشحن — عدّل الأرقام هنا فقط لو تغيّرت أسعار التوصيل (23 أغسطس 2026: سعر موحّد للإمارات + تخفيض رسوم عُمان) ===== */
 const SHIPPING_RATES = {
-  AE: { standard: 25, western: 50 },
-  OM: { door: 3, nool: 2 }
+  AE: { standard: 20 },
+  OM: { door: 2, nool: 1 }
 };
+
+/* ===== عمولة تابي — تُضاف تلقائيًا على السعر النهائي فقط لما العميل يختار الدفع عبر تابي
+   (متاح بالإمارات حاليًا فقط، شوف COUNTRIES.AE.tabby). عدّل النسبة هنا فقط لو تغيّرت
+   نسبة عمولة تابي المتفق عليها. ===== */
+const TABBY_FEE_PERCENT = 5;
+function tabbyFeeFor(amount){
+  if(paymentMethod !== "tabby" || !COUNTRIES[country].tabby) return 0;
+  return Math.round(amount * TABBY_FEE_PERCENT / 100);
+}
 
 const UAE_EMIRATES = ["أبوظبي","دبي","الشارقة","عجمان","أم القيوين","رأس الخيمة","الفجيرة","المنطقة الغربية (أبوظبي)"];
 
@@ -747,6 +777,22 @@ async function loadReviewsFromJson(){
   }
 }
 
+// ------------------------------------------------------------------
+// بيانات الحساب البنكي — ملف bank-info.json (تُدار من لوحة التحكم admin-upload.html،
+// وضع "🏦 بيانات البنك"). لو الملف غير موجود أو فيه خطأ مؤقت، نكمل ببيانات فاضية
+// (يظهر للعميل بنفس المكان تنبيه "تواصل معنا عبر واتساب" بدل ما نكسر نموذج الطلب).
+// ------------------------------------------------------------------
+async function loadBankInfoFromJson(){
+  try{
+    const res = await fetch("./bank-info.json");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    bankInfo = (data && typeof data === "object" && !Array.isArray(data)) ? data : {};
+  }catch(e){
+    bankInfo = {};
+  }
+}
+
 // تقييمات عطر معيّن، الأحدث أولًا
 function reviewsFor(perfumeId){
   return reviews.filter(r => r.perfumeId === perfumeId)
@@ -1043,6 +1089,7 @@ async function loadPerfumesFromSheet(){
     }
   }
   await loadReviewsFromJson();
+  await loadBankInfoFromJson();
   renderAll();
 }
 
@@ -1576,19 +1623,60 @@ function paymentLabel(t, method){
   return method==="tabby" ? t.paymentTabby : method==="bank" ? t.paymentBank : t.paymentCOD;
 }
 
-function renderPaymentRow(hasItems){
+// ------------------------------------------------------------------
+// اختيار طريقة الدفع — انتقل من شريط السلة السفلي لداخل نموذج الطلب نفسه
+// (23 أغسطس 2026)، يظهر مباشرة بعد اختيار الدولة، لأن الطرق المتاحة (تابي
+// مثلًا) تعتمد عليها. #ofPaymentRow و#ofBankDetails موجودين بنموذج الطلب فقط.
+// ------------------------------------------------------------------
+function renderOrderPaymentSection(){
   const t = I18N[lang];
-  const wrap = document.getElementById("paymentRow");
-  if(!hasItems){ wrap.style.display = "none"; wrap.innerHTML = ""; return; }
-  wrap.style.display = "flex";
+  const wrap = document.getElementById("ofPaymentRow");
+  if(!wrap) return;
   const methods = [["cod", "ic-truck"], ["tabby", "ic-sparkle"], ["bank", "ic-shield"]]
     .filter(([key])=> key!=="tabby" || COUNTRIES[country].tabby);
+  wrap.style.display = "flex";
   wrap.innerHTML = methods.map(([key, icon])=>
     `<button type="button" class="payment-pill ${paymentMethod===key?"active":""}" data-method="${key}">${svgIcon(icon)}<span>${paymentLabel(t,key)}</span></button>`
   ).join("");
   wrap.querySelectorAll(".payment-pill").forEach(btn=>{
-    btn.onclick = ()=>{ paymentMethod = btn.dataset.method; renderCart(); };
+    btn.onclick = ()=>{
+      paymentMethod = btn.dataset.method;
+      renderOrderPaymentSection();
+      renderBankDetailsBlock();
+      renderShippingSummary();
+      renderCart();
+    };
   });
+}
+
+// حقول بيانات الحساب البنكي المعبّأة فعليًا (من bank-info.json) لدولة معيّنة — نتجاهل الحقول الفاضية
+function bankDetailsFieldsFor(countryCode){
+  const t = I18N[lang];
+  const b = bankInfo[countryCode] || {};
+  const fields = [];
+  if(b.bankName) fields.push([t.bankFieldBankName, b.bankName]);
+  if(b.accountName) fields.push([t.bankFieldAccountName, b.accountName]);
+  if(b.accountNumber) fields.push([t.bankFieldAccountNumber, b.accountNumber]);
+  if(b.iban) fields.push([t.bankFieldIban, b.iban]);
+  if(b.swift) fields.push([t.bankFieldSwift, b.swift]);
+  return fields;
+}
+
+function renderBankDetailsBlock(){
+  const t = I18N[lang];
+  const box = document.getElementById("ofBankDetails");
+  if(!box) return;
+  if(paymentMethod !== "bank"){ box.style.display = "none"; box.innerHTML = ""; return; }
+  const fields = bankDetailsFieldsFor(country);
+  const rowsHtml = fields.length
+    ? fields.map(([label,val])=>`<div class="bd-row"><span>${label}</span><b>${val}</b></div>`).join("")
+    : `<div class="bd-row">${t.bankInfoUnavailable}</div>`;
+  box.style.display = "block";
+  box.innerHTML = `
+    <div class="bd-title">${t.bankDetailsTitle}</div>
+    ${rowsHtml}
+    <div class="bd-hint">${t.bankReceiptHint}</div>
+  `;
 }
 
 function cartItemsList(){
@@ -1643,8 +1731,6 @@ function renderCart(){
   const checkoutBtn = document.getElementById("checkoutBtn");
   const items = cartItemsList();
   const cur = currencyLabel();
-
-  renderPaymentRow(items.length > 0);
 
   if(items.length === 0){
     cartInfo.innerHTML = svgIcon("ic-cart") + `<span>${t.cartEmpty}</span>`;
@@ -1774,19 +1860,30 @@ function populateWilayatSelect(){
   sel.innerHTML = groups + `<option value="__other__">${t.wilayatOtherOption}</option>`;
 }
 
+// العميل يقدر يغيّر الدولة من نفس نموذج الطلب (23 أغسطس 2026) — مفيد خصوصًا لعميل
+// عُماني يبا يتأكد أو يبدّل لعنوان إماراتي أو العكس. تغييرها يحدّث فورًا: العملة/الأسعار
+// (priceFor يقرأ متغيّر country مباشرة)، رسوم التوصيل، طرق الدفع المتاحة (تابي بس بالإمارات)،
+// وبيانات التحويل البنكي المعروضة. ما نفرّغ السلة — نفس العطور تضل بالسلة وبس سعرها يتحدث.
+function onOrderCountryChange(e){
+  country = e.target.value;
+  if(!COUNTRIES[country].tabby && paymentMethod === "tabby") paymentMethod = "cod";
+  updateAddressBlocksVisibility();
+  renderShippingSummary();
+  renderOrderPaymentSection();
+  renderBankDetailsBlock();
+  renderCountrySelect(); // نزامن قائمة الدولة بأعلى الصفحة مع نفس الاختيار
+  renderCart(); // يحدّث سلة السفلي والتخزين المؤقت (sessionStorage) بنفس الدولة الجديدة
+}
+
 function populateOrderCountrySelect(){
-  // الدولة هنا للعرض فقط (Disabled) — نفس الدولة المختارة أعلى الصفحة، لأنها هي اللي حددت
-  // عملة وأسعار العطور الموجودة بالسلة أصلًا. تغييرها من هنا لازم يفرّغ السلة (تعارض أسعار
-  // بين عملتين)، وهذا يضيع طلب العميل وهو بنص الخطوة — فخليناها ثابتة بهذي المرحلة،
-  // وأي تغيير للدولة يصير من القائمة العلوية بالموقع قبل ما يضيف عطور للسلة.
   const sel = document.getElementById("ofCountrySelect");
   sel.innerHTML = Object.keys(COUNTRIES).map(code => {
     const label = lang==="ar" ? COUNTRIES[code].labelAr : COUNTRIES[code].labelEn;
     return `<option value="${code}">${label}</option>`;
   }).join("");
   sel.value = country;
-  sel.disabled = true;
-  sel.onchange = null;
+  sel.disabled = false;
+  sel.onchange = onOrderCountryChange;
 }
 
 function updateAddressBlocksVisibility(){
@@ -1798,9 +1895,7 @@ function updateAddressBlocksVisibility(){
 function currentShippingFee(){
   const isAe = country === "AE";
   if(isAe){
-    const emirateSel = document.getElementById("ofEmirate");
-    const isWestern = emirateSel && emirateSel.value === "المنطقة الغربية (أبوظبي)";
-    return isWestern ? SHIPPING_RATES.AE.western : SHIPPING_RATES.AE.standard;
+    return SHIPPING_RATES.AE.standard;
   } else {
     const doorRadio = document.querySelector('input[name="ofOmDelivery"]:checked');
     const method = doorRadio ? doorRadio.value : "door";
@@ -1816,13 +1911,20 @@ function renderShippingSummary(){
   const offerStatus = computeOffersStatus(items);
   const freeShip = hasFreeShipping(offerStatus);
   const fee = currentShippingFee();
-  const grand = subtotal + (freeShip ? 0 : fee);
+  const shippingCharged = freeShip ? 0 : fee;
+  const preTabbyTotal = subtotal + shippingCharged;
+  const tabbyFee = tabbyFeeFor(preTabbyTotal);
+  const grand = preTabbyTotal + tabbyFee;
   const feeHtml = freeShip
     ? `<s>${fee} ${cur}</s> <span class="os-free">${t.shipFree}</span>`
     : `${fee} ${cur}`;
+  const tabbyRowHtml = tabbyFee > 0
+    ? `<div class="os-row"><span>${t.tabbyFeeLabel}</span><span>${tabbyFee} ${cur}</span></div>`
+    : "";
   document.getElementById("orderShippingSummary").innerHTML = `
     <div class="os-row"><span>${t.shipSubtotal}</span><span>${subtotal} ${cur}</span></div>
     <div class="os-row"><span>${t.shipFee}</span><span>${feeHtml}</span></div>
+    ${tabbyRowHtml}
     <div class="os-row os-total"><span>${t.shipGrandTotal}</span><span>${grand} ${cur}</span></div>
   `;
 }
@@ -1834,6 +1936,7 @@ function applyOrderFormLabels(){
   document.getElementById("lblEmail").textContent = t.lblEmail;
   document.getElementById("lblCountry").textContent = t.lblCountry;
   document.getElementById("ofCountryHint").textContent = t.ofCountryHint;
+  document.getElementById("lblPaymentMethodModal").textContent = t.paymentTitle;
   document.getElementById("lblEmirate").textContent = t.lblEmirate;
   document.getElementById("lblWilayat").textContent = t.lblWilayat;
   document.getElementById("lblDeliveryMethod").textContent = t.lblDeliveryMethod;
@@ -1849,6 +1952,8 @@ function applyOrderFormLabels(){
   populateEmirateSelect();
   populateWilayatSelect();
   updateAddressBlocksVisibility();
+  renderOrderPaymentSection();
+  renderBankDetailsBlock();
   renderShippingSummary();
 
   document.getElementById("ofEmirate").onchange = renderShippingSummary;
@@ -1866,7 +1971,10 @@ function buildOrderPayload(){
   const offerStatus = computeOffersStatus(items);
   const freeShip = hasFreeShipping(offerStatus);
   const shippingFee = currentShippingFee();
-  const grandTotal = subtotal + (freeShip ? 0 : shippingFee);
+  const shippingCharged = freeShip ? 0 : shippingFee;
+  const preTabbyTotal = subtotal + shippingCharged;
+  const tabbyFee = tabbyFeeFor(preTabbyTotal);
+  const grandTotal = preTabbyTotal + tabbyFee;
 
   const isAe = country === "AE";
   let emirateOrWilayat = "", deliveryMethod = "";
@@ -1893,8 +2001,9 @@ function buildOrderPayload(){
     currency: cur,
     paymentMethod: paymentLabel(t, paymentMethod),
     subtotal,
-    shippingFee: freeShip ? 0 : shippingFee,
+    shippingFee: shippingCharged,
     shippingFree: freeShip,
+    tabbyFee,
     total: grandTotal,
     offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
     items: items.map(i => ({
@@ -1954,9 +2063,19 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
   payload.items.forEach((i,idx)=>{
     waMsgLines.push(`${idx+1}. ${i.brand} - ${i.name} (${i.size}ml) x${i.qty}`);
   });
+  if(payload.tabbyFee > 0) waMsgLines.push(`${t.tabbyFeeLabel}: ${payload.tabbyFee} ${payload.currency}`);
   waMsgLines.push(`${t.shipGrandTotal}: ${payload.total} ${payload.currency}`);
   waMsgLines.push(`${t.orderMsgPayment}: ${payload.paymentMethod}`);
   const waFallbackHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsgLines.join("\n"))}`;
+
+  // لما الدفع تحويل بنكي، بعد نجاح الطلب نعرض زر جاهز يفتح واتساب برسالة معبّأة
+  // مسبقًا (اسم/هاتف/الإجمالي) عشان العميل يرفق صورة الإيصال ونعتمد الطلب — سواء
+  // إمارات أو عُمان، نفس الآلية بالضبط (الاعتماد يصير يدويًا عبر واتساب زي باقي المبيعات).
+  const bankReceiptMsg = lang === "ar"
+    ? `مرفق إيصال التحويل البنكي لطلبي من Evoque Perfume.\nالاسم: ${payload.name}\nالهاتف: ${payload.phone}\nالإجمالي: ${payload.total} ${payload.currency}`
+    : `Here's my bank transfer receipt for my Evoque Perfume order.\nName: ${payload.name}\nPhone: ${payload.phone}\nTotal: ${payload.total} ${payload.currency}`;
+  const bankReceiptHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(bankReceiptMsg)}`;
+  const isBankPayment = paymentMethod === "bank";
 
   function showSuccess(){
     document.getElementById("orderModalBody").innerHTML = `
@@ -1964,6 +2083,7 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
         <div class="oc-icon">🎉</div>
         <h4>${t.orderSuccessTitle}</h4>
         <p>${t.orderSuccessMsg}</p>
+        ${isBankPayment ? `<a class="order-wa-fallback" href="${bankReceiptHref}" target="_blank">${t.sendReceiptBtn}</a>` : ""}
       </div>`;
     document.querySelector(".order-modal-foot").style.display = "none";
     cart = {}; renderAll();
