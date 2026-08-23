@@ -256,6 +256,12 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <input type="hidden" name="payload" id="orderHiddenPayload">
 </form>
 
+<!-- نفس تقنية إرسال الطلب أعلاه — فورم + iframe مخفي منفصل لتقييمات العملاء -->
+<iframe name="reviewHiddenFrame" id="reviewHiddenFrame" style="display:none;"></iframe>
+<form id="reviewHiddenForm" method="POST" enctype="text/plain" target="reviewHiddenFrame" style="display:none;">
+  <input type="hidden" name="payload" id="reviewHiddenPayload">
+</form>
+
 <footer>
   <div class="foot-logo">EVOQUE PERFUME</div>
   <div id="footerText"></div>
