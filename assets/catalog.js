@@ -9,7 +9,7 @@ const WHATSAPP_NUMBER = "971522275255";
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwC3s_nTuYaQ_OVku-gcrX3Lv2idt7DY1kHV4EJl9CfiGdRIOedetUBPjPMShc8-ffB/exec";
 // رابط Google Apps Script Web App منفصل لاستقبال تقييمات العملاء — انشره حسب
 // دليل reviews-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
-const REVIEWS_ENDPOINT = "PASTE_REVIEWS_ENDPOINT_HERE";
+const REVIEWS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxwC7mC6JegXo-XZ-TryKrdyf3CP-K2i_zRIHAMh0EDBkriLBaJ1JYtP2lgMevkd5JHAA/exec";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
