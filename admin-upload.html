@@ -22,10 +22,20 @@
   .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px;}
   .panel h2{font-size:15px; margin:0 0 12px; color:var(--muted); font-weight:700;}
   label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
-  input[type=text], input[type=password], input[type=number], select{
+  input[type=text], input[type=password], input[type=number], select, textarea{
     width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
     background:#0f0f0f; color:var(--ink); font-size:14px; margin-bottom:14px;
   }
+  textarea{ font-family:inherit; resize:vertical; }
+  .review-row{ padding:12px; border-bottom:1px solid var(--line); }
+  .review-row:last-child{ border-bottom:none; }
+  .review-row-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .review-row-name{ color:var(--ink); font-weight:600; font-size:13.5px; }
+  .review-row-stars{ color:var(--amber); font-size:12px; letter-spacing:1px; }
+  .review-row-comment{ color:var(--muted); font-size:12.5px; line-height:1.7; margin:6px 0; }
+  .review-row-meta{ color:var(--muted); font-size:11px; }
+  .review-row-actions{ display:flex; gap:8px; margin-top:8px; }
+  .review-row-actions button{ padding:5px 10px; font-size:12px; margin:0; width:auto; }
   input[type=file]{
     width:100%; padding:10px; border-radius:8px; border:1px dashed #444;
     background:#0f0f0f; color:var(--ink); font-size:13px; margin-bottom:14px;
@@ -129,6 +139,7 @@
       <button type="button" class="ghost" id="modeBulkBtn">📦 رفع كل الصور دفعة وحدة</button>
       <button type="button" class="ghost" id="modeStockBtn">📊 المخزون</button>
       <button type="button" class="ghost" id="modeExcelBtn">📥 استيراد عطور من إكسل</button>
+      <button type="button" class="ghost" id="modeReviewsBtn">⭐ التقييمات</button>
     </div>
     <small class="hint" style="margin-top:0;">
       عندك 182 عطر موجودين ببياناتهم كاملة أصلًا (من الشيت القديم) — كل اللي ناقصهم الصورة.
@@ -137,6 +148,7 @@
       فيه كل الصور مسمّاة بنفس اسم البراند والعطر — يطابقها وحده ويرفعها كلها بدون ما تختار كل عطر يدويًا.
       استخدم "المخزون" عشان تشوف وتحدّث حالة "متوفر/خلص" بسرعة، أو تشوف العطور اللي بياناتها ناقصة.
       استخدم "استيراد من إكسل" عشان تضيف عدة عطور جديدة دفعة وحدة من ملف إكسل، بدل ما تعبي كل عطر يدويًا.
+      استخدم "التقييمات" عشان تضيف تقييم عميل حقيقي على عطر معيّن، أو تعدّل/تحذف تقييم موجود — التقييمات تظهر للزوار مباشرة تحت تفاصيل العطر بالموقع.
     </small>
 
     <div id="editSearchWrap" style="display:none;">
@@ -253,6 +265,39 @@
       <button type="button" id="sq_editFullBtn" class="secondary">تعديل بيانات العطر كاملة</button>
     </div>
     <div class="status" id="sq_statusBox"></div>
+  </div>
+
+  <div class="panel" id="reviewsQuickPanel" style="display:none;">
+    <h2 id="reviewsQuickPanelTitle">4) تقييمات العطر</h2>
+
+    <div id="rv_list" class="static-list" style="display:none;"></div>
+    <small class="hint" id="rv_emptyHint" style="margin-top:0;">ما فيه تقييمات لهذا العطر بعد — أضف أول تقييم بالفورم تحت.</small>
+
+    <fieldset style="margin-top:14px;">
+      <legend id="rv_formLegend">إضافة تقييم جديد</legend>
+      <div class="grid2">
+        <div class="field"><label for="rv_name">اسم العميل</label><input type="text" id="rv_name" placeholder="مثال: أحمد."></div>
+        <div class="field">
+          <label for="rv_rating">التقييم</label>
+          <select id="rv_rating">
+            <option value="5">★★★★★ (5)</option>
+            <option value="4">★★★★☆ (4)</option>
+            <option value="3">★★★☆☆ (3)</option>
+            <option value="2">★★☆☆☆ (2)</option>
+            <option value="1">★☆☆☆☆ (1)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label for="rv_commentAr">نص التقييم (عربي)</label><textarea id="rv_commentAr" rows="3" placeholder="رأي العميل بالعطر..."></textarea></div>
+      <div class="field"><label for="rv_commentEn">نص التقييم (إنجليزي) — اختياري</label><textarea id="rv_commentEn" rows="3" placeholder="Customer's opinion of the fragrance..."></textarea></div>
+      <div class="field"><label for="rv_date">التاريخ</label><input type="text" id="rv_date" placeholder="YYYY-MM-DD"></div>
+    </fieldset>
+    <small class="hint">أدخل تقييمات حقيقية من عملاء فعليين بس (رسائل شكر بواتساب، تقييمات إنستقرام، إلخ) — لا تُدخل تقييمات وهمية. تقدر تحذف أي تقييم بأي وقت من القائمة فوق.</small>
+    <div class="row">
+      <button type="button" id="rv_saveBtn">حفظ التقييم</button>
+      <button type="button" id="rv_cancelEditBtn" class="secondary" style="display:none;">إلغاء التعديل</button>
+    </div>
+    <div class="status" id="rv_statusBox"></div>
   </div>
 
   <div class="panel" id="excelPanel" style="display:none;">
@@ -400,10 +445,15 @@ const OWNER = "evoque-perfumes";
 const REPO = "evoque-catalog";
 const BRANCH = "main";
 const DATA_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data.json?t=` + Date.now();
+const REVIEWS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/reviews.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
+const REVIEWS_JSON_PATH = "reviews.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
+let reviewsData = [];        // آخر نسخة معروفة من reviews.json (للعرض/البحث فقط)
+let reviewsSelected = null;  // العطر المختار حاليًا بوضع "التقييمات"
+let reviewsEditingId = null; // id التقييم الحالي المفتوح للتعديل (null = فورم إضافة جديد)
 let existingFiles = new Set();
 let mode = "add";            // "add" | "edit"
 let editingOriginal = null;  // العطر الأصلي قبل التعديل (null لو إضافة)
@@ -445,6 +495,23 @@ async function loadData(){
   document.getElementById("statTotal").textContent = perfumes.length;
   document.getElementById("statsRow").style.display = "flex";
   updateProgress();
+}
+
+// ===== تحميل قائمة التقييمات (للعرض والبحث فقط — نفس منطق loadData بالضبط) =====
+async function loadReviews(){
+  try{
+    const res = await fetch(REVIEWS_JSON_RAW_URL, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    reviewsData = await res.json();
+    if(!Array.isArray(reviewsData)) reviewsData = [];
+  }catch(e){
+    reviewsData = []; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
+  }
+}
+
+function reviewsForPerfume(perfumeId){
+  return reviewsData.filter(r => r.perfumeId === perfumeId)
+    .sort((a,b) => (b.date||"").localeCompare(a.date||""));
 }
 
 function hasImage(p){
@@ -612,6 +679,165 @@ document.getElementById("sq_editFullBtn").addEventListener("click", () => {
   selectPerfumeForEdit(p);
 });
 
+// ===== وضع "التقييمات" (reviews) =====
+function todayStr(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function resetReviewForm(){
+  reviewsEditingId = null;
+  document.getElementById("rv_name").value = "";
+  document.getElementById("rv_rating").value = "5";
+  document.getElementById("rv_commentAr").value = "";
+  document.getElementById("rv_commentEn").value = "";
+  document.getElementById("rv_date").value = todayStr();
+  document.getElementById("rv_formLegend").textContent = "إضافة تقييم جديد";
+  document.getElementById("rv_saveBtn").textContent = "حفظ التقييم";
+  document.getElementById("rv_cancelEditBtn").style.display = "none";
+}
+
+function renderReviewsList(){
+  if(!reviewsSelected) return;
+  const list = reviewsForPerfume(reviewsSelected.id);
+  const wrap = document.getElementById("rv_list");
+  const emptyHint = document.getElementById("rv_emptyHint");
+  if(list.length === 0){
+    wrap.style.display = "none";
+    emptyHint.style.display = "block";
+    return;
+  }
+  emptyHint.style.display = "none";
+  wrap.style.display = "block";
+  wrap.innerHTML = list.map(r => `
+    <div class="review-row" data-id="${r.id}">
+      <div class="review-row-top">
+        <span class="review-row-name">${(r.name||"").replace(/</g,"&lt;")}</span>
+        <span class="review-row-stars">${"★".repeat(Number(r.rating)||0)}${"☆".repeat(5-(Number(r.rating)||0))}</span>
+      </div>
+      ${r.commentAr ? `<div class="review-row-comment">🇦🇪 ${r.commentAr.replace(/</g,"&lt;")}</div>` : ""}
+      ${r.commentEn ? `<div class="review-row-comment">EN: ${r.commentEn.replace(/</g,"&lt;")}</div>` : ""}
+      <div class="review-row-meta">${r.date || ""} ${r.visible === false ? "— (مخفي عن الموقع)" : ""}</div>
+      <div class="review-row-actions">
+        <button type="button" class="secondary rv-edit-btn">✏️ تعديل</button>
+        <button type="button" class="secondary rv-delete-btn">🗑️ حذف</button>
+      </div>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".rv-edit-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const id = e.target.closest(".review-row").dataset.id;
+      const r = list.find(x => x.id === id);
+      if(!r) return;
+      reviewsEditingId = id;
+      document.getElementById("rv_name").value = r.name || "";
+      document.getElementById("rv_rating").value = String(r.rating || 5);
+      document.getElementById("rv_commentAr").value = r.commentAr || "";
+      document.getElementById("rv_commentEn").value = r.commentEn || "";
+      document.getElementById("rv_date").value = r.date || todayStr();
+      document.getElementById("rv_formLegend").textContent = "تعديل تقييم";
+      document.getElementById("rv_saveBtn").textContent = "حفظ التعديل";
+      document.getElementById("rv_cancelEditBtn").style.display = "inline-block";
+      document.getElementById("rv_name").scrollIntoView({behavior:"smooth", block:"center"});
+    });
+  });
+  wrap.querySelectorAll(".rv-delete-btn").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const id = e.target.closest(".review-row").dataset.id;
+      const token = getToken();
+      if(!token){ rvShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      if(!confirm("متأكد تبا تحذف هذا التقييم؟ ما يرجع بعد الحذف.")) return;
+      btn.disabled = true;
+      try{
+        rvShowStatus("جارِ الحذف...", "info");
+        const updatedList = await updateReviewsJsonWithRetry(token, (list) => list.filter(x => x.id !== id), `Delete review: ${id}`);
+        reviewsData = updatedList;
+        renderReviewsList();
+        if(reviewsEditingId === id) resetReviewForm();
+        rvShowStatus("تم حذف التقييم.", "ok");
+      }catch(err){
+        rvShowStatus("صار خطأ: " + err.message, "err");
+        btn.disabled = false;
+      }
+    });
+  });
+}
+
+function selectPerfumeForReviews(p){
+  reviewsSelected = p;
+  const wrap = document.getElementById("selectedChipWrap");
+  wrap.innerHTML = `<div class="selected-chip">
+    <span>${p.brand} — ${p.name}</span>
+    <button type="button" id="deselectBtn" title="إلغاء">×</button>
+  </div>`;
+  document.getElementById("deselectBtn").addEventListener("click", () => {
+    reviewsSelected = null;
+    wrap.innerHTML = "";
+    document.getElementById("reviewsQuickPanel").style.display = "none";
+  });
+  document.getElementById("searchInput").value = "";
+  document.getElementById("reviewsQuickPanelTitle").textContent = `4) تقييمات: ${p.brand} — ${p.name}`;
+  document.getElementById("reviewsQuickPanel").style.display = "block";
+  document.getElementById("rv_statusBox").className = "status";
+  resetReviewForm();
+  renderReviewsList();
+}
+
+function rvShowStatus(msg, type){
+  const box = document.getElementById("rv_statusBox");
+  box.textContent = msg;
+  box.className = "status show " + type;
+}
+
+document.getElementById("rv_cancelEditBtn").addEventListener("click", () => resetReviewForm());
+
+document.getElementById("rv_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token || !reviewsSelected){ rvShowStatus("لازم تدخل مفتاح الدخول أول وتختار عطر.", "err"); return; }
+  const name = document.getElementById("rv_name").value.trim();
+  const commentAr = document.getElementById("rv_commentAr").value.trim();
+  const commentEn = document.getElementById("rv_commentEn").value.trim();
+  if(!name || (!commentAr && !commentEn)){
+    rvShowStatus("لازم تعبي اسم العميل ونص التقييم (عربي أو إنجليزي على الأقل).", "err");
+    return;
+  }
+  const p = reviewsSelected;
+  const rating = parseInt(document.getElementById("rv_rating").value, 10) || 5;
+  const date = document.getElementById("rv_date").value.trim() || todayStr();
+  const btn = document.getElementById("rv_saveBtn");
+  btn.disabled = true;
+  try{
+    rvShowStatus("جارِ الحفظ...", "info");
+    let updatedList;
+    if(reviewsEditingId){
+      updatedList = await updateReviewsJsonWithRetry(token, (list) => {
+        const idx = list.findIndex(x => x.id === reviewsEditingId);
+        if(idx === -1) throw new Error("التقييم ما انلقى — يمكن انحذف من مكان ثاني.");
+        list[idx] = { ...list[idx], name, rating, commentAr, commentEn, date };
+        return list;
+      }, `Update review: ${p.brand} — ${p.name}`);
+      rvShowStatus("تم حفظ التعديل.", "ok");
+    } else {
+      const newReview = {
+        id: `${p.id}-${Date.now()}`,
+        perfumeId: p.id,
+        name, rating, commentAr, commentEn, date,
+        visible: true
+      };
+      updatedList = await updateReviewsJsonWithRetry(token, (list) => { list.push(newReview); return list; }, `Add review: ${p.brand} — ${p.name}`);
+      rvShowStatus("تم إضافة التقييم. يأخذ بضع دقايق يظهر بالموقع الحي.", "ok");
+    }
+    reviewsData = updatedList;
+    renderReviewsList();
+    resetReviewForm();
+  }catch(e){
+    rvShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
+
 // ===== وضع إضافة/تعديل =====
 function setMode(newMode){
   mode = newMode;
@@ -621,13 +847,16 @@ function setMode(newMode){
   document.getElementById("modeBulkBtn").classList.toggle("active", mode === "bulk");
   document.getElementById("modeStockBtn").classList.toggle("active", mode === "stock");
   document.getElementById("modeExcelBtn").classList.toggle("active", mode === "excel");
-  document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock") ? "block" : "none";
+  document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
+  document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock" || mode === "reviews") ? "block" : "none";
   document.getElementById("progressStatsWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
   document.getElementById("hideUploadedRow").style.display = (mode === "edit" || mode === "photo") ? "flex" : "none";
   document.getElementById("stockCategoryWrap").style.display = mode === "stock" ? "block" : "none";
   document.getElementById("stockQuickPanel").style.display = "none";
+  document.getElementById("reviewsQuickPanel").style.display = "none";
   stockCategoryActive = null;
   stockSelected = null;
+  reviewsSelected = null;
   if(mode !== "stock"){
     document.getElementById("stockCategoryList").innerHTML = "";
     document.getElementById("stockCatMissing").classList.remove("active");
@@ -666,6 +895,7 @@ document.getElementById("modePhotoBtn").addEventListener("click", () => setMode(
 document.getElementById("modeBulkBtn").addEventListener("click", () => setMode("bulk"));
 document.getElementById("modeStockBtn").addEventListener("click", () => setMode("stock"));
 document.getElementById("modeExcelBtn").addEventListener("click", () => setMode("excel"));
+document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
 
 // ===== البحث (تعديل + رفع صورة فقط + المخزون يشتركون بنفس مربع البحث) =====
 function renderDropdown(query){
@@ -686,6 +916,9 @@ function renderDropdown(query){
     if(mode === "stock"){
       const out = isOutOfStock(p);
       badgeHtml = `<span class="badge ${out ? "pending" : "done"}">10مل:${stockAsQty(p.stock10)} 50مل:${stockAsQty(p.stock50)}</span>`;
+    } else if(mode === "reviews"){
+      const n = reviewsForPerfume(p.id).length;
+      badgeHtml = `<span class="badge ${n > 0 ? "done" : "pending"}">${n > 0 ? n + " تقييم" : "بدون تقييم"}</span>`;
     } else {
       const done = hasImage(p);
       badgeHtml = `<span class="badge ${done ? "done" : "pending"}">${done ? "له صورة" : "بدون صورة"}</span>`;
@@ -701,6 +934,7 @@ function renderDropdown(query){
       const p = perfumes.find(x => x.id === el.dataset.id);
       if(mode === "photo") selectPerfumeForPhotoOnly(p);
       else if(mode === "stock") selectPerfumeForStock(p);
+      else if(mode === "reviews") selectPerfumeForReviews(p);
       else selectPerfumeForEdit(p);
       dd.classList.remove("show");
     });
@@ -1139,6 +1373,58 @@ async function updateDataJsonWithRetry(token, mutateFn, commitMsg, attempt){
   }catch(e){
     if(String(e.message).includes("تعديل ثاني") && attempt < 2){
       return updateDataJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newList;
+}
+
+// ===== قراءة/كتابة reviews.json — نفس منطق data.json بالضبط =====
+// ملاحظة: لو الملف ما موجود بعد بالريبو (404)، نتعامل معه كقائمة فاضية بلا sha
+// (أول حفظ ينشئ الملف تلقائيًا عبر GitHub API بدون ما نحتاج نرفعه يدويًا أول مرة).
+async function getReviewsJsonWithSha(token){
+  const res = await fetch(`${API_BASE}/${REVIEWS_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { list: [], sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة reviews.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  const list = JSON.parse(base64ToUtf8(info.content));
+  return { list: Array.isArray(list) ? list : [], sha: info.sha };
+}
+
+async function putReviewsJson(list, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(list, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${REVIEWS_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updateReviewsJsonWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { list, sha } = await getReviewsJsonWithSha(token);
+  const newList = mutateFn(list);
+  try{
+    await putReviewsJson(newList, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateReviewsJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
     }
     throw e;
   }
@@ -1597,6 +1883,7 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
 });
 
 loadData();
+loadReviews();
 </script>
 </body>
 </html>
