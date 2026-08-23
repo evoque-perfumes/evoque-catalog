@@ -45,6 +45,7 @@ const BEST_SELLER_IDS = [
 ];
 
 let perfumes = [];
+let reviews = []; // reviews.json — تقييمات العملاء: [{id, perfumeId, name, rating, commentAr, commentEn, date}]
 let lang = "ar";
 let country = "AE"; // "AE" (الإمارات، AED) | "OM" (عُمان، OMR) — يحدد أي أعمدة أسعار نقرأ ومين خيارات الدفع المتاحة
 
@@ -150,6 +151,9 @@ const I18N = {
     notesToggleClose: "إخفاء التفاصيل",
     accordsLabel: "أهم الأكوردات",
     inCartLabel: "بالسلة",
+    reviewsTitle: "آراء عملائنا",
+    reviewsEmpty: "ما فيه تقييمات لهذا العطر بعد — كن أول من يقيّمه بعد تجربته!",
+    reviewsCount: (n) => n === 1 ? "تقييم واحد" : n === 2 ? "تقييمان" : `${n} تقييمات`,
     top: "أهم المكونات", middle: "وسط النوتس", base: "قاعدة النوتس",
     longevity: "الثبات", sillage: "الفوحان",
     askPrice: "اسأل عن السعر",
@@ -284,6 +288,9 @@ const I18N = {
     notesToggleClose: "Hide details",
     accordsLabel: "Main accords",
     inCartLabel: "in cart",
+    reviewsTitle: "Customer reviews",
+    reviewsEmpty: "No reviews yet for this fragrance — be the first to review it after trying it!",
+    reviewsCount: (n) => n === 1 ? "1 review" : `${n} reviews`,
     top: "Key notes", middle: "Middle notes", base: "Base notes",
     longevity: "Longevity", sillage: "Sillage",
     askPrice: "Ask for price",
@@ -697,6 +704,82 @@ async function loadPerfumesFromJson(){
   perfumes = list;
 }
 
+// ------------------------------------------------------------------
+// تقييمات العملاء — ملف reviews.json (تُدار من لوحة التحكم admin-upload.html،
+// وضع "⭐ التقييمات"). لو الملف غير موجود أو فيه خطأ مؤقت، نكمل بدون تقييمات
+// (ما يوقف تحميل بقية الموقع أبدًا — التقييمات ميزة إضافية مو أساسية).
+// ------------------------------------------------------------------
+async function loadReviewsFromJson(){
+  try{
+    const res = await fetch("./reviews.json");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    reviews = Array.isArray(data) ? data.filter(r => r && r.visible !== false) : [];
+  }catch(e){
+    reviews = [];
+  }
+}
+
+// تقييمات عطر معيّن، الأحدث أولًا
+function reviewsFor(perfumeId){
+  return reviews.filter(r => r.perfumeId === perfumeId)
+    .sort((a,b) => (b.date||"").localeCompare(a.date||""));
+}
+
+// ملخص التقييم (المتوسط + العدد) لعطر معيّن — يرجع null لو ما فيه تقييمات
+function ratingSummary(perfumeId){
+  const list = reviewsFor(perfumeId);
+  if(list.length === 0) return null;
+  const sum = list.reduce((s,r) => s + (Number(r.rating) || 0), 0);
+  return { avg: sum / list.length, count: list.length };
+}
+
+function starsHtml(rating){
+  const r = Math.round(Number(rating) || 0);
+  let out = "";
+  for(let i=1;i<=5;i++) out += `<span class="star ${i<=r ? "filled" : ""}">★</span>`;
+  return `<span class="stars">${out}</span>`;
+}
+
+function reviewDateDisplay(dateStr){
+  if(!dateStr) return "";
+  try{
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString(lang === "ar" ? "ar" : "en-GB", { year:"numeric", month:"short", day:"numeric" });
+  }catch(e){ return dateStr; }
+}
+
+function renderReviewsSection(p){
+  const t = I18N[lang];
+  const wrap = document.getElementById("lightboxReviews");
+  if(!wrap) return;
+  const summary = ratingSummary(p.id);
+  const list = reviewsFor(p.id);
+
+  let html = `<div class="reviews-head">`;
+  html += `<h3>${t.reviewsTitle}</h3>`;
+  if(summary){
+    html += `<div class="reviews-summary">${starsHtml(summary.avg)}<b>${summary.avg.toFixed(1)}</b><span>(${t.reviewsCount(summary.count)})</span></div>`;
+  }
+  html += `</div>`;
+
+  if(list.length === 0){
+    html += `<div class="reviews-empty">${t.reviewsEmpty}</div>`;
+  } else {
+    html += `<div class="reviews-list">` + list.map(r => `
+      <div class="review-card">
+        <div class="review-top">
+          <span class="review-name">${(r.name||"").replace(/</g,"&lt;")}</span>
+          ${starsHtml(r.rating)}
+        </div>
+        <p class="review-comment">${((lang==="ar" ? (r.commentAr||r.commentEn) : (r.commentEn||r.commentAr))||"").replace(/</g,"&lt;")}</p>
+        <div class="review-date">${reviewDateDisplay(r.date)}</div>
+      </div>
+    `).join("") + `</div>`;
+  }
+  wrap.innerHTML = html;
+}
+
 // خطة طوارئ فقط (22 أغسطس 2026): الشيت ما عاد هو مصدر البيانات الأساسي — كل
 // الإضافة/التعديل صار من لوحة التحكم (admin-upload.html) وتنكتب مباشرة بـ
 // data.json. هذا المسار يشتغل بس لو data.json نفسه صار فيه خطأ أو ما وصل.
@@ -765,6 +848,7 @@ async function loadPerfumesFromSheet(){
       loadErrorMsg = err.message;
     }
   }
+  await loadReviewsFromJson();
   renderAll();
 }
 
@@ -868,6 +952,7 @@ function openLightbox(p){
   if(longevityDisplay) rows.push(`<div class="row">${svgIcon("ic-clock")}<div><b>${t.longevity}:</b> ${longevityDisplay}</div></div>`);
   if(sillageDisplay) rows.push(`<div class="row">${svgIcon("ic-wind")}<div><b>${t.sillage}:</b> ${sillageDisplay}</div></div>`);
   document.getElementById("lightboxDetails").innerHTML = rows.join("");
+  renderReviewsSection(p);
   document.getElementById("lightboxOverlay").classList.add("open");
 }
 function closeLightbox(){ document.getElementById("lightboxOverlay").classList.remove("open"); }
@@ -1151,6 +1236,7 @@ function renderGrid(explicitList){
     const longevityDisplay = translateForDisplay(p.longevity);
     const sillageDisplay = translateForDisplay(p.sillage);
     const hasDetails = accordsDisplay || notesTopDisplay || longevityDisplay || sillageDisplay;
+    const cardRating = ratingSummary(p.id);
 
     info.innerHTML = `
       <div class="impressions-tag">Impressions</div>
@@ -1159,6 +1245,7 @@ function renderGrid(explicitList){
         ${discountPct > 0 ? `<div class="discount-tag">${svgIcon("ic-sparkle")}<span>${lang==="ar" ? `خصم ${discountPct}٪` : `-${discountPct}%`}</span></div>` : ""}
       </div>
       <div class="name">${toTitleCase(p.name)}</div>
+      ${cardRating ? `<div class="card-rating">${starsHtml(cardRating.avg)}<span>${cardRating.avg.toFixed(1)} (${cardRating.count})</span></div>` : ""}
       ${genderLabel ? `<div class="badge-row"><span class="badge badge-gender">${svgIcon(ICONS[p.gender])}${genderLabel}</span></div>` : ""}
       <button class="notes-toggle" type="button"><span>${t.notesToggleOpen}</span>${svgIcon("ic-chevron","chev")}</button>
       <div class="notes-box">
