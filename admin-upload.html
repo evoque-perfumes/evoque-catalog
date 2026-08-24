@@ -428,6 +428,34 @@
       <div class="field"><label for="sl_date">التاريخ</label><input type="text" id="sl_date" placeholder="YYYY-MM-DD"></div>
     </div>
 
+    <div class="grid2" style="margin-top:10px;">
+      <div class="field">
+        <label for="sl_country">الدولة — اختياري</label>
+        <select id="sl_country">
+          <option value="">— اختر —</option>
+          <option value="AE" data-code="+971">🇦🇪 الإمارات</option>
+          <option value="OM" data-code="+968">🇴🇲 عُمان</option>
+          <option value="SA" data-code="+966">🇸🇦 السعودية</option>
+          <option value="KW" data-code="+965">🇰🇼 الكويت</option>
+          <option value="QA" data-code="+974">🇶🇦 قطر</option>
+          <option value="BH" data-code="+973">🇧🇭 البحرين</option>
+          <option value="OTHER" data-code="">🌍 دولة ثانية</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sl_phone">رقم الهاتف — اختياري</label>
+        <div style="display:flex; gap:6px;">
+          <span id="sl_phoneCode" style="display:flex; align-items:center; padding:0 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2); color:var(--muted); white-space:nowrap;">+___</span>
+          <input type="tel" id="sl_phone" placeholder="501234567" style="flex:1;">
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:10px;">
+      <label for="sl_address">العنوان — اختياري</label>
+      <input type="text" id="sl_address" placeholder="مثال: دبي، الإمارات — أو تفاصيل التوصيل">
+    </div>
+
     <div class="row">
       <button type="button" id="sl_saveBtn" disabled>✅ سجّل الطلب</button>
       <button type="button" id="sl_clearCartBtn" class="secondary" style="display:none;">إفراغ السلة</button>
@@ -1219,7 +1247,7 @@ function slShowStatus(msg, type){
   box.className = "status show " + type;
 }
 
-function selectPerfumeForSales(p){
+function slShowSelectedChip(p){
   salesSelected = p;
   const wrap = document.getElementById("selectedChipWrap");
   wrap.innerHTML = `<div class="selected-chip">
@@ -1232,6 +1260,10 @@ function selectPerfumeForSales(p){
     document.getElementById("sl_addItemWrap").style.display = "none";
     document.getElementById("sl_pickHint").style.display = "block";
   });
+}
+
+function selectPerfumeForSales(p){
+  slShowSelectedChip(p);
   document.getElementById("searchInput").value = "";
   document.getElementById("sl_size").value = "50";
   document.getElementById("sl_qty").value = "1";
@@ -1240,11 +1272,36 @@ function selectPerfumeForSales(p){
   document.getElementById("sl_pickHint").style.display = "none";
 }
 
+// تعديل عنصر موجود بالسلة: نطلعه من السلة ونعبّي الفورم ببياناته عشان يصححها ويضيفه من جديد
+function slEditCartItem(idx){
+  const item = salesCart[idx];
+  if(!item) return;
+  const p = perfumes.find(x => x.id === item.perfumeId) || { id: item.perfumeId, brand: item.brand, name: item.name, price10: null, price50: null };
+  salesCart.splice(idx, 1);
+  slShowSelectedChip(p);
+  document.getElementById("searchInput").value = "";
+  document.getElementById("sl_size").value = String(item.size);
+  document.getElementById("sl_qty").value = item.qty;
+  document.getElementById("sl_price").value = item.unitPrice;
+  document.getElementById("sl_addItemWrap").style.display = "block";
+  document.getElementById("sl_pickHint").style.display = "none";
+  slRenderCart();
+  slShowStatus(`عدّل بيانات ${p.brand} — ${p.name} فوق واضغط "أضف للسلة" لحفظ التعديل.`, "info");
+  document.getElementById("sl_qty").focus();
+}
+
 document.getElementById("sl_size").addEventListener("change", () => {
   if(!salesSelected) return;
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
   document.getElementById("sl_price").value = size === "50" ? (p.price50 ?? "") : (p.price10 ?? "");
+});
+
+document.getElementById("sl_country").addEventListener("change", () => {
+  const sel = document.getElementById("sl_country");
+  const opt = sel.options[sel.selectedIndex];
+  const code = opt ? (opt.dataset.code || "") : "";
+  document.getElementById("sl_phoneCode").textContent = code || "+___";
 });
 
 document.getElementById("sl_addToCartBtn").addEventListener("click", () => {
@@ -1289,11 +1346,18 @@ function slRenderCart(){
         <span class="sale-row-amount">${fmtNum(sub)} AED</span>
       </div>
       <div class="sale-row-actions">
+        <button type="button" class="secondary sl-cart-edit-btn">✏️ تعديل</button>
         <button type="button" class="secondary sl-cart-remove-btn">🗑️ إزالة</button>
       </div>
     </div>`;
   }).join("");
   totalEl.textContent = fmtNum(total);
+  listEl.querySelectorAll(".sl-cart-edit-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const idx = Number(e.target.closest(".sale-row").dataset.idx);
+      slEditCartItem(idx);
+    });
+  });
   listEl.querySelectorAll(".sl-cart-remove-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const idx = Number(e.target.closest(".sale-row").dataset.idx);
@@ -1314,7 +1378,7 @@ function groupSalesData(){
   const map = new Map();
   salesData.forEach(o => {
     const key = o.orderId || o.id;
-    if(!map.has(key)) map.set(key, { key, date: o.date, customer: o.customer, items: [] });
+    if(!map.has(key)) map.set(key, { key, date: o.date, customer: o.customer, country: o.country, countryLabel: o.countryLabel, phone: o.phone, address: o.address, items: [] });
     map.get(key).items.push(o);
   });
   return Array.from(map.values()).reverse(); // الأحدث أول
@@ -1343,7 +1407,7 @@ function renderSalesHistory(){
         <span class="sale-row-name">${itemsLabel}${g.customer ? " — " + String(g.customer).replace(/</g,"&lt;") : ""}</span>
         <span class="sale-row-amount">${fmtNum(total)} AED</span>
       </div>
-      <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}</div>
+      <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}</div>
       <div class="sale-row-actions">
         <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
       </div>
@@ -1377,6 +1441,14 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   if(!salesCart.length){ slShowStatus("السلة فاضية — أضف عطر وحد على الأقل قبل الحفظ.", "err"); return; }
   const customer = document.getElementById("sl_customer").value.trim();
   const date = document.getElementById("sl_date").value.trim() || todayStr();
+  const countrySel = document.getElementById("sl_country");
+  const countryOpt = countrySel.options[countrySel.selectedIndex];
+  const country = countrySel.value || "";
+  const countryLabel = country ? countryOpt.textContent.trim() : "";
+  const phoneCode = document.getElementById("sl_phoneCode").textContent.trim();
+  const phoneLocal = document.getElementById("sl_phone").value.trim();
+  const phone = phoneLocal ? ((phoneCode && phoneCode !== "+___") ? phoneCode + " " + phoneLocal : phoneLocal) : "";
+  const address = document.getElementById("sl_address").value.trim();
   const btn = document.getElementById("sl_saveBtn");
   btn.disabled = true;
   try{
@@ -1390,6 +1462,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       qty: item.qty,
       unitPrice: item.unitPrice,
       customer, date,
+      country, countryLabel, phone, address,
       orderId,
       source: "admin"
     }));
@@ -1404,6 +1477,10 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
     renderOverview();
     document.getElementById("sl_customer").value = "";
     document.getElementById("sl_date").value = todayStr();
+    document.getElementById("sl_country").value = "";
+    document.getElementById("sl_phoneCode").textContent = "+___";
+    document.getElementById("sl_phone").value = "";
+    document.getElementById("sl_address").value = "";
     slShowStatus(`تم تسجيل الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`, "ok");
   }catch(e){
     slShowStatus("صار خطأ: " + e.message, "err");
