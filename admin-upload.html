@@ -198,6 +198,7 @@
       <div class="kpi-card"><div class="kpi-label">عدد البراندات</div><div class="kpi-value" id="ov_brands">—</div></div>
       <div class="kpi-card"><div class="kpi-label">متوسط سعر 50مل (AED)</div><div class="kpi-value" id="ov_avgPrice">—</div></div>
       <div class="kpi-card"><div class="kpi-label">قيمة المخزون التقديرية (AED)</div><div class="kpi-value" id="ov_stockValue">—</div><div class="kpi-sub">حسب السعر × الكمية المتوفرة</div></div>
+      <div class="kpi-card"><div class="kpi-label">إجمالي القطع بالمخزون الحين</div><div class="kpi-value" id="ov_stockUnits">—</div><div class="kpi-sub">مجموع كميات كل الأحجام</div></div>
       <div class="kpi-card"><div class="kpi-label">متوسط التقييم</div><div class="kpi-value" id="ov_rating">—</div><div class="kpi-sub" id="ov_ratingSub"></div></div>
     </div>
 
@@ -206,10 +207,20 @@
       ما فيه مبيعات مسجّلة بعد. بعد كل عملية بيع تخلص بالواتساب، روح تبويب "💰 المبيعات" وسجّلها بضغطة وحدة — وبتشوف هنا إجمالي الإيرادات وأفضل عطر مبيعًا فعليًا (مب قائمة يدوية).
     </div>
     <div class="kpi-grid" id="ov_salesGrid" style="display:none;">
-      <div class="kpi-card good"><div class="kpi-label">إجمالي المبيعات المسجّلة</div><div class="kpi-value" id="ov_salesCount">—</div></div>
+      <div class="kpi-card good"><div class="kpi-label">عدد عمليات البيع المسجّلة</div><div class="kpi-value" id="ov_salesCount">—</div></div>
+      <div class="kpi-card good"><div class="kpi-label">إجمالي القطع المباعة</div><div class="kpi-value" id="ov_salesUnits">—</div></div>
       <div class="kpi-card good"><div class="kpi-label">إجمالي الإيرادات (AED)</div><div class="kpi-value" id="ov_salesRevenue">—</div></div>
       <div class="kpi-card"><div class="kpi-label">الأكثر مبيعًا فعليًا</div><div class="kpi-value" id="ov_bestSeller" style="font-size:16px;">—</div></div>
-      <div class="kpi-card"><div class="kpi-label">مبيعات آخر 7 أيام</div><div class="kpi-value" id="ov_salesWeek">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">مبيعات آخر 7 أيام (قطع)</div><div class="kpi-value" id="ov_salesWeek">—</div></div>
+    </div>
+
+    <div id="ov_periodStatsWrap" style="display:none;">
+      <div class="ov-section-title" style="margin-top:22px;">📅 إحصائيات شهرية</div>
+      <div id="ov_monthlyStats" class="static-list"></div>
+      <small class="hint" id="ov_monthlyMoreHint" style="display:none;"></small>
+
+      <div class="ov-section-title" style="margin-top:22px;">📆 إحصائيات سنوية</div>
+      <div id="ov_yearlyStats" class="static-list"></div>
     </div>
 
     <div class="ov-section-title">طلبات نموذج الموقع (Google Sheet) — اختياري</div>
@@ -393,8 +404,9 @@
     <small class="hint" style="margin-top:0;">
       ابحث عن العطر بمربع البحث فوق واضغطه، حدد الحجم/الكمية/السعر، واضغط "أضف للسلة" — وكرّر البحث
       والإضافة لكل عطر ثاني اشتراه نفس العميل بنفس الطلب. لما تخلص، عبّي اسم العميل والتاريخ (اختياري،
-      مرة وحدة للطلب كامل) واضغط "سجّل الطلب" — يتسجّل كل شي دفعة وحدة. ما فيه خصم تلقائي من المخزون —
-      حدّث المخزون بنفسك من تبويب "📊 المخزون" لو تبا.
+      مرة وحدة للطلب كامل) واضغط "سجّل الطلب" — يتسجّل كل شي دفعة وحدة، **والمخزون ينقص تلقائيًا** لكل عطر
+      بمقدار الكمية المباعة (وما ينزل تحت صفر أبدًا). لو عدّلت طلب محفوظ أو حذفته، المخزون يتحدّث تلقائيًا
+      معه بردّه.
     </small>
 
     <small class="hint" id="sl_pickHint" style="margin-top:0;">👆 ابحث عن أول عطر بمربع البحث بالأعلى واضغطه عشان تضيفه.</small>
@@ -820,6 +832,9 @@ function renderOverview(){
   const stockValue = perfumes.reduce((s,p) => s + (Number(p.price50)||0)*stockAsQty(p.stock50) + (Number(p.price10)||0)*stockAsQty(p.stock10), 0);
   el("ov_stockValue").textContent = total ? fmtNum(stockValue) : "—";
 
+  const stockUnits = perfumes.reduce((s,p) => s + stockAsQty(p.stock50) + stockAsQty(p.stock10), 0);
+  el("ov_stockUnits").textContent = total ? fmtNum(stockUnits) : "—";
+
   if(reviewsData.length){
     const avgRating = reviewsData.reduce((s,r) => s + (Number(r.rating)||0), 0) / reviewsData.length;
     el("ov_rating").textContent = avgRating.toFixed(1) + " ★";
@@ -836,6 +851,8 @@ function renderOverview(){
     el("ov_salesCount").textContent = fmtNum(salesData.length);
     const revenue = salesData.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
     el("ov_salesRevenue").textContent = fmtNum(revenue);
+    const totalUnitsSold = salesData.reduce((s,o) => s + (Number(o.qty)||0), 0);
+    el("ov_salesUnits").textContent = fmtNum(totalUnitsSold);
 
     const byPerfume = {};
     salesData.forEach(o => { byPerfume[o.perfumeId] = (byPerfume[o.perfumeId]||0) + (Number(o.qty)||0); });
@@ -850,12 +867,94 @@ function renderOverview(){
       return !isNaN(t) && t >= weekAgo;
     }).reduce((s,o) => s + (Number(o.qty)||0), 0);
     el("ov_salesWeek").textContent = fmtNum(weekCount);
+
+    renderPeriodStats();
   } else {
     el("ov_salesEmpty").style.display = "block";
     el("ov_salesGrid").style.display = "none";
+    el("ov_periodStatsWrap").style.display = "none";
   }
 
   renderSiteOrdersOverview();
+}
+
+const AR_MONTH_NAMES = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const MAX_MONTHLY_ROWS = 24; // ما نعرض أكثر من كذا شهر بالقائمة — لو فيه أكثر نبين ملاحظة بدل ما نخفيها بصمت
+
+// تجميع المبيعات المسجّلة (salesData) شهريًا وسنويًا حسب حقل date («YYYY-MM-DD») لكل سجل
+function buildSalesPeriodStats(){
+  const monthMap = new Map(); // "YYYY-MM" -> {orderIds:Set, units, revenue}
+  const yearMap = new Map();  // "YYYY" -> {orderIds:Set, units, revenue}
+  let skippedInvalidDate = 0;
+  salesData.forEach(o => {
+    const date = String(o.date || "");
+    if(!/^\d{4}-\d{2}-\d{2}/.test(date)){ skippedInvalidDate++; return; }
+    const ym = date.slice(0, 7);
+    const y = date.slice(0, 4);
+    const orderKey = o.orderId || o.id;
+    const qty = Number(o.qty) || 0;
+    const revenue = qty * (Number(o.unitPrice) || 0);
+    if(!monthMap.has(ym)) monthMap.set(ym, { orderIds: new Set(), units: 0, revenue: 0 });
+    const m = monthMap.get(ym);
+    m.orderIds.add(orderKey); m.units += qty; m.revenue += revenue;
+    if(!yearMap.has(y)) yearMap.set(y, { orderIds: new Set(), units: 0, revenue: 0 });
+    const yy = yearMap.get(y);
+    yy.orderIds.add(orderKey); yy.units += qty; yy.revenue += revenue;
+  });
+  const months = Array.from(monthMap.entries())
+    .map(([ym, v]) => ({ ym, orders: v.orderIds.size, units: v.units, revenue: v.revenue }))
+    .sort((a, b) => b.ym.localeCompare(a.ym));
+  const years = Array.from(yearMap.entries())
+    .map(([y, v]) => ({ y, orders: v.orderIds.size, units: v.units, revenue: v.revenue }))
+    .sort((a, b) => b.y.localeCompare(a.y));
+  return { months, years, skippedInvalidDate };
+}
+
+function monthLabel(ym){
+  const [y, m] = ym.split("-");
+  const idx = parseInt(m, 10) - 1;
+  const name = AR_MONTH_NAMES[idx] || m;
+  return `${name} ${y}`;
+}
+
+function renderPeriodStats(){
+  const { months, years, skippedInvalidDate } = buildSalesPeriodStats();
+  const wrap = document.getElementById("ov_periodStatsWrap");
+  if(!months.length && !years.length){
+    wrap.style.display = "none";
+    return;
+  }
+  wrap.style.display = "block";
+
+  const monthlyEl = document.getElementById("ov_monthlyStats");
+  const shown = months.slice(0, MAX_MONTHLY_ROWS);
+  monthlyEl.innerHTML = shown.map(m => `
+    <div class="sale-row">
+      <div class="sale-row-top">
+        <span class="sale-row-name">${monthLabel(m.ym)} — ${m.orders} ${m.orders === 1 ? "طلب" : "طلبات"}</span>
+        <span class="sale-row-amount">${fmtNum(m.revenue)} AED</span>
+      </div>
+      <div class="sale-row-meta">${fmtNum(m.units)} قطعة مباعة</div>
+    </div>
+  `).join("");
+
+  const moreHint = document.getElementById("ov_monthlyMoreHint");
+  const extraNotes = [];
+  if(months.length > MAX_MONTHLY_ROWS) extraNotes.push(`فيه ${months.length - MAX_MONTHLY_ROWS} شهر أقدم مو ظاهر بالقائمة (نعرض آخر ${MAX_MONTHLY_ROWS} شهر بس).`);
+  if(skippedInvalidDate) extraNotes.push(`${skippedInvalidDate} عملية بيع لها تاريخ غير صالح واستُبعدت من هالإحصائيات.`);
+  if(extraNotes.length){ moreHint.textContent = extraNotes.join(" "); moreHint.style.display = "block"; }
+  else { moreHint.style.display = "none"; }
+
+  const yearlyEl = document.getElementById("ov_yearlyStats");
+  yearlyEl.innerHTML = years.map(y => `
+    <div class="sale-row">
+      <div class="sale-row-top">
+        <span class="sale-row-name">سنة ${y.y} — ${y.orders} ${y.orders === 1 ? "طلب" : "طلبات"}</span>
+        <span class="sale-row-amount">${fmtNum(y.revenue)} AED</span>
+      </div>
+      <div class="sale-row-meta">${fmtNum(y.units)} قطعة مباعة</div>
+    </div>
+  `).join("");
 }
 
 function renderSiteOrdersOverview(){
@@ -1244,6 +1343,7 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
 // ===== وضع "المبيعات" (تسجيل يدوي لطلب بيع واتساب — يدعم أكثر من عطر بنفس الطلب) =====
 let salesCart = []; // {perfumeId, brand, name, size, qty, unitPrice} — عناصر الطلب الحالي قبل الحفظ
 let salesEditingOrderId = null; // لو مو null، معناها نعدّل طلب محفوظ سابقًا بدل ما نسجّل طلب جديد
+let salesEditingOriginalItems = []; // نسخة من عناصر الطلب الأصلية وقت بداية التعديل — تُستخدم لحساب فرق المخزون الصحيح عند الحفظ
 
 function slShowStatus(msg, type){
   const box = document.getElementById("sl_statusBox");
@@ -1393,9 +1493,53 @@ function slResetOrderFields(){
 
 function slExitEditMode(){
   salesEditingOrderId = null;
+  salesEditingOriginalItems = [];
   document.getElementById("sl_cancelEditBtn").style.display = "none";
   document.getElementById("sl_editingHint").style.display = "none";
   slUpdateSaveBtnLabel();
+}
+
+// ===== خصم/إرجاع المخزون تلقائيًا مع كل عملية بيع (تسجيل جديد / تعديل / حذف) =====
+// oldItems: عناصر الطلب زي ما كانت محفوظة قبل (فاضية = ما فيه طلب سابق، يعني تسجيل جديد بحت)
+// newItems: عناصر الطلب بعد الحفظ (فاضية = الطلب انحذف كامل، يعني نرجّع كل شي للمخزون)
+// كل عنصر: {perfumeId, size, qty}
+function computeStockDelta(oldItems, newItems){
+  const delta = {}; // "<perfumeId>|<size>" -> صافي القطع المباعة (موجب = ننقص من المخزون، سالب = نرجّع للمخزون)
+  (oldItems || []).forEach(it => {
+    const key = `${it.perfumeId}|${Number(it.size)}`;
+    delta[key] = (delta[key] || 0) - (Number(it.qty) || 0);
+  });
+  (newItems || []).forEach(it => {
+    const key = `${it.perfumeId}|${Number(it.size)}`;
+    delta[key] = (delta[key] || 0) + (Number(it.qty) || 0);
+  });
+  return delta;
+}
+
+// يطبّق فرق المخزون على data.json بكتابة GitHub واحدة. المخزون ما ينزل تحت صفر أبدًا (clamp).
+// يرجّع {changes: [{perfumeId,size,from,to}], notFound: [perfumeId,...]} عشان نقدر نعرض ملخص واضح للمستخدم.
+async function applySalesStockDelta(token, deltaMap){
+  const entries = Object.entries(deltaMap).filter(([, d]) => d !== 0);
+  if(!entries.length) return { changes: [], notFound: [] };
+  const changes = [];
+  const notFound = [];
+  const updatedList = await updateDataJsonWithRetry(token, (list) => {
+    entries.forEach(([key, delta]) => {
+      const sep = key.lastIndexOf("|");
+      const perfumeId = key.slice(0, sep);
+      const size = key.slice(sep + 1);
+      const idx = list.findIndex(x => x.id === perfumeId);
+      if(idx === -1){ notFound.push(perfumeId); return; }
+      const field = size === "50" ? "stock50" : "stock10";
+      const current = stockAsQty(list[idx][field]);
+      const next = Math.max(0, current - delta);
+      list[idx] = { ...list[idx], [field]: next };
+      changes.push({ perfumeId, size, from: current, to: next });
+    });
+    return list;
+  }, `Auto-adjust stock from sale (${entries.length} change${entries.length === 1 ? "" : "s"})`);
+  perfumes = updatedList;
+  return { changes, notFound };
 }
 
 // يحمّل طلب محفوظ سابقًا (مجموعة عناصره + بيانات العميل) بالسلة عشان يتعدّل بدل ما يُسجَّل طلب جديد
@@ -1416,6 +1560,7 @@ function slLoadOrderForEdit(key){
     };
   });
   salesEditingOrderId = key;
+  salesEditingOriginalItems = g.items.map(o => ({ perfumeId: o.perfumeId, size: Number(o.size), qty: Number(o.qty) || 0 }));
 
   document.getElementById("sl_customer").value = g.customer || "";
   document.getElementById("sl_date").value = g.date || todayStr();
@@ -1501,7 +1646,9 @@ function renderSalesHistory(){
       const key = e.target.closest(".sale-row").dataset.key;
       const token = getToken();
       if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-      if(!confirm("متأكد تبا تحذف هذا الطلب كامل (كل عطوره)؟ ما يرجع بعد الحذف.")) return;
+      if(!confirm("متأكد تبا تحذف هذا الطلب كامل (كل عطوره)؟ المخزون بيترجّع تلقائيًا، بس الطلب نفسه ما يرجع بعد الحذف.")) return;
+      const deletedItems = (groupSalesData().find(g => g.key === key)?.items || [])
+        .map(o => ({ perfumeId: o.perfumeId, size: Number(o.size), qty: Number(o.qty) || 0 }));
       btn.disabled = true;
       try{
         slShowStatus("جارِ الحذف...", "info");
@@ -1515,8 +1662,17 @@ function renderSalesHistory(){
           slRenderCart();
         }
         renderSalesHistory();
+        let stockNote = "";
+        try{
+          const { changes, notFound } = await applySalesStockDelta(token, computeStockDelta(deletedItems, []));
+          if(changes.length) stockNote = ` وتم إرجاع ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"} للمخزون تلقائيًا.`;
+          if(notFound.length) stockNote += ` (تنبيه: ${notFound.length} عطر بالطلب ما انلقى بالكتالوج — يمكن انحذف، ما قدرنا نرجّع مخزونه.)`;
+          updateStockCounts();
+        }catch(stockErr){
+          stockNote = ` — تحذير: الطلب انحذف بس صار خطأ برجّاع المخزون تلقائيًا (${stockErr.message}) — راجع المخزون يدويًا لهذا العطر.`;
+        }
         renderOverview();
-        slShowStatus("تم حذف الطلب.", "ok");
+        slShowStatus("تم حذف الطلب." + stockNote, "ok");
       }catch(err){
         slShowStatus("صار خطأ: " + err.message, "err");
         btn.disabled = false;
@@ -1542,6 +1698,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   const btn = document.getElementById("sl_saveBtn");
   const isEditing = !!salesEditingOrderId;
   const editingKey = salesEditingOrderId;
+  const originalItemsSnapshot = isEditing ? salesEditingOriginalItems.slice() : [];
   btn.disabled = true;
   try{
     slShowStatus(isEditing ? "جارِ حفظ التعديلات..." : "جارِ الحفظ...", "info");
@@ -1570,15 +1727,29 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       return base;
     }, label);
     salesData = updatedList;
+
+    // خصم/إرجاع المخزون تلقائيًا حسب الفرق بين عناصر الطلب الأصلية (لو تعديل) والعناصر الجديدة
+    let stockNote = "";
+    try{
+      const newItemsForStock = cartSnapshot.map(item => ({ perfumeId: item.perfumeId, size: item.size, qty: item.qty }));
+      const delta = computeStockDelta(originalItemsSnapshot, newItemsForStock);
+      const { changes, notFound } = await applySalesStockDelta(token, delta);
+      if(changes.length) stockNote = ` تم تحديث المخزون تلقائيًا لـ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"}.`;
+      if(notFound.length) stockNote += ` (تنبيه: ${notFound.length} عطر بالطلب ما انلقى بالكتالوج — راجع مخزونه يدويًا.)`;
+      updateStockCounts();
+    }catch(stockErr){
+      stockNote = ` — تحذير: الطلب اتسجّل بس صار خطأ بتحديث المخزون تلقائيًا (${stockErr.message}) — راجع المخزون يدويًا لعطور هذا الطلب.`;
+    }
+
     salesCart = [];
     slExitEditMode();
     slRenderCart();
     renderSalesHistory();
     renderOverview();
     slResetOrderFields();
-    slShowStatus(isEditing
+    slShowStatus((isEditing
       ? `تم حفظ تعديلات الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`
-      : `تم تسجيل الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`, "ok");
+      : `تم تسجيل الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`) + stockNote, "ok");
   }catch(e){
     slShowStatus("صار خطأ: " + e.message, "err");
   }finally{
