@@ -1,23 +1,31 @@
 [
   {
-    "id": "jean-paul-gaultier-la-belle-le-parfum-1787597899792-0",
+    "id": "jean-paul-gaultier-la-belle-le-parfum-1787600683278-0",
     "perfumeId": "jean-paul-gaultier-la-belle-le-parfum",
     "size": 50,
     "qty": 1,
     "unitPrice": 50,
-    "customer": "فاطمة المقبالس",
+    "customer": "فاطمة المقبالي",
     "date": "2026-08-24",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "+971 564002687",
+    "address": "العين - شعاب الاشجر",
     "orderId": "order-1787597899792",
     "source": "admin"
   },
   {
-    "id": "lancome-idole-1787597899792-1",
+    "id": "lancome-idole-1787600683278-1",
     "perfumeId": "lancome-idole",
     "size": 50,
     "qty": 1,
     "unitPrice": 50,
-    "customer": "فاطمة المقبالس",
+    "customer": "فاطمة المقبالي",
     "date": "2026-08-24",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "+971 564002687",
+    "address": "العين - شعاب الاشجر",
     "orderId": "order-1787597899792",
     "source": "admin"
   }
