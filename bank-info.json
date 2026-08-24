@@ -1,16 +1,16 @@
 {
   "AE": {
-    "bankName": "",
-    "accountName": "",
-    "accountNumber": "",
-    "iban": "",
+    "bankName": "ADIB",
+    "accountName": "Jasem Kareem",
+    "accountNumber": "24539133",
+    "iban": "AE430500000000024539133",
     "swift": ""
   },
   "OM": {
-    "bankName": "",
-    "accountName": "",
-    "accountNumber": "",
-    "iban": "",
+    "bankName": "Bank Dhofar",
+    "accountName": "Jasem Kareem",
+    "accountNumber": "01012625238001",
+    "iban": "95858826",
     "swift": ""
   }
 }
