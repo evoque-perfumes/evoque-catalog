@@ -415,6 +415,8 @@
       </div>
     </div>
 
+    <small class="hint" id="sl_editingHint" style="display:none; margin-top:10px;">🖊️ تعدّل الآن طلب سابق محفوظ — عدّل العناصر أو البيانات تحت واضغط "حفظ التعديلات"، أو "إلغاء التعديل" للرجوع بدون حفظ.</small>
+
     <div id="sl_cartWrap" style="display:none;">
       <div class="ov-section-title">🛒 عناصر الطلب الحالي</div>
       <div id="sl_cartList" class="static-list"></div>
@@ -459,6 +461,7 @@
     <div class="row">
       <button type="button" id="sl_saveBtn" disabled>✅ سجّل الطلب</button>
       <button type="button" id="sl_clearCartBtn" class="secondary" style="display:none;">إفراغ السلة</button>
+      <button type="button" id="sl_cancelEditBtn" class="secondary" style="display:none;">إلغاء التعديل</button>
     </div>
     <div class="status" id="sl_statusBox"></div>
 
@@ -1240,6 +1243,7 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
 
 // ===== وضع "المبيعات" (تسجيل يدوي لطلب بيع واتساب — يدعم أكثر من عطر بنفس الطلب) =====
 let salesCart = []; // {perfumeId, brand, name, size, qty, unitPrice} — عناصر الطلب الحالي قبل الحفظ
+let salesEditingOrderId = null; // لو مو null، معناها نعدّل طلب محفوظ سابقًا بدل ما نسجّل طلب جديد
 
 function slShowStatus(msg, type){
   const box = document.getElementById("sl_statusBox");
@@ -1321,12 +1325,17 @@ document.getElementById("sl_addToCartBtn").addEventListener("click", () => {
   document.getElementById("searchInput").focus();
 });
 
+function slUpdateSaveBtnLabel(){
+  document.getElementById("sl_saveBtn").textContent = salesEditingOrderId ? "💾 حفظ التعديلات" : "✅ سجّل الطلب";
+}
+
 function slRenderCart(){
   const cartWrap = document.getElementById("sl_cartWrap");
   const listEl = document.getElementById("sl_cartList");
   const totalEl = document.getElementById("sl_cartTotal");
   const saveBtn = document.getElementById("sl_saveBtn");
   const clearBtn = document.getElementById("sl_clearCartBtn");
+  slUpdateSaveBtnLabel();
   if(salesCart.length === 0){
     cartWrap.style.display = "none";
     saveBtn.disabled = true;
@@ -1373,6 +1382,73 @@ document.getElementById("sl_clearCartBtn").addEventListener("click", () => {
   slRenderCart();
 });
 
+function slResetOrderFields(){
+  document.getElementById("sl_customer").value = "";
+  document.getElementById("sl_date").value = todayStr();
+  document.getElementById("sl_country").value = "";
+  document.getElementById("sl_phoneCode").textContent = "+___";
+  document.getElementById("sl_phone").value = "";
+  document.getElementById("sl_address").value = "";
+}
+
+function slExitEditMode(){
+  salesEditingOrderId = null;
+  document.getElementById("sl_cancelEditBtn").style.display = "none";
+  document.getElementById("sl_editingHint").style.display = "none";
+  slUpdateSaveBtnLabel();
+}
+
+// يحمّل طلب محفوظ سابقًا (مجموعة عناصره + بيانات العميل) بالسلة عشان يتعدّل بدل ما يُسجَّل طلب جديد
+function slLoadOrderForEdit(key){
+  const g = groupSalesData().find(x => x.key === key);
+  if(!g) return;
+  if(salesCart.length && !confirm("فيه عناصر بالسلة الحالية بتنمسح لو بدأت تعديل طلب ثاني. تكمل؟")) return;
+
+  salesCart = g.items.map(o => {
+    const p = perfumes.find(x => x.id === o.perfumeId);
+    return {
+      perfumeId: o.perfumeId,
+      brand: p ? p.brand : (o.brand || o.perfumeId),
+      name: p ? p.name : (o.name || ""),
+      size: Number(o.size),
+      qty: Number(o.qty) || 1,
+      unitPrice: Number(o.unitPrice) || 0,
+    };
+  });
+  salesEditingOrderId = key;
+
+  document.getElementById("sl_customer").value = g.customer || "";
+  document.getElementById("sl_date").value = g.date || todayStr();
+  const countrySel = document.getElementById("sl_country");
+  countrySel.value = g.country || "";
+  const opt = countrySel.options[countrySel.selectedIndex];
+  const code = (opt && opt.value) ? (opt.dataset.code || "") : "";
+  document.getElementById("sl_phoneCode").textContent = code || "+___";
+  let phoneLocal = g.phone || "";
+  if(code && phoneLocal.startsWith(code)) phoneLocal = phoneLocal.slice(code.length).trim();
+  document.getElementById("sl_phone").value = phoneLocal;
+  document.getElementById("sl_address").value = g.address || "";
+
+  salesSelected = null;
+  document.getElementById("selectedChipWrap").innerHTML = "";
+  document.getElementById("sl_addItemWrap").style.display = "none";
+  document.getElementById("sl_pickHint").style.display = "block";
+
+  document.getElementById("sl_cancelEditBtn").style.display = "inline-block";
+  document.getElementById("sl_editingHint").style.display = "block";
+  slRenderCart();
+  slShowStatus('تعدّل الآن طلب سابق — عدّل العناصر أو البيانات تحت واضغط "حفظ التعديلات".', "info");
+  document.getElementById("salesQuickPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("sl_cancelEditBtn").addEventListener("click", () => {
+  salesCart = [];
+  slResetOrderFields();
+  slExitEditMode();
+  slRenderCart();
+  slShowStatus("تم إلغاء التعديل.", "info");
+});
+
 // تجميع orders.json حسب orderId (الطلبات القديمة قبل هذي الميزة ما فيها orderId — كل وحدة تصير طلب لحالها)
 function groupSalesData(){
   const map = new Map();
@@ -1409,10 +1485,17 @@ function renderSalesHistory(){
       </div>
       <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}</div>
       <div class="sale-row-actions">
+        <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
         <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
       </div>
     </div>`;
   }).join("");
+  wrap.querySelectorAll(".sl-history-edit-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const key = e.target.closest(".sale-row").dataset.key;
+      slLoadOrderForEdit(key);
+    });
+  });
   wrap.querySelectorAll(".sl-history-delete-btn").forEach(btn => {
     btn.addEventListener("click", async (e) => {
       const key = e.target.closest(".sale-row").dataset.key;
@@ -1424,6 +1507,13 @@ function renderSalesHistory(){
         slShowStatus("جارِ الحذف...", "info");
         const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.filter(x => (x.orderId || x.id) !== key), `Delete order: ${key}`);
         salesData = updatedList;
+        if(salesEditingOrderId === key){
+          // كنا نعدّل هذا الطلب بالذات ثم انحذف من مكان ثاني — نلغي التعديل عشان ما نسجّل طلب "يتيم"
+          salesCart = [];
+          slResetOrderFields();
+          slExitEditMode();
+          slRenderCart();
+        }
         renderSalesHistory();
         renderOverview();
         slShowStatus("تم حذف الطلب.", "ok");
@@ -1450,10 +1540,13 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   const phone = phoneLocal ? ((phoneCode && phoneCode !== "+___") ? phoneCode + " " + phoneLocal : phoneLocal) : "";
   const address = document.getElementById("sl_address").value.trim();
   const btn = document.getElementById("sl_saveBtn");
+  const isEditing = !!salesEditingOrderId;
+  const editingKey = salesEditingOrderId;
   btn.disabled = true;
   try{
-    slShowStatus("جارِ الحفظ...", "info");
-    const orderId = `order-${Date.now()}`;
+    slShowStatus(isEditing ? "جارِ حفظ التعديلات..." : "جارِ الحفظ...", "info");
+    // لو نعدّل طلب موجود، نستخدم نفس مفتاحه كـorderId عشان يبقى الطلب "نفسه" بعد التعديل (نفس منطق التجميع بـgroupSalesData)
+    const orderId = isEditing ? editingKey : `order-${Date.now()}`;
     const cartSnapshot = salesCart.slice();
     const newEntries = cartSnapshot.map((item, i) => ({
       id: `${item.perfumeId}-${Date.now()}-${i}`,
@@ -1466,22 +1559,26 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       orderId,
       source: "admin"
     }));
-    const label = cartSnapshot.length === 1
-      ? `Log sale: ${cartSnapshot[0].brand} — ${cartSnapshot[0].name}`
-      : `Log order (${cartSnapshot.length} items)`;
-    const updatedList = await updateOrdersJsonWithRetry(token, (list) => { newEntries.forEach(e => list.push(e)); return list; }, label);
+    const label = isEditing
+      ? `Edit order: ${editingKey}`
+      : (cartSnapshot.length === 1
+        ? `Log sale: ${cartSnapshot[0].brand} — ${cartSnapshot[0].name}`
+        : `Log order (${cartSnapshot.length} items)`);
+    const updatedList = await updateOrdersJsonWithRetry(token, (list) => {
+      const base = isEditing ? list.filter(x => (x.orderId || x.id) !== editingKey) : list;
+      newEntries.forEach(e => base.push(e));
+      return base;
+    }, label);
     salesData = updatedList;
     salesCart = [];
+    slExitEditMode();
     slRenderCart();
     renderSalesHistory();
     renderOverview();
-    document.getElementById("sl_customer").value = "";
-    document.getElementById("sl_date").value = todayStr();
-    document.getElementById("sl_country").value = "";
-    document.getElementById("sl_phoneCode").textContent = "+___";
-    document.getElementById("sl_phone").value = "";
-    document.getElementById("sl_address").value = "";
-    slShowStatus(`تم تسجيل الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`, "ok");
+    slResetOrderFields();
+    slShowStatus(isEditing
+      ? `تم حفظ تعديلات الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`
+      : `تم تسجيل الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`, "ok");
   }catch(e){
     slShowStatus("صار خطأ: " + e.message, "err");
   }finally{
