@@ -170,6 +170,20 @@
 
   .card .info{ padding:16px 16px 4px; flex:1; display:flex; flex-direction:column; gap:7px; }
   .impressions-tag{ font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted-soft); font-weight:600; }
+
+  /* زر "❤️ المفضلة" (Wishlist) — 25 أغسطس 2026. نفس منطق عدم وضع شارات فوق
+     الصورة أعلاه: الزر داخل بطاقة المعلومات البيضاء (صف مع "Impressions")
+     مو فوق صورة العطر نفسها. */
+  .card-top-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .wishlist-heart-btn{
+    width:26px; height:26px; border-radius:50%; border:1px solid var(--line); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none; padding:0;
+    transition:transform .15s ease, background .2s ease, border-color .2s ease;
+  }
+  .wishlist-heart-btn:hover{ transform:scale(1.1); }
+  .wishlist-heart-btn .icon{ width:14px; height:14px; color:#c0475a; stroke-width:2; }
+  .wishlist-heart-btn.active{ background:#c0475a; border-color:#c0475a; }
+  .wishlist-heart-btn.active .icon{ fill:#fff; color:#fff; }
   .name-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .card .brand{ font-size:11px; color:var(--gold-deep); letter-spacing:.5px; font-weight:600; }
   .discount-tag{

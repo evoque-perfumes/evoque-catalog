@@ -10,6 +10,11 @@ const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwC3s_nTuYaQ_OVk
 // رابط Google Apps Script Web App منفصل لاستقبال تقييمات العملاء — انشره حسب
 // دليل reviews-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
 const REVIEWS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxwC7mC6JegXo-XZ-TryKrdyf3CP-K2i_zRIHAMh0EDBkriLBaJ1JYtP2lgMevkd5JHAA/exec";
+// رابط Google Apps Script Web App منفصل ثالث (25 أغسطس 2026) لاستقبال إشارات
+// "المفضلة" (❤️ Wishlist) — كل ضغطة قلب على عطر تحدّث عداده بملف wishlist.json
+// بجذر الريبو. سكربت منفصل تمامًا عن الطلبات والتقييمات (نفس مبدأ الفصل). انشره
+// حسب دليل wishlist-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
+const WISHLIST_ENDPOINT = "PASTE_WISHLIST_ENDPOINT_HERE";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
@@ -175,6 +180,8 @@ const I18N = {
     askPrice: "اسأل عن السعر",
     outOfStock: "نفذ",
     allOutOfStock: "نفذت الكمية",
+    wishlistAddTitle: "أضف للمفضلة",
+    wishlistRemoveTitle: "إزالة من المفضلة",
     add: "أضف للسلة",
     added: "أُضيف",
     cartEmpty: "سلتك فارغة",
@@ -225,6 +232,7 @@ const I18N = {
     shipFee: "رسوم التوصيل",
     shipFree: "مجاني 🎁",
     shipGrandTotal: "الإجمالي شامل التوصيل",
+    shipEstimateNote: "(الرسوم النهائية تتأكد حسب موقعك بالضبط)",
     orderSubmitBtn: "إرسال الطلب",
     orderSubmitting: "جاري الإرسال...",
     orderFormNote: "بعد الإرسال بنتواصل معك عبر واتساب لتأكيد الطلب.",
@@ -334,6 +342,8 @@ const I18N = {
     askPrice: "Ask for price",
     outOfStock: "out of stock",
     allOutOfStock: "Out of stock",
+    wishlistAddTitle: "Add to wishlist",
+    wishlistRemoveTitle: "Remove from wishlist",
     add: "Add to cart",
     added: "Added",
     cartEmpty: "Your cart is empty",
@@ -384,6 +394,7 @@ const I18N = {
     shipFee: "Delivery Fee",
     shipFree: "Free 🎁",
     shipGrandTotal: "Total incl. delivery",
+    shipEstimateNote: "(Final fee confirmed based on your exact location)",
     orderSubmitBtn: "Submit Order",
     orderSubmitting: "Submitting...",
     orderFormNote: "After submitting, we'll contact you on WhatsApp to confirm your order.",
@@ -440,9 +451,10 @@ function hasFreeShipping(offerStatus){
   return offerStatus.unlocked.some(o => o.freeShipping);
 }
 
-/* ===== إعدادات الشحن — عدّل الأرقام هنا فقط لو تغيّرت أسعار التوصيل (23 أغسطس 2026: سعر موحّد للإمارات + تخفيض رسوم عُمان) ===== */
+/* ===== إعدادات الشحن — عدّل الأرقام هنا فقط لو تغيّرت أسعار التوصيل
+   (25 أغسطس 2026: رجّعنا تمييز المنطقة الغربية بأبوظبي — رسومها أعلى من باقي الإمارات) ===== */
 const SHIPPING_RATES = {
-  AE: { standard: 20 },
+  AE: { standard: 20, western: 50 },
   OM: { door: 2, nool: 1 }
 };
 
@@ -455,20 +467,66 @@ function tabbyFeeFor(amount){
   return Math.round(amount * TABBY_FEE_PERCENT / 100);
 }
 
-const UAE_EMIRATES = ["أبوظبي","دبي","الشارقة","عجمان","أم القيوين","رأس الخيمة","الفجيرة","المنطقة الغربية (أبوظبي)"];
+// كل إمارة عندها اسم عربي وإنجليزي — عشان لما اللغة تكون إنجليزي تظهر القائمة
+// بالإنجليزي بدل ما تضل عربي دايمًا (كانت هذي مشكلة قبل 25 أغسطس 2026).
+// western:true = المنطقة الغربية بأبوظبي، لها رسوم توصيل أعلى (شوف SHIPPING_RATES.AE.western)
+// — تُقرأ عبر data-western بالـ<option> بدل مطابقة النص، عشان تشتغل بأي لغة.
+const UAE_EMIRATES = [
+  { ar:"أبوظبي", en:"Abu Dhabi" },
+  { ar:"دبي", en:"Dubai" },
+  { ar:"الشارقة", en:"Sharjah" },
+  { ar:"عجمان", en:"Ajman" },
+  { ar:"أم القيوين", en:"Umm Al Quwain" },
+  { ar:"رأس الخيمة", en:"Ras Al Khaimah" },
+  { ar:"الفجيرة", en:"Fujairah" },
+  { ar:"المنطقة الغربية (أبوظبي)", en:"Western Region (Abu Dhabi)", western:true }
+];
 
+// نفس الفكرة لولايات عُمان — كل محافظة وولاية عندها اسم عربي وإنجليزي.
 const OMAN_WILAYATS = [
-  { gov:"محافظة مسقط", items:["مسقط","مطرح","بوشر","السيب","العامرات","القريات"] },
-  { gov:"محافظة شمال الباطنة", items:["الخابورة","صحم","صحار","لوى","شناص","السويق"] },
-  { gov:"محافظة جنوب الباطنة", items:["بركاء","المصنعة","الرستاق","وادي المعاول","نخل"] },
-  { gov:"محافظة الداخلية", items:["سمائل","بدبد","نزوى","الحمراء","بهلاء","منح","إزكي","أدم"] },
-  { gov:"محافظة الظاهرة", items:["عبري","ضنك","ينقل"] },
-  { gov:"محافظة البريمي", items:["البريمي","محضة","السنينة"] },
-  { gov:"محافظة مسندم", items:["مدحاء","دبا","خصب","بخا"] },
-  { gov:"محافظة جنوب الشرقية", items:["صور","جعلان بني بو حسن","جعلان بني بو علي","الكامل والوافي","مصيرة"] },
-  { gov:"محافظة شمال الشرقية", items:["دماء والطائيين","القابل","إبراء","المضيبي","بدية"] },
-  { gov:"محافظة الوسطى", items:["هيماء","محوت","الدقم","الجازر"] },
-  { gov:"محافظة ظفار", items:["صلالة","طاقة","مرباط","سدح","رخيوت","ضلكوت","ثمريت","المزيونة","مقشن","شليم وجزر الحلانيات"] }
+  { gov:{ar:"محافظة مسقط", en:"Muscat Governorate"}, items:[
+    {ar:"مسقط", en:"Muscat"}, {ar:"مطرح", en:"Muttrah"}, {ar:"بوشر", en:"Bawshar"},
+    {ar:"السيب", en:"As Seeb"}, {ar:"العامرات", en:"Al Amerat"}, {ar:"القريات", en:"Quriyat"}
+  ]},
+  { gov:{ar:"محافظة شمال الباطنة", en:"North Al Batinah Governorate"}, items:[
+    {ar:"الخابورة", en:"Al Khaburah"}, {ar:"صحم", en:"Saham"}, {ar:"صحار", en:"Sohar"},
+    {ar:"لوى", en:"Liwa"}, {ar:"شناص", en:"Shinas"}, {ar:"السويق", en:"As Suwaiq"}
+  ]},
+  { gov:{ar:"محافظة جنوب الباطنة", en:"South Al Batinah Governorate"}, items:[
+    {ar:"بركاء", en:"Barka"}, {ar:"المصنعة", en:"Al Musanaah"}, {ar:"الرستاق", en:"Ar Rustaq"},
+    {ar:"وادي المعاول", en:"Wadi Al Maawil"}, {ar:"نخل", en:"Nakhal"}
+  ]},
+  { gov:{ar:"محافظة الداخلية", en:"Ad Dakhiliyah Governorate"}, items:[
+    {ar:"سمائل", en:"Samail"}, {ar:"بدبد", en:"Bidbid"}, {ar:"نزوى", en:"Nizwa"},
+    {ar:"الحمراء", en:"Al Hamra"}, {ar:"بهلاء", en:"Bahla"}, {ar:"منح", en:"Manah"},
+    {ar:"إزكي", en:"Izki"}, {ar:"أدم", en:"Adam"}
+  ]},
+  { gov:{ar:"محافظة الظاهرة", en:"Ad Dhahirah Governorate"}, items:[
+    {ar:"عبري", en:"Ibri"}, {ar:"ضنك", en:"Dank"}, {ar:"ينقل", en:"Yanqul"}
+  ]},
+  { gov:{ar:"محافظة البريمي", en:"Al Buraimi Governorate"}, items:[
+    {ar:"البريمي", en:"Al Buraimi"}, {ar:"محضة", en:"Mahdah"}, {ar:"السنينة", en:"As Sunaynah"}
+  ]},
+  { gov:{ar:"محافظة مسندم", en:"Musandam Governorate"}, items:[
+    {ar:"مدحاء", en:"Madha"}, {ar:"دبا", en:"Dibba (Musandam)"}, {ar:"خصب", en:"Khasab"}, {ar:"بخا", en:"Bukha"}
+  ]},
+  { gov:{ar:"محافظة جنوب الشرقية", en:"South Ash Sharqiyah Governorate"}, items:[
+    {ar:"صور", en:"Sur"}, {ar:"جعلان بني بو حسن", en:"Jalan Bani Bu Hassan"},
+    {ar:"جعلان بني بو علي", en:"Jalan Bani Bu Ali"}, {ar:"الكامل والوافي", en:"Al Kamil Wal Wafi"},
+    {ar:"مصيرة", en:"Masirah"}
+  ]},
+  { gov:{ar:"محافظة شمال الشرقية", en:"North Ash Sharqiyah Governorate"}, items:[
+    {ar:"دماء والطائيين", en:"Dama Wa Al Taiyin"}, {ar:"القابل", en:"Al Qabil"},
+    {ar:"إبراء", en:"Ibra"}, {ar:"المضيبي", en:"Al Mudhaibi"}, {ar:"بدية", en:"Bidiyah"}
+  ]},
+  { gov:{ar:"محافظة الوسطى", en:"Al Wusta Governorate"}, items:[
+    {ar:"هيماء", en:"Haima"}, {ar:"محوت", en:"Mahout"}, {ar:"الدقم", en:"Duqm"}, {ar:"الجازر", en:"Al Jazir"}
+  ]},
+  { gov:{ar:"محافظة ظفار", en:"Dhofar Governorate"}, items:[
+    {ar:"صلالة", en:"Salalah"}, {ar:"طاقة", en:"Taqah"}, {ar:"مرباط", en:"Mirbat"}, {ar:"سدح", en:"Sadah"},
+    {ar:"رخيوت", en:"Rakhyut"}, {ar:"ضلكوت", en:"Dhalkut"}, {ar:"ثمريت", en:"Thumrait"},
+    {ar:"المزيونة", en:"Al Mazyunah"}, {ar:"مقشن", en:"Muqshin"}, {ar:"شليم وجزر الحلانيات", en:"Shalim and the Hallaniyat Islands"}
+  ]}
 ];
 
 function getBestOffer(size, qty){
@@ -1495,8 +1553,15 @@ function renderGrid(explicitList){
     const hasDetails = accordsDisplay || notesTopDisplay || longevityDisplay || sillageDisplay;
     const cardRating = ratingSummary(p.id);
 
+    // 25 أغسطس 2026: زر "❤️ المفضلة" — تعمّدنا نحطه بمنطقة المعلومات البيضاء (مو
+    // فوق الصورة نفسها) بنفس منطق قرار عدم وضع شارات فوق الصورة أعلاه — صور
+    // العطور (تصاميم Canva) قد يكون فيها ألوان/نصوص مدمجة، وأي عنصر فوقها ممكن
+    // يغطي جزء منها بشكل غير متوقع. صف صغير أعلى بطاقة المعلومات، جنب "Impressions".
     info.innerHTML = `
-      <div class="impressions-tag">Impressions</div>
+      <div class="card-top-row">
+        <div class="impressions-tag">Impressions</div>
+        <button type="button" class="wishlist-heart-btn${myWishlist.has(p.id) ? " active" : ""}" aria-label="${myWishlist.has(p.id) ? t.wishlistRemoveTitle : t.wishlistAddTitle}" title="${myWishlist.has(p.id) ? t.wishlistRemoveTitle : t.wishlistAddTitle}">${svgIcon("ic-heart")}</button>
+      </div>
       <div class="name-row">
         <div class="brand" title="${lang==="ar" ? "عرض كل عطور هذا البراند" : "Show all perfumes from this brand"}">${toTitleCase(p.brand)}</div>
         ${discountPct > 0 ? `<div class="discount-tag">${svgIcon("ic-sparkle")}<span>${lang==="ar" ? `خصم ${discountPct}٪` : `-${discountPct}%`}</span></div>` : ""}
@@ -1512,6 +1577,18 @@ function renderGrid(explicitList){
         ${sillageDisplay ? `<div class="row">${svgIcon("ic-wind")}<div><b>${t.sillage}:</b> ${sillageDisplay}</div></div>` : ""}
       </div>
     `;
+
+    const heartBtn = info.querySelector(".wishlist-heart-btn");
+    heartBtn.onclick = ()=>{
+      const wasActive = myWishlist.has(p.id);
+      if(wasActive){ myWishlist.delete(p.id); } else { myWishlist.add(p.id); }
+      saveMyWishlistToStorage();
+      heartBtn.classList.toggle("active", !wasActive);
+      const newTitle = !wasActive ? t.wishlistRemoveTitle : t.wishlistAddTitle;
+      heartBtn.title = newTitle;
+      heartBtn.setAttribute("aria-label", newTitle);
+      submitWishlistSignal(p, wasActive ? "remove" : "add");
+    };
 
     const brandEl = info.querySelector(".brand");
     brandEl.onclick = ()=>{
@@ -1724,6 +1801,47 @@ function restoreCartState(){
   }catch(e){ /* أول زيارة أو sessionStorage غير متاح — نبدأ بسلة فاضية عادي */ }
 }
 
+/* ===== المفضلة (❤️ Wishlist) — 25 أغسطس 2026 =====
+   عكس السلة، نخزّن المفضلة بـlocalStorage (لا sessionStorage) عشان تضل محفوظة
+   للعميل حتى لو رجع الموقع بعد أيام، مو بس بنفس الجلسة. كل عطر معرَّف بـp.id
+   الثابت (نفس المعرّف المستخدم بالتقييمات). */
+const WISHLIST_STORAGE_KEY = "evoque_wishlist_v1";
+let myWishlist = new Set();
+
+function loadMyWishlistFromStorage(){
+  try{
+    const raw = localStorage.getItem(WISHLIST_STORAGE_KEY);
+    if(raw){
+      const arr = JSON.parse(raw);
+      if(Array.isArray(arr)) myWishlist = new Set(arr);
+    }
+  }catch(e){ /* localStorage غير متاح — المفضلة تشتغل بالذاكرة بس لهذي الزيارة */ }
+}
+
+function saveMyWishlistToStorage(){
+  try{ localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(Array.from(myWishlist))); }
+  catch(e){ /* نتجاهل بصمت — نفس تعامل السلة */ }
+}
+
+// إشارة خلفية (fire-and-forget) لصاحب المتجر: كل ضغطة قلب تحدّث عداد الطلب على
+// هذا العطر بملف wishlist.json عبر Apps Script منفصل (نفس تقنية فورم/iframe
+// المخفي المستخدمة بالطلبات والتقييمات، بدون قيود CORS). لو الخدمة لسا ما
+// انفعّلت (المستخدم ما نشر السكربت بعد) نتجاهل بهدوء — المفضلة تضل شغالة محليًا
+// بمتصفح العميل نفسه بكل الأحوال، بس بدون ما يشوفها صاحب المتجر بلوحة التحكم.
+function submitWishlistSignal(p, action){
+  if(!WISHLIST_ENDPOINT || WISHLIST_ENDPOINT.indexOf("PASTE_") === 0) return;
+  try{
+    const form = document.getElementById("wishlistHiddenForm");
+    const iframe = document.getElementById("wishlistHiddenFrame");
+    if(!form || !iframe) return;
+    form.action = WISHLIST_ENDPOINT;
+    document.getElementById("wishlistHiddenPayload").value = JSON.stringify({
+      perfumeId: p.id, brand: p.brand, name: p.name, action, hp: ""
+    });
+    form.submit();
+  }catch(e){ /* فشل الإرسال بالخلفية ما يوقف تجربة العميل — حالة المفضلة المحلية اتصلحت خلاص */ }
+}
+
 function renderCart(){
   persistCartState();
   const t = I18N[lang];
@@ -1745,12 +1863,22 @@ function renderCart(){
   const offerBadge = offerStatus.unlocked.length ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🎁</span>` : "";
   cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${totalQty}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}${offerBadge}</span>`;
   checkoutBtn.style.opacity = "1"; checkoutBtn.style.pointerEvents = "auto";
+  // 25 أغسطس 2026: رسالة "إتمام الطلب عبر واتساب" السريعة كانت ما تذكر رسوم التوصيل
+  // إطلاقًا (كانت تكتفي بـ"المجموع التقريبي بدون التوصيل")، فيوصل للعميل والبائع رقم
+  // ناقص. صرنا نضيف تقدير رسوم التوصيل + الإجمالي شامل التوصيل، مع توضيح إنه تقديري
+  // (لأن هذا المسار السريع ما يجمع الإمارة/الولاية بعد — الإمارة تُحدد بنموذج الطلب).
+  const freeShip = hasFreeShipping(offerStatus);
+  const estFee = currentShippingFee();
+  const shippingCharged = freeShip ? 0 : estFee;
+  const estGrandTotal = total + shippingCharged;
   let msg = t.orderMsgIntro;
   items.forEach((i,idx)=>{
     const priceTxt = i.lineTotal != null ? `${i.lineTotal} ${cur}` : t.orderMsgAskPrice;
     msg += `${idx+1}. ${toTitleCase(i.p.brand)} - ${toTitleCase(i.p.name)} (${i.size}ml) x${i.qty} — ${priceTxt}\n`;
   });
-  msg += `\n${t.orderMsgTotal}: ${total} ${cur} ${t.withoutDelivery}`;
+  msg += `\n${t.shipSubtotal}: ${total} ${cur}`;
+  msg += `\n${t.shipFee}: ${freeShip ? t.shipFree : estFee + " " + cur}`;
+  msg += `\n${t.shipGrandTotal}: ${estGrandTotal} ${cur} ${t.shipEstimateNote}`;
   msg += `\n${t.orderMsgPayment}: ${paymentLabel(t, paymentMethod)}`;
   if(offerStatus.unlocked.length){
     offerStatus.unlocked.forEach(o=>{ msg += `\n${t.orderMsgOfferLine}: ${o.reward[lang]}`; });
@@ -1846,18 +1974,33 @@ document.getElementById("cartModalOverlay").onclick = (e)=>{
 
 /* رقم الطلب الرسمي (تسلسلي، يبدأ 1001 كل شهر) يُولّد من السيرفر (Code.gs) — هذا الرقم هنا للمرجع بالواتساب فقط لو فشل الاتصال بالسيرفر بالكامل قبل ما يوصل أي طلب */
 
+// نحافظ على نفس موضع الاختيار (بالفهرس) لما نعيد تعبئة القائمة بعد تبديل اللغة،
+// عشان العميل لو مثلاً محدد "دبي" وبدّل اللغة للإنجليزي، يضل عليها ("Dubai") بدل
+// ما ترجع القائمة لأول خيار تلقائيًا.
 function populateEmirateSelect(){
   const sel = document.getElementById("ofEmirate");
-  sel.innerHTML = UAE_EMIRATES.map(e => `<option value="${e}">${e}</option>`).join("");
+  const prevIndex = sel.selectedIndex >= 0 ? sel.selectedIndex : 0;
+  sel.innerHTML = UAE_EMIRATES.map(e => {
+    const label = lang === "ar" ? e.ar : e.en;
+    return `<option value="${label}" data-western="${e.western ? "1" : "0"}">${label}</option>`;
+  }).join("");
+  sel.selectedIndex = Math.min(prevIndex, sel.options.length - 1);
 }
 
 function populateWilayatSelect(){
   const t = I18N[lang];
   const sel = document.getElementById("ofWilayat");
-  const groups = OMAN_WILAYATS.map(g =>
-    `<optgroup label="${g.gov}">${g.items.map(w=>`<option value="${w}">${w}</option>`).join("")}</optgroup>`
-  ).join("");
+  const prevIndex = sel.selectedIndex >= 0 ? sel.selectedIndex : 0;
+  const groups = OMAN_WILAYATS.map(g => {
+    const govLabel = lang === "ar" ? g.gov.ar : g.gov.en;
+    const opts = g.items.map(w => {
+      const label = lang === "ar" ? w.ar : w.en;
+      return `<option value="${label}">${label}</option>`;
+    }).join("");
+    return `<optgroup label="${govLabel}">${opts}</optgroup>`;
+  }).join("");
   sel.innerHTML = groups + `<option value="__other__">${t.wilayatOtherOption}</option>`;
+  sel.selectedIndex = Math.min(prevIndex, sel.options.length - 1);
 }
 
 // العميل يقدر يغيّر الدولة من نفس نموذج الطلب (23 أغسطس 2026) — مفيد خصوصًا لعميل
@@ -1895,7 +2038,11 @@ function updateAddressBlocksVisibility(){
 function currentShippingFee(){
   const isAe = country === "AE";
   if(isAe){
-    return SHIPPING_RATES.AE.standard;
+    // نتحقق من data-western بالخيار المحدد (مو بمطابقة النص) عشان يشتغل صح بأي لغة
+    const emirateSel = document.getElementById("ofEmirate");
+    const selectedOpt = emirateSel && emirateSel.selectedOptions ? emirateSel.selectedOptions[0] : null;
+    const isWestern = !!(selectedOpt && selectedOpt.dataset.western === "1");
+    return isWestern ? SHIPPING_RATES.AE.western : SHIPPING_RATES.AE.standard;
   } else {
     const doorRadio = document.querySelector('input[name="ofOmDelivery"]:checked');
     const method = doorRadio ? doorRadio.value : "door";
@@ -2145,6 +2292,7 @@ document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeLightbox
 
 // نرجع السلة/الدولة/طريقة الدفع المحفوظة (لو الزائر انتقل من صفحة ثانية بنفس الجلسة) قبل أول رسم للصفحة
 restoreCartState();
+loadMyWishlistFromStorage();
 
 // نحدد اللغة: لو الزائر اختار من قبل نستخدمها بصمت، ولو أول زيارة نعرض نافذة الاختيار
 let savedLang = null;
