@@ -14,7 +14,7 @@ const REVIEWS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxwC7mC6JegXo-
 // "المفضلة" (❤️ Wishlist) — كل ضغطة قلب على عطر تحدّث عداده بملف wishlist.json
 // بجذر الريبو. سكربت منفصل تمامًا عن الطلبات والتقييمات (نفس مبدأ الفصل). انشره
 // حسب دليل wishlist-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
-const WISHLIST_ENDPOINT = "PASTE_WISHLIST_ENDPOINT_HERE";
+const WISHLIST_ENDPOINT = "https://script.google.com/macros/s/AKfycbyRBlIFQ9jHZ2mCabZHeVrTrd6205U8zvMZQRPcW03J8gX70zaKFD-KeGZGn2db_b8N/exec";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
