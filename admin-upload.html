@@ -4,46 +4,68 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>لوحة تحكم منتجات Evoque</title>
+<title>لوحة تحكم Evoque Perfumes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0A0A0A; --panel:#151515; --line:#2a2a2a; --ink:#fff; --muted:#9a9aa1;
-    --red:#E11D2E; --red-deep:#B0121F; --green:#1ea952; --amber:#c98a1a;
-    --radius:12px;
+    --bg:#FAF6EF; --panel:#FFFFFF; --panel-2:#F1E9DC; --line:#E4D9C5; --ink:#221F1C; --muted:#7A7168;
+    --gold:#C6AB8B; --gold-deep:#A9835C; --gold-soft:rgba(198,171,139,.16); --gold-ink:#6B4F2E;
+    --emerald:#2F4A3D; --emerald-deep:#213830;
+    --red:#B23A2E; --red-deep:#8E2C22; --green:#1F6B41; --amber:#8A6A1F;
+    --radius:14px;
   }
   *{box-sizing:border-box;}
   body{
-    margin:0; font-family:'Segoe UI', Tahoma, Arial, sans-serif; background:var(--bg); color:var(--ink);
+    margin:0; font-family:'Tajawal','Segoe UI', Tahoma, Arial, sans-serif; background:var(--bg); color:var(--ink);
     min-height:100vh; padding:24px 16px 80px;
+    background-image:radial-gradient(circle at 15% -10%, rgba(198,171,139,.16), transparent 45%);
   }
-  .wrap{max-width:860px; margin:0 auto;}
-  h1{font-size:22px; font-weight:800; margin:0 0 4px;}
-  .sub{color:var(--muted); font-size:14px; margin:0 0 20px; line-height:1.7;}
-  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px;}
-  .panel h2{font-size:15px; margin:0 0 12px; color:var(--muted); font-weight:700;}
+  .wrap{max-width:960px; margin:0 auto;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
+  .brandmark{display:flex; align-items:center; gap:10px;}
+  .brandmark .dot{width:9px; height:9px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px rgba(47,74,61,.4);}
+  h1{font-family:'Markazi Text', 'Tajawal', serif; font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; color:var(--ink);}
+  .sub{color:var(--muted); font-size:13.5px; margin:2px 0 0; line-height:1.7;}
+  .livepill{font-size:11.5px; color:var(--muted); border:1px solid var(--line); background:var(--panel); border-radius:20px; padding:5px 12px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
+  .livepill .dot2{width:7px; height:7px; border-radius:50%; background:var(--green);}
+
+  nav.tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:6px; box-shadow:0 1px 2px rgba(34,31,28,.04);}
+  nav.tabs button{
+    background:transparent; color:var(--muted); border:none; border-radius:9px; padding:9px 14px;
+    font-size:13.5px; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+  nav.tabs button:hover{color:var(--ink); background:var(--panel-2);}
+  nav.tabs button.active{background:var(--gold-soft); color:var(--gold-ink); box-shadow:inset 0 0 0 1px rgba(198,171,139,.5);}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px; box-shadow:0 1px 2px rgba(34,31,28,.04);}
+  .panel h2{font-family:'Markazi Text','Tajawal',serif; font-size:19px; margin:0 0 12px; color:var(--ink); font-weight:700;}
   label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
   input[type=text], input[type=password], input[type=number], select, textarea{
     width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
-    background:#0f0f0f; color:var(--ink); font-size:14px; margin-bottom:14px;
+    background:var(--panel-2); color:var(--ink); font-size:14px; margin-bottom:14px; font-family:inherit;
   }
   textarea{ font-family:inherit; resize:vertical; }
-  .review-row{ padding:12px; border-bottom:1px solid var(--line); }
-  .review-row:last-child{ border-bottom:none; }
-  .review-row-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .review-row-name{ color:var(--ink); font-weight:600; font-size:13.5px; }
-  .review-row-stars{ color:var(--amber); font-size:12px; letter-spacing:1px; }
+  .review-row, .sale-row{ padding:12px; border-bottom:1px solid var(--line); }
+  .review-row:last-child, .sale-row:last-child{ border-bottom:none; }
+  .review-row-top, .sale-row-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .review-row-name, .sale-row-name{ color:var(--ink); font-weight:600; font-size:13.5px; }
+  .review-row-stars{ color:var(--gold-ink); font-size:12px; letter-spacing:1px; }
   .review-row-comment{ color:var(--muted); font-size:12.5px; line-height:1.7; margin:6px 0; }
-  .review-row-meta{ color:var(--muted); font-size:11px; }
-  .review-row-actions{ display:flex; gap:8px; margin-top:8px; }
-  .review-row-actions button{ padding:5px 10px; font-size:12px; margin:0; width:auto; }
+  .review-row-meta, .sale-row-meta{ color:var(--muted); font-size:11px; }
+  .review-row-actions, .sale-row-actions{ display:flex; gap:8px; margin-top:8px; }
+  .review-row-actions button, .sale-row-actions button{ padding:5px 10px; font-size:12px; margin:0; width:auto; }
+  .sale-row-amount{ color:var(--emerald); font-weight:700; font-size:13.5px; }
   input[type=file]{
-    width:100%; padding:10px; border-radius:8px; border:1px dashed #444;
-    background:#0f0f0f; color:var(--ink); font-size:13px; margin-bottom:14px;
+    width:100%; padding:10px; border-radius:8px; border:1px dashed #C9BBA0;
+    background:var(--panel-2); color:var(--ink); font-size:13px; margin-bottom:14px;
   }
   .field{margin-bottom:0;}
   .grid2{display:grid; grid-template-columns:1fr 1fr; gap:0 14px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 14px;}
   .grid4{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0 14px;}
-  @media (max-width:640px){ .grid4{grid-template-columns:1fr 1fr;} }
+  @media (max-width:640px){ .grid4{grid-template-columns:1fr 1fr;} .grid3{grid-template-columns:1fr 1fr;} }
   fieldset{border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin:0 0 14px; }
   legend{color:var(--muted); font-size:12.5px; padding:0 6px;}
   .chkrow{display:flex; gap:16px; flex-wrap:wrap;}
@@ -51,77 +73,111 @@
   .chkrow input{width:auto; margin:0;}
   .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   button{
-    background:var(--red); color:#fff; border:none; border-radius:8px; padding:12px 20px;
-    font-size:14px; font-weight:700; cursor:pointer;
+    background:var(--emerald); color:#F3ECDD; border:none; border-radius:8px; padding:12px 20px;
+    font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;
   }
-  button:hover{background:var(--red-deep);}
-  button:disabled{background:#3a3a3a; cursor:not-allowed; color:#888;}
-  button.secondary{background:#2a2a2a;}
-  button.secondary:hover{background:#3a3a3a;}
+  button:hover{background:var(--emerald-deep);}
+  button:disabled{background:#D8D0C0; cursor:not-allowed; color:#9C9284;}
+  button.secondary{background:var(--panel-2); color:var(--ink); border:1px solid var(--line);}
+  button.secondary:hover{background:#E9DFC9;}
   button.ghost{background:transparent; border:1px solid var(--line); color:var(--muted);}
-  button.ghost.active{background:var(--red); color:#fff; border-color:var(--red);}
-  button.danger{background:#2a1414; border:1px solid #5a2323; color:#ff8a93;}
-  button.danger:hover{background:#3a1a1a;}
+  button.ghost.active{background:var(--emerald); color:#F3ECDD; border-color:var(--emerald);}
+  button.danger{background:#FBEBE8; border:1px solid #E3B8AF; color:#963224;}
+  button.danger:hover{background:#F5DAD4;}
   .status{font-size:13px; margin-top:10px; padding:10px 12px; border-radius:8px; display:none; line-height:1.7;}
   .status.show{display:block;}
-  .status.ok{background:rgba(30,169,82,.12); border:1px solid rgba(30,169,82,.4); color:#5ee08a;}
-  .status.err{background:rgba(225,29,46,.12); border:1px solid rgba(225,29,46,.4); color:#ff8a93;}
-  .status.info{background:rgba(200,138,26,.12); border:1px solid rgba(200,138,26,.4); color:#e0b25e;}
+  .status.ok{background:rgba(31,107,65,.10); border:1px solid rgba(31,107,65,.3); color:#1F6B41;}
+  .status.err{background:rgba(178,58,46,.10); border:1px solid rgba(178,58,46,.3); color:#963224;}
+  .status.info{background:var(--gold-soft); border:1px solid rgba(198,171,139,.5); color:var(--gold-ink);}
   .preview{display:flex; align-items:center; gap:14px; margin-bottom:14px;}
-  .preview img{width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:#000;}
+  .preview img{width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:#fff;}
   .preview .meta{font-size:12.5px; color:var(--muted); line-height:1.8;}
-  .progress-bar{height:8px; background:#0f0f0f; border-radius:5px; overflow:hidden; margin:10px 0; border:1px solid var(--line);}
-  .progress-fill{height:100%; background:var(--green); width:0%; transition:width .3s;}
+  .progress-bar{height:8px; background:var(--panel-2); border-radius:5px; overflow:hidden; margin:10px 0; border:1px solid var(--line);}
+  .progress-fill{height:100%; background:var(--emerald); width:0%; transition:width .3s;}
   .search-wrap{position:relative;}
   .dropdown{
-    position:absolute; top:100%; right:0; left:0; background:#0f0f0f; border:1px solid var(--line);
+    position:absolute; top:100%; right:0; left:0; background:var(--panel); border:1px solid var(--line);
     border-radius:8px; max-height:260px; overflow-y:auto; z-index:10; display:none; margin-top:-10px;
+    box-shadow:0 8px 20px rgba(34,31,28,.08);
   }
   .dropdown.show{display:block;}
-  .dropdown-item{padding:10px 12px; cursor:pointer; font-size:13.5px; border-bottom:1px solid #1c1c1c;}
-  .dropdown-item:hover, .dropdown-item.active{background:#1c1c1c;}
+  .dropdown-item{padding:10px 12px; cursor:pointer; font-size:13.5px; border-bottom:1px solid var(--line);}
+  .dropdown-item:hover, .dropdown-item.active{background:var(--panel-2);}
   .dropdown-item .name{color:var(--ink);}
   .dropdown-item .badge{font-size:11px; padding:2px 7px; border-radius:20px; margin-inline-start:8px;}
-  .badge.done{background:rgba(30,169,82,.2); color:#5ee08a;}
-  .badge.pending{background:rgba(200,138,26,.18); color:#e0b25e;}
+  .badge.done{background:rgba(31,107,65,.12); color:#1F6B41;}
+  .badge.pending{background:rgba(138,106,31,.14); color:#8A6A1F;}
   .selected-chip{
-    display:inline-flex; align-items:center; gap:8px; background:#0f0f0f; border:1px solid var(--line);
+    display:inline-flex; align-items:center; gap:8px; background:var(--panel-2); border:1px solid var(--line);
     border-radius:8px; padding:8px 12px; font-size:13.5px; margin-bottom:14px;
   }
   .selected-chip button{background:none; padding:0; font-size:16px; color:var(--muted); line-height:1;}
-  small.hint{color:#77777d; font-size:12px; display:block; margin-top:-8px; margin-bottom:14px; line-height:1.6;}
-  a{color:#e0b25e;}
+  small.hint{color:#8B8073; font-size:12px; display:block; margin-top:-8px; margin-bottom:14px; line-height:1.6;}
+  a{color:var(--gold-ink);}
   .toggle-token{background:none; color:var(--muted); font-size:12px; padding:0; margin-top:-8px; margin-bottom:14px; text-decoration:underline; cursor:pointer;}
   .stats{display:flex; gap:16px; margin-bottom:6px;}
   .stat{font-size:13px;}
   .stat b{font-size:18px; display:block;}
-  .banner{background:rgba(200,138,26,.1); border:1px solid rgba(200,138,26,.35); color:#e0b25e; padding:12px 14px; border-radius:8px; font-size:13px; line-height:1.8; margin-bottom:16px;}
-  .static-list{background:#0f0f0f; border:1px solid var(--line); border-radius:8px; max-height:320px; overflow-y:auto; margin:10px 0;}
-  .stat-clickable{cursor:pointer; padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:#0f0f0f; transition:border-color .15s; flex:1;}
-  .stat-clickable:hover{border-color:#555;}
-  .stat-clickable.active{border-color:var(--red); background:rgba(225,29,46,.08);}
+  .banner{background:var(--gold-soft); border:1px solid rgba(198,171,139,.5); color:var(--gold-ink); padding:12px 14px; border-radius:8px; font-size:13px; line-height:1.8; margin-bottom:16px;}
+  .static-list{background:var(--panel-2); border:1px solid var(--line); border-radius:8px; max-height:320px; overflow-y:auto; margin:10px 0;}
+  .stat-clickable{cursor:pointer; padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); transition:border-color .15s; flex:1;}
+  .stat-clickable:hover{border-color:#B8A87E;}
+  .stat-clickable.active{border-color:var(--gold-ink); background:var(--gold-soft);}
   #formPanel{display:none;}
+
+  /* ===== نظرة عامة (Overview) ===== */
+  .kpi-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;}
+  @media (max-width:820px){ .kpi-grid{grid-template-columns:repeat(2, 1fr);} }
+  .kpi-card{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:14px; transition:border-color .15s, transform .15s;}
+  .kpi-card.clickable{cursor:pointer;}
+  .kpi-card.clickable:hover{border-color:var(--gold-ink); transform:translateY(-1px);}
+  .kpi-card .kpi-label{color:var(--muted); font-size:12.5px; line-height:1.5;}
+  .kpi-card .kpi-value{font-family:'Markazi Text','Tajawal',serif; font-size:28px; font-weight:700; color:var(--ink); margin-top:4px;}
+  .kpi-card.alert .kpi-value{color:#9C6B1F;}
+  .kpi-card.alert-red .kpi-value{color:#B23A2E;}
+  .kpi-card.good .kpi-value{color:#1F6B41;}
+  .kpi-card .kpi-sub{color:#93897A; font-size:11.5px; margin-top:2px;}
+  .ov-section-title{font-family:'Markazi Text','Tajawal',serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
+  .ov-section-title:first-child{margin-top:0;}
+  .ov-empty-note{color:var(--muted); font-size:12.5px; background:var(--panel-2); border:1px dashed var(--line); border-radius:8px; padding:12px 14px; line-height:1.8;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>لوحة تحكم منتجات Evoque</h1>
-  <p class="sub">إضافة عطر جديد أو تعديل عطر موجود — الاسم، الأسعار، المخزون، والصورة — كل شي من مكان وحد، وينحفظ مباشرة على الموقع الحي.</p>
-
-  <div class="banner">
-    ملاحظة: الشيت القديم (Google Sheet) ما عاد يتحدث تلقائيًا. من الحين، كل إضافة أو تعديل
-    لازم تصير من هالصفحة فقط عشان يظهر بالموقع.
+  <div class="topbar">
+    <div class="brandmark">
+      <span class="dot"></span>
+      <div>
+        <h1>لوحة تحكم Evoque Perfumes</h1>
+        <p class="sub">المرجع الأول والأخير للموقع — بيانات العطور، المخزون، التقييمات، والمبيعات، كل شي من مكان وحد.</p>
+      </div>
+    </div>
+    <span class="livepill"><span class="dot2"></span> متصل مباشرة بالموقع الحي</span>
   </div>
 
+  <nav class="tabs">
+    <button type="button" class="active" id="modeOverviewBtn">🏠 نظرة عامة</button>
+    <button type="button" id="modePhotoBtn">📷 رفع صورة</button>
+    <button type="button" id="modeEditBtn">✏️ تعديل عطر</button>
+    <button type="button" id="modeAddBtn">➕ إضافة عطر</button>
+    <button type="button" id="modeStockBtn">📊 المخزون</button>
+    <button type="button" id="modeSalesBtn">💰 المبيعات</button>
+    <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
+    <button type="button" id="modeBulkBtn">📦 رفع صور دفعة</button>
+    <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
+    <button type="button" id="modeBankBtn">🏦 بيانات البنك</button>
+    <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
+  </nav>
+
   <div class="panel" id="tokenPanel">
-    <h2>1) مفتاح الدخول (مرة وحدة بس بكل جلسة)</h2>
+    <h2>مفتاح الدخول (مرة وحدة بكل جلسة)</h2>
     <label for="tokenInput">GitHub Personal Access Token</label>
     <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
     <button type="button" class="toggle-token" id="toggleTokenBtn">إظهار المفتاح</button>
     <small class="hint">
-      هذا المفتاح يبقى بمتصفحك فقط، ما يترسل لأي مكان غير GitHub مباشرة، ويختفي لما تسكر التبويب (إلا لو فعّلت "احفظ المفتاح").
-      إذا ما عندك مفتاح: من حسابك بـ GitHub روح Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token،
-      اختر الصلاحية بس على ريبو evoque-catalog، وامنحه صلاحية "Contents: Read and write".
+      يبقى بمتصفحك فقط، ما يترسل لأي مكان غير GitHub مباشرة. ما عندك مفتاح؟ من حسابك بـ GitHub:
+      Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token —
+      اختر ريبو evoque-catalog بس، وامنحه صلاحية "Contents: Read and write".
     </small>
     <div class="row">
       <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
@@ -130,35 +186,77 @@
     </div>
   </div>
 
-  <div class="panel">
-    <h2>2) شنو تبا تسوي؟</h2>
-    <div class="row" style="margin-bottom:14px;">
-      <button type="button" class="ghost active" id="modePhotoBtn">📷 رفع صورة فقط (الأسرع)</button>
-      <button type="button" class="ghost" id="modeEditBtn">✏️ تعديل بيانات عطر</button>
-      <button type="button" class="ghost" id="modeAddBtn">➕ إضافة عطر جديد</button>
-      <button type="button" class="ghost" id="modeBulkBtn">📦 رفع كل الصور دفعة وحدة</button>
-      <button type="button" class="ghost" id="modeStockBtn">📊 المخزون</button>
-      <button type="button" class="ghost" id="modeExcelBtn">📥 استيراد عطور من إكسل</button>
-      <button type="button" class="ghost" id="modeReviewsBtn">⭐ التقييمات</button>
-      <button type="button" class="ghost" id="modeBankBtn">🏦 بيانات البنك</button>
-      <button type="button" class="ghost" id="modeWishlistBtn">❤️ المفضلة</button>
-    </div>
-    <small class="hint" style="margin-top:0;">
-      عندك 182 عطر موجودين ببياناتهم كاملة أصلًا (من الشيت القديم) — كل اللي ناقصهم الصورة.
-      استخدم "رفع صورة فقط" عشان ترفع الصور بسرعة بدون ما تفتح نموذج طويل. استخدم "تعديل بيانات عطر"
-      بس لو تبا تغيّر سعر أو مخزون أو أي معلومة ثانية. استخدم "رفع كل الصور دفعة وحدة" لو عندك مجلد
-      فيه كل الصور مسمّاة بنفس اسم البراند والعطر — يطابقها وحده ويرفعها كلها بدون ما تختار كل عطر يدويًا.
-      استخدم "المخزون" عشان تشوف وتحدّث حالة "متوفر/خلص" بسرعة، أو تشوف العطور اللي بياناتها ناقصة.
-      استخدم "استيراد من إكسل" عشان تضيف عدة عطور جديدة دفعة وحدة من ملف إكسل، بدل ما تعبي كل عطر يدويًا.
-      استخدم "التقييمات" عشان تضيف تقييم عميل حقيقي على عطر معيّن، أو تعدّل/تحذف تقييم موجود — التقييمات تظهر للزوار مباشرة تحت تفاصيل العطر بالموقع.
-      استخدم "بيانات البنك" عشان تدخل أو تعدّل حساب التحويل البنكي اللي يشوفه العميل بالموقع لما يختار "تحويل بنكي" — منفصل للإمارات وعُمان، وتقدر تغيّره أي وقت.
-    </small>
+  <div class="panel" id="overviewPanel">
+    <h2>نظرة عامة على المتجر</h2>
 
-    <div id="editSearchWrap" style="display:none;">
+    <div class="ov-section-title">الكتالوج</div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">إجمالي العطور</div><div class="kpi-value" id="ov_total">—</div><div class="kpi-sub" id="ov_totalSub"></div></div>
+      <div class="kpi-card good"><div class="kpi-label">نسبة اكتمال الصور</div><div class="kpi-value" id="ov_imagesPct">—</div><div class="kpi-sub" id="ov_imagesSub"></div></div>
+      <div class="kpi-card clickable alert" id="ov_missingCard"><div class="kpi-label">بيانات ناقصة (اضغط للمراجعة)</div><div class="kpi-value" id="ov_missing">—</div><div class="kpi-sub">أكوردات / نوتات / ثبات / فوحان...</div></div>
+      <div class="kpi-card clickable alert-red" id="ov_outCard"><div class="kpi-label">فيها حجم خلص (اضغط للتحديث)</div><div class="kpi-value" id="ov_out">—</div><div class="kpi-sub" id="ov_outSub"></div></div>
+      <div class="kpi-card clickable alert" id="ov_lowCard"><div class="kpi-label">قارب على النفاد — بقي حجم وحد (اضغط للمراجعة)</div><div class="kpi-value" id="ov_low">—</div><div class="kpi-sub">قطعة وحدة متبقية — جهّز شراء</div></div>
+      <div class="kpi-card"><div class="kpi-label">عدد البراندات</div><div class="kpi-value" id="ov_brands">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">متوسط سعر 50مل (AED)</div><div class="kpi-value" id="ov_avgPrice">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">قيمة المخزون التقديرية (AED)</div><div class="kpi-value" id="ov_stockValue">—</div><div class="kpi-sub">حسب السعر × الكمية المتوفرة</div></div>
+      <div class="kpi-card"><div class="kpi-label">إجمالي القطع بالمخزون الحين</div><div class="kpi-value" id="ov_stockUnits">—</div><div class="kpi-sub">مجموع كميات كل الأحجام</div></div>
+      <div class="kpi-card"><div class="kpi-label">متوسط التقييم</div><div class="kpi-value" id="ov_rating">—</div><div class="kpi-sub" id="ov_ratingSub"></div></div>
+    </div>
+
+    <div class="ov-section-title">المبيعات المسجّلة (واتساب)</div>
+    <div id="ov_salesEmpty" class="ov-empty-note">
+      ما فيه مبيعات مسجّلة بعد. بعد كل عملية بيع تخلص بالواتساب، روح تبويب "💰 المبيعات" وسجّلها بضغطة وحدة — وبتشوف هنا إجمالي الإيرادات وأفضل عطر مبيعًا فعليًا (مب قائمة يدوية).
+    </div>
+    <div class="kpi-grid" id="ov_salesGrid" style="display:none;">
+      <div class="kpi-card good"><div class="kpi-label">عدد عمليات البيع المسجّلة</div><div class="kpi-value" id="ov_salesCount">—</div></div>
+      <div class="kpi-card good"><div class="kpi-label">إجمالي القطع المباعة</div><div class="kpi-value" id="ov_salesUnits">—</div></div>
+      <div class="kpi-card good"><div class="kpi-label">إجمالي الإيرادات (AED)</div><div class="kpi-value" id="ov_salesRevenue">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">الأكثر مبيعًا فعليًا</div><div class="kpi-value" id="ov_bestSeller" style="font-size:16px;">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">مبيعات آخر 7 أيام (قطع)</div><div class="kpi-value" id="ov_salesWeek">—</div></div>
+    </div>
+
+    <div id="ov_periodStatsWrap" style="display:none;">
+      <div class="ov-section-title" style="margin-top:22px;">📅 إحصائيات شهرية</div>
+      <div id="ov_monthlyStats" class="static-list"></div>
+      <small class="hint" id="ov_monthlyMoreHint" style="display:none;"></small>
+
+      <div class="ov-section-title" style="margin-top:22px;">📆 إحصائيات سنوية</div>
+      <div id="ov_yearlyStats" class="static-list"></div>
+    </div>
+
+    <div class="ov-section-title">طلبات نموذج الموقع (Google Sheet) — اختياري</div>
+    <div class="kpi-grid" id="ov_siteGrid">
+      <div class="kpi-card"><div class="kpi-label">عدد الطلبات</div><div class="kpi-value" id="ov_siteCount">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">إجمالي قيمتها</div><div class="kpi-value" id="ov_siteRevenue">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">آخر طلب</div><div class="kpi-value" id="ov_siteLatest" style="font-size:15px;">—</div></div>
+    </div>
+    <details style="margin-top:12px;">
+      <summary style="cursor:pointer; color:var(--muted); font-size:12.5px;">ربط طلبات نموذج الموقع (إعداد لمرة وحدة)</summary>
+      <div style="margin-top:12px;">
+        <small class="hint" style="margin-top:0;">
+          يحتاج رابط Apps Script Web App من ملف Code.gs المستخدم بنموذج الطلبات، بعد إضافة دالة قراءة بسيطة له.
+          لو ما ضبطته بعد، خلي الخانتين فاضيتين — باقي اللوحة تشتغل عادي.
+        </small>
+        <label for="ov_appsUrl">رابط Apps Script Web App</label>
+        <input type="text" id="ov_appsUrl" placeholder="https://script.google.com/macros/s/xxxxx/exec">
+        <label for="ov_appsKey">كلمة مرور بسيطة (نفسها المضبوطة بالكود)</label>
+        <input type="password" id="ov_appsKey" placeholder="اختياري">
+        <div class="row">
+          <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="ov_appsRemember" style="width:auto; margin:0;"> احفظ الإعداد بهذا المتصفح
+          </label>
+          <button type="button" class="secondary" id="ov_appsFetchBtn">تحديث طلبات الموقع</button>
+        </div>
+        <div class="status" id="ov_appsStatus"></div>
+      </div>
+    </details>
+  </div>
+
+  <div class="panel" id="editSearchWrap" style="display:none;">
       <div id="progressStatsWrap">
         <div class="stats" id="statsRow" style="display:none;">
           <div class="stat">إجمالي العطور<b id="statTotal">—</b></div>
-          <div class="stat">لها صورة<b id="statDone" style="color:#5ee08a;">—</b></div>
+          <div class="stat">لها صورة<b id="statDone" style="color:#1F6B41;">—</b></div>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       </div>
@@ -172,8 +270,9 @@
       <div id="stockCategoryWrap" style="display:none;">
         <div class="row" style="margin-bottom:6px; align-items:stretch;">
           <div class="stat-clickable" id="stockCatMissing"><div style="color:var(--muted); font-size:13px;">بياناتها ناقصة</div><b id="stockCatMissingCount" style="font-size:20px; display:block;">—</b></div>
-          <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">فيها حجم مب متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#e0b25e;">—</b></div>
-          <div class="stat-clickable" id="stockCatIn"><div style="color:var(--muted); font-size:13px;">متوفرة بالكامل</div><b id="stockCatInCount" style="font-size:20px; display:block; color:#5ee08a;">—</b></div>
+          <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">فيها حجم مب متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
+          <div class="stat-clickable" id="stockCatLow"><div style="color:var(--muted); font-size:13px;">قارب على النفاد (بقي 1)</div><b id="stockCatLowCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
+          <div class="stat-clickable" id="stockCatIn"><div style="color:var(--muted); font-size:13px;">متوفرة بالكامل</div><b id="stockCatInCount" style="font-size:20px; display:block; color:#1F6B41;">—</b></div>
         </div>
         <small class="hint" style="margin-top:0;">اضغط أي تصنيف فوق تشوف قائمته، أو ابحث باسم العطر تحت مباشرة.</small>
         <div class="static-list" id="stockCategoryList" style="display:none;"></div>
@@ -184,11 +283,10 @@
         <div class="dropdown" id="dropdown"></div>
       </div>
       <div id="selectedChipWrap"></div>
-    </div>
   </div>
 
   <div class="panel" id="quickPhotoPanel" style="display:none;">
-    <h2 id="quickPhotoPanelTitle">3) رفع الصورة</h2>
+    <h2 id="quickPhotoPanelTitle">رفع الصورة</h2>
     <div id="qp_currentImageWrap" style="display:none; margin-bottom:10px;">
       <label>الصورة الحالية</label>
       <div class="preview"><img id="qp_currentImg" alt=""><div class="meta">لو ما رفعت صورة جديدة، هذي تضل هي المعروضة.</div></div>
@@ -207,7 +305,7 @@
   </div>
 
   <div class="panel" id="bulkPanel" style="display:none;">
-    <h2>3) رفع دفعة صور تلقائي</h2>
+    <h2>رفع دفعة صور تلقائي</h2>
     <small class="hint" style="margin-top:0;">
       اختر المجلد اللي فيه كل صور العطور (لازم كل ملف مسمّى بنفس صيغة "البراند _ اسم العطر" —
       نفس التسمية اللي كانت بجوجل درايف). النظام يطابق كل ملف مع العطر الصحيح تلقائيًا، ويعرض لك
@@ -218,8 +316,8 @@
     <div id="bulk_previewWrap" style="display:none;">
       <div class="stats" id="bulk_statsRow">
         <div class="stat">ملفات صور موجودة<b id="bulk_statFiles">—</b></div>
-        <div class="stat">تطابقت تلقائيًا<b id="bulk_statMatched" style="color:#5ee08a;">—</b></div>
-        <div class="stat">بتُرفع الحين<b id="bulk_statToUpload" style="color:#5ee08a;">—</b></div>
+        <div class="stat">تطابقت تلقائيًا<b id="bulk_statMatched" style="color:#1F6B41;">—</b></div>
+        <div class="stat">بتُرفع الحين<b id="bulk_statToUpload" style="color:#1F6B41;">—</b></div>
       </div>
       <div class="row" style="margin:10px 0;">
         <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--ink);">
@@ -234,13 +332,13 @@
       </div>
       <div class="progress-bar" style="margin-top:14px;"><div class="progress-fill" id="bulk_progressFill" style="width:0%;"></div></div>
       <div id="bulk_progressLabel" style="color:var(--muted); font-size:13px; margin:6px 0;"></div>
-      <div id="bulk_log" style="max-height:280px; overflow-y:auto; background:#0f0f0f; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12.5px; line-height:1.9; display:none;"></div>
+      <div id="bulk_log" style="max-height:280px; overflow-y:auto; background:#F1E9DC; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12.5px; line-height:1.9; display:none;"></div>
     </div>
     <div class="status" id="bulk_statusBox"></div>
   </div>
 
   <div class="panel" id="stockQuickPanel" style="display:none;">
-    <h2 id="stockQuickPanelTitle">4) الكمية المتوفرة</h2>
+    <h2 id="stockQuickPanelTitle">الكمية المتوفرة</h2>
     <fieldset>
       <legend>المخزون</legend>
       <div class="grid2">
@@ -271,7 +369,7 @@
   </div>
 
   <div class="panel" id="reviewsQuickPanel" style="display:none;">
-    <h2 id="reviewsQuickPanelTitle">4) تقييمات العطر</h2>
+    <h2 id="reviewsQuickPanelTitle">تقييمات العطر</h2>
 
     <div id="rv_list" class="static-list" style="display:none;"></div>
     <small class="hint" id="rv_emptyHint" style="margin-top:0;">ما فيه تقييمات لهذا العطر بعد — أضف أول تقييم بالفورم تحت.</small>
@@ -302,8 +400,91 @@
     <div class="status" id="rv_statusBox"></div>
   </div>
 
+  <div class="panel" id="salesQuickPanel" style="display:none;">
+    <h2>تسجيل طلب بيع (واتساب)</h2>
+    <small class="hint" style="margin-top:0;">
+      ابحث عن العطر بمربع البحث فوق واضغطه، حدد الحجم/الكمية/السعر، واضغط "أضف للسلة" — وكرّر البحث
+      والإضافة لكل عطر ثاني اشتراه نفس العميل بنفس الطلب. لما تخلص، عبّي اسم العميل والتاريخ (اختياري،
+      مرة وحدة للطلب كامل) واضغط "سجّل الطلب" — يتسجّل كل شي دفعة وحدة، **والمخزون ينقص تلقائيًا** لكل عطر
+      بمقدار الكمية المباعة (وما ينزل تحت صفر أبدًا). لو عدّلت طلب محفوظ أو حذفته، المخزون يتحدّث تلقائيًا
+      معه بردّه.
+    </small>
+
+    <small class="hint" id="sl_pickHint" style="margin-top:0;">👆 ابحث عن أول عطر بمربع البحث بالأعلى واضغطه عشان تضيفه.</small>
+    <div id="sl_addItemWrap" style="display:none;">
+      <div class="grid3">
+        <div class="field">
+          <label for="sl_size">الحجم</label>
+          <select id="sl_size">
+            <option value="50">50مل</option>
+            <option value="10">10مل</option>
+          </select>
+        </div>
+        <div class="field"><label for="sl_qty">الكمية</label><input type="number" id="sl_qty" min="1" step="1" value="1"></div>
+        <div class="field"><label for="sl_price">سعر الوحدة (AED)</label><input type="number" id="sl_price" min="0" step="0.01"></div>
+      </div>
+      <div class="row">
+        <button type="button" id="sl_addToCartBtn" class="secondary">➕ أضف للسلة</button>
+      </div>
+    </div>
+
+    <small class="hint" id="sl_editingHint" style="display:none; margin-top:10px;">🖊️ تعدّل الآن طلب سابق محفوظ — عدّل العناصر أو البيانات تحت واضغط "حفظ التعديلات"، أو "إلغاء التعديل" للرجوع بدون حفظ.</small>
+
+    <div id="sl_cartWrap" style="display:none;">
+      <div class="ov-section-title">🛒 عناصر الطلب الحالي</div>
+      <div id="sl_cartList" class="static-list"></div>
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <b>إجمالي السلة: <span id="sl_cartTotal">0</span> AED</b>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px;">
+      <div class="field"><label for="sl_customer">اسم العميل — اختياري</label><input type="text" id="sl_customer" placeholder="مثال: أم محمد"></div>
+      <div class="field"><label for="sl_date">التاريخ</label><input type="text" id="sl_date" placeholder="YYYY-MM-DD"></div>
+    </div>
+
+    <div class="grid2" style="margin-top:10px;">
+      <div class="field">
+        <label for="sl_country">الدولة — اختياري</label>
+        <select id="sl_country">
+          <option value="">— اختر —</option>
+          <option value="AE" data-code="+971">🇦🇪 الإمارات</option>
+          <option value="OM" data-code="+968">🇴🇲 عُمان</option>
+          <option value="SA" data-code="+966">🇸🇦 السعودية</option>
+          <option value="KW" data-code="+965">🇰🇼 الكويت</option>
+          <option value="QA" data-code="+974">🇶🇦 قطر</option>
+          <option value="BH" data-code="+973">🇧🇭 البحرين</option>
+          <option value="OTHER" data-code="">🌍 دولة ثانية</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sl_phone">رقم الهاتف — اختياري</label>
+        <div style="display:flex; gap:6px;">
+          <span id="sl_phoneCode" style="display:flex; align-items:center; padding:0 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2); color:var(--muted); white-space:nowrap;">+___</span>
+          <input type="tel" id="sl_phone" placeholder="501234567" style="flex:1;">
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:10px;">
+      <label for="sl_address">العنوان — اختياري</label>
+      <input type="text" id="sl_address" placeholder="مثال: دبي، الإمارات — أو تفاصيل التوصيل">
+    </div>
+
+    <div class="row">
+      <button type="button" id="sl_saveBtn" disabled>✅ سجّل الطلب</button>
+      <button type="button" id="sl_clearCartBtn" class="secondary" style="display:none;">إفراغ السلة</button>
+      <button type="button" id="sl_cancelEditBtn" class="secondary" style="display:none;">إلغاء التعديل</button>
+    </div>
+    <div class="status" id="sl_statusBox"></div>
+
+    <div class="ov-section-title" style="margin-top:26px;">آخر الطلبات المسجّلة</div>
+    <div id="sl_history" class="static-list" style="display:none;"></div>
+    <small class="hint" id="sl_historyEmptyHint" style="margin-top:0;">ما فيه مبيعات مسجّلة بعد.</small>
+  </div>
+
   <div class="panel" id="bankInfoPanel" style="display:none;">
-    <h2>3) بيانات الحساب البنكي</h2>
+    <h2>بيانات الحساب البنكي</h2>
     <small class="hint" style="margin-top:0;">
       هذي البيانات تظهر للعميل بالموقع مباشرة لما يختار "تحويل بنكي" بنموذج الطلب — منفصلة للإمارات
       وعُمان. اترك أي حقل فاضي لو ما تبا يظهر (مثلًا لو ما عندك سويفت كود). اضغط "تحميل آخر نسخة" لو
@@ -346,7 +527,7 @@
   </div>
 
   <div class="panel" id="wishlistPanel" style="display:none;">
-    <h2>3) العطور المطلوبة (❤️ المفضلة)</h2>
+    <h2>العطور المطلوبة (❤️ المفضلة)</h2>
     <small class="hint" style="margin-top:0;">
       كل مرة عميل يضغط ❤️ على عطر بالموقع، يتسجل هنا. القائمة مرتبة من الأكثر طلبًا للأقل — استخدمها
       عشان تعرف أي عطر عليه طلب فعلي، خصوصًا لو كان "نفدت الكمية" (شوف وضع "📊 المخزون") عشان تعرف إيش
@@ -361,7 +542,7 @@
   </div>
 
   <div class="panel" id="excelPanel" style="display:none;">
-    <h2>3) استيراد عطور جديدة من إكسل</h2>
+    <h2>استيراد عطور جديدة من إكسل</h2>
     <small class="hint" style="margin-top:0;">
       هذا الوضع لإضافة عطور <b>جديدة كليًا</b> بس (العطور الموجودة أصلًا ما تتأثر أو تتحدّث). عبّي ملف
       الإكسل (نفس القالب اللي أرسلته لك بالمحادثة) بصف واحد لكل عطر جديد، وارفعه هنا. الصور تضل تُرفع
@@ -372,8 +553,8 @@
     <div id="xlsx_previewWrap" style="display:none;">
       <div class="stats" id="xlsx_statsRow">
         <div class="stat">صفوف بالملف<b id="xlsx_statRows">—</b></div>
-        <div class="stat">جاهزة للإضافة<b id="xlsx_statValid" style="color:#5ee08a;">—</b></div>
-        <div class="stat">فيها مشكلة (متجاوَزة)<b id="xlsx_statSkipped" style="color:#e0b25e;">—</b></div>
+        <div class="stat">جاهزة للإضافة<b id="xlsx_statValid" style="color:#1F6B41;">—</b></div>
+        <div class="stat">فيها مشكلة (متجاوَزة)<b id="xlsx_statSkipped" style="color:#8A6A1F;">—</b></div>
       </div>
       <div id="xlsx_previewList" class="static-list" style="display:none;"></div>
       <div id="xlsx_issuesBox"></div>
@@ -385,7 +566,7 @@
   </div>
 
   <div class="panel" id="formPanel">
-    <h2 id="formPanelTitle">3) بيانات العطر</h2>
+    <h2 id="formPanelTitle">بيانات العطر</h2>
 
     <div class="grid2">
       <div class="field"><label for="f_brand">البراند</label><input type="text" id="f_brand" placeholder="مثال: GUCCI"></div>
@@ -506,11 +687,13 @@ const REPO = "evoque-catalog";
 const BRANCH = "main";
 const DATA_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data.json?t=` + Date.now();
 const REVIEWS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/reviews.json?t=` + Date.now();
+const ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/orders.json?t=` + Date.now();
 const BANK_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/bank-info.json?t=` + Date.now();
 const WISHLIST_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/wishlist.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
+const ORDERS_JSON_PATH = "orders.json";
 const BANK_JSON_PATH = "bank-info.json";
 const WISHLIST_JSON_PATH = "wishlist.json";
 
@@ -518,10 +701,13 @@ let perfumes = [];           // آخر نسخة معروفة (للعرض/الب�
 let reviewsData = [];        // آخر نسخة معروفة من reviews.json (للعرض/البحث فقط)
 let reviewsSelected = null;  // العطر المختار حاليًا بوضع "التقييمات"
 let reviewsEditingId = null; // id التقييم الحالي المفتوح للتعديل (null = فورم إضافة جديد)
+let salesData = [];          // آخر نسخة معروفة من orders.json (مبيعات واتساب المسجّلة يدويًا)
+let salesSelected = null;    // العطر المختار حاليًا بوضع "المبيعات"
+let siteOrders = null;       // طلبات نموذج الموقع (Google Sheet) — null لين يتحدّث أول مرة
 let bankInfoData = { AE:{}, OM:{} }; // آخر نسخة معروفة من bank-info.json
 let wishlistData = {}; // آخر نسخة معروفة من wishlist.json — { perfumeId: {count, brand, name, lastAt} }
 let existingFiles = new Set();
-let mode = "add";            // "add" | "edit"
+let mode = "overview";       // "overview" | "add" | "edit" | "photo" | "stock" | "sales" | "reviews" | "bulk" | "excel" | "bank"
 let editingOriginal = null;  // العطر الأصلي قبل التعديل (null لو إضافة)
 let deleteArmed = false;
 
@@ -573,6 +759,25 @@ async function loadReviews(){
   }catch(e){
     reviewsData = []; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
   }
+  renderOverview();
+}
+
+// ===== تحميل قائمة المبيعات المسجّلة (نفس منطق loadReviews بالضبط) =====
+async function loadOrders(){
+  try{
+    const res = await fetch(ORDERS_JSON_RAW_URL, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    salesData = await res.json();
+    if(!Array.isArray(salesData)) salesData = [];
+  }catch(e){
+    salesData = []; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
+  }
+  renderOverview();
+}
+
+function salesForPerfume(perfumeId){
+  return salesData.filter(o => o.perfumeId === perfumeId)
+    .sort((a,b) => (b.date||"").localeCompare(a.date||""));
 }
 
 function reviewsForPerfume(perfumeId){
@@ -604,7 +809,250 @@ function updateProgress(){
   document.getElementById("progressFill").style.width = Math.round(100*done/total) + "%";
   updateStockCounts();
   if(stockCategoryActive) renderStockCategoryList(stockCategoryActive);
+  renderOverview();
 }
+
+// ===== نظرة عامة (Overview) — كل الأرقام محسوبة حية من البيانات الفعلية، مب نص ثابت =====
+function fmtNum(n){ return new Intl.NumberFormat("en-US").format(Math.round(n)); }
+
+function renderOverview(){
+  const el = id => document.getElementById(id);
+  if(!el("ov_total")) return; // الصفحة لسا ما خلصت تحميل
+
+  const total = perfumes.length;
+  el("ov_total").textContent = total ? fmtNum(total) : "—";
+  const men = perfumes.filter(p => p.gender === "men").length;
+  const women = perfumes.filter(p => p.gender === "women").length;
+  const unisex = perfumes.filter(p => p.gender === "unisex").length;
+  el("ov_totalSub").textContent = total ? `رجالي ${men} — نسائي ${women} — للجنسين ${unisex}` : "";
+
+  const done = countDone();
+  el("ov_imagesPct").textContent = total ? Math.round(100*done/total) + "%" : "—";
+  el("ov_imagesSub").textContent = total ? `${done} من ${total} عندها صورة` : "";
+
+  const missingCount = perfumes.filter(isMissingData).length;
+  el("ov_missing").textContent = total ? fmtNum(missingCount) : "—";
+
+  const outCount = perfumes.filter(isOutOfStock).length;
+  const outBoth = perfumes.filter(p => stockAsQty(p.stock10) <= 0 && stockAsQty(p.stock50) <= 0).length;
+  el("ov_out").textContent = total ? fmtNum(outCount) : "—";
+  el("ov_outSub").textContent = total ? `منها ${outBoth} خلصت بالحجمين كليًا` : "";
+
+  const lowCount = perfumes.filter(isLowStock).length;
+  el("ov_low").textContent = total ? fmtNum(lowCount) : "—";
+
+  const brands = new Set(perfumes.map(p => p.brand)).size;
+  el("ov_brands").textContent = total ? fmtNum(brands) : "—";
+
+  const pricedItems = perfumes.filter(p => Number(p.price50) > 0);
+  const avgPrice = pricedItems.length ? pricedItems.reduce((s,p) => s + Number(p.price50), 0) / pricedItems.length : 0;
+  el("ov_avgPrice").textContent = pricedItems.length ? fmtNum(avgPrice) : "—";
+
+  const stockValue = perfumes.reduce((s,p) => s + (Number(p.price50)||0)*stockAsQty(p.stock50) + (Number(p.price10)||0)*stockAsQty(p.stock10), 0);
+  el("ov_stockValue").textContent = total ? fmtNum(stockValue) : "—";
+
+  const stockUnits = perfumes.reduce((s,p) => s + stockAsQty(p.stock50) + stockAsQty(p.stock10), 0);
+  el("ov_stockUnits").textContent = total ? fmtNum(stockUnits) : "—";
+
+  if(reviewsData.length){
+    const avgRating = reviewsData.reduce((s,r) => s + (Number(r.rating)||0), 0) / reviewsData.length;
+    el("ov_rating").textContent = avgRating.toFixed(1) + " ★";
+    el("ov_ratingSub").textContent = `من ${reviewsData.length} تقييم`;
+  } else {
+    el("ov_rating").textContent = "—";
+    el("ov_ratingSub").textContent = "ما فيه تقييمات بعد";
+  }
+
+  // المبيعات المسجّلة يدويًا
+  if(salesData.length){
+    el("ov_salesEmpty").style.display = "none";
+    el("ov_salesGrid").style.display = "grid";
+    el("ov_salesCount").textContent = fmtNum(salesData.length);
+    const revenue = salesData.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
+    el("ov_salesRevenue").textContent = fmtNum(revenue);
+    const totalUnitsSold = salesData.reduce((s,o) => s + (Number(o.qty)||0), 0);
+    el("ov_salesUnits").textContent = fmtNum(totalUnitsSold);
+
+    const byPerfume = {};
+    salesData.forEach(o => { byPerfume[o.perfumeId] = (byPerfume[o.perfumeId]||0) + (Number(o.qty)||0); });
+    let bestId = null, bestQty = 0;
+    Object.keys(byPerfume).forEach(pid => { if(byPerfume[pid] > bestQty){ bestQty = byPerfume[pid]; bestId = pid; } });
+    const bestP = bestId ? perfumes.find(p => p.id === bestId) : null;
+    el("ov_bestSeller").textContent = bestP ? `${bestP.brand} — ${bestP.name} (${bestQty})` : (bestId || "—");
+
+    const weekAgo = Date.now() - 7*24*60*60*1000;
+    const weekCount = salesData.filter(o => {
+      const t = Date.parse(o.date);
+      return !isNaN(t) && t >= weekAgo;
+    }).reduce((s,o) => s + (Number(o.qty)||0), 0);
+    el("ov_salesWeek").textContent = fmtNum(weekCount);
+
+    renderPeriodStats();
+  } else {
+    el("ov_salesEmpty").style.display = "block";
+    el("ov_salesGrid").style.display = "none";
+    el("ov_periodStatsWrap").style.display = "none";
+  }
+
+  renderSiteOrdersOverview();
+}
+
+const AR_MONTH_NAMES = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const MAX_MONTHLY_ROWS = 24; // ما نعرض أكثر من كذا شهر بالقائمة — لو فيه أكثر نبين ملاحظة بدل ما نخفيها بصمت
+
+// تجميع المبيعات المسجّلة (salesData) شهريًا وسنويًا حسب حقل date («YYYY-MM-DD») لكل سجل
+function buildSalesPeriodStats(){
+  const monthMap = new Map(); // "YYYY-MM" -> {orderIds:Set, units, revenue}
+  const yearMap = new Map();  // "YYYY" -> {orderIds:Set, units, revenue}
+  let skippedInvalidDate = 0;
+  salesData.forEach(o => {
+    const date = String(o.date || "");
+    if(!/^\d{4}-\d{2}-\d{2}/.test(date)){ skippedInvalidDate++; return; }
+    const ym = date.slice(0, 7);
+    const y = date.slice(0, 4);
+    const orderKey = o.orderId || o.id;
+    const qty = Number(o.qty) || 0;
+    const revenue = qty * (Number(o.unitPrice) || 0);
+    if(!monthMap.has(ym)) monthMap.set(ym, { orderIds: new Set(), units: 0, revenue: 0 });
+    const m = monthMap.get(ym);
+    m.orderIds.add(orderKey); m.units += qty; m.revenue += revenue;
+    if(!yearMap.has(y)) yearMap.set(y, { orderIds: new Set(), units: 0, revenue: 0 });
+    const yy = yearMap.get(y);
+    yy.orderIds.add(orderKey); yy.units += qty; yy.revenue += revenue;
+  });
+  const months = Array.from(monthMap.entries())
+    .map(([ym, v]) => ({ ym, orders: v.orderIds.size, units: v.units, revenue: v.revenue }))
+    .sort((a, b) => b.ym.localeCompare(a.ym));
+  const years = Array.from(yearMap.entries())
+    .map(([y, v]) => ({ y, orders: v.orderIds.size, units: v.units, revenue: v.revenue }))
+    .sort((a, b) => b.y.localeCompare(a.y));
+  return { months, years, skippedInvalidDate };
+}
+
+function monthLabel(ym){
+  const [y, m] = ym.split("-");
+  const idx = parseInt(m, 10) - 1;
+  const name = AR_MONTH_NAMES[idx] || m;
+  return `${name} ${y}`;
+}
+
+function renderPeriodStats(){
+  const { months, years, skippedInvalidDate } = buildSalesPeriodStats();
+  const wrap = document.getElementById("ov_periodStatsWrap");
+  if(!months.length && !years.length){
+    wrap.style.display = "none";
+    return;
+  }
+  wrap.style.display = "block";
+
+  const monthlyEl = document.getElementById("ov_monthlyStats");
+  const shown = months.slice(0, MAX_MONTHLY_ROWS);
+  monthlyEl.innerHTML = shown.map(m => `
+    <div class="sale-row">
+      <div class="sale-row-top">
+        <span class="sale-row-name">${monthLabel(m.ym)} — ${m.orders} ${m.orders === 1 ? "طلب" : "طلبات"}</span>
+        <span class="sale-row-amount">${fmtNum(m.revenue)} AED</span>
+      </div>
+      <div class="sale-row-meta">${fmtNum(m.units)} قطعة مباعة</div>
+    </div>
+  `).join("");
+
+  const moreHint = document.getElementById("ov_monthlyMoreHint");
+  const extraNotes = [];
+  if(months.length > MAX_MONTHLY_ROWS) extraNotes.push(`فيه ${months.length - MAX_MONTHLY_ROWS} شهر أقدم مو ظاهر بالقائمة (نعرض آخر ${MAX_MONTHLY_ROWS} شهر بس).`);
+  if(skippedInvalidDate) extraNotes.push(`${skippedInvalidDate} عملية بيع لها تاريخ غير صالح واستُبعدت من هالإحصائيات.`);
+  if(extraNotes.length){ moreHint.textContent = extraNotes.join(" "); moreHint.style.display = "block"; }
+  else { moreHint.style.display = "none"; }
+
+  const yearlyEl = document.getElementById("ov_yearlyStats");
+  yearlyEl.innerHTML = years.map(y => `
+    <div class="sale-row">
+      <div class="sale-row-top">
+        <span class="sale-row-name">سنة ${y.y} — ${y.orders} ${y.orders === 1 ? "طلب" : "طلبات"}</span>
+        <span class="sale-row-amount">${fmtNum(y.revenue)} AED</span>
+      </div>
+      <div class="sale-row-meta">${fmtNum(y.units)} قطعة مباعة</div>
+    </div>
+  `).join("");
+}
+
+function renderSiteOrdersOverview(){
+  const el = id => document.getElementById(id);
+  if(!siteOrders || !siteOrders.length){
+    el("ov_siteCount").textContent = "—";
+    el("ov_siteRevenue").textContent = "—";
+    el("ov_siteLatest").textContent = siteOrders === null ? "غير مفعّل بعد" : "لا يوجد طلبات";
+    return;
+  }
+  el("ov_siteCount").textContent = fmtNum(siteOrders.length);
+  const revenue = siteOrders.reduce((s,o) => s + (Number(o.total)||0), 0);
+  el("ov_siteRevenue").textContent = fmtNum(revenue);
+  const sorted = siteOrders.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
+  el("ov_siteLatest").textContent = sorted[0] ? (sorted[0].date || "—") : "—";
+}
+
+document.getElementById("ov_missingCard").addEventListener("click", () => {
+  setMode("stock");
+  renderStockCategoryList("missing");
+});
+document.getElementById("ov_outCard").addEventListener("click", () => {
+  setMode("stock");
+  renderStockCategoryList("out");
+});
+document.getElementById("ov_lowCard").addEventListener("click", () => {
+  setMode("stock");
+  renderStockCategoryList("low");
+});
+
+// ===== طلبات نموذج الموقع (Google Sheet عبر Apps Script) — اختياري، تُقرأ فقط =====
+function loadAppsScriptSettings(){
+  try{
+    const saved = localStorage.getItem("evoque_admin_apps_script");
+    if(saved){
+      const cfg = JSON.parse(saved);
+      document.getElementById("ov_appsUrl").value = cfg.url || "";
+      document.getElementById("ov_appsKey").value = cfg.key || "";
+      document.getElementById("ov_appsRemember").checked = true;
+    }
+  }catch(e){}
+}
+
+function ovAppsStatus(msg, type){
+  const box = document.getElementById("ov_appsStatus");
+  box.textContent = msg;
+  box.className = "status show " + type;
+}
+
+document.getElementById("ov_appsFetchBtn").addEventListener("click", async () => {
+  const url = document.getElementById("ov_appsUrl").value.trim();
+  const key = document.getElementById("ov_appsKey").value.trim();
+  if(!url){ ovAppsStatus("حط رابط Apps Script Web App أول.", "err"); return; }
+
+  if(document.getElementById("ov_appsRemember").checked){
+    try{ localStorage.setItem("evoque_admin_apps_script", JSON.stringify({url, key})); }catch(e){}
+  } else {
+    try{ localStorage.removeItem("evoque_admin_apps_script"); }catch(e){}
+  }
+
+  const btn = document.getElementById("ov_appsFetchBtn");
+  btn.disabled = true;
+  try{
+    ovAppsStatus("جارِ تحديث طلبات الموقع...", "info");
+    const sep = url.includes("?") ? "&" : "?";
+    const res = await fetch(`${url}${sep}key=${encodeURIComponent(key)}`, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (Array.isArray(data.orders) ? data.orders : null);
+    if(!list) throw new Error("الرد ما كان بالشكل المتوقع (orders[])");
+    siteOrders = list;
+    renderSiteOrdersOverview();
+    ovAppsStatus(`تم! ${list.length} طلب.`, "ok");
+  }catch(e){
+    ovAppsStatus("ما قدرت أجيب طلبات الموقع: " + e.message + " — تأكد إن دالة doGet مضافة بـ Code.gs ومنشورة.", "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
 
 // ===== وضع "المخزون" (تحديد أي عطر متوفر/خلص + العطور اللي بياناتها ناقصة) =====
 const STOCK_CHECK_FIELDS = ["accords", "notesTop", "longevity", "sillage", "seasons", "daynight"];
@@ -622,14 +1070,17 @@ function stockAsQty(v){
   return v === false ? 0 : 1;
 }
 function isOutOfStock(p){ return stockAsQty(p.stock10) <= 0 || stockAsQty(p.stock50) <= 0; }
+// "قارب على النفاد" — بقي قطعة وحدة بحجم وحد على الأقل (وذاك الحجم لسا مو صفر، يعني لسا متوفر بس على وشك يخلص)
+function isLowStock(p){ return stockAsQty(p.stock10) === 1 || stockAsQty(p.stock50) === 1; }
 
-let stockCategoryActive = null; // 'missing' | 'out' | 'in' | null
+let stockCategoryActive = null; // 'missing' | 'out' | 'low' | 'in' | null
 let stockSelected = null;
 
 function updateStockCounts(){
   if(!document.getElementById("stockCatMissingCount")) return;
   document.getElementById("stockCatMissingCount").textContent = perfumes.filter(isMissingData).length;
   document.getElementById("stockCatOutCount").textContent = perfumes.filter(isOutOfStock).length;
+  document.getElementById("stockCatLowCount").textContent = perfumes.filter(isLowStock).length;
   document.getElementById("stockCatInCount").textContent = perfumes.filter(p => !isOutOfStock(p)).length;
 }
 
@@ -637,11 +1088,13 @@ function renderStockCategoryList(cat){
   stockCategoryActive = cat;
   document.getElementById("stockCatMissing").classList.toggle("active", cat === "missing");
   document.getElementById("stockCatOut").classList.toggle("active", cat === "out");
+  document.getElementById("stockCatLow").classList.toggle("active", cat === "low");
   document.getElementById("stockCatIn").classList.toggle("active", cat === "in");
 
   let list;
   if(cat === "missing") list = perfumes.filter(isMissingData);
   else if(cat === "out") list = perfumes.filter(isOutOfStock);
+  else if(cat === "low") list = perfumes.filter(isLowStock);
   else list = perfumes.filter(p => !isOutOfStock(p));
   list = list.slice().sort((a,b) => (a.brand+" "+a.name).localeCompare(b.brand+" "+b.name, "en", {sensitivity:"base"}));
 
@@ -655,6 +1108,9 @@ function renderStockCategoryList(cat){
     let badgeText, badgeClass;
     if(cat === "missing"){
       badgeText = "ناقص: " + getMissingFields(p).map(f => STOCK_FIELD_LABELS[f]).join("، ");
+      badgeClass = "pending";
+    } else if(cat === "low"){
+      badgeText = `10مل: ${stockAsQty(p.stock10)} — 50مل: ${stockAsQty(p.stock50)}`;
       badgeClass = "pending";
     } else {
       badgeText = `10مل: ${stockAsQty(p.stock10)} — 50مل: ${stockAsQty(p.stock50)}`;
@@ -675,6 +1131,7 @@ function renderStockCategoryList(cat){
 }
 document.getElementById("stockCatMissing").addEventListener("click", () => renderStockCategoryList("missing"));
 document.getElementById("stockCatOut").addEventListener("click", () => renderStockCategoryList("out"));
+document.getElementById("stockCatLow").addEventListener("click", () => renderStockCategoryList("low"));
 document.getElementById("stockCatIn").addEventListener("click", () => renderStockCategoryList("in"));
 
 function selectPerfumeForStock(p){
@@ -692,7 +1149,7 @@ function selectPerfumeForStock(p){
   document.getElementById("searchInput").value = "";
   document.getElementById("sq_stock10").value = stockAsQty(p.stock10);
   document.getElementById("sq_stock50").value = stockAsQty(p.stock50);
-  document.getElementById("stockQuickPanelTitle").textContent = `4) الكمية المتوفرة: ${p.brand} — ${p.name}`;
+  document.getElementById("stockQuickPanelTitle").textContent = `الكمية المتوفرة: ${p.brand} — ${p.name}`;
   document.getElementById("stockQuickPanel").style.display = "block";
   document.getElementById("sq_statusBox").className = "status";
 }
@@ -840,7 +1297,7 @@ function selectPerfumeForReviews(p){
     document.getElementById("reviewsQuickPanel").style.display = "none";
   });
   document.getElementById("searchInput").value = "";
-  document.getElementById("reviewsQuickPanelTitle").textContent = `4) تقييمات: ${p.brand} — ${p.name}`;
+  document.getElementById("reviewsQuickPanelTitle").textContent = `تقييمات: ${p.brand} — ${p.name}`;
   document.getElementById("reviewsQuickPanel").style.display = "block";
   document.getElementById("rv_statusBox").className = "status";
   resetReviewForm();
@@ -902,33 +1359,456 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
   }
 });
 
+// ===== وضع "المبيعات" (تسجيل يدوي لطلب بيع واتساب — يدعم أكثر من عطر بنفس الطلب) =====
+let salesCart = []; // {perfumeId, brand, name, size, qty, unitPrice} — عناصر الطلب الحالي قبل الحفظ
+let salesEditingOrderId = null; // لو مو null، معناها نعدّل طلب محفوظ سابقًا بدل ما نسجّل طلب جديد
+let salesEditingOriginalItems = []; // نسخة من عناصر الطلب الأصلية وقت بداية التعديل — تُستخدم لحساب فرق المخزون الصحيح عند الحفظ
+
+function slShowStatus(msg, type){
+  const box = document.getElementById("sl_statusBox");
+  box.textContent = msg;
+  box.className = "status show " + type;
+}
+
+function slShowSelectedChip(p){
+  salesSelected = p;
+  const wrap = document.getElementById("selectedChipWrap");
+  wrap.innerHTML = `<div class="selected-chip">
+    <span>${p.brand} — ${p.name}</span>
+    <button type="button" id="deselectBtn" title="إلغاء">×</button>
+  </div>`;
+  document.getElementById("deselectBtn").addEventListener("click", () => {
+    salesSelected = null;
+    wrap.innerHTML = "";
+    document.getElementById("sl_addItemWrap").style.display = "none";
+    document.getElementById("sl_pickHint").style.display = "block";
+  });
+}
+
+function selectPerfumeForSales(p){
+  slShowSelectedChip(p);
+  document.getElementById("searchInput").value = "";
+  document.getElementById("sl_size").value = "50";
+  document.getElementById("sl_qty").value = "1";
+  document.getElementById("sl_price").value = p.price50 != null ? p.price50 : "";
+  document.getElementById("sl_addItemWrap").style.display = "block";
+  document.getElementById("sl_pickHint").style.display = "none";
+}
+
+// تعديل عنصر موجود بالسلة: نطلعه من السلة ونعبّي الفورم ببياناته عشان يصححها ويضيفه من جديد
+function slEditCartItem(idx){
+  const item = salesCart[idx];
+  if(!item) return;
+  const p = perfumes.find(x => x.id === item.perfumeId) || { id: item.perfumeId, brand: item.brand, name: item.name, price10: null, price50: null };
+  salesCart.splice(idx, 1);
+  slShowSelectedChip(p);
+  document.getElementById("searchInput").value = "";
+  document.getElementById("sl_size").value = String(item.size);
+  document.getElementById("sl_qty").value = item.qty;
+  document.getElementById("sl_price").value = item.unitPrice;
+  document.getElementById("sl_addItemWrap").style.display = "block";
+  document.getElementById("sl_pickHint").style.display = "none";
+  slRenderCart();
+  slShowStatus(`عدّل بيانات ${p.brand} — ${p.name} فوق واضغط "أضف للسلة" لحفظ التعديل.`, "info");
+  document.getElementById("sl_qty").focus();
+}
+
+document.getElementById("sl_size").addEventListener("change", () => {
+  if(!salesSelected) return;
+  const p = salesSelected;
+  const size = document.getElementById("sl_size").value;
+  document.getElementById("sl_price").value = size === "50" ? (p.price50 ?? "") : (p.price10 ?? "");
+});
+
+document.getElementById("sl_country").addEventListener("change", () => {
+  const sel = document.getElementById("sl_country");
+  const opt = sel.options[sel.selectedIndex];
+  const code = opt ? (opt.dataset.code || "") : "";
+  document.getElementById("sl_phoneCode").textContent = code || "+___";
+});
+
+document.getElementById("sl_addToCartBtn").addEventListener("click", () => {
+  if(!salesSelected) return;
+  const p = salesSelected;
+  const size = document.getElementById("sl_size").value;
+  const qty = Math.max(1, parseInt(document.getElementById("sl_qty").value, 10) || 1);
+  const unitPrice = Math.max(0, parseFloat(document.getElementById("sl_price").value) || 0);
+  salesCart.push({ perfumeId: p.id, brand: p.brand, name: p.name, size: Number(size), qty, unitPrice });
+  slRenderCart();
+  slShowStatus(`تمت إضافة ${p.brand} — ${p.name} للسلة. ابحث عن العطر التالي أو اضغط "سجّل الطلب" لو خلصت.`, "info");
+  // نفضي الاختيار الحالي عشان يبحث عن العطر التالي
+  salesSelected = null;
+  document.getElementById("selectedChipWrap").innerHTML = "";
+  document.getElementById("sl_addItemWrap").style.display = "none";
+  document.getElementById("sl_pickHint").style.display = "block";
+  document.getElementById("searchInput").focus();
+});
+
+function slUpdateSaveBtnLabel(){
+  document.getElementById("sl_saveBtn").textContent = salesEditingOrderId ? "💾 حفظ التعديلات" : "✅ سجّل الطلب";
+}
+
+function slRenderCart(){
+  const cartWrap = document.getElementById("sl_cartWrap");
+  const listEl = document.getElementById("sl_cartList");
+  const totalEl = document.getElementById("sl_cartTotal");
+  const saveBtn = document.getElementById("sl_saveBtn");
+  const clearBtn = document.getElementById("sl_clearCartBtn");
+  slUpdateSaveBtnLabel();
+  if(salesCart.length === 0){
+    cartWrap.style.display = "none";
+    saveBtn.disabled = true;
+    clearBtn.style.display = "none";
+    return;
+  }
+  cartWrap.style.display = "block";
+  clearBtn.style.display = "inline-block";
+  saveBtn.disabled = false;
+  let total = 0;
+  listEl.innerHTML = salesCart.map((item, idx) => {
+    const sub = (Number(item.qty)||0) * (Number(item.unitPrice)||0);
+    total += sub;
+    return `<div class="sale-row" data-idx="${idx}">
+      <div class="sale-row-top">
+        <span class="sale-row-name">${item.brand} — ${item.name} (${item.size}مل × ${item.qty})</span>
+        <span class="sale-row-amount">${fmtNum(sub)} AED</span>
+      </div>
+      <div class="sale-row-actions">
+        <button type="button" class="secondary sl-cart-edit-btn">✏️ تعديل</button>
+        <button type="button" class="secondary sl-cart-remove-btn">🗑️ إزالة</button>
+      </div>
+    </div>`;
+  }).join("");
+  totalEl.textContent = fmtNum(total);
+  listEl.querySelectorAll(".sl-cart-edit-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const idx = Number(e.target.closest(".sale-row").dataset.idx);
+      slEditCartItem(idx);
+    });
+  });
+  listEl.querySelectorAll(".sl-cart-remove-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const idx = Number(e.target.closest(".sale-row").dataset.idx);
+      salesCart.splice(idx, 1);
+      slRenderCart();
+    });
+  });
+}
+
+document.getElementById("sl_clearCartBtn").addEventListener("click", () => {
+  if(salesCart.length && !confirm("متأكد تبا تفرّغ السلة؟ العناصر المضافة بتنمسح.")) return;
+  salesCart = [];
+  slRenderCart();
+});
+
+function slResetOrderFields(){
+  document.getElementById("sl_customer").value = "";
+  document.getElementById("sl_date").value = todayStr();
+  document.getElementById("sl_country").value = "";
+  document.getElementById("sl_phoneCode").textContent = "+___";
+  document.getElementById("sl_phone").value = "";
+  document.getElementById("sl_address").value = "";
+}
+
+function slExitEditMode(){
+  salesEditingOrderId = null;
+  salesEditingOriginalItems = [];
+  document.getElementById("sl_cancelEditBtn").style.display = "none";
+  document.getElementById("sl_editingHint").style.display = "none";
+  slUpdateSaveBtnLabel();
+}
+
+// ===== خصم/إرجاع المخزون تلقائيًا مع كل عملية بيع (تسجيل جديد / تعديل / حذف) =====
+// oldItems: عناصر الطلب زي ما كانت محفوظة قبل (فاضية = ما فيه طلب سابق، يعني تسجيل جديد بحت)
+// newItems: عناصر الطلب بعد الحفظ (فاضية = الطلب انحذف كامل، يعني نرجّع كل شي للمخزون)
+// كل عنصر: {perfumeId, size, qty}
+function computeStockDelta(oldItems, newItems){
+  const delta = {}; // "<perfumeId>|<size>" -> صافي القطع المباعة (موجب = ننقص من المخزون، سالب = نرجّع للمخزون)
+  (oldItems || []).forEach(it => {
+    const key = `${it.perfumeId}|${Number(it.size)}`;
+    delta[key] = (delta[key] || 0) - (Number(it.qty) || 0);
+  });
+  (newItems || []).forEach(it => {
+    const key = `${it.perfumeId}|${Number(it.size)}`;
+    delta[key] = (delta[key] || 0) + (Number(it.qty) || 0);
+  });
+  return delta;
+}
+
+// يطبّق فرق المخزون على data.json بكتابة GitHub واحدة. المخزون ما ينزل تحت صفر أبدًا (clamp).
+// يرجّع {changes: [{perfumeId,size,from,to}], notFound: [perfumeId,...]} عشان نقدر نعرض ملخص واضح للمستخدم.
+async function applySalesStockDelta(token, deltaMap){
+  const entries = Object.entries(deltaMap).filter(([, d]) => d !== 0);
+  if(!entries.length) return { changes: [], notFound: [] };
+  const changes = [];
+  const notFound = [];
+  const updatedList = await updateDataJsonWithRetry(token, (list) => {
+    entries.forEach(([key, delta]) => {
+      const sep = key.lastIndexOf("|");
+      const perfumeId = key.slice(0, sep);
+      const size = key.slice(sep + 1);
+      const idx = list.findIndex(x => x.id === perfumeId);
+      if(idx === -1){ notFound.push(perfumeId); return; }
+      const field = size === "50" ? "stock50" : "stock10";
+      const current = stockAsQty(list[idx][field]);
+      const next = Math.max(0, current - delta);
+      list[idx] = { ...list[idx], [field]: next };
+      changes.push({ perfumeId, size, from: current, to: next });
+    });
+    return list;
+  }, `Auto-adjust stock from sale (${entries.length} change${entries.length === 1 ? "" : "s"})`);
+  perfumes = updatedList;
+  return { changes, notFound };
+}
+
+// يحمّل طلب محفوظ سابقًا (مجموعة عناصره + بيانات العميل) بالسلة عشان يتعدّل بدل ما يُسجَّل طلب جديد
+function slLoadOrderForEdit(key){
+  const g = groupSalesData().find(x => x.key === key);
+  if(!g) return;
+  if(salesCart.length && !confirm("فيه عناصر بالسلة الحالية بتنمسح لو بدأت تعديل طلب ثاني. تكمل؟")) return;
+
+  salesCart = g.items.map(o => {
+    const p = perfumes.find(x => x.id === o.perfumeId);
+    return {
+      perfumeId: o.perfumeId,
+      brand: p ? p.brand : (o.brand || o.perfumeId),
+      name: p ? p.name : (o.name || ""),
+      size: Number(o.size),
+      qty: Number(o.qty) || 1,
+      unitPrice: Number(o.unitPrice) || 0,
+    };
+  });
+  salesEditingOrderId = key;
+  salesEditingOriginalItems = g.items.map(o => ({ perfumeId: o.perfumeId, size: Number(o.size), qty: Number(o.qty) || 0 }));
+
+  document.getElementById("sl_customer").value = g.customer || "";
+  document.getElementById("sl_date").value = g.date || todayStr();
+  const countrySel = document.getElementById("sl_country");
+  countrySel.value = g.country || "";
+  const opt = countrySel.options[countrySel.selectedIndex];
+  const code = (opt && opt.value) ? (opt.dataset.code || "") : "";
+  document.getElementById("sl_phoneCode").textContent = code || "+___";
+  let phoneLocal = g.phone || "";
+  if(code && phoneLocal.startsWith(code)) phoneLocal = phoneLocal.slice(code.length).trim();
+  document.getElementById("sl_phone").value = phoneLocal;
+  document.getElementById("sl_address").value = g.address || "";
+
+  salesSelected = null;
+  document.getElementById("selectedChipWrap").innerHTML = "";
+  document.getElementById("sl_addItemWrap").style.display = "none";
+  document.getElementById("sl_pickHint").style.display = "block";
+
+  document.getElementById("sl_cancelEditBtn").style.display = "inline-block";
+  document.getElementById("sl_editingHint").style.display = "block";
+  slRenderCart();
+  slShowStatus('تعدّل الآن طلب سابق — عدّل العناصر أو البيانات تحت واضغط "حفظ التعديلات".', "info");
+  document.getElementById("salesQuickPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("sl_cancelEditBtn").addEventListener("click", () => {
+  salesCart = [];
+  slResetOrderFields();
+  slExitEditMode();
+  slRenderCart();
+  slShowStatus("تم إلغاء التعديل.", "info");
+});
+
+// تجميع orders.json حسب orderId (الطلبات القديمة قبل هذي الميزة ما فيها orderId — كل وحدة تصير طلب لحالها)
+function groupSalesData(){
+  const map = new Map();
+  salesData.forEach(o => {
+    const key = o.orderId || o.id;
+    if(!map.has(key)) map.set(key, { key, date: o.date, customer: o.customer, country: o.country, countryLabel: o.countryLabel, phone: o.phone, address: o.address, items: [] });
+    map.get(key).items.push(o);
+  });
+  return Array.from(map.values()).reverse(); // الأحدث أول
+}
+
+function renderSalesHistory(){
+  const groups = groupSalesData();
+  const wrap = document.getElementById("sl_history");
+  const emptyHint = document.getElementById("sl_historyEmptyHint");
+  if(groups.length === 0){
+    wrap.style.display = "none";
+    emptyHint.style.display = "block";
+    return;
+  }
+  emptyHint.style.display = "none";
+  wrap.style.display = "block";
+  wrap.innerHTML = groups.slice(0, 15).map(g => {
+    const total = g.items.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
+    const itemsLabel = g.items.map(o => {
+      const p = perfumes.find(x => x.id === o.perfumeId);
+      const label = p ? `${p.brand} — ${p.name}` : o.perfumeId;
+      return `${label} (${o.size}مل×${o.qty})`;
+    }).join("، ");
+    return `<div class="sale-row" data-key="${g.key}">
+      <div class="sale-row-top">
+        <span class="sale-row-name">${itemsLabel}${g.customer ? " — " + String(g.customer).replace(/</g,"&lt;") : ""}</span>
+        <span class="sale-row-amount">${fmtNum(total)} AED</span>
+      </div>
+      <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}</div>
+      <div class="sale-row-actions">
+        <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
+        <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
+      </div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".sl-history-edit-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const key = e.target.closest(".sale-row").dataset.key;
+      slLoadOrderForEdit(key);
+    });
+  });
+  wrap.querySelectorAll(".sl-history-delete-btn").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const key = e.target.closest(".sale-row").dataset.key;
+      const token = getToken();
+      if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      if(!confirm("متأكد تبا تحذف هذا الطلب كامل (كل عطوره)؟ المخزون بيترجّع تلقائيًا، بس الطلب نفسه ما يرجع بعد الحذف.")) return;
+      const deletedItems = (groupSalesData().find(g => g.key === key)?.items || [])
+        .map(o => ({ perfumeId: o.perfumeId, size: Number(o.size), qty: Number(o.qty) || 0 }));
+      btn.disabled = true;
+      try{
+        slShowStatus("جارِ الحذف...", "info");
+        const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.filter(x => (x.orderId || x.id) !== key), `Delete order: ${key}`);
+        salesData = updatedList;
+        if(salesEditingOrderId === key){
+          // كنا نعدّل هذا الطلب بالذات ثم انحذف من مكان ثاني — نلغي التعديل عشان ما نسجّل طلب "يتيم"
+          salesCart = [];
+          slResetOrderFields();
+          slExitEditMode();
+          slRenderCart();
+        }
+        renderSalesHistory();
+        let stockNote = "";
+        try{
+          const { changes, notFound } = await applySalesStockDelta(token, computeStockDelta(deletedItems, []));
+          if(changes.length) stockNote = ` وتم إرجاع ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"} للمخزون تلقائيًا.`;
+          if(notFound.length) stockNote += ` (تنبيه: ${notFound.length} عطر بالطلب ما انلقى بالكتالوج — يمكن انحذف، ما قدرنا نرجّع مخزونه.)`;
+          updateStockCounts();
+        }catch(stockErr){
+          stockNote = ` — تحذير: الطلب انحذف بس صار خطأ برجّاع المخزون تلقائيًا (${stockErr.message}) — راجع المخزون يدويًا لهذا العطر.`;
+        }
+        renderOverview();
+        slShowStatus("تم حذف الطلب." + stockNote, "ok");
+      }catch(err){
+        slShowStatus("صار خطأ: " + err.message, "err");
+        btn.disabled = false;
+      }
+    });
+  });
+}
+
+document.getElementById("sl_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  if(!salesCart.length){ slShowStatus("السلة فاضية — أضف عطر وحد على الأقل قبل الحفظ.", "err"); return; }
+  const customer = document.getElementById("sl_customer").value.trim();
+  const date = document.getElementById("sl_date").value.trim() || todayStr();
+  const countrySel = document.getElementById("sl_country");
+  const countryOpt = countrySel.options[countrySel.selectedIndex];
+  const country = countrySel.value || "";
+  const countryLabel = country ? countryOpt.textContent.trim() : "";
+  const phoneCode = document.getElementById("sl_phoneCode").textContent.trim();
+  const phoneLocal = document.getElementById("sl_phone").value.trim();
+  const phone = phoneLocal ? ((phoneCode && phoneCode !== "+___") ? phoneCode + " " + phoneLocal : phoneLocal) : "";
+  const address = document.getElementById("sl_address").value.trim();
+  const btn = document.getElementById("sl_saveBtn");
+  const isEditing = !!salesEditingOrderId;
+  const editingKey = salesEditingOrderId;
+  const originalItemsSnapshot = isEditing ? salesEditingOriginalItems.slice() : [];
+  btn.disabled = true;
+  try{
+    slShowStatus(isEditing ? "جارِ حفظ التعديلات..." : "جارِ الحفظ...", "info");
+    // لو نعدّل طلب موجود، نستخدم نفس مفتاحه كـorderId عشان يبقى الطلب "نفسه" بعد التعديل (نفس منطق التجميع بـgroupSalesData)
+    const orderId = isEditing ? editingKey : `order-${Date.now()}`;
+    const cartSnapshot = salesCart.slice();
+    const newEntries = cartSnapshot.map((item, i) => ({
+      id: `${item.perfumeId}-${Date.now()}-${i}`,
+      perfumeId: item.perfumeId,
+      size: item.size,
+      qty: item.qty,
+      unitPrice: item.unitPrice,
+      customer, date,
+      country, countryLabel, phone, address,
+      orderId,
+      source: "admin"
+    }));
+    const label = isEditing
+      ? `Edit order: ${editingKey}`
+      : (cartSnapshot.length === 1
+        ? `Log sale: ${cartSnapshot[0].brand} — ${cartSnapshot[0].name}`
+        : `Log order (${cartSnapshot.length} items)`);
+    const updatedList = await updateOrdersJsonWithRetry(token, (list) => {
+      const base = isEditing ? list.filter(x => (x.orderId || x.id) !== editingKey) : list;
+      newEntries.forEach(e => base.push(e));
+      return base;
+    }, label);
+    salesData = updatedList;
+
+    // خصم/إرجاع المخزون تلقائيًا حسب الفرق بين عناصر الطلب الأصلية (لو تعديل) والعناصر الجديدة
+    let stockNote = "";
+    try{
+      const newItemsForStock = cartSnapshot.map(item => ({ perfumeId: item.perfumeId, size: item.size, qty: item.qty }));
+      const delta = computeStockDelta(originalItemsSnapshot, newItemsForStock);
+      const { changes, notFound } = await applySalesStockDelta(token, delta);
+      if(changes.length) stockNote = ` تم تحديث المخزون تلقائيًا لـ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"}.`;
+      if(notFound.length) stockNote += ` (تنبيه: ${notFound.length} عطر بالطلب ما انلقى بالكتالوج — راجع مخزونه يدويًا.)`;
+      updateStockCounts();
+    }catch(stockErr){
+      stockNote = ` — تحذير: الطلب اتسجّل بس صار خطأ بتحديث المخزون تلقائيًا (${stockErr.message}) — راجع المخزون يدويًا لعطور هذا الطلب.`;
+    }
+
+    salesCart = [];
+    slExitEditMode();
+    slRenderCart();
+    renderSalesHistory();
+    renderOverview();
+    slResetOrderFields();
+    slShowStatus((isEditing
+      ? `تم حفظ تعديلات الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`
+      : `تم تسجيل الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`) + stockNote, "ok");
+  }catch(e){
+    slShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
+
 // ===== وضع إضافة/تعديل =====
 function setMode(newMode){
   mode = newMode;
+  document.getElementById("modeOverviewBtn").classList.toggle("active", mode === "overview");
   document.getElementById("modeAddBtn").classList.toggle("active", mode === "add");
   document.getElementById("modeEditBtn").classList.toggle("active", mode === "edit");
   document.getElementById("modePhotoBtn").classList.toggle("active", mode === "photo");
   document.getElementById("modeBulkBtn").classList.toggle("active", mode === "bulk");
   document.getElementById("modeStockBtn").classList.toggle("active", mode === "stock");
+  document.getElementById("modeSalesBtn").classList.toggle("active", mode === "sales");
   document.getElementById("modeExcelBtn").classList.toggle("active", mode === "excel");
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
   document.getElementById("modeBankBtn").classList.toggle("active", mode === "bank");
   document.getElementById("modeWishlistBtn").classList.toggle("active", mode === "wishlist");
-  document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock" || mode === "reviews") ? "block" : "none";
+  document.getElementById("overviewPanel").style.display = mode === "overview" ? "block" : "none";
+  document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock" || mode === "reviews" || mode === "sales") ? "block" : "none";
   document.getElementById("progressStatsWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
   document.getElementById("hideUploadedRow").style.display = (mode === "edit" || mode === "photo") ? "flex" : "none";
   document.getElementById("stockCategoryWrap").style.display = mode === "stock" ? "block" : "none";
   document.getElementById("stockQuickPanel").style.display = "none";
   document.getElementById("reviewsQuickPanel").style.display = "none";
+  document.getElementById("salesQuickPanel").style.display = mode === "sales" ? "block" : "none";
   document.getElementById("bankInfoPanel").style.display = mode === "bank" ? "block" : "none";
   document.getElementById("wishlistPanel").style.display = mode === "wishlist" ? "block" : "none";
   stockCategoryActive = null;
   stockSelected = null;
   reviewsSelected = null;
+  salesSelected = null;
   if(mode !== "stock"){
     document.getElementById("stockCategoryList").innerHTML = "";
     document.getElementById("stockCatMissing").classList.remove("active");
     document.getElementById("stockCatOut").classList.remove("active");
+    document.getElementById("stockCatLow").classList.remove("active");
     document.getElementById("stockCatIn").classList.remove("active");
   }
   document.getElementById("deleteBtn").style.display = mode === "edit" && editingOriginal ? "inline-block" : "none";
@@ -941,7 +1821,7 @@ function setMode(newMode){
 
   if(mode === "add"){
     resetForm();
-    document.getElementById("formPanelTitle").textContent = "3) بيانات العطر الجديد";
+    document.getElementById("formPanelTitle").textContent = "بيانات العطر الجديد";
     document.getElementById("formPanel").style.display = "block";
     document.getElementById("quickPhotoPanel").style.display = "none";
   } else if(mode === "edit"){
@@ -950,18 +1830,28 @@ function setMode(newMode){
   } else if(mode === "photo"){
     document.getElementById("formPanel").style.display = "none";
     document.getElementById("quickPhotoPanel").style.display = "none";
-  } else { // bulk
+  } else { // overview / stock / sales / reviews / bulk / excel / bank / wishlist
     document.getElementById("formPanel").style.display = "none";
     document.getElementById("quickPhotoPanel").style.display = "none";
+  }
+  if(mode === "overview") renderOverview();
+  if(mode === "sales"){
+    document.getElementById("sl_addItemWrap").style.display = "none";
+    document.getElementById("sl_pickHint").style.display = "block";
+    if(!document.getElementById("sl_date").value) document.getElementById("sl_date").value = todayStr();
+    slRenderCart();
+    renderSalesHistory();
   }
   hideStatus();
   updateSaveBtnState();
 }
+document.getElementById("modeOverviewBtn").addEventListener("click", () => setMode("overview"));
 document.getElementById("modeAddBtn").addEventListener("click", () => setMode("add"));
 document.getElementById("modeEditBtn").addEventListener("click", () => setMode("edit"));
 document.getElementById("modePhotoBtn").addEventListener("click", () => setMode("photo"));
 document.getElementById("modeBulkBtn").addEventListener("click", () => setMode("bulk"));
 document.getElementById("modeStockBtn").addEventListener("click", () => setMode("stock"));
+document.getElementById("modeSalesBtn").addEventListener("click", () => setMode("sales"));
 document.getElementById("modeExcelBtn").addEventListener("click", () => setMode("excel"));
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
 document.getElementById("modeBankBtn").addEventListener("click", () => { setMode("bank"); loadBankInfoIntoForm(); });
@@ -989,6 +1879,9 @@ function renderDropdown(query){
     } else if(mode === "reviews"){
       const n = reviewsForPerfume(p.id).length;
       badgeHtml = `<span class="badge ${n > 0 ? "done" : "pending"}">${n > 0 ? n + " تقييم" : "بدون تقييم"}</span>`;
+    } else if(mode === "sales"){
+      const sold = salesForPerfume(p.id).reduce((s,o) => s + (Number(o.qty)||0), 0);
+      badgeHtml = `<span class="badge ${sold > 0 ? "done" : "pending"}">${sold > 0 ? "بيع " + sold + " قطعة" : "بدون مبيعات مسجّلة"}</span>`;
     } else {
       const done = hasImage(p);
       badgeHtml = `<span class="badge ${done ? "done" : "pending"}">${done ? "له صورة" : "بدون صورة"}</span>`;
@@ -1005,6 +1898,7 @@ function renderDropdown(query){
       if(mode === "photo") selectPerfumeForPhotoOnly(p);
       else if(mode === "stock") selectPerfumeForStock(p);
       else if(mode === "reviews") selectPerfumeForReviews(p);
+      else if(mode === "sales") selectPerfumeForSales(p);
       else selectPerfumeForEdit(p);
       dd.classList.remove("show");
     });
@@ -1034,7 +1928,7 @@ function selectPerfumeForPhotoOnly(p){
   });
   document.getElementById("searchInput").value = "";
 
-  document.getElementById("quickPhotoPanelTitle").textContent = `3) رفع صورة: ${p.brand} — ${p.name}`;
+  document.getElementById("quickPhotoPanelTitle").textContent = `رفع صورة: ${p.brand} — ${p.name}`;
   const curWrap = document.getElementById("qp_currentImageWrap");
   if(p.image){
     document.getElementById("qp_currentImg").src = p.image;
@@ -1071,9 +1965,9 @@ document.getElementById("qp_fileInput").addEventListener("change", async (e) => 
     const savedPct = f.size > blob.size ? Math.round(100 - (blob.size/f.size)*100) : 0;
     document.getElementById("qp_previewMeta").innerHTML =
       (savedPct > 0
-        ? `الحجم الأصلي: ${originalKB} كيلوبايت ← بعد الضغط: <b style="color:#5ee08a">${finalKB} كيلوبايت</b> (وفّرنا ${savedPct}%)`
+        ? `الحجم الأصلي: ${originalKB} كيلوبايت ← بعد الضغط: <b style="color:#1F6B41">${finalKB} كيلوبايت</b> (وفّرنا ${savedPct}%)`
         : `${finalKB} كيلوبايت`) +
-      (note ? `<br><span style="color:#77777d">${note}</span>` : "");
+      (note ? `<br><span style="color:#8B8073">${note}</span>` : "");
     document.getElementById("qp_previewWrap").style.display = "flex";
   };
   reader.readAsDataURL(blob);
@@ -1146,7 +2040,7 @@ function selectPerfumeForEdit(p){
   });
   document.getElementById("searchInput").value = "";
   fillForm(p);
-  document.getElementById("formPanelTitle").textContent = `3) تعديل: ${p.brand} — ${p.name}`;
+  document.getElementById("formPanelTitle").textContent = `تعديل: ${p.brand} — ${p.name}`;
   document.getElementById("formPanel").style.display = "block";
   document.getElementById("deleteBtn").style.display = "inline-block";
   deleteArmed = false;
@@ -1309,9 +2203,9 @@ document.getElementById("fileInput").addEventListener("change", async (e) => {
     const savedPct = f.size > blob.size ? Math.round(100 - (blob.size/f.size)*100) : 0;
     document.getElementById("previewMeta").innerHTML =
       (savedPct > 0
-        ? `الحجم الأصلي: ${originalKB} كيلوبايت ← بعد الضغط: <b style="color:#5ee08a">${finalKB} كيلوبايت</b> (وفّرنا ${savedPct}%)`
+        ? `الحجم الأصلي: ${originalKB} كيلوبايت ← بعد الضغط: <b style="color:#1F6B41">${finalKB} كيلوبايت</b> (وفّرنا ${savedPct}%)`
         : `${finalKB} كيلوبايت`) +
-      (note ? `<br><span style="color:#77777d">${note}</span>` : "");
+      (note ? `<br><span style="color:#8B8073">${note}</span>` : "");
     document.getElementById("previewWrap").style.display = "flex";
   };
   reader.readAsDataURL(blob);
@@ -1339,7 +2233,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("evoque_admin_token");
     if(saved){ document.getElementById("tokenInput").value = saved; document.getElementById("rememberToken").checked = true; }
   }catch(e){}
-  setMode("photo");
+  setMode("overview");
 });
 document.getElementById("rememberToken").addEventListener("change", (e) => {
   try{
@@ -1501,7 +2395,57 @@ async function updateReviewsJsonWithRetry(token, mutateFn, commitMsg, attempt){
   return newList;
 }
 
-// ===== قراءة/كتابة bank-info.json — نفس منطق reviews.json بالضبط، بس كائن وحد
+// ===== قراءة/كتابة orders.json (مبيعات واتساب المسجّلة يدويًا) — نفس منطق reviews.json بالضبط =====
+async function getOrdersJsonWithSha(token){
+  const res = await fetch(`${API_BASE}/${ORDERS_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { list: [], sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة orders.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  const list = JSON.parse(base64ToUtf8(info.content));
+  return { list: Array.isArray(list) ? list : [], sha: info.sha };
+}
+
+async function putOrdersJson(list, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(list, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${ORDERS_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updateOrdersJsonWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { list, sha } = await getOrdersJsonWithSha(token);
+  const newList = mutateFn(list);
+  try{
+    await putOrdersJson(newList, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateOrdersJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newList;
+}
+
+// ===== قراءة/كتابة bank-info.json — نفس منطق reviews.json/orders.json بالضبط، بس كائن وحد
 // (بيانات البنك للإمارات وعُمان) بدل قائمة =====
 function bankShowStatus(msg, type){
   const box = document.getElementById("bank_statusBox");
@@ -1605,7 +2549,6 @@ async function loadBankInfoIntoForm(){
       throw new Error("HTTP " + res.status);
     }
     fillBankForm(bankInfoData);
-    hideStatus();
     document.getElementById("bank_statusBox").className = "status";
   }catch(e){
     bankShowStatus("ما قدرت أجيب بيانات البنك الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
@@ -2223,6 +3166,11 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
 
 loadData();
 loadReviews();
+loadOrders();
+loadAppsScriptSettings();
+if(document.getElementById("ov_appsUrl").value.trim()){
+  document.getElementById("ov_appsFetchBtn").click();
+}
 </script>
 </body>
 </html>
