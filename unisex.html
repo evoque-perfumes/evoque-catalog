@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@300;400;500;700&family=Jost:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/catalog.css?v=20260823d">
+<link rel="stylesheet" href="assets/catalog.css?v=20260825a">
 <!-- ===== إضافات SEO ===== -->
 <meta name="description" content="تشكيلة Evoque Perfume من العطور الفاخرة البديلة للجنسين — فلتر حسب الموسم والوقت، وأكمل طلبك مباشرة عبر واتساب.">
 <link rel="canonical" href="https://evoqueperfumes.com/unisex.html">
@@ -89,6 +89,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <symbol id="ic-instagram" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1"/></symbol>
   <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9S9.5 5.5 12 3Z"/></symbol>
   <symbol id="ic-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+  <symbol id="ic-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></symbol>
 </svg>
 
 <!-- نافذة اختيار اللغة — تظهر مرة وحدة عند أول زيارة، قبل أي محتوى ثاني -->
@@ -267,6 +268,12 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <input type="hidden" name="payload" id="reviewHiddenPayload">
 </form>
 
+<!-- نفس التقنية — فورم + iframe مخفي ثالث منفصل لإشارات المفضلة (❤️ Wishlist) -->
+<iframe name="wishlistHiddenFrame" id="wishlistHiddenFrame" style="display:none;"></iframe>
+<form id="wishlistHiddenForm" method="POST" enctype="text/plain" target="wishlistHiddenFrame" style="display:none;">
+  <input type="hidden" name="payload" id="wishlistHiddenPayload">
+</form>
+
 <footer>
   <div class="foot-logo">EVOQUE PERFUME</div>
   <div id="footerText"></div>
@@ -282,7 +289,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 <script>
   window.EVOQUE_PAGE = { mode: "category", gender: "unisex" };
 </script>
-<script src="assets/catalog.js?v=20260823d"></script>
+<script src="assets/catalog.js?v=20260825a"></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>
