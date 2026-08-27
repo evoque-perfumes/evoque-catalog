@@ -15,6 +15,13 @@ const REVIEWS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxwC7mC6JegXo-
 // بجذر الريبو. سكربت منفصل تمامًا عن الطلبات والتقييمات (نفس مبدأ الفصل). انشره
 // حسب دليل wishlist-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
 const WISHLIST_ENDPOINT = "https://script.google.com/macros/s/AKfycbyRBlIFQ9jHZ2mCabZHeVrTrd6205U8zvMZQRPcW03J8gX70zaKFD-KeGZGn2db_b8N/exec";
+// رابط Google Apps Script Web App منفصل رابع (27 أغسطس 2026) لاستقبال نسخة من
+// كل طلب (نموذج كامل أو زر واتساب السريع) وكتابتها بملف pending-orders.json
+// عشان تظهر بتبويب "🧾 الطلبات الجديدة" بلوحة التحكم للاعتماد/الرفض بدون إدخال
+// يدوي. سكربت منفصل تمامًا عن نظام الطلبات القديم (ORDER_ENDPOINT) — القديم
+// يضل شغال بالضبط زي ما كان، هذا بس يضيف نسخة موازية. انشره حسب دليل
+// order-queue-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
+const ORDER_QUEUE_ENDPOINT = "PASTE_ORDER_QUEUE_ENDPOINT_HERE";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
@@ -180,6 +187,7 @@ const I18N = {
     askPrice: "اسأل عن السعر",
     outOfStock: "نفذ",
     allOutOfStock: "نفذت الكمية",
+    lowStockNote: "🔥 باقي {n} فقط!",
     wishlistAddTitle: "أضف للمفضلة",
     wishlistRemoveTitle: "إزالة من المفضلة",
     add: "أضف للسلة",
@@ -255,6 +263,10 @@ const I18N = {
     bestSellersEyebrow: "الأكثر طلبًا",
     bestSellersTitle: "عطورنا الأكثر مبيعًا",
     bestSellersSubtitle: "أبرز العطور اللي يطلبها عملاؤنا بكثرة — نقطة بداية ممتازة لو أول مرة تتسوق من عندنا.",
+    homeSearchPlaceholder: "ابحث عن أي عطر بالاسم أو البراند...",
+    searchResultsEyebrow: "نتائج البحث",
+    searchResultsTitle: "عطور مطابقة لبحثك",
+    searchResultsSubtitle: "نتائج البحث من كل عطورنا (رجالي، نسائي، للجنسين).",
     shopByCategoryTitle: "تسوّق حسب التصنيف",
     shopByCategorySubtitle: "اختر تصنيفك وشوف كل العطور المناسبة لك",
     categoryCardMenTitle: "رجالي",
@@ -342,6 +354,7 @@ const I18N = {
     askPrice: "Ask for price",
     outOfStock: "out of stock",
     allOutOfStock: "Out of stock",
+    lowStockNote: "🔥 Only {n} left!",
     wishlistAddTitle: "Add to wishlist",
     wishlistRemoveTitle: "Remove from wishlist",
     add: "Add to cart",
@@ -417,6 +430,10 @@ const I18N = {
     bestSellersEyebrow: "Most Requested",
     bestSellersTitle: "Our Best-Selling Fragrances",
     bestSellersSubtitle: "The scents our customers order most — a great place to start if this is your first time shopping with us.",
+    homeSearchPlaceholder: "Search any perfume by name or brand...",
+    searchResultsEyebrow: "Search Results",
+    searchResultsTitle: "Fragrances Matching Your Search",
+    searchResultsSubtitle: "Results across all our fragrances (men, women, and unisex).",
     shopByCategoryTitle: "Shop by Category",
     shopByCategorySubtitle: "Pick your category and see every fragrance made for you",
     categoryCardMenTitle: "Men",
@@ -1326,6 +1343,7 @@ function renderAll(){
   renderCountrySelect();
 
   if(PAGE.mode === "home"){
+    renderHomeSearch();
     renderBestSellers();
     renderCategoryNav();
   } else {
@@ -1367,19 +1385,48 @@ function renderCategoryIntro(){
 }
 
 // ===================================================================
-// قسم "الأكثر مبيعًا" بالصفحة الرئيسية فقط — يعرض BEST_SELLER_IDS باستخدام
-// نفس بطاقة العرض المستخدمة بصفحات التصنيف (renderGrid) بدون فلاتر/بحث
+// مربع البحث بالصفحة الرئيسية (27 أغسطس 2026) — يبحث بكل العطور (رجالي/
+// نسائي/للجنسين مع بعض) بالاسم أو البراند، بدون ما يحتاج الزائر يختار
+// تصنيف أول. يعيد استخدام نفس متغير searchQuery/دالة matches() المستخدمة
+// بصفحات التصنيف (LOCKED_GENDER = null بالرئيسية أصلًا، فـmatches() ما تقيّد
+// بجنس معيّن هنا — تفتّش بكل الكتالوج تلقائيًا).
+// ===================================================================
+function renderHomeSearch(){
+  const t = I18N[lang];
+  const input = document.getElementById("homeSearchInput");
+  if(!input) return;
+  input.placeholder = t.homeSearchPlaceholder;
+  input.value = searchQuery;
+  input.oninput = (e)=>{ searchQuery = e.target.value; visibleCount = PAGE_SIZE; renderBestSellers(); };
+}
+
+// ===================================================================
+// قسم "الأكثر مبيعًا" بالصفحة الرئيسية — يعرض BEST_SELLER_IDS باستخدام نفس
+// بطاقة العرض المستخدمة بصفحات التصنيف (renderGrid) بدون فلاتر. لو الزائر
+// كاتب بمربع البحث أعلى الصفحة، نستبدل هذا القسم بنتائج البحث الفعلية من
+// كامل الكتالوج بدل قائمة الأكثر مبيعًا المختارة يدويًا.
 // ===================================================================
 function renderBestSellers(){
   const t = I18N[lang];
   const eyebrowEl = document.getElementById("bestSellersEyebrow");
   const titleEl = document.getElementById("bestSellersTitle");
   const subEl = document.getElementById("bestSellersSubtitle");
-  if(eyebrowEl) eyebrowEl.textContent = t.bestSellersEyebrow;
-  if(titleEl) titleEl.textContent = t.bestSellersTitle;
-  if(subEl) subEl.textContent = t.bestSellersSubtitle;
+  const categoryNavWrap = document.getElementById("categoryNavWrap");
+  const isSearching = !!searchQuery.trim();
+
+  if(eyebrowEl) eyebrowEl.textContent = isSearching ? t.searchResultsEyebrow : t.bestSellersEyebrow;
+  if(titleEl) titleEl.textContent = isSearching ? t.searchResultsTitle : t.bestSellersTitle;
+  if(subEl) subEl.textContent = isSearching ? t.searchResultsSubtitle : t.bestSellersSubtitle;
+  // نخفي بطاقات "تسوّق حسب التصنيف" أثناء البحث الفعلي — الزائر جاي يدور
+  // بالاسم مباشرة، مو يتصفّح تصنيفات، ونرجعها لما يمسح البحث.
+  if(categoryNavWrap) categoryNavWrap.style.display = isSearching ? "none" : "";
 
   if(loadState !== "loaded"){ renderGrid(); return; } // يعرض حالة التحميل/الخطأ بنفس أسلوب renderGrid المعتاد
+
+  if(isSearching){
+    renderGrid(); // بدون قائمة صريحة = perfumes.filter(matches) على كامل الكتالوج (LOCKED_GENDER فاضي بالرئيسية)
+    return;
+  }
   const byId = {};
   perfumes.forEach(p => { byId[p.id] = p; });
   const curated = BEST_SELLER_IDS.map(id => byId[id]).filter(Boolean);
@@ -1623,7 +1670,14 @@ function renderGrid(explicitList){
         const hasDiscount = shownPrice != null && beforePrice != null && beforePrice > shownPrice;
         const oldPriceHtml = hasDiscount ? `<s class="old-price">${beforePrice} ${currencyLabel()}</s>` : "";
         const priceHtml = shownPrice != null ? `${oldPriceHtml}${shownPrice} ${currencyLabel()}` : t.askPrice;
-        parts.push(`<div class="size-pill ${selectedSize===sz?"active":""} ${!inStock?"disabled":""}" data-size="${sz}">${sz}ml<b>${priceHtml}</b>${!inStock?`<div style="font-size:9px;color:var(--muted);">${t.outOfStock}</div>`:""}</div>`);
+        // 27 أغسطس 2026: لما تبقى كمية بسيطة (1 أو 2) من هذا الحجم، نعرض تنبيه
+        // "باقي X فقط" بدل ما نسكت — يشجّع العميل يقرر بسرعة قبل ما تخلص الكمية.
+        const qtyNum = Number(inStock) || 0;
+        const isLow = inStock && qtyNum > 0 && qtyNum < 3;
+        const stockNoteHtml = !inStock
+          ? `<div style="font-size:9px;color:var(--muted);">${t.outOfStock}</div>`
+          : (isLow ? `<div style="font-size:9px;color:#c0475a;font-weight:700;">${t.lowStockNote.replace("{n}", qtyNum)}</div>` : "");
+        parts.push(`<div class="size-pill ${selectedSize===sz?"active":""} ${!inStock?"disabled":""}" data-size="${sz}">${sz}ml<b>${priceHtml}</b>${stockNoteHtml}</div>`);
       });
       return parts.length ? `<div class="size-row">${parts.join("")}</div>` : `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${t.askPrice}</div>`;
     }
@@ -1842,6 +1896,21 @@ function submitWishlistSignal(p, action){
   }catch(e){ /* فشل الإرسال بالخلفية ما يوقف تجربة العميل — حالة المفضلة المحلية اتصلحت خلاص */ }
 }
 
+// إرسال نسخة من الطلب لطابور "🧾 الطلبات الجديدة" بلوحة التحكم (pending-orders.json)
+// — بالتوازي مع أي إرسال ثاني (ORDER_ENDPOINT القديم أو رسالة واتساب)، بدون ما
+// يوقف أو يبطئ تجربة العميل لو فشل لأي سبب (fire-and-forget، نفس أسلوب المفضلة).
+function submitOrderToQueue(payload){
+  if(!ORDER_QUEUE_ENDPOINT || ORDER_QUEUE_ENDPOINT.indexOf("PASTE_") === 0) return;
+  try{
+    const form = document.getElementById("orderQueueHiddenForm");
+    const iframe = document.getElementById("orderQueueHiddenFrame");
+    if(!form || !iframe) return;
+    form.action = ORDER_QUEUE_ENDPOINT;
+    document.getElementById("orderQueueHiddenPayload").value = JSON.stringify({ ...payload, hp: "" });
+    form.submit();
+  }catch(e){ /* فشل الإرسال بالخلفية ما يوقف تجربة العميل إطلاقًا */ }
+}
+
 function renderCart(){
   persistCartState();
   const t = I18N[lang];
@@ -1885,6 +1954,33 @@ function renderCart(){
   }
   checkoutBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   checkoutBtn.target = "_blank";
+  // 27 أغسطس 2026: إرسال نسخة من طلب واتساب السريع لطابور "🧾 الطلبات الجديدة"
+  // بلوحة التحكم (بدون ما يوقف فتح واتساب — إرسال خلفي بحت). ما فيه اسم/هاتف/
+  // عنوان بهذا المسار (ما يجمعها أصلًا)، صاحب المتجر يعبّيها بنفسه عند الاعتماد
+  // من محادثة واتساب الفعلية. .onclick (لا addEventListener) عشان ما تتكرر
+  // الإشارة أكثر من مرة مع كل إعادة رسم للسلة.
+  checkoutBtn.onclick = function(){
+    submitOrderToQueue({
+      dateISO: new Date().toISOString(),
+      lang,
+      source: "quick-whatsapp",
+      name: "", phone: "", email: "",
+      country: lang==="ar" ? (COUNTRIES[country] ? COUNTRIES[country].labelAr : country) : (COUNTRIES[country] ? COUNTRIES[country].labelEn : country),
+      emirateOrWilayat: "", deliveryMethod: "", address: "", notes: "",
+      currency: cur,
+      paymentMethod: paymentLabel(t, paymentMethod),
+      subtotal: total,
+      shippingFee: shippingCharged,
+      shippingFree: freeShip,
+      tabbyFee: 0,
+      total: estGrandTotal,
+      offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
+      items: items.map(i => ({
+        perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name),
+        size: i.size, qty: i.qty, unitPrice: i.unitPrice || 0, lineTotal: i.lineTotal || 0
+      }))
+    });
+  };
 
   renderCartModal();
 }
@@ -2154,7 +2250,8 @@ function buildOrderPayload(){
     total: grandTotal,
     offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
     items: items.map(i => ({
-      brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: i.size, qty: i.qty, lineTotal: i.lineTotal
+      perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: i.size, qty: i.qty,
+      unitPrice: i.unitPrice || 0, lineTotal: i.lineTotal
     }))
   };
 }
@@ -2200,6 +2297,9 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
   submitBtn.textContent = t.orderSubmitting;
 
   const payload = buildOrderPayload();
+  // نسخة موازية لطابور "🧾 الطلبات الجديدة" بلوحة التحكم — إرسال خلفي بحت، ما
+  // يأثر إطلاقًا على إرسال الطلب الأساسي (ORDER_ENDPOINT) اللي تحته مباشرة.
+  submitOrderToQueue({ ...payload, source: "form" });
 
   const waMsgLines = [
     lang==="ar" ? `طلب جديد` : `New order`,
