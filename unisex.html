@@ -274,6 +274,12 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <input type="hidden" name="payload" id="wishlistHiddenPayload">
 </form>
 
+<!-- نفس التقنية — فورم + iframe مخفي رابع منفصل لطابور "الطلبات الجديدة" (27 أغسطس 2026) -->
+<iframe name="orderQueueHiddenFrame" id="orderQueueHiddenFrame" style="display:none;"></iframe>
+<form id="orderQueueHiddenForm" method="POST" enctype="text/plain" target="orderQueueHiddenFrame" style="display:none;">
+  <input type="hidden" name="payload" id="orderQueueHiddenPayload">
+</form>
+
 <footer>
   <div class="foot-logo">EVOQUE PERFUME</div>
   <div id="footerText"></div>
@@ -289,7 +295,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 <script>
   window.EVOQUE_PAGE = { mode: "category", gender: "unisex" };
 </script>
-<script src="assets/catalog.js?v=20260826a"></script>
+<script src="assets/catalog.js?v=20260827b"></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>

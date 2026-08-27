@@ -163,14 +163,25 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 
 <div class="notfound-banner" id="notfoundBanner"></div>
 
+<!-- مربع بحث الصفحة الرئيسية (27 أغسطس 2026) — يبحث بكل العطور (كل الأجناس) بالاسم أو
+     البراند مباشرة من غير ما الزائر يحتاج يفتح تصنيف رجالي/نسائي أول -->
+<div class="search-controls">
+  <div class="search-field">
+    <svg class="icon"><use href="#ic-search"/></svg>
+    <input class="search-input" id="homeSearchInput" type="text">
+  </div>
+</div>
+
 <section class="section-head" id="bestSellersHead">
   <div class="eyebrow" id="bestSellersEyebrow"></div>
   <h2 id="bestSellersTitle"></h2>
   <p id="bestSellersSubtitle"></p>
 </section>
+<div class="results-count" id="resultsCount"></div>
 <div class="grid" id="grid"></div>
+<div class="show-more-wrap" id="showMoreWrap"></div>
 
-<div class="category-nav-wrap">
+<div class="category-nav-wrap" id="categoryNavWrap">
   <section class="section-head" id="shopByCategoryHead">
     <h2 id="shopByCategoryTitle"></h2>
     <p id="shopByCategorySubtitle"></p>
@@ -272,6 +283,12 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <input type="hidden" name="payload" id="wishlistHiddenPayload">
 </form>
 
+<!-- نفس التقنية — فورم + iframe مخفي رابع منفصل لطابور "الطلبات الجديدة" (27 أغسطس 2026) -->
+<iframe name="orderQueueHiddenFrame" id="orderQueueHiddenFrame" style="display:none;"></iframe>
+<form id="orderQueueHiddenForm" method="POST" enctype="text/plain" target="orderQueueHiddenFrame" style="display:none;">
+  <input type="hidden" name="payload" id="orderQueueHiddenPayload">
+</form>
+
 <footer>
   <div class="foot-logo">EVOQUE PERFUME</div>
   <div id="footerText"></div>
@@ -287,7 +304,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 <script>
   window.EVOQUE_PAGE = { mode: "home" };
 </script>
-<script src="assets/catalog.js?v=20260826a"></script>
+<script src="assets/catalog.js?v=20260827b"></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>
