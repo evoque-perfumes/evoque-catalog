@@ -167,6 +167,7 @@
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
     <button type="button" id="modeBankBtn">🏦 بيانات البنك</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
+    <button type="button" id="modeOrdersQueueBtn">🧾 الطلبات الجديدة<span class="badge pending" id="oqNavBadge" style="display:none; margin-inline-start:6px;"></span></button>
   </nav>
 
   <div class="panel" id="tokenPanel">
@@ -339,6 +340,7 @@
 
   <div class="panel" id="stockQuickPanel" style="display:none;">
     <h2 id="stockQuickPanelTitle">الكمية المتوفرة</h2>
+    <div id="stockQuickPanelLastUpdate" style="font-size:12px;color:var(--muted);margin-top:-8px;margin-bottom:14px;"></div>
     <fieldset>
       <legend>المخزون</legend>
       <div class="grid2">
@@ -541,6 +543,26 @@
     <div class="status" id="wl_statusBox"></div>
   </div>
 
+  <div class="panel" id="ordersQueuePanel" style="display:none;">
+    <h2>🧾 الطلبات الجديدة (بانتظار الاعتماد)</h2>
+    <small class="hint" style="margin-top:0;">
+      كل طلب يوصل هنا تلقائيًا من الموقع — سواء عبر نموذج الطلب الكامل أو زر "إتمام الطلب عبر
+      واتساب" السريع — بدون ما تدخل أي بيانة يدويًا. اضغط "✅ اعتماد" بعد ما تتأكد من الطلب
+      (وتعبّي اسم/هاتف/عنوان العميل لو ناقصة، حالة الطلبات السريعة عبر واتساب) وبيصير التالي
+      تلقائيًا: يتسجل بـ"💰 المبيعات"، ويتخصم من "📊 المخزون" — من غير ما تدخل شي بنفسك. لو الطلب
+      وهمي أو العميل تراجع، اضغط "❌ رفض" (ما يأثر على المخزون إطلاقًا لأنه لسا ما اتخصم).
+      <br><br>
+      ملاحظة: لو تبا تلغي طلب <b>معتمد خلاص</b> (بعد ما ظهر بالمبيعات)، روح لتبويب "💰 المبيعات"
+      واضغط "🗑️ حذف الطلب" من هناك — المخزون يرجع تلقائيًا لحاله زي قبل الاعتماد.
+    </small>
+    <div class="row" style="margin-bottom:6px;">
+      <button type="button" id="oq_reloadBtn" class="secondary">تحميل آخر نسخة</button>
+    </div>
+    <div id="oq_summary" style="color:var(--muted); font-size:13px; margin-bottom:8px;"></div>
+    <div id="oq_list" class="static-list" style="max-height:640px;"></div>
+    <div class="status" id="oq_statusBox"></div>
+  </div>
+
   <div class="panel" id="excelPanel" style="display:none;">
     <h2>استيراد عطور جديدة من إكسل</h2>
     <small class="hint" style="margin-top:0;">
@@ -690,12 +712,14 @@ const REVIEWS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}
 const ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/orders.json?t=` + Date.now();
 const BANK_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/bank-info.json?t=` + Date.now();
 const WISHLIST_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/wishlist.json?t=` + Date.now();
+const PENDING_ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/pending-orders.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
 const ORDERS_JSON_PATH = "orders.json";
 const BANK_JSON_PATH = "bank-info.json";
 const WISHLIST_JSON_PATH = "wishlist.json";
+const PENDING_ORDERS_JSON_PATH = "pending-orders.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
 let reviewsData = [];        // آخر نسخة معروفة من reviews.json (للعرض/البحث فقط)
@@ -706,6 +730,8 @@ let salesSelected = null;    // العطر المختار حاليًا بوضع 
 let siteOrders = null;       // طلبات نموذج الموقع (Google Sheet) — null لين يتحدّث أول مرة
 let bankInfoData = { AE:{}, OM:{} }; // آخر نسخة معروفة من bank-info.json
 let wishlistData = {}; // آخر نسخة معروفة من wishlist.json — { perfumeId: {count, brand, name, lastAt} }
+let pendingOrders = []; // آخر نسخة معروفة من pending-orders.json — طلبات الموقع بانتظار الاعتماد
+let oqEdits = {}; // تعديلات اسم/هاتف/عنوان يدخلها المستخدم بالفورم قبل الاعتماد (orderId -> {name,phone,address}) — تبقى بالذاكرة لين الاعتماد/إعادة التحميل
 let existingFiles = new Set();
 let mode = "overview";       // "overview" | "add" | "edit" | "photo" | "stock" | "sales" | "reviews" | "bulk" | "excel" | "bank"
 let editingOriginal = null;  // العطر الأصلي قبل التعديل (null لو إضافة)
@@ -1070,8 +1096,37 @@ function stockAsQty(v){
   return v === false ? 0 : 1;
 }
 function isOutOfStock(p){ return stockAsQty(p.stock10) <= 0 || stockAsQty(p.stock50) <= 0; }
+// 27 أغسطس 2026: طابع وقت "آخر تحديث" لكل حجم على حدة — يتحدّث فقط لو الكمية
+// فعليًا تغيّرت (يدويًا من لوحة التحكم أو تلقائيًا بعد اعتماد طلب/تسجيل بيع)،
+// عشان ما يتحرك بلا داعي لو المستخدم حفظ نفس الرقم أو عدّل حقول ثانية بالعطر.
+function withStockTimestamps(oldRecord, newStock10, newStock50){
+  const now = new Date().toISOString();
+  const patch = {};
+  if(stockAsQty(oldRecord.stock10) !== newStock10) patch.stock10UpdatedAt = now;
+  if(stockAsQty(oldRecord.stock50) !== newStock50) patch.stock50UpdatedAt = now;
+  return patch;
+}
+function fmtStockUpdatedAt(iso){
+  if(!iso) return "";
+  try{
+    return new Date(iso).toLocaleString("ar", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" });
+  }catch(e){ return ""; }
+}
+// يعرض آخر تحديث للحجمين مع بعض (لو مختلفين يعرض الاثنين، ولو ما فيه أي تحديث يدوي/تلقائي مسجّل لسا يرجع فاضي بهدوء)
+function latestStockUpdateLabel(p){
+  const a = p.stock10UpdatedAt ? `10مل: ${fmtStockUpdatedAt(p.stock10UpdatedAt)}` : "";
+  const b = p.stock50UpdatedAt ? `50مل: ${fmtStockUpdatedAt(p.stock50UpdatedAt)}` : "";
+  const parts = [a, b].filter(Boolean);
+  if(!parts.length) return "";
+  return `<div style="font-size:11px;color:var(--muted);margin-top:4px;">🕒 آخر تحديث — ${parts.join(" · ")}</div>`;
+}
 // "قارب على النفاد" — بقي قطعة وحدة بحجم وحد على الأقل (وذاك الحجم لسا مو صفر، يعني لسا متوفر بس على وشك يخلص)
-function isLowStock(p){ return stockAsQty(p.stock10) === 1 || stockAsQty(p.stock50) === 1; }
+// 27 أغسطس 2026: رفعنا العتبة من "1 بالضبط" إلى "أقل من 3" (يعني 1 أو 2) — نفس
+// العتبة المستخدمة بالضبط لبادج "🔥 باقي X فقط" على الموقع الحي (catalog.js).
+function isLowStock(p){
+  const s10 = stockAsQty(p.stock10), s50 = stockAsQty(p.stock50);
+  return (s10 > 0 && s10 < 3) || (s50 > 0 && s50 < 3);
+}
 
 let stockCategoryActive = null; // 'missing' | 'out' | 'low' | 'in' | null
 let stockSelected = null;
@@ -1116,9 +1171,11 @@ function renderStockCategoryList(cat){
       badgeText = `10مل: ${stockAsQty(p.stock10)} — 50مل: ${stockAsQty(p.stock50)}`;
       badgeClass = isOutOfStock(p) ? "pending" : "done";
     }
+    const lastUpdateHtml = latestStockUpdateLabel(p);
     return `<div class="dropdown-item" data-id="${p.id}">
       <span class="name">${p.brand} — ${p.name}</span><br>
       <span class="badge ${badgeClass}" style="margin-inline-start:0; margin-top:4px; display:inline-block;">${badgeText}</span>
+      ${lastUpdateHtml}
     </div>`;
   }).join("");
   box.querySelectorAll(".dropdown-item[data-id]").forEach(el => {
@@ -1150,6 +1207,7 @@ function selectPerfumeForStock(p){
   document.getElementById("sq_stock10").value = stockAsQty(p.stock10);
   document.getElementById("sq_stock50").value = stockAsQty(p.stock50);
   document.getElementById("stockQuickPanelTitle").textContent = `الكمية المتوفرة: ${p.brand} — ${p.name}`;
+  document.getElementById("stockQuickPanelLastUpdate").innerHTML = latestStockUpdateLabel(p) || `<span style="opacity:.6;">ما فيه تحديث مسجّل لهذا العطر بعد.</span>`;
   document.getElementById("stockQuickPanel").style.display = "block";
   document.getElementById("sq_statusBox").className = "status";
 }
@@ -1183,11 +1241,16 @@ document.getElementById("sq_saveBtn").addEventListener("click", async () => {
     const updatedList = await updateDataJsonWithRetry(token, (list) => {
       const idx = list.findIndex(x => x.id === p.id);
       if(idx === -1) throw new Error("العطر ما انلقى بـ data.json — يمكن انحذف أو تغيّر اسمه من مكان ثاني.");
-      list[idx] = { ...list[idx], stock10: newStock10, stock50: newStock50 };
+      const stamp = withStockTimestamps(list[idx], newStock10, newStock50);
+      list[idx] = { ...list[idx], stock10: newStock10, stock50: newStock50, ...stamp };
       return list;
     }, `Update stock: ${p.brand} — ${p.name}`);
     perfumes = updatedList;
+    stockSelected = perfumes.find(x => x.id === p.id) || stockSelected;
+    document.getElementById("stockQuickPanelLastUpdate").innerHTML = latestStockUpdateLabel(stockSelected) || "";
+    if(stockCategoryActive) renderStockCategoryList(stockCategoryActive);
     updateProgress();
+    updateStockCounts();
     sqShowStatus(`تم تحديث حالة التوفر لـ"${p.brand} — ${p.name}". تأخذ بضع دقايق تظهر بالموقع الحي.`, "ok");
   }catch(e){
     sqShowStatus("صار خطأ: " + e.message, "err");
@@ -1550,9 +1613,10 @@ async function applySalesStockDelta(token, deltaMap){
       const idx = list.findIndex(x => x.id === perfumeId);
       if(idx === -1){ notFound.push(perfumeId); return; }
       const field = size === "50" ? "stock50" : "stock10";
+      const tsField = size === "50" ? "stock50UpdatedAt" : "stock10UpdatedAt";
       const current = stockAsQty(list[idx][field]);
       const next = Math.max(0, current - delta);
-      list[idx] = { ...list[idx], [field]: next };
+      list[idx] = { ...list[idx], [field]: next, ...(next !== current ? { [tsField]: new Date().toISOString() } : {}) };
       changes.push({ perfumeId, size, from: current, to: next });
     });
     return list;
@@ -1790,6 +1854,7 @@ function setMode(newMode){
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
   document.getElementById("modeBankBtn").classList.toggle("active", mode === "bank");
   document.getElementById("modeWishlistBtn").classList.toggle("active", mode === "wishlist");
+  document.getElementById("modeOrdersQueueBtn").classList.toggle("active", mode === "ordersQueue");
   document.getElementById("overviewPanel").style.display = mode === "overview" ? "block" : "none";
   document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock" || mode === "reviews" || mode === "sales") ? "block" : "none";
   document.getElementById("progressStatsWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
@@ -1800,6 +1865,7 @@ function setMode(newMode){
   document.getElementById("salesQuickPanel").style.display = mode === "sales" ? "block" : "none";
   document.getElementById("bankInfoPanel").style.display = mode === "bank" ? "block" : "none";
   document.getElementById("wishlistPanel").style.display = mode === "wishlist" ? "block" : "none";
+  document.getElementById("ordersQueuePanel").style.display = mode === "ordersQueue" ? "block" : "none";
   stockCategoryActive = null;
   stockSelected = null;
   reviewsSelected = null;
@@ -1856,6 +1922,7 @@ document.getElementById("modeExcelBtn").addEventListener("click", () => setMode(
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
 document.getElementById("modeBankBtn").addEventListener("click", () => { setMode("bank"); loadBankInfoIntoForm(); });
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
+document.getElementById("modeOrdersQueueBtn").addEventListener("click", () => { setMode("ordersQueue"); loadPendingOrdersIntoPanel(); });
 
 // ===== البحث (تعديل + رفع صورة فقط + المخزون يشتركون بنفس مربع البحث) =====
 function renderDropdown(query){
@@ -2445,6 +2512,56 @@ async function updateOrdersJsonWithRetry(token, mutateFn, commitMsg, attempt){
   return newList;
 }
 
+// ===== قراءة/كتابة pending-orders.json (طلبات الموقع بانتظار الاعتماد) — نفس منطق orders.json بالضبط =====
+async function getPendingOrdersWithSha(token){
+  const res = await fetch(`${API_BASE}/${PENDING_ORDERS_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { list: [], sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة pending-orders.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  const list = JSON.parse(base64ToUtf8(info.content));
+  return { list: Array.isArray(list) ? list : [], sha: info.sha };
+}
+
+async function putPendingOrdersJson(list, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(list, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${PENDING_ORDERS_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updatePendingOrdersJsonWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { list, sha } = await getPendingOrdersWithSha(token);
+  const newList = mutateFn(list);
+  try{
+    await putPendingOrdersJson(newList, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updatePendingOrdersJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newList;
+}
+
 // ===== قراءة/كتابة bank-info.json — نفس منطق reviews.json/orders.json بالضبط، بس كائن وحد
 // (بيانات البنك للإمارات وعُمان) بدل قائمة =====
 function bankShowStatus(msg, type){
@@ -2712,6 +2829,204 @@ async function loadWishlistIntoPanel(){
 }
 
 document.getElementById("wl_reloadBtn").addEventListener("click", loadWishlistIntoPanel);
+
+// ===== وضع "🧾 الطلبات الجديدة" (اعتماد/رفض طلبات الموقع بدون إدخال يدوي) =====
+function oqShowStatus(msg, cls){
+  const box = document.getElementById("oq_statusBox");
+  box.textContent = msg;
+  box.className = "status " + (cls || "");
+}
+
+function fmtOqDate(iso){
+  if(!iso) return "";
+  try{ return new Date(iso).toLocaleString("ar", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }); }
+  catch(e){ return iso; }
+}
+
+function updateOrdersQueueBadge(){
+  const badge = document.getElementById("oqNavBadge");
+  if(!badge) return;
+  if(pendingOrders.length){
+    badge.textContent = pendingOrders.length;
+    badge.style.display = "inline-block";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function renderOrdersQueueList(){
+  const box = document.getElementById("oq_list");
+  const summary = document.getElementById("oq_summary");
+  updateOrdersQueueBadge();
+  if(!pendingOrders.length){
+    summary.textContent = "";
+    box.innerHTML = `<div class="dropdown-item">ما فيه طلبات جديدة بانتظار الاعتماد حاليًا 🎉</div>`;
+    return;
+  }
+  const sorted = pendingOrders.slice().sort((a,b) => (b.receivedAt||"").localeCompare(a.receivedAt||""));
+  summary.textContent = `${sorted.length} ${sorted.length === 1 ? "طلب" : "طلبات"} بانتظار الاعتماد`;
+  box.innerHTML = sorted.map(o => {
+    const edits = oqEdits[o.orderId] || {};
+    const name = edits.name != null ? edits.name : (o.name || "");
+    const phone = edits.phone != null ? edits.phone : (o.phone || "");
+    const address = edits.address != null ? edits.address : (o.address || "");
+    const sourceLabel = o.source === "quick-whatsapp" ? "💬 واتساب سريع (بدون بيانات عميل)" : "🌐 نموذج الطلب الكامل";
+    const itemsHtml = (o.items || []).map(it => {
+      const live = perfumes.find(p => p.id === it.perfumeId);
+      const label = live ? `${live.brand} — ${live.name}` : `${it.brand || "?"} — ${it.name || it.perfumeId || "?"}`;
+      const notFoundNote = it.perfumeId && !live ? ` <span style="color:#c0475a;">(ما انلقى بالكتالوج — ما راح يتخصم مخزونه تلقائيًا)</span>` : "";
+      return `<div>• ${label} (${it.size}مل × ${it.qty}) — ${fmtNum(it.lineTotal || (it.unitPrice*it.qty) || 0)} ${o.currency || ""}${notFoundNote}</div>`;
+    }).join("");
+    const metaParts = [
+      o.country ? `📍 ${o.country}${o.emirateOrWilayat ? " — " + o.emirateOrWilayat : ""}` : "",
+      o.deliveryMethod ? `🚚 ${o.deliveryMethod}` : "",
+      o.paymentMethod ? `💳 ${o.paymentMethod}` : "",
+      o.notes ? `📝 ${String(o.notes).replace(/</g,"&lt;")}` : ""
+    ].filter(Boolean).join(" — ");
+    return `<div class="dropdown-item" data-order-id="${o.orderId}" style="display:block; padding:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span class="badge ${o.source === "quick-whatsapp" ? "pending" : "done"}">${sourceLabel}</span>
+        <span style="font-size:12px;color:var(--muted);">🕒 ${fmtOqDate(o.receivedAt)}</span>
+      </div>
+      <div style="margin-top:10px; font-size:13px; line-height:1.9;">${itemsHtml || "<em>ما فيه عناصر</em>"}</div>
+      <div style="margin-top:6px; font-size:13px;">
+        المجموع الفرعي: ${fmtNum(o.subtotal||0)} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${o.currency||""}</b>
+      </div>
+      ${metaParts ? `<div style="margin-top:6px; font-size:12px; color:var(--muted);">${metaParts}</div>` : ""}
+      <div class="grid2" style="margin-top:12px;">
+        <div class="field" style="margin-bottom:0;"><label>اسم العميل</label><input type="text" class="oq-name-input" value="${name.replace(/"/g,"&quot;")}" placeholder="اسم العميل"></div>
+        <div class="field" style="margin-bottom:0;"><label>الهاتف</label><input type="text" class="oq-phone-input" value="${phone.replace(/"/g,"&quot;")}" placeholder="رقم الهاتف"></div>
+      </div>
+      <div class="field" style="margin-top:10px; margin-bottom:0;"><label>العنوان</label><input type="text" class="oq-address-input" value="${address.replace(/"/g,"&quot;")}" placeholder="العنوان التفصيلي"></div>
+      <div class="row" style="margin-top:12px; gap:8px;">
+        <button type="button" class="oq-approve-btn" style="flex:1;">✅ اعتماد</button>
+        <button type="button" class="secondary oq-reject-btn" style="flex:1;">❌ رفض</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  box.querySelectorAll(".dropdown-item[data-order-id]").forEach(card => {
+    const orderId = card.dataset.orderId;
+    const nameInput = card.querySelector(".oq-name-input");
+    const phoneInput = card.querySelector(".oq-phone-input");
+    const addressInput = card.querySelector(".oq-address-input");
+    function syncEdits(){
+      oqEdits[orderId] = { name: nameInput.value, phone: phoneInput.value, address: addressInput.value };
+    }
+    nameInput.addEventListener("input", syncEdits);
+    phoneInput.addEventListener("input", syncEdits);
+    addressInput.addEventListener("input", syncEdits);
+
+    card.querySelector(".oq-approve-btn").addEventListener("click", async () => {
+      const token = getToken();
+      if(!token){ oqShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const order = pendingOrders.find(o => o.orderId === orderId);
+      if(!order){ oqShowStatus("الطلب ما انلقى — يمكن اتعامل معه من جلسة ثانية. حدّث القائمة.", "err"); return; }
+      const items = (order.items || []).filter(it => it.perfumeId && Number(it.qty) > 0);
+      if(!items.length){ oqShowStatus("هذا الطلب ما فيه عناصر صالحة للاعتماد.", "err"); return; }
+
+      const approveBtn = card.querySelector(".oq-approve-btn");
+      const rejectBtn = card.querySelector(".oq-reject-btn");
+      approveBtn.disabled = true; rejectBtn.disabled = true;
+      try{
+        oqShowStatus("جارِ الاعتماد...", "info");
+        const finalName = nameInput.value.trim();
+        const finalPhone = phoneInput.value.trim();
+        const finalAddress = addressInput.value.trim();
+        const orderKey = order.orderId;
+        const nowDate = todayStr();
+        const newSalesEntries = items.map((it, i) => ({
+          id: `${it.perfumeId}-${Date.now()}-${i}`,
+          perfumeId: it.perfumeId,
+          size: it.size,
+          qty: it.qty,
+          unitPrice: it.unitPrice,
+          customer: finalName,
+          date: nowDate,
+          country: order.country || "",
+          countryLabel: order.country || "",
+          phone: finalPhone,
+          address: finalAddress,
+          orderId: orderKey,
+          source: order.source === "quick-whatsapp" ? "quick-whatsapp" : "website"
+        }));
+
+        // 1) نضيف الطلب لسجل المبيعات (orders.json) — نفس شكل التسجيل اليدوي بالضبط
+        const updatedSales = await updateOrdersJsonWithRetry(token, (list) => {
+          newSalesEntries.forEach(e => list.push(e));
+          return list;
+        }, `Approve order: ${orderKey}`);
+        salesData = updatedSales;
+
+        // 2) نخصم المخزون تلقائيًا (نفس دالة تسجيل البيع اليدوي بالضبط)
+        let stockNote = "";
+        try{
+          const delta = computeStockDelta([], items.map(it => ({ perfumeId: it.perfumeId, size: it.size, qty: it.qty })));
+          const { changes, notFound } = await applySalesStockDelta(token, delta);
+          if(changes.length) stockNote = ` وتم خصم ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"} من المخزون تلقائيًا.`;
+          if(notFound.length) stockNote += ` (تنبيه: ${notFound.length} عطر بالطلب ما انلقى بالكتالوج — راجع مخزونه يدويًا.)`;
+          updateStockCounts();
+        }catch(stockErr){
+          stockNote = ` — تحذير: اتسجّل بالمبيعات بس صار خطأ بخصم المخزون تلقائيًا (${stockErr.message}) — راجع المخزون يدويًا لعطور هذا الطلب.`;
+        }
+
+        // 3) نشيل الطلب من طابور "الطلبات الجديدة"
+        const updatedPending = await updatePendingOrdersJsonWithRetry(token, (list) => list.filter(o => o.orderId !== orderKey), `Approve order (remove from queue): ${orderKey}`);
+        pendingOrders = updatedPending;
+        delete oqEdits[orderKey];
+
+        renderOrdersQueueList();
+        renderSalesHistory();
+        renderOverview();
+        oqShowStatus(`تم اعتماد الطلب وتسجيله بالمبيعات.${stockNote}`, "ok");
+      }catch(e){
+        oqShowStatus("صار خطأ: " + e.message, "err");
+        approveBtn.disabled = false; rejectBtn.disabled = false;
+      }
+    });
+
+    card.querySelector(".oq-reject-btn").addEventListener("click", async () => {
+      if(!confirm("متأكد تبا ترفض هذا الطلب؟ ما راح ينضاف للمبيعات ولا يأثر على المخزون، وما يرجع بعد الرفض.")) return;
+      const token = getToken();
+      if(!token){ oqShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const approveBtn = card.querySelector(".oq-approve-btn");
+      const rejectBtn = card.querySelector(".oq-reject-btn");
+      approveBtn.disabled = true; rejectBtn.disabled = true;
+      try{
+        oqShowStatus("جارِ الرفض...", "info");
+        const updatedPending = await updatePendingOrdersJsonWithRetry(token, (list) => list.filter(o => o.orderId !== orderId), `Reject order: ${orderId}`);
+        pendingOrders = updatedPending;
+        delete oqEdits[orderId];
+        renderOrdersQueueList();
+        oqShowStatus("تم رفض الطلب.", "ok");
+      }catch(e){
+        oqShowStatus("صار خطأ: " + e.message, "err");
+        approveBtn.disabled = false; rejectBtn.disabled = false;
+      }
+    });
+  });
+}
+
+async function loadPendingOrdersIntoPanel(){
+  try{
+    oqShowStatus("جارِ التحميل...", "info");
+    const res = await fetch(`${PENDING_ORDERS_JSON_RAW_URL}&r=${Math.random()}`, { cache: "no-store" });
+    if(res.ok){
+      pendingOrders = await res.json();
+      if(!Array.isArray(pendingOrders)) pendingOrders = [];
+    } else if(res.status === 404){
+      pendingOrders = [];
+    } else {
+      throw new Error("HTTP " + res.status);
+    }
+    renderOrdersQueueList();
+    oqShowStatus("", "");
+  }catch(e){
+    oqShowStatus("ما قدرت أجيب الطلبات الجديدة الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
+  }
+}
+
+document.getElementById("oq_reloadBtn").addEventListener("click", loadPendingOrdersIntoPanel);
 
 async function uploadPhoto(slug, file, token, label){
   const extMap = {"image/png":".png", "image/jpeg":".jpg", "image/jpg":".jpg", "image/webp":".webp"};
@@ -3097,6 +3412,17 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     // 3) تجهيز السجل الجديد
     const newRecord = readFormAsPerfume(imagePath);
     newRecord.id = newSlug;
+    // طابع "آخر تحديث مخزون" — لو عطر جديد كليًا نختم وقت الإضافة مباشرة، ولو
+    // تعديل عطر موجود نحافظ على الطابع القديم إلا لو الكمية فعليًا تغيّرت.
+    if(!editingOriginal){
+      const nowIso = new Date().toISOString();
+      newRecord.stock10UpdatedAt = nowIso;
+      newRecord.stock50UpdatedAt = nowIso;
+    } else {
+      newRecord.stock10UpdatedAt = editingOriginal.stock10UpdatedAt || null;
+      newRecord.stock50UpdatedAt = editingOriginal.stock50UpdatedAt || null;
+      Object.assign(newRecord, withStockTimestamps(editingOriginal, newRecord.stock10, newRecord.stock50));
+    }
 
     // 4) نطبّق التعديل على أحدث نسخة من data.json (نجيبها من جديد وقت الحفظ الفعلي،
     // لتفادي استخدام sha قديم لو صار وقت بين الفحص ورفع الصورة والحفظ)
@@ -3167,6 +3493,7 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
 loadData();
 loadReviews();
 loadOrders();
+loadPendingOrdersIntoPanel(); // تحميل مبكر بس عشان يظهر رقم الطلبات الجديدة بالتبويب فورًا من غير ما ينتظر المستخدم يضغطه
 loadAppsScriptSettings();
 if(document.getElementById("ov_appsUrl").value.trim()){
   document.getElementById("ov_appsFetchBtn").click();
