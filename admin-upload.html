@@ -275,10 +275,15 @@
           <div class="stat-clickable" id="stockCatLow"><div style="color:var(--muted); font-size:13px;">قارب على النفاد (بقي 1)</div><b id="stockCatLowCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
           <div class="stat-clickable" id="stockCatIn"><div style="color:var(--muted); font-size:13px;">متوفرة بالكامل</div><b id="stockCatInCount" style="font-size:20px; display:block; color:#1F6B41;">—</b></div>
         </div>
-        <small class="hint" style="margin-top:0;">اضغط أي تصنيف فوق تشوف قائمته، أو ابحث باسم العطر تحت مباشرة.</small>
+        <small class="hint" style="margin-top:0;">اضغط أي تصنيف فوق تشوف قائمته، أو ابحث باسم العطر تحت مباشرة، أو اختر براند معيّن من القائمة تحت عشان تحصر النتائج فيه بس.</small>
         <div class="static-list" id="stockCategoryList" style="display:none;"></div>
       </div>
 
+      <div class="row" style="margin-bottom:8px;">
+        <select id="brandFilterSelect" style="flex:1;">
+          <option value="all">كل البراندات</option>
+        </select>
+      </div>
       <div class="search-wrap">
         <input type="text" id="searchInput" placeholder="اكتب اسم البراند أو العطر...">
         <div class="dropdown" id="dropdown"></div>
@@ -722,6 +727,21 @@ const WISHLIST_JSON_PATH = "wishlist.json";
 const PENDING_ORDERS_JSON_PATH = "pending-orders.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
+let brandFilterValue = "all"; // فلتر البراند المختار من القائمة المنسدلة (يشترك فيه البحث + المخزون)
+
+// يعبّي قائمة البراندات بمربع الفلتر المنسدل من كل البراندات الموجودة فعليًا بالعطور —
+// يستدعى بعد كل تحميل/تحديث لقائمة perfumes عشان القائمة توصل محدّثة دايمًا.
+function populateBrandFilterOptions(){
+  const sel = document.getElementById("brandFilterSelect");
+  if(!sel) return;
+  const prev = brandFilterValue;
+  const brands = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
+    .sort((a,b) => a.localeCompare(b, "en", {sensitivity:"base"}));
+  sel.innerHTML = `<option value="all">كل البراندات</option>` +
+    brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${b}</option>`).join("");
+  brandFilterValue = brands.includes(prev) ? prev : "all";
+  sel.value = brandFilterValue;
+}
 let reviewsData = [];        // آخر نسخة معروفة من reviews.json (للعرض/البحث فقط)
 let reviewsSelected = null;  // العطر المختار حاليًا بوضع "التقييمات"
 let reviewsEditingId = null; // id التقييم الحالي المفتوح للتعديل (null = فورم إضافة جديد)
@@ -773,6 +793,7 @@ async function loadData(){
   document.getElementById("statTotal").textContent = perfumes.length;
   document.getElementById("statsRow").style.display = "flex";
   updateProgress();
+  populateBrandFilterOptions();
 }
 
 // ===== تحميل قائمة التقييمات (للعرض والبحث فقط — نفس منطق loadData بالضبط) =====
@@ -1151,6 +1172,7 @@ function renderStockCategoryList(cat){
   else if(cat === "out") list = perfumes.filter(isOutOfStock);
   else if(cat === "low") list = perfumes.filter(isLowStock);
   else list = perfumes.filter(p => !isOutOfStock(p));
+  if(brandFilterValue !== "all") list = list.filter(p => p.brand === brandFilterValue);
   list = list.slice().sort((a,b) => (a.brand+" "+a.name).localeCompare(b.brand+" "+b.name, "en", {sensitivity:"base"}));
 
   const box = document.getElementById("stockCategoryList");
@@ -1931,6 +1953,7 @@ function renderDropdown(query){
   const hideUploaded = (mode === "photo" || mode === "edit") && document.getElementById("hideUploadedChk").checked;
   let list = perfumes;
   if(hideUploaded) list = list.filter(p => !hasImage(p));
+  if(brandFilterValue !== "all") list = list.filter(p => p.brand === brandFilterValue);
   if(q) list = list.filter(p => (p.brand+" "+p.name).toLowerCase().includes(q));
   list = list.slice(0, 40);
   if(list.length === 0){
@@ -1974,6 +1997,11 @@ function renderDropdown(query){
 document.getElementById("searchInput").addEventListener("input", (e) => renderDropdown(e.target.value));
 document.getElementById("searchInput").addEventListener("focus", (e) => renderDropdown(e.target.value));
 document.getElementById("hideUploadedChk").addEventListener("change", () => renderDropdown(document.getElementById("searchInput").value));
+document.getElementById("brandFilterSelect").addEventListener("change", (e) => {
+  brandFilterValue = e.target.value;
+  renderDropdown(document.getElementById("searchInput").value);
+  if(mode === "stock" && stockCategoryActive) renderStockCategoryList(stockCategoryActive);
+});
 document.addEventListener("click", (e) => {
   if(!e.target.closest(".search-wrap")) document.getElementById("dropdown").classList.remove("show");
 });
