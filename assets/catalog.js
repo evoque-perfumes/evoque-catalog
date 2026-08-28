@@ -21,7 +21,7 @@ const WISHLIST_ENDPOINT = "https://script.google.com/macros/s/AKfycbyRBlIFQ9jHZ2
 // يدوي. سكربت منفصل تمامًا عن نظام الطلبات القديم (ORDER_ENDPOINT) — القديم
 // يضل شغال بالضبط زي ما كان، هذا بس يضيف نسخة موازية. انشره حسب دليل
 // order-queue-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
-const ORDER_QUEUE_ENDPOINT = "PASTE_ORDER_QUEUE_ENDPOINT_HERE";
+const ORDER_QUEUE_ENDPOINT = "https://script.google.com/macros/s/AKfycbxXrXt26AgddAb5kGWzUtUM34CfM_SbMw6Q27SB2nAgRBmCztsB62IpISya-ird3o2I/exec";
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
