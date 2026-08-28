@@ -161,6 +161,7 @@
     <button type="button" id="modeEditBtn">✏️ تعديل عطر</button>
     <button type="button" id="modeAddBtn">➕ إضافة عطر</button>
     <button type="button" id="modeStockBtn">📊 المخزون</button>
+    <button type="button" id="modeBulkPriceBtn">💲 تعديل الأسعار بالجملة</button>
     <button type="button" id="modeSalesBtn">💰 المبيعات</button>
     <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
     <button type="button" id="modeBulkBtn">📦 رفع صور دفعة</button>
@@ -592,6 +593,79 @@
     <div class="status" id="xlsx_statusBox"></div>
   </div>
 
+  <div class="panel" id="bulkPricePanel" style="display:none;">
+    <h2>تعديل الأسعار بالجملة</h2>
+    <small class="hint" style="margin-top:0;">
+      غيّر سعر حجم معيّن لعدة عطور دفعة وحدة — على كل العطور، أو براند معيّن، أو بس اللي سعرها
+      الحالي يساوي قيمة معيّنة (مثلًا كل اللي سعر 10مل عندهم 15 درهم)، أو تحديد يدوي من قائمة.
+      اضغط "معاينة" أول عشان تتأكد من العدد والأسعار قبل ما تنفّذ — التغيير كله يصير بكوميت واحد.
+    </small>
+
+    <label for="bp_field">أي سعر تبي تعدّل؟</label>
+    <select id="bp_field">
+      <option value="price10">10مل (درهم)</option>
+      <option value="price50">50مل (درهم)</option>
+      <option value="price10Before">10مل قبل الخصم (درهم)</option>
+      <option value="price50Before">50مل قبل الخصم (درهم)</option>
+      <option value="price10Om">10مل (ريال عُماني)</option>
+      <option value="price50Om">50مل (ريال عُماني)</option>
+      <option value="price10OmBefore">10مل قبل الخصم (ريال عُماني)</option>
+      <option value="price50OmBefore">50مل قبل الخصم (ريال عُماني)</option>
+    </select>
+
+    <label>على أي عطور؟</label>
+    <div class="chkrow">
+      <label><input type="radio" name="bp_scope" value="all" checked> كل العطور</label>
+      <label><input type="radio" name="bp_scope" value="currentValue"> بس اللي سعرها الحالي يساوي</label>
+      <label><input type="radio" name="bp_scope" value="brand"> براند معيّن</label>
+      <label><input type="radio" name="bp_scope" value="manual"> تحديد يدوي من قائمة</label>
+    </div>
+
+    <div class="field" id="bp_currentValueWrap" style="display:none;">
+      <label for="bp_currentValue">القيمة الحالية</label>
+      <input type="number" id="bp_currentValue" min="0" step="0.01">
+    </div>
+
+    <div class="field" id="bp_brandWrap" style="display:none;">
+      <label for="bp_brandSelect">البراند</label>
+      <select id="bp_brandSelect"></select>
+    </div>
+
+    <div id="bp_manualWrap" style="display:none;">
+      <label for="bp_manualSearch">ابحث واختر العطور</label>
+      <input type="text" id="bp_manualSearch" placeholder="اكتب اسم البراند أو العطر...">
+      <div id="bp_manualList" class="static-list" style="max-height:220px;"></div>
+      <small class="hint" style="margin-top:4px;">✓ العطور المحددة: <b id="bp_manualCount">0</b></small>
+    </div>
+
+    <label>طريقة التغيير</label>
+    <div class="chkrow">
+      <label><input type="radio" name="bp_mode" value="set" checked> تحديد قيمة جديدة ثابتة</label>
+      <label><input type="radio" name="bp_mode" value="adjust"> تعديل بمقدار (+ أو -)</label>
+    </div>
+    <div class="field">
+      <label for="bp_value" id="bp_valueLabel">القيمة الجديدة</label>
+      <input type="number" id="bp_value" step="0.01" placeholder="مثال: 10">
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <button type="button" id="bp_previewBtn" class="secondary">👁️ معاينة</button>
+    </div>
+
+    <div id="bp_previewWrap" style="display:none;">
+      <div class="stats">
+        <div class="stat">عدد العطور المتأثرة<b id="bp_previewCount" style="color:#1F6B41;">—</b></div>
+        <div class="stat">متجاوَزة (ما فيها هذا السعر)<b id="bp_previewSkipped" style="color:#8A6A1F;">—</b></div>
+      </div>
+      <div id="bp_previewList" class="static-list" style="max-height:280px;"></div>
+      <div class="row" style="margin-top:10px;">
+        <button type="button" id="bp_applyBtn">✅ نفّذ التغيير الآن</button>
+      </div>
+    </div>
+
+    <div class="status" id="bp_statusBox"></div>
+  </div>
+
   <div class="panel" id="formPanel">
     <h2 id="formPanelTitle">بيانات العطر</h2>
 
@@ -742,6 +816,182 @@ function populateBrandFilterOptions(){
   brandFilterValue = brands.includes(prev) ? prev : "all";
   sel.value = brandFilterValue;
 }
+
+// ===================================================================
+// وضع "تعديل الأسعار بالجملة" (28 أغسطس 2026) — يغيّر سعر حجم معيّن لعدة
+// عطور دفعة وحدة، بدل ما يفتح كل عطر لحاله. أربع طرق لتحديد "على أي عطور":
+// كل العطور / بس اللي سعرها الحالي = قيمة معيّنة / براند معيّن / تحديد يدوي.
+// وطريقتين للتغيير: تحديد قيمة جديدة ثابتة، أو تعديل بمقدار (+/-) عن القيمة
+// الحالية. يعرض معاينة (العدد + قائمة قبل/بعد) قبل التنفيذ الفعلي، ويطبّق
+// التغيير على data.json بكوميت واحد عبر نفس آلية updateDataJsonWithRetry.
+// ===================================================================
+let bpManualSelected = new Set(); // ids العطور المحددة يدويًا بطريقة "تحديد يدوي من قائمة"
+
+function bpInitPanel(){
+  // قائمة البراندات
+  const brandSel = document.getElementById("bp_brandSelect");
+  const brands = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
+    .sort((a,b) => a.localeCompare(b, "en", {sensitivity:"base"}));
+  brandSel.innerHTML = brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${b}</option>`).join("");
+  bpRenderManualList("");
+  document.getElementById("bp_previewWrap").style.display = "none";
+  document.getElementById("bp_statusBox").className = "status";
+}
+
+function bpScopeValue(){
+  return document.querySelector('input[name="bp_scope"]:checked').value;
+}
+function bpModeValue(){
+  return document.querySelector('input[name="bp_mode"]:checked').value;
+}
+
+document.querySelectorAll('input[name="bp_scope"]').forEach(r => {
+  r.addEventListener("change", () => {
+    const v = bpScopeValue();
+    document.getElementById("bp_currentValueWrap").style.display = v === "currentValue" ? "block" : "none";
+    document.getElementById("bp_brandWrap").style.display = v === "brand" ? "block" : "none";
+    document.getElementById("bp_manualWrap").style.display = v === "manual" ? "block" : "none";
+  });
+});
+document.querySelectorAll('input[name="bp_mode"]').forEach(r => {
+  r.addEventListener("change", () => {
+    document.getElementById("bp_valueLabel").textContent = bpModeValue() === "set" ? "القيمة الجديدة" : "المقدار (اكتب رقم سالب للتنقيص، مثال: -5)";
+  });
+});
+
+function bpRenderManualList(query){
+  const q = (query || "").trim().toLowerCase();
+  const box = document.getElementById("bp_manualList");
+  let list = perfumes;
+  if(q) list = list.filter(p => (p.brand + " " + p.name).toLowerCase().includes(q));
+  list = list.slice(0, 60);
+  if(list.length === 0){
+    box.innerHTML = `<div class="dropdown-item">ما فيه نتائج</div>`;
+  } else {
+    box.innerHTML = list.map(p => `
+      <label class="dropdown-item" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" class="bp-manual-chk" data-id="${p.id}" ${bpManualSelected.has(p.id) ? "checked" : ""}>
+        <span class="name">${p.brand} — ${p.name}</span>
+      </label>`).join("");
+    box.querySelectorAll(".bp-manual-chk").forEach(chk => {
+      chk.addEventListener("change", () => {
+        if(chk.checked) bpManualSelected.add(chk.dataset.id);
+        else bpManualSelected.delete(chk.dataset.id);
+        document.getElementById("bp_manualCount").textContent = bpManualSelected.size;
+      });
+    });
+  }
+  document.getElementById("bp_manualCount").textContent = bpManualSelected.size;
+}
+document.getElementById("bp_manualSearch").addEventListener("input", (e) => bpRenderManualList(e.target.value));
+
+// يحدد هل عطر معيّن يدخل بنطاق التغيير المطلوب حسب الطريقة المختارة
+function bpMatchesScope(p, criteria){
+  if(criteria.scope === "brand") return p.brand === criteria.brand;
+  if(criteria.scope === "manual") return criteria.manualIds.has(p.id);
+  if(criteria.scope === "currentValue"){
+    const cur = p[criteria.field];
+    return cur != null && Math.abs(Number(cur) - criteria.currentValue) < 0.001;
+  }
+  return true; // "all"
+}
+// يحسب القيمة الجديدة لعطر معيّن — يرجع null لو ما فيه قيمة حالية أصلًا لهذا الحقل (نتجاوزه)
+function bpComputeNewValue(oldVal, criteria){
+  if(oldVal === null || oldVal === undefined || oldVal === "") return null;
+  let nv = criteria.mode === "set" ? criteria.value : (Number(oldVal) + criteria.value);
+  if(nv < 0) nv = 0;
+  return Math.round(nv * 100) / 100;
+}
+function bpReadCriteria(){
+  const field = document.getElementById("bp_field").value;
+  const scope = bpScopeValue();
+  const modeVal = bpModeValue();
+  const value = parseFloat(document.getElementById("bp_value").value);
+  const currentValue = parseFloat(document.getElementById("bp_currentValue").value);
+  const brand = document.getElementById("bp_brandSelect").value;
+  return { field, scope, mode: modeVal, value, currentValue, brand, manualIds: new Set(bpManualSelected) };
+}
+function bpFieldLabel(field){
+  const opt = document.querySelector(`#bp_field option[value="${field}"]`);
+  return opt ? opt.textContent : field;
+}
+
+document.getElementById("bp_previewBtn").addEventListener("click", () => {
+  const box = document.getElementById("bp_statusBox");
+  box.className = "status";
+  const criteria = bpReadCriteria();
+  if(isNaN(criteria.value)){ box.className = "status show err"; box.textContent = "لازم تكتب القيمة الجديدة (أو المقدار) أول."; return; }
+  if(criteria.scope === "currentValue" && isNaN(criteria.currentValue)){ box.className = "status show err"; box.textContent = "لازم تكتب القيمة الحالية اللي تبي تفلتر عليها."; return; }
+  if(criteria.scope === "manual" && criteria.manualIds.size === 0){ box.className = "status show err"; box.textContent = "لازم تحدد عطر وحد على الأقل من القائمة."; return; }
+
+  const matched = perfumes.filter(p => bpMatchesScope(p, criteria));
+  const rows = [];
+  let skipped = 0;
+  matched.forEach(p => {
+    const oldVal = p[criteria.field];
+    const newVal = bpComputeNewValue(oldVal, criteria);
+    if(newVal === null){ skipped++; return; }
+    rows.push({ p, oldVal, newVal });
+  });
+
+  document.getElementById("bp_previewCount").textContent = rows.length;
+  document.getElementById("bp_previewSkipped").textContent = skipped;
+  const listBox = document.getElementById("bp_previewList");
+  if(rows.length === 0){
+    listBox.innerHTML = `<div class="dropdown-item">ما فيه عطور مطابقة — تأكد من الاختيارات فوق.</div>`;
+  } else {
+    listBox.innerHTML = rows.map(r => `
+      <div class="dropdown-item">
+        <span class="name">${r.p.brand} — ${r.p.name}</span>
+        <span class="badge pending" style="margin-inline-start:8px;">${r.oldVal} ← ${r.newVal}</span>
+      </div>`).join("");
+  }
+  document.getElementById("bp_previewWrap").style.display = "block";
+  // نحفظ المعايير نفسها (مو لقطة العطور) عشان زر التنفيذ يطبّقها من جديد على أحدث نسخة من data.json وقت الحفظ
+  document.getElementById("bp_applyBtn").dataset.ready = "1";
+  window.__bpLastCriteria = criteria;
+  window.__bpLastRowCount = rows.length;
+});
+
+document.getElementById("bp_applyBtn").addEventListener("click", async () => {
+  const token = getToken();
+  const box = document.getElementById("bp_statusBox");
+  if(!token){ box.className = "status show err"; box.textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+  const criteria = window.__bpLastCriteria;
+  if(!criteria){ box.className = "status show err"; box.textContent = "اضغط معاينة أول."; return; }
+  if(!window.__bpLastRowCount){ box.className = "status show err"; box.textContent = "ما فيه عطور بتتأثر — راجع المعاينة."; return; }
+
+  const btn = document.getElementById("bp_applyBtn");
+  btn.disabled = true;
+  try{
+    box.className = "status show info"; box.textContent = "جارِ التنفيذ...";
+    let changedCount = 0;
+    const updatedList = await updateDataJsonWithRetry(token, (list) => {
+      changedCount = 0;
+      return list.map(p => {
+        if(!bpMatchesScope(p, criteria)) return p;
+        const newVal = bpComputeNewValue(p[criteria.field], criteria);
+        if(newVal === null) return p;
+        changedCount++;
+        return { ...p, [criteria.field]: newVal };
+      });
+    }, `Bulk price update: ${bpFieldLabel(criteria.field)} (${criteria.scope})`);
+    perfumes = updatedList;
+    populateBrandFilterOptions();
+    updateProgress();
+    box.className = "status show ok";
+    box.textContent = `تم! انعدّل سعر "${bpFieldLabel(criteria.field)}" لـ ${changedCount} عطر. تأخذ بضع دقايق تظهر بالموقع الحي.`;
+    document.getElementById("bp_previewWrap").style.display = "none";
+    window.__bpLastCriteria = null;
+    window.__bpLastRowCount = 0;
+  }catch(e){
+    box.className = "status show err";
+    box.textContent = "صار خطأ: " + e.message;
+  }finally{
+    btn.disabled = false;
+  }
+});
+
 let reviewsData = [];        // آخر نسخة معروفة من reviews.json (للعرض/البحث فقط)
 let reviewsSelected = null;  // العطر المختار حاليًا بوضع "التقييمات"
 let reviewsEditingId = null; // id التقييم الحالي المفتوح للتعديل (null = فورم إضافة جديد)
@@ -1871,6 +2121,7 @@ function setMode(newMode){
   document.getElementById("modePhotoBtn").classList.toggle("active", mode === "photo");
   document.getElementById("modeBulkBtn").classList.toggle("active", mode === "bulk");
   document.getElementById("modeStockBtn").classList.toggle("active", mode === "stock");
+  document.getElementById("modeBulkPriceBtn").classList.toggle("active", mode === "bulkPrice");
   document.getElementById("modeSalesBtn").classList.toggle("active", mode === "sales");
   document.getElementById("modeExcelBtn").classList.toggle("active", mode === "excel");
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
@@ -1902,6 +2153,7 @@ function setMode(newMode){
   document.getElementById("deleteBtn").style.display = mode === "edit" && editingOriginal ? "inline-block" : "none";
   document.getElementById("bulkPanel").style.display = mode === "bulk" ? "block" : "none";
   document.getElementById("excelPanel").style.display = mode === "excel" ? "block" : "none";
+  document.getElementById("bulkPricePanel").style.display = mode === "bulkPrice" ? "block" : "none";
 
   document.getElementById("selectedChipWrap").innerHTML = "";
   document.getElementById("searchInput").value = "";
@@ -1939,6 +2191,7 @@ document.getElementById("modeEditBtn").addEventListener("click", () => setMode("
 document.getElementById("modePhotoBtn").addEventListener("click", () => setMode("photo"));
 document.getElementById("modeBulkBtn").addEventListener("click", () => setMode("bulk"));
 document.getElementById("modeStockBtn").addEventListener("click", () => setMode("stock"));
+document.getElementById("modeBulkPriceBtn").addEventListener("click", () => { setMode("bulkPrice"); bpInitPanel(); });
 document.getElementById("modeSalesBtn").addEventListener("click", () => setMode("sales"));
 document.getElementById("modeExcelBtn").addEventListener("click", () => setMode("excel"));
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
