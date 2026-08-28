@@ -1398,6 +1398,20 @@ function renderHomeSearch(){
   input.placeholder = t.homeSearchPlaceholder;
   input.value = searchQuery;
   input.oninput = (e)=>{ searchQuery = e.target.value; visibleCount = PAGE_SIZE; renderBestSellers(); };
+
+  // قائمة البراندات المنسدلة بالرئيسية (28 أغسطس 2026) — نفس فكرة brandSelect
+  // بصفحات التصنيف بالضبط، بس هنا بدون تقييد بجنس معيّن (LOCKED_GENDER فاضي بالرئيسية).
+  const brandSelect = document.getElementById("brandSelect");
+  if(brandSelect){
+    const brands = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
+    const prevSelection = selectedBrand;
+    brandSelect.innerHTML = `<option value="all">${t.allBrands}</option>` +
+      brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${toTitleCase(b)}</option>`).join("");
+    selectedBrand = brands.includes(prevSelection) ? prevSelection : "all";
+    brandSelect.value = selectedBrand;
+    brandSelect.onchange = (e)=>{ selectedBrand = e.target.value; visibleCount = PAGE_SIZE; renderBestSellers(); };
+  }
 }
 
 // ===================================================================
@@ -1412,7 +1426,7 @@ function renderBestSellers(){
   const titleEl = document.getElementById("bestSellersTitle");
   const subEl = document.getElementById("bestSellersSubtitle");
   const categoryNavWrap = document.getElementById("categoryNavWrap");
-  const isSearching = !!searchQuery.trim();
+  const isSearching = !!searchQuery.trim() || selectedBrand !== "all";
 
   if(eyebrowEl) eyebrowEl.textContent = isSearching ? t.searchResultsEyebrow : t.bestSellersEyebrow;
   if(titleEl) titleEl.textContent = isSearching ? t.searchResultsTitle : t.bestSellersTitle;
