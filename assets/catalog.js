@@ -45,19 +45,82 @@ const CATEGORY_PAGES = {
 };
 
 // ------------------------------------------------------------------
-// قائمة "الأكثر مبيعًا" اللي تظهر بالصفحة الرئيسية فقط — قائمة أولية اخترناها
-// نحن (Evoque AI Marketing Director) بشكل مبدئي بناءً على قوة البراند واكتمال
-// بيانات العطر (مو بيانات مبيعات فعلية بعد). عدّل القيم هنا بأي وقت — كل قيمة
-// هي id العطر كما يظهر بـ data.json (مثال: "giorgio-armani-si-passione" —
-// صار مبني على البراند+الاسم بدل رقم الصف، عشان يضل ثابت حتى لو انضافت أو
-// انحذفت عطور من لوحة التحكم لاحقًا). خله متوازن قد الإمكان بين
-// رجالي/نسائي/للجنسين عشان الانطباع الأول يعكس كل تشكيلة المتجر.
+// قائمة "الأكثر مبيعًا" الاحتياطية (fallback) — تُستخدم فقط لو الكتالوج صغير
+// جدًا ونظام الاختيار التلقائي تحت (pickAutoBestSellers) ما لقى عدد كافي من
+// العطور اللي عندها مخزون بكل جنس. كل قيمة هي id العطر كما يظهر بـ data.json.
 // ------------------------------------------------------------------
 const BEST_SELLER_IDS = [
   "givenchy-gentleman-reserve-privee", "gucci-gucci-guilty-absolute-man", "guerlain-l-homme-ideal-l-intense", // رجالي
   "giorgio-armani-si-passione", "giorgio-armani-my-way", "givenchy-ange-ou-demon", // نسائي
   "gucci-intense-oud", "guerlain-ambre-samar", "guerlain-cherry-oud" // للجنسين
 ];
+
+// ===================================================================
+// اختيار "الأكثر مبيعًا" تلقائيًا (28 أغسطس 2026) — بدل القائمة اليدوية الثابتة
+// أعلاه. الفكرة: نبني لكل جنس (رجالي/نسائي/للجنسين) "مجموعة مرشحين" من أعلى
+// العطور مخزونًا (عشان نساعد نبيع اللي عندنا منه كمية كبيرة ونخلص منه)، وبعدين
+// نختار BEST_SELLER_PICK_PER_GENDER منها بشكل يدور تلقائيًا كل
+// BEST_SELLER_ROTATION_DAYS يوم — بدون أي سيرفر أو كرون، كله بحساب بالمتصفح
+// وقت التحميل بناءً على تاريخ اليوم (كل الزوار بنفس فترة الدوران يشوفون نفس
+// الاختيار، ويتغير تلقائيًا لما تبدأ فترة جديدة).
+// غيّر BEST_SELLER_ROTATION_DAYS لـ 3 لو تبي الدوران كل 3 أيام بدل أسبوع.
+// ===================================================================
+const BEST_SELLER_ROTATION_DAYS = 7;   // كل كم يوم يتغير الاختيار
+const BEST_SELLER_POOL_SIZE = 8;       // حجم مجموعة المرشحين (الأعلى مخزونًا) بكل جنس
+const BEST_SELLER_PICK_PER_GENDER = 3; // كم عطر يُختار من كل جنس
+
+function bsStockScore(p){
+  return (Number(p.stock10) || 0) + (Number(p.stock50) || 0);
+}
+
+// PRNG بسيط وثابت (mulberry32) — نفس seed يعطي نفس الترتيب دائمًا، عشان كل
+// الزوار بنفس فترة الدوران يشوفون نفس الاختيار بالضبط
+function bsMulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function bsShuffle(arr, rand){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickAutoBestSellers(){
+  const periodIndex = Math.floor(Date.now() / (BEST_SELLER_ROTATION_DAYS * 24 * 60 * 60 * 1000));
+  const genders = ["men", "women", "unisex"];
+  let picked = [];
+  genders.forEach((g, gi) => {
+    const inGender = perfumes.filter(p => p.gender === g && bsStockScore(p) > 0);
+    if(inGender.length === 0) return;
+    const pool = inGender
+      .slice()
+      .sort((a, b) => bsStockScore(b) - bsStockScore(a))
+      .slice(0, Math.max(BEST_SELLER_POOL_SIZE, BEST_SELLER_PICK_PER_GENDER));
+    // seed مختلف لكل جنس (gi) عشان كل جنس يدور بشكل مستقل عن الثاني
+    const rand = bsMulberry32(periodIndex * 1000 + gi * 37);
+    picked = picked.concat(bsShuffle(pool, rand).slice(0, BEST_SELLER_PICK_PER_GENDER));
+  });
+  // احتياط: لو الكتالوج صغير وما طلعنا بعدد كافٍ، نكمل من القائمة اليدوية القديمة
+  const need = BEST_SELLER_PICK_PER_GENDER * genders.length;
+  if(picked.length < need){
+    const byId = {};
+    perfumes.forEach(p => { byId[p.id] = p; });
+    const pickedIds = new Set(picked.map(p => p.id));
+    BEST_SELLER_IDS.forEach(id => {
+      if(picked.length >= need) return;
+      const p = byId[id];
+      if(p && !pickedIds.has(p.id)){ picked.push(p); pickedIds.add(p.id); }
+    });
+  }
+  return picked;
+}
 
 let perfumes = [];
 let reviews = []; // reviews.json — تقييمات العملاء: [{id, perfumeId, name, rating, comment, date, visible, source}]
@@ -1441,9 +1504,7 @@ function renderBestSellers(){
     renderGrid(); // بدون قائمة صريحة = perfumes.filter(matches) على كامل الكتالوج (LOCKED_GENDER فاضي بالرئيسية)
     return;
   }
-  const byId = {};
-  perfumes.forEach(p => { byId[p.id] = p; });
-  const curated = BEST_SELLER_IDS.map(id => byId[id]).filter(Boolean);
+  const curated = pickAutoBestSellers();
   renderGrid(curated);
 }
 
