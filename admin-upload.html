@@ -2353,7 +2353,9 @@ function readFormAsPerfume(existingImage){
     return v === "" ? null : parseFloat(v);
   };
   return {
-    brand: document.getElementById("f_brand").value.trim(),
+    // نفرض الأحرف الكابيتل دايمًا على البراند عشان ما يصير نفس البراند مسجّل
+    // بأكثر من صيغة (زي "Matiere Premiere" و"MATIERE PREMIERE") ويتفرّق بفلتر البراند.
+    brand: document.getElementById("f_brand").value.trim().toUpperCase(),
     name: document.getElementById("f_name").value.trim(),
     image: existingImage || "",
     seasons: Array.from(document.querySelectorAll(".f_season:checked")).map(cb => cb.value),
@@ -3291,7 +3293,7 @@ let xlsxParsedRows = [];
 function xlsxProcessRows(rawRows){
   const seenInFile = new Set();
   return rawRows.map((row, i) => {
-    const brand = (xlsxGetCell(row,"brand")||"").toString().trim();
+    const brand = (xlsxGetCell(row,"brand")||"").toString().trim().toUpperCase();
     const name = (xlsxGetCell(row,"name")||"").toString().trim();
     if(!brand && !name) return null; // صف فاضي بالكامل — نتجاهله بصمت
     if(!brand || !name){
