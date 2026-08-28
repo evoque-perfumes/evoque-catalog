@@ -326,21 +326,25 @@
   }
   .cart-bar .cart-info .icon{ width:17px; height:17px; }
   .cart-bar .cart-info b{ color:#fff; }
+  /* 28 أغسطس 2026: قلبنا الأولوية البصرية بين الزرين — "اطلب أونلاين" الحين هو الزر
+     الأساسي (لون العلامة القوي + أبرز حجمًا) لأنه يكمّل الطلب بالكامل أونلاين بدون واتساب،
+     وواتساب صار الخيار الثانوي (ستايل شفاف/هادئ) لمن يفضّل يتواصل مباشرة. */
   .checkout-btn{
-    background:var(--wa); color:#fff; border:none; padding:12px 22px;
-    border-radius:12px; font-weight:600; font-size:13.5px; cursor:pointer;
-    text-decoration:none; white-space:nowrap; display:flex; align-items:center; gap:8px; font-family:'Poppins';
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.3); color:#25d366;
+    padding:12px 14px; border-radius:12px; font-weight:600; font-size:12px; cursor:pointer;
+    text-decoration:none; white-space:nowrap; display:flex; align-items:center; gap:6px; font-family:'Poppins';
   }
-  .checkout-btn .icon{ width:15px; height:15px; }
+  .checkout-btn .icon{ width:14px; height:14px; }
   .checkout-btn:disabled{ opacity:.35; cursor:not-allowed; }
   .checkout-row{ display:flex; align-items:center; gap:8px; }
   .order-form-btn{
-    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.3); color:var(--gold-soft);
-    padding:12px 14px; border-radius:12px; font-weight:600; font-size:12px; cursor:pointer;
-    white-space:nowrap; display:flex; align-items:center; gap:6px; font-family:'Poppins';
+    background:linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%); border:none; color:#fff;
+    padding:12px 22px; border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer;
+    white-space:nowrap; display:flex; align-items:center; gap:8px; font-family:'Poppins';
+    box-shadow:0 4px 14px rgba(225,29,46,.35);
   }
-  .order-form-btn:disabled{ opacity:.35; cursor:not-allowed; }
-  .order-form-btn .icon{ width:14px; height:14px; }
+  .order-form-btn:disabled{ opacity:.35; cursor:not-allowed; box-shadow:none; }
+  .order-form-btn .icon{ width:15px; height:15px; }
 
   /* ===== Order form modal ===== */
   .order-modal-overlay{
