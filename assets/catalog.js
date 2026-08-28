@@ -210,7 +210,7 @@ const I18N = {
     offerNextMid50: "عطر 50مل كمان واحصل على:",
     offerNextMid10: "عطر 10مل كمان واحصل على:",
     orderMsgOfferLine: "🎁 العرض المستحق",
-    orderFormBtnLabel: "اطلب بنموذج",
+    orderFormBtnLabel: "اطلب أونلاين",
     orderModalTitle: "تفاصيل الطلب",
     lblName: "الاسم الكامل",
     lblPhone: "رقم الهاتف",
@@ -243,10 +243,10 @@ const I18N = {
     shipEstimateNote: "(الرسوم النهائية تتأكد حسب موقعك بالضبط)",
     orderSubmitBtn: "إرسال الطلب",
     orderSubmitting: "جاري الإرسال...",
-    orderFormNote: "بعد الإرسال بنتواصل معك عبر واتساب لتأكيد الطلب.",
+    orderFormNote: "عبّي بياناتك واطلب مباشرة أونلاين — يوصلك تأكيد الطلب على إيميلك فورًا، بدون ما تحتاج واتساب.",
     orderSuccessTitle: "🎉 تم استلام طلبك!",
     orderSuccessMsgPrefix: "رقم طلبك",
-    orderSuccessMsg: "شكرًا لطلبك من Evoque Perfume. رقم طلبك الرسمي وكل التفاصيل بانتظارك بالإيميل، وراح نتواصل معك قريبًا عبر واتساب لتأكيد التفاصيل.",
+    orderSuccessMsg: "شكرًا لطلبك من Evoque Perfume. رقم طلبك الرسمي وكل التفاصيل بانتظارك بالإيميل. طلبك الحين قيد التجهيز 📦",
     orderErrorMsg: "حدث خطأ بإرسال الطلب. تقدر تكمل الطلب مباشرة عبر واتساب:",
     waFallbackLabel: "تواصل عبر واتساب",
     footer: "© 2026 Evoque Perfume — جميع الحقوق محفوظة",
@@ -377,7 +377,7 @@ const I18N = {
     offerNextMid50: "more 50ml perfume to unlock:",
     offerNextMid10: "more 10ml perfume to unlock:",
     orderMsgOfferLine: "🎁 Offer earned",
-    orderFormBtnLabel: "Order via Form",
+    orderFormBtnLabel: "Order Online",
     orderModalTitle: "Order Details",
     lblName: "Full Name",
     lblPhone: "Phone Number",
@@ -410,10 +410,10 @@ const I18N = {
     shipEstimateNote: "(Final fee confirmed based on your exact location)",
     orderSubmitBtn: "Submit Order",
     orderSubmitting: "Submitting...",
-    orderFormNote: "After submitting, we'll contact you on WhatsApp to confirm your order.",
+    orderFormNote: "Fill in your details and order directly online — your confirmation lands in your inbox right away, no WhatsApp needed.",
     orderSuccessTitle: "🎉 Your order has been received!",
     orderSuccessMsgPrefix: "Order number",
-    orderSuccessMsg: "Thank you for ordering from Evoque Perfume. Your official order number and full details are on their way to your email, and we'll reach out on WhatsApp shortly to confirm.",
+    orderSuccessMsg: "Thank you for ordering from Evoque Perfume. Your official order number and full details are on their way to your email. Your order is now being prepared 📦",
     orderErrorMsg: "There was an error submitting your order. You can complete it directly via WhatsApp:",
     waFallbackLabel: "Contact via WhatsApp",
     footer: "© 2026 Evoque Perfume — All rights reserved",
@@ -1930,12 +1930,16 @@ function renderCart(){
   const t = I18N[lang];
   const cartInfo = document.getElementById("cartInfo");
   const checkoutBtn = document.getElementById("checkoutBtn");
+  const orderFormBtn = document.getElementById("orderFormBtn");
   const items = cartItemsList();
   const cur = currencyLabel();
 
   if(items.length === 0){
     cartInfo.innerHTML = svgIcon("ic-cart") + `<span>${t.cartEmpty}</span>`;
     checkoutBtn.style.opacity = ".35"; checkoutBtn.style.pointerEvents = "none";
+    // 28 أغسطس 2026: زر "اطلب أونلاين" صار الزر الأساسي، فلازم يتعطّل بعد لو السلة فاضية
+    // (كان قبل يضل شغّال دايمًا حتى بسلة فاضية — ما كان ملاحظ لما كان الزر الثانوي الخافت).
+    orderFormBtn.disabled = true;
     renderCartModal();
     return;
   }
@@ -1946,6 +1950,7 @@ function renderCart(){
   const offerBadge = offerStatus.unlocked.length ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🎁</span>` : "";
   cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${totalQty}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}${offerBadge}</span>`;
   checkoutBtn.style.opacity = "1"; checkoutBtn.style.pointerEvents = "auto";
+  orderFormBtn.disabled = false;
   // 25 أغسطس 2026: رسالة "إتمام الطلب عبر واتساب" السريعة كانت ما تذكر رسوم التوصيل
   // إطلاقًا (كانت تكتفي بـ"المجموع التقريبي بدون التوصيل")، فيوصل للعميل والبائع رقم
   // ناقص. صرنا نضيف تقدير رسوم التوصيل + الإجمالي شامل التوصيل، مع توضيح إنه تقديري
