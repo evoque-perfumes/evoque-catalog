@@ -16,7 +16,7 @@
     "black": 0,
     "white": 0,
     "bottlesEmpty": 1080,
-    "bottlesReady": 1000,
+    "bottlesReady": 0,
     "bags": 1,
     "boxes": 0
   },
