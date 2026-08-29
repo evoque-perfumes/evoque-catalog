@@ -15,8 +15,8 @@
     "black": 500,
     "white": 470,
     "bottlesEmpty": 80,
-    "bottlesReady": 1000,
-    "bags": 1,
+    "bottlesReady": 970,
+    "bags": 0,
     "boxes": 0
   },
   "sales": [
@@ -29,10 +29,18 @@
       "base": 450,
       "themeSurcharge": 15,
       "total": 465,
+      "discount": 0,
+      "netTotal": 465,
+      "bottlesUsed": 30,
+      "bagsUsed": 1,
+      "boxesUsed": 0,
+      "orderCost": 140.75,
+      "orderProfit": 324.25,
       "note": "",
       "customerName": "ام سلطان",
       "customerPhone": "0501234567",
-      "emirate": "Alain"
+      "emirate": "Alain",
+      "editedAt": "2026-08-29T20:50:00.603Z"
     }
   ]
 }
