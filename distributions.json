@@ -13,10 +13,10 @@
   },
   "stock": {
     "black": 0,
-    "white": 0,
+    "white": 30,
     "bottlesEmpty": 0,
-    "bottlesReady": 0,
-    "bags": 0,
+    "bottlesReady": 30,
+    "bags": 1,
     "boxes": 0
   },
   "sales": [
@@ -40,7 +40,9 @@
       "customerName": "ام سلطان",
       "customerPhone": "0501234567",
       "emirate": "Alain",
-      "editedAt": "2026-08-29T20:50:00.603Z"
+      "editedAt": "2026-08-29T20:50:00.603Z",
+      "cancelled": true,
+      "cancelledAt": "2026-08-29T20:53:31.307Z"
     }
   ]
 }
