@@ -157,14 +157,13 @@
 
   <nav class="tabs">
     <button type="button" class="active" id="modeOverviewBtn">🏠 نظرة عامة</button>
-    <button type="button" id="modePhotoBtn">📷 رفع صورة</button>
+    <button type="button" id="modePhotoBtn">📷 رفع الصور</button>
     <button type="button" id="modeEditBtn">✏️ تعديل عطر</button>
     <button type="button" id="modeAddBtn">➕ إضافة عطر</button>
     <button type="button" id="modeStockBtn">📊 المخزون</button>
     <button type="button" id="modeBulkPriceBtn">💲 تعديل الأسعار بالجملة</button>
     <button type="button" id="modeSalesBtn">💰 المبيعات</button>
     <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
-    <button type="button" id="modeBulkBtn">📦 رفع صور دفعة</button>
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
     <button type="button" id="modeBankBtn">🏦 بيانات البنك</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
@@ -255,6 +254,13 @@
         <div class="status" id="ov_appsStatus"></div>
       </div>
     </details>
+  </div>
+
+  <div class="panel" id="photoSubModeToggle" style="display:none;">
+    <div class="row" style="gap:10px; margin-bottom:0;">
+      <button type="button" class="ghost active" id="photoSubSingleBtn">📷 صورة واحدة</button>
+      <button type="button" class="ghost" id="photoSubBulkBtn">📦 دفعة صور (مجلد كامل)</button>
+    </div>
   </div>
 
   <div class="panel" id="editSearchWrap" style="display:none;">
@@ -2270,7 +2276,6 @@ function setMode(newMode){
   document.getElementById("modeAddBtn").classList.toggle("active", mode === "add");
   document.getElementById("modeEditBtn").classList.toggle("active", mode === "edit");
   document.getElementById("modePhotoBtn").classList.toggle("active", mode === "photo");
-  document.getElementById("modeBulkBtn").classList.toggle("active", mode === "bulk");
   document.getElementById("modeStockBtn").classList.toggle("active", mode === "stock");
   document.getElementById("modeBulkPriceBtn").classList.toggle("active", mode === "bulkPrice");
   document.getElementById("modeSalesBtn").classList.toggle("active", mode === "sales");
@@ -2302,7 +2307,10 @@ function setMode(newMode){
     document.getElementById("stockCatIn").classList.remove("active");
   }
   document.getElementById("deleteBtn").style.display = mode === "edit" && editingOriginal ? "inline-block" : "none";
-  document.getElementById("bulkPanel").style.display = mode === "bulk" ? "block" : "none";
+  document.getElementById("bulkPanel").style.display = "none";
+  document.getElementById("photoSubModeToggle").style.display = mode === "photo" ? "block" : "none";
+  const _pss = document.getElementById("photoSubSingleBtn"); if(_pss) _pss.classList.add("active");
+  const _psb = document.getElementById("photoSubBulkBtn"); if(_psb) _psb.classList.remove("active");
   document.getElementById("excelPanel").style.display = mode === "excel" ? "block" : "none";
   document.getElementById("bulkPricePanel").style.display = mode === "bulkPrice" ? "block" : "none";
 
@@ -2340,7 +2348,25 @@ document.getElementById("modeOverviewBtn").addEventListener("click", () => setMo
 document.getElementById("modeAddBtn").addEventListener("click", () => setMode("add"));
 document.getElementById("modeEditBtn").addEventListener("click", () => setMode("edit"));
 document.getElementById("modePhotoBtn").addEventListener("click", () => setMode("photo"));
-document.getElementById("modeBulkBtn").addEventListener("click", () => setMode("bulk"));
+document.getElementById("photoSubSingleBtn").addEventListener("click", () => {
+  document.getElementById("photoSubSingleBtn").classList.add("active");
+  document.getElementById("photoSubBulkBtn").classList.remove("active");
+  document.getElementById("bulkPanel").style.display = "none";
+  document.getElementById("editSearchWrap").style.display = "block";
+  document.getElementById("progressStatsWrap").style.display = "block";
+  document.getElementById("hideUploadedRow").style.display = "flex";
+});
+document.getElementById("photoSubBulkBtn").addEventListener("click", () => {
+  document.getElementById("photoSubBulkBtn").classList.add("active");
+  document.getElementById("photoSubSingleBtn").classList.remove("active");
+  document.getElementById("quickPhotoPanel").style.display = "none";
+  document.getElementById("editSearchWrap").style.display = "none";
+  document.getElementById("progressStatsWrap").style.display = "none";
+  document.getElementById("hideUploadedRow").style.display = "none";
+  document.getElementById("selectedChipWrap").innerHTML = "";
+  const _dd = document.getElementById("dropdown"); if(_dd) _dd.classList.remove("show");
+  document.getElementById("bulkPanel").style.display = "block";
+});
 document.getElementById("modeStockBtn").addEventListener("click", () => setMode("stock"));
 document.getElementById("modeBulkPriceBtn").addEventListener("click", () => { setMode("bulkPrice"); bpInitPanel(); });
 document.getElementById("modeSalesBtn").addEventListener("click", () => setMode("sales"));
