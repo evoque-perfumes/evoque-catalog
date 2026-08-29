@@ -64,6 +64,15 @@
       "unitPrice": 2,
       "totalPrice": 2160,
       "note": "sky kine"
+    },
+    {
+      "id": "distp_1788037349270",
+      "date": "2026-08-30",
+      "material": "oil",
+      "qty": 6,
+      "unitPrice": 300,
+      "totalPrice": 1800,
+      "note": ""
     }
   ]
 }
