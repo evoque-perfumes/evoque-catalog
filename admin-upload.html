@@ -590,22 +590,20 @@
       <legend>🧾 المواد الخام والتكلفة (مرجع لك بس — ما تأثر على الموقع)</legend>
       <small class="hint" style="margin-top:0;">
         سجّل تكاليفك هنا عشان تعرف هامش ربحك — هذي الأرقام لك انت بس، ما تظهر للعميل ولا تأثر على السعر اللي يدفعه.
+        نسبة الخلط الثابتة: 1 كيلو زيت + 2000 مل كحول = 3000 مل، وحجم زجاجة العطر 15مل — محسوبة تلقائيًا بالأسفل.
       </small>
       <div class="grid2">
         <div class="field"><label for="dist_costBag">تكلفة الكيس الواحد (درهم)</label><input type="number" id="dist_costBag" min="0" step="0.1"></div>
         <div class="field"><label for="dist_costBottle">تكلفة زجاجة العطر (درهم)</label><input type="number" id="dist_costBottle" min="0" step="0.1"></div>
       </div>
       <div class="grid2">
-        <div class="field"><label for="dist_costHandleBlack">تكلفة المسكة السوداء (درهم)</label><input type="number" id="dist_costHandleBlack" min="0" step="0.1"></div>
-        <div class="field"><label for="dist_costHandleWhite">تكلفة المسكة البيضاء (درهم)</label><input type="number" id="dist_costHandleWhite" min="0" step="0.1"></div>
-      </div>
-      <div class="grid2">
+        <div class="field"><label for="dist_costHandle">تكلفة المسكة (درهم) — نفس السعر للأسود والأبيض</label><input type="number" id="dist_costHandle" min="0" step="0.1"></div>
         <div class="field"><label for="dist_costAlcoholPerKg">تكلفة الكحول لكل كيلو (درهم)</label><input type="number" id="dist_costAlcoholPerKg" min="0" step="0.1" placeholder="مثال: 250 درهم / 20 كيلو = 12.5"></div>
-        <div class="field"><label for="dist_costOilPerKg">تكلفة الزيت العطري لكل كيلو (درهم) — يتغير، عدّله كل مرة تشتري</label><input type="number" id="dist_costOilPerKg" min="0" step="0.1"></div>
       </div>
-      <div class="field"><label for="dist_mixRatioNote">نسبة الخلط (مرجع فقط)</label><input type="text" id="dist_mixRatioNote" value="1 كيلو زيت مع 2000 مل كحول" readonly style="background:var(--panel-2); color:var(--muted);"></div>
-      <div class="row" style="align-items:center;">
+      <div class="field"><label for="dist_costOilPerKg">تكلفة الزيت العطري لكل كيلو (درهم) — يتغير، عدّله كل مرة تشتري</label><input type="number" id="dist_costOilPerKg" min="0" step="0.1"></div>
+      <div class="row" style="align-items:center; flex-direction:column; align-items:stretch; gap:4px;">
         <span id="dist_estCostDisplay" style="font-weight:700; color:var(--gold-ink);"></span>
+        <span id="dist_estMarginDisplay" style="font-weight:700;"></span>
       </div>
       <div class="row">
         <button type="button" id="dist_saveCostsBtn">احفظ التكاليف</button>
@@ -631,20 +629,25 @@
     <fieldset style="margin-top:16px;">
       <legend>🧾 تسجيل عملية بيع (منفصلة عن مبيعات العطور)</legend>
       <div class="grid2">
+        <div class="field"><label for="dist_saleCustomerName">اسم العميل (اختياري)</label><input type="text" id="dist_saleCustomerName" placeholder="مثال: أم محمد"></div>
+        <div class="field"><label for="dist_saleCustomerPhone">رقم الهاتف (اختياري)</label><input type="text" id="dist_saleCustomerPhone" placeholder="مثال: 0501234567"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="dist_saleEmirate">الإمارة / المنطقة (اختياري)</label><input type="text" id="dist_saleEmirate" placeholder="مثال: دبي"></div>
+        <div class="field"><label for="dist_saleDate">التاريخ</label><input type="text" id="dist_saleDate" placeholder="YYYY-MM-DD"></div>
+      </div>
+      <div class="grid2">
         <div class="field"><label for="dist_saleColor">لون المسكة</label>
           <select id="dist_saleColor"><option value="black">أسود</option><option value="white">أبيض</option></select>
         </div>
         <div class="field"><label for="dist_saleQty">الكمية</label><input type="number" id="dist_saleQty" min="1" step="1" value="1"></div>
       </div>
-      <div class="grid2">
-        <div class="field">
-          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-            <input type="checkbox" id="dist_saleTheme" style="width:auto; margin:0;"> مع ثيم
-          </label>
-        </div>
-        <div class="field"><label for="dist_saleDate">التاريخ</label><input type="text" id="dist_saleDate" placeholder="YYYY-MM-DD"></div>
+      <div class="field">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="dist_saleTheme" style="width:auto; margin:0;"> مع ثيم
+        </label>
       </div>
-      <div class="field"><label for="dist_saleNote">ملاحظة (اختياري)</label><input type="text" id="dist_saleNote" placeholder="مثال: اسم العميل أو المناسبة"></div>
+      <div class="field"><label for="dist_saleNote">ملاحظة إضافية (اختياري)</label><input type="text" id="dist_saleNote" placeholder="مثال: المناسبة"></div>
       <div class="row" style="align-items:center;">
         <span id="dist_saleComputedPrice" style="font-weight:700; color:var(--gold-ink);"></span>
       </div>
@@ -2488,15 +2491,17 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
 
 // ===== وضع "🎁 توزيعات وهدايا المناسبات" — منتج منفصل بالكامل عن العطور (مخزون + تكاليف + مبيعات) — 29 أغسطس 2026 =====
 // نفس نمط bank-info.json/wishlist.json بالضبط: قراءة عامة (رابط raw) + كتابة عبر GitHub Contents API بتوكن المستخدم.
-// تحديث 29 أغسطس (مساءً): تصحيح لون المسكة لـ"أسود/أبيض" (بدل "أسود/بيج")، وتصحيح رسوم الثيم —
-// رسوم ثابتة لكل دفعة طباعة (مو سعر لكل قطعة)، وإضافة حقول تكاليف المواد الخام.
+// تحديث 29 أغسطس (مساءً #2): تكلفة مسكة واحدة (نفس السعر أسود/أبيض)، حساب تكلفة تلقائي للزيت+الكحول
+// لكل زجاجة 15مل (نسبة ثابتة: 1كيلو زيت + 2000مل كحول = 3000مل)، وحقول عميل (اسم/هاتف/إمارة) بسجل البيع.
+const DIST_MIX_OIL_KG = 1, DIST_MIX_ALCOHOL_ML = 2000, DIST_MIX_TOTAL_ML = 3000, DIST_BOTTLE_ML = 15;
+
 function distDefaultData(){
   return {
     config: {
       basePriceNoTheme: 15,
       themeFeePerRun: 15,
       runCapacity: 30,
-      costs: { bag: 1, bottle: 2, handleBlack: 0, handleWhite: 0, alcoholPerKg: 12.5, oilPerKg: 0 }
+      costs: { bag: 1, bottle: 2, handle: 0, alcoholPerKg: 12.5, oilPerKg: 0 }
     },
     stock: { black: 0, white: 0 },
     sales: []
@@ -2571,6 +2576,13 @@ function distComputeTotal(qty, withTheme){
   return { base, themeSurcharge, total: base + themeSurcharge, runs };
 }
 
+// تكلفة الزيت + الكحول لكل زجاجة 15مل، بناءً على نسبة الخلط الثابتة (1كيلو زيت + 2000مل كحول = 3000مل)
+function distLiquidCostPer15ml(oilPerKg, alcoholPerKg){
+  const mixCost = (oilPerKg * DIST_MIX_OIL_KG) + (alcoholPerKg * (DIST_MIX_ALCOHOL_ML / 1000));
+  const costPerMl = mixCost / DIST_MIX_TOTAL_ML;
+  return costPerMl * DIST_BOTTLE_ML;
+}
+
 function distRenderSalesLog(){
   const sales = distributionsData.sales || [];
   const totalUnits = sales.reduce((s,x) => s + (Number(x.qty)||0), 0);
@@ -2582,12 +2594,15 @@ function distRenderSalesLog(){
     log.innerHTML = `<div class="hint">ما فيه مبيعات مسجّلة بعد.</div>`;
     return;
   }
-  log.innerHTML = sales.slice().reverse().map(s => `
+  log.innerHTML = sales.slice().reverse().map(s => {
+    const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).join(" — ");
+    return `
     <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; gap:10px;">
-      <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"} ${s.note ? "— " + s.note : ""}</span>
+      <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}</span>
       <b>${Number(s.total).toFixed(2)} AED</b>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function distUpdateComputedPrice(){
@@ -2604,8 +2619,18 @@ function distUpdateComputedPrice(){
 function distUpdateCostEstimate(){
   const bag = Number(document.getElementById("dist_costBag").value) || 0;
   const bottle = Number(document.getElementById("dist_costBottle").value) || 0;
+  const handle = Number(document.getElementById("dist_costHandle").value) || 0;
+  const oilPerKg = Number(document.getElementById("dist_costOilPerKg").value) || 0;
+  const alcoholPerKg = Number(document.getElementById("dist_costAlcoholPerKg").value) || 0;
+  const liquidCost = distLiquidCostPer15ml(oilPerKg, alcoholPerKg);
+  const totalCost = bag + bottle + handle + liquidCost;
   document.getElementById("dist_estCostDisplay").textContent =
-    `تكلفة الكيس + الزجاجة التقريبية للقطعة: ${(bag+bottle).toFixed(2)} درهم (بدون المسكة والعطر)`;
+    `التكلفة الإجمالية التقريبية للقطعة: ${totalCost.toFixed(2)} درهم (كيس ${bag.toFixed(2)} + زجاجة ${bottle.toFixed(2)} + مسكة ${handle.toFixed(2)} + زيت/كحول ${liquidCost.toFixed(2)})`;
+  const basePrice = Number(distributionsData.config.basePriceNoTheme) || 15;
+  const margin = basePrice - totalCost;
+  const marginEl = document.getElementById("dist_estMarginDisplay");
+  marginEl.textContent = `هامش الربح التقريبي (بدون ثيم، سعر بيع ${basePrice.toFixed(2)}): ${margin.toFixed(2)} درهم للقطعة`;
+  marginEl.style.color = margin >= 0 ? "#1F6B41" : "#963224";
 }
 
 function distFillForm(){
@@ -2617,8 +2642,7 @@ function distFillForm(){
   const costs = distributionsData.config.costs || {};
   document.getElementById("dist_costBag").value = costs.bag || 0;
   document.getElementById("dist_costBottle").value = costs.bottle || 0;
-  document.getElementById("dist_costHandleBlack").value = costs.handleBlack || 0;
-  document.getElementById("dist_costHandleWhite").value = costs.handleWhite || 0;
+  document.getElementById("dist_costHandle").value = (costs.handle !== undefined ? costs.handle : (costs.handleBlack || costs.handleWhite || 0));
   document.getElementById("dist_costAlcoholPerKg").value = costs.alcoholPerKg || 0;
   document.getElementById("dist_costOilPerKg").value = costs.oilPerKg || 0;
 
@@ -2663,6 +2687,9 @@ document.getElementById("dist_saleQty").addEventListener("input", distUpdateComp
 document.getElementById("dist_saleTheme").addEventListener("change", distUpdateComputedPrice);
 document.getElementById("dist_costBag").addEventListener("input", distUpdateCostEstimate);
 document.getElementById("dist_costBottle").addEventListener("input", distUpdateCostEstimate);
+document.getElementById("dist_costHandle").addEventListener("input", distUpdateCostEstimate);
+document.getElementById("dist_costOilPerKg").addEventListener("input", distUpdateCostEstimate);
+document.getElementById("dist_costAlcoholPerKg").addEventListener("input", distUpdateCostEstimate);
 
 document.getElementById("dist_saveStockBtn").addEventListener("click", async () => {
   const token = getToken();
@@ -2690,8 +2717,7 @@ document.getElementById("dist_saveCostsBtn").addEventListener("click", async () 
   const costs = {
     bag: Number(document.getElementById("dist_costBag").value) || 0,
     bottle: Number(document.getElementById("dist_costBottle").value) || 0,
-    handleBlack: Number(document.getElementById("dist_costHandleBlack").value) || 0,
-    handleWhite: Number(document.getElementById("dist_costHandleWhite").value) || 0,
+    handle: Number(document.getElementById("dist_costHandle").value) || 0,
     alcoholPerKg: Number(document.getElementById("dist_costAlcoholPerKg").value) || 0,
     oilPerKg: Number(document.getElementById("dist_costOilPerKg").value) || 0
   };
@@ -2745,6 +2771,9 @@ document.getElementById("dist_logSaleBtn").addEventListener("click", async () =>
   const withTheme = document.getElementById("dist_saleTheme").checked;
   const date = document.getElementById("dist_saleDate").value || todayStr();
   const note = document.getElementById("dist_saleNote").value.trim();
+  const customerName = document.getElementById("dist_saleCustomerName").value.trim();
+  const customerPhone = document.getElementById("dist_saleCustomerPhone").value.trim();
+  const emirate = document.getElementById("dist_saleEmirate").value.trim();
   if(qty <= 0){ distShowStatus("لازم تكتب كمية أكبر من صفر.", "err"); return; }
   const currentStock = distributionsData.stock[color] || 0;
   if(qty > currentStock){
@@ -2756,7 +2785,7 @@ document.getElementById("dist_logSaleBtn").addEventListener("click", async () =>
   btn.disabled = true;
   try{
     distShowStatus("جارِ الحفظ والنشر...", "info");
-    const saleEntry = { id: "dist_" + Date.now(), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, note };
+    const saleEntry = { id: "dist_" + Date.now(), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, note, customerName, customerPhone, emirate };
     const updated = await updateDistributionsWithRetry(token, (obj) => {
       obj.stock[color] = (obj.stock[color] || 0) - qty;
       obj.sales = obj.sales || [];
@@ -2766,6 +2795,9 @@ document.getElementById("dist_logSaleBtn").addEventListener("click", async () =>
     distributionsData = updated;
     document.getElementById("dist_saleQty").value = 1;
     document.getElementById("dist_saleNote").value = "";
+    document.getElementById("dist_saleCustomerName").value = "";
+    document.getElementById("dist_saleCustomerPhone").value = "";
+    document.getElementById("dist_saleEmirate").value = "";
     distFillForm();
     distShowStatus("تم تسجيل البيع وخصم المخزون!", "ok");
   }catch(e){
