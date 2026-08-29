@@ -13,7 +13,22 @@
   },
   "stock": {
     "black": 500,
-    "white": 500
+    "white": 470
   },
-  "sales": []
+  "sales": [
+    {
+      "id": "dist_1788035686445",
+      "date": "2026-08-30",
+      "color": "white",
+      "qty": 30,
+      "withTheme": true,
+      "base": 450,
+      "themeSurcharge": 15,
+      "total": 465,
+      "note": "",
+      "customerName": "ام سلطان",
+      "customerPhone": "0501234567",
+      "emirate": "Alain"
+    }
+  ]
 }
