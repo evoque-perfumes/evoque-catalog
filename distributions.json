@@ -15,7 +15,7 @@
   "stock": {
     "black": 0,
     "white": 0,
-    "bottlesEmpty": 0,
+    "bottlesEmpty": 1080,
     "bottlesReady": 0,
     "bags": 1,
     "boxes": 0
@@ -55,6 +55,15 @@
       "unitPrice": 1,
       "totalPrice": 1,
       "note": ""
+    },
+    {
+      "id": "distp_1788037015245",
+      "date": "01-07-2026",
+      "material": "bottle",
+      "qty": 1080,
+      "unitPrice": 2,
+      "totalPrice": 2160,
+      "note": "sky kine"
     }
   ]
 }
