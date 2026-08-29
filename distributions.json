@@ -20,7 +20,7 @@
     "bags": 1,
     "boxes": 0,
     "alcoholKg": -3,
-    "oilKg": -6
+    "oilKg": 0
   },
   "sales": [
     {
@@ -66,6 +66,15 @@
       "unitPrice": 2,
       "totalPrice": 2160,
       "note": "sky kine"
+    },
+    {
+      "id": "distp_1788041226747",
+      "date": "2026-08-30",
+      "material": "oil",
+      "qty": 6,
+      "unitPrice": 300,
+      "totalPrice": 1800,
+      "note": ""
     }
   ]
 }
