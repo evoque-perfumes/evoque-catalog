@@ -15,12 +15,12 @@
   "stock": {
     "black": 0,
     "white": 0,
-    "bottlesEmpty": 1080,
-    "bottlesReady": 0,
+    "bottlesEmpty": 80,
+    "bottlesReady": 1000,
     "bags": 1,
     "boxes": 0,
-    "alcoholKg": 19997,
-    "oilKg": 5994
+    "alcoholKg": 19987,
+    "oilKg": 5989
   },
   "sales": [
     {
@@ -85,6 +85,15 @@
       "unitPrice": 0.0125,
       "totalPrice": 250,
       "note": ""
+    }
+  ],
+  "fills": [
+    {
+      "id": "distf_1788041314982",
+      "date": "2026-08-30",
+      "qty": 1000,
+      "oilUsed": 5,
+      "alcoholUsed": 10
     }
   ]
 }
