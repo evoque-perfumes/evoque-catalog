@@ -8,7 +8,7 @@
       "bottle": 2,
       "handle": 1,
       "alcoholPerKg": 250,
-      "oilPerKg": 300,
+      "oilPerKg": 0.3,
       "box": 1
     }
   },
@@ -20,7 +20,7 @@
     "bags": 1,
     "boxes": 0,
     "alcoholKg": -3,
-    "oilKg": 0
+    "oilKg": 5994
   },
   "sales": [
     {
@@ -71,10 +71,11 @@
       "id": "distp_1788041226747",
       "date": "2026-08-30",
       "material": "oil",
-      "qty": 6,
-      "unitPrice": 300,
+      "qty": 6000,
+      "unitPrice": 0.3,
       "totalPrice": 1800,
-      "note": ""
+      "note": "",
+      "editedAt": "2026-08-29T22:07:45.271Z"
     }
   ]
 }
