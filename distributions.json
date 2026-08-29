@@ -8,7 +8,8 @@
       "bottle": 2,
       "handle": 1,
       "alcoholPerKg": 12.5,
-      "oilPerKg": 300
+      "oilPerKg": 300,
+      "box": 0
     }
   },
   "stock": {
