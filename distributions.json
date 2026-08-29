@@ -6,8 +6,7 @@
     "costs": {
       "bag": 1,
       "bottle": 2,
-      "handleBlack": 0,
-      "handleWhite": 0,
+      "handle": 1,
       "alcoholPerKg": 12.5,
       "oilPerKg": 300
     }
