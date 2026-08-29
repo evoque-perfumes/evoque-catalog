@@ -5,6 +5,7 @@
 // ما يُشارك أبدًا مع أي أحد — العميل ما يقدر يوصله من هذي الصفحة إطلاقًا.
 // ------------------------------------------------------------------
 const WHATSAPP_NUMBER = "971522275255";
+const COMING_SOON_IMAGE = "assets/coming-soon.jpg"; // صورة "الصور قيد التجهيز" الموحدة — 29 أغسطس 2026
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwC3s_nTuYaQ_OVku-gcrX3Lv2idt7DY1kHV4EJl9CfiGdRIOedetUBPjPMShc8-ffB/exec";
 // رابط Google Apps Script Web App منفصل لاستقبال تقييمات العملاء — انشره حسب
@@ -1650,13 +1651,11 @@ function renderGrid(explicitList){
     const imgWrap = document.createElement("div");
     imgWrap.className = "imgwrap";
     if(p.image){
-      // لو الصورة فشلت بالتحميل (رابط معطّل/بطيء)، ما نسيب أيقونة الصورة المكسورة ونص alt يطلعون
-      // فوق بعض مع شارات الجنس/الخصم — نستبدلها بنفس بلوك "الصورة قيد الإضافة" تلقائيًا.
-      imgWrap.innerHTML = `<img src="${p.image}" alt="${p.brand} ${p.name}" loading="lazy" onerror="const w=this.parentElement; this.remove(); w.insertAdjacentHTML('afterbegin','&lt;div class=&quot;placeholder&quot;&gt;${t.imgPending}&lt;/div&gt;');">`;
+      imgWrap.innerHTML = `<img src="${p.image}" alt="${p.brand} ${p.name}" loading="lazy" onerror="this.onerror=null; this.src='${COMING_SOON_IMAGE}';">`;
       // تكبير الصورة عند الضغط عليها — لقراءة تفاصيل العطر والمكونات بوضوح
       imgWrap.addEventListener("click", ()=> openLightbox(p));
     } else {
-      imgWrap.innerHTML = `<div class="placeholder">${t.imgPending}</div>`;
+      imgWrap.innerHTML = `<img src="${COMING_SOON_IMAGE}" alt="${p.brand} ${p.name}" loading="lazy">`;
     }
     // ملاحظة مهمة: ولا شارة (خصم/جنس) تنحط فوق الصورة (overlay) عشان صور العطور
     // نفسها تصاميم كانفا فيها ألوان وأحيانًا نصوص/عناوين مدمجة بالصورة نفسها —
