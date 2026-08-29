@@ -12,10 +12,10 @@
     }
   },
   "stock": {
-    "black": 500,
-    "white": 470,
-    "bottlesEmpty": 80,
-    "bottlesReady": 970,
+    "black": 0,
+    "white": 0,
+    "bottlesEmpty": 0,
+    "bottlesReady": 0,
     "bags": 0,
     "boxes": 0
   },
