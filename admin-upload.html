@@ -167,6 +167,7 @@
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
     <button type="button" id="modeBankBtn">🏦 بيانات البنك</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
+    <button type="button" id="modeDistBtn">🎁 توزيعات المناسبات</button>
     <button type="button" id="modeOrdersQueueBtn">🧾 الطلبات الجديدة<span class="badge pending" id="oqNavBadge" style="display:none; margin-inline-start:6px;"></span></button>
   </nav>
 
@@ -559,6 +560,82 @@
     <div class="status" id="wl_statusBox"></div>
   </div>
 
+  <div class="panel" id="distPanel" style="display:none;">
+    <h2>توزيعات وهدايا المناسبات</h2>
+    <small class="hint" style="margin-top:0;">
+      منتج منفصل تمامًا عن العطور العادية — كيس بيده (مسكة) لونها أسود أو بيج، مع عطر 15مل جواه.
+      المخزون والمبيعات هنا منفصلة 100% عن بيانات العطور وتقاريرها. اضغط "تحميل آخر نسخة" لو فتحت
+      هذا الوضع بعد فترة، عشان تشتغل على أحدث بيانات محفوظة.
+    </small>
+    <div class="row" style="margin-bottom:6px;">
+      <button type="button" id="dist_reloadBtn" class="secondary">تحميل آخر نسخة</button>
+    </div>
+
+    <fieldset>
+      <legend>📦 المخزون الحالي</legend>
+      <div class="stats" id="dist_stockStats">
+        <div class="stat">مسكة سوداء متوفرة<b id="dist_stockBlackDisplay">—</b></div>
+        <div class="stat">مسكة بيج متوفرة<b id="dist_stockBeigeDisplay">—</b></div>
+      </div>
+      <div class="grid2" style="margin-top:12px;">
+        <div class="field"><label for="dist_stockBlack">تعديل مخزون — مسكة سوداء</label><input type="number" id="dist_stockBlack" min="0" step="1"></div>
+        <div class="field"><label for="dist_stockBeige">تعديل مخزون — مسكة بيج</label><input type="number" id="dist_stockBeige" min="0" step="1"></div>
+      </div>
+      <div class="row">
+        <button type="button" id="dist_saveStockBtn">احفظ المخزون</button>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin-top:16px;">
+      <legend>💲 التسعير</legend>
+      <div class="field"><label for="dist_basePrice">السعر بدون ثيم (للقطعة الواحدة) — AED</label><input type="number" id="dist_basePrice" min="0" step="0.5"></div>
+      <label style="margin-top:14px;">أسعار الثيم حسب الكمية (كل ما زادت الكمية، ينزل سعر القطعة)</label>
+      <div id="dist_tiersWrap"></div>
+      <div class="row" style="margin-top:8px;">
+        <button type="button" id="dist_addTierBtn" class="secondary">➕ أضف مستوى كمية جديد</button>
+      </div>
+      <div class="row">
+        <button type="button" id="dist_savePricingBtn">احفظ التسعير</button>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin-top:16px;">
+      <legend>🧾 تسجيل عملية بيع (منفصلة عن مبيعات العطور)</legend>
+      <div class="grid2">
+        <div class="field"><label for="dist_saleColor">لون المسكة</label>
+          <select id="dist_saleColor"><option value="black">أسود</option><option value="beige">بيج</option></select>
+        </div>
+        <div class="field"><label for="dist_saleQty">الكمية</label><input type="number" id="dist_saleQty" min="1" step="1" value="1"></div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="dist_saleTheme" style="width:auto; margin:0;"> مع ثيم
+          </label>
+        </div>
+        <div class="field"><label for="dist_saleDate">التاريخ</label><input type="text" id="dist_saleDate" placeholder="YYYY-MM-DD"></div>
+      </div>
+      <div class="field"><label for="dist_saleNote">ملاحظة (اختياري)</label><input type="text" id="dist_saleNote" placeholder="مثال: اسم العميل أو المناسبة"></div>
+      <div class="row" style="align-items:center;">
+        <span id="dist_saleComputedPrice" style="font-weight:700; color:var(--gold-ink);"></span>
+      </div>
+      <div class="row">
+        <button type="button" id="dist_logSaleBtn">✅ سجّل البيع واخصم من المخزون</button>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin-top:16px;">
+      <legend>📜 سجل مبيعات التوزيعات</legend>
+      <div class="stats" id="dist_salesStats">
+        <div class="stat">إجمالي القطع المباعة<b id="dist_totalUnitsSold">—</b></div>
+        <div class="stat">إجمالي الإيراد<b id="dist_totalRevenue">—</b></div>
+      </div>
+      <div id="dist_salesLog" style="max-height:320px; overflow-y:auto; margin-top:10px;"></div>
+    </fieldset>
+
+    <div class="status" id="dist_statusBox"></div>
+  </div>
+
   <div class="panel" id="ordersQueuePanel" style="display:none;">
     <h2>🧾 الطلبات الجديدة (بانتظار الاعتماد)</h2>
     <small class="hint" style="margin-top:0;">
@@ -802,6 +879,7 @@ const ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/
 const BANK_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/bank-info.json?t=` + Date.now();
 const WISHLIST_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/wishlist.json?t=` + Date.now();
 const PENDING_ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/pending-orders.json?t=` + Date.now();
+const DISTRIBUTIONS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/distributions.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
@@ -809,6 +887,7 @@ const ORDERS_JSON_PATH = "orders.json";
 const BANK_JSON_PATH = "bank-info.json";
 const WISHLIST_JSON_PATH = "wishlist.json";
 const PENDING_ORDERS_JSON_PATH = "pending-orders.json";
+const DISTRIBUTIONS_JSON_PATH = "distributions.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
 let brandFilterValue = "all"; // فلتر البراند المختار من القائمة المنسدلة (يشترك فيه البحث + المخزون)
@@ -2283,6 +2362,7 @@ function setMode(newMode){
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
   document.getElementById("modeBankBtn").classList.toggle("active", mode === "bank");
   document.getElementById("modeWishlistBtn").classList.toggle("active", mode === "wishlist");
+  document.getElementById("modeDistBtn").classList.toggle("active", mode === "dist");
   document.getElementById("modeOrdersQueueBtn").classList.toggle("active", mode === "ordersQueue");
   document.getElementById("overviewPanel").style.display = mode === "overview" ? "block" : "none";
   document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock" || mode === "reviews" || mode === "sales") ? "block" : "none";
@@ -2294,6 +2374,7 @@ function setMode(newMode){
   document.getElementById("salesQuickPanel").style.display = mode === "sales" ? "block" : "none";
   document.getElementById("bankInfoPanel").style.display = mode === "bank" ? "block" : "none";
   document.getElementById("wishlistPanel").style.display = mode === "wishlist" ? "block" : "none";
+  document.getElementById("distPanel").style.display = mode === "dist" ? "block" : "none";
   document.getElementById("ordersQueuePanel").style.display = mode === "ordersQueue" ? "block" : "none";
   stockCategoryActive = null;
   stockSelected = null;
@@ -2374,6 +2455,262 @@ document.getElementById("modeExcelBtn").addEventListener("click", () => setMode(
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
 document.getElementById("modeBankBtn").addEventListener("click", () => { setMode("bank"); loadBankInfoIntoForm(); });
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
+document.getElementById("modeDistBtn").addEventListener("click", () => { setMode("dist"); loadDistributionsIntoPanel(); });
+
+document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
+
+// ===== وضع "🎁 توزيعات وهدايا المناسبات" — منتج منفصل بالكامل عن العطور (مخزون + مبيعات) — 29 أغسطس 2026 =====
+// نفس نمط bank-info.json/wishlist.json بالضبط: قراءة عامة (رابط raw) + كتابة عبر GitHub Contents API بتوكن المستخدم.
+let distributionsData = { config: { basePriceNoTheme: 15, themeTiers: [{ minQty: 30, pricePerUnit: 15 }] }, stock: { black: 0, beige: 0 }, sales: [] };
+
+function distShowStatus(msg, cls){
+  const box = document.getElementById("dist_statusBox");
+  box.textContent = msg;
+  box.className = "status " + (cls || "");
+}
+
+function distDefaultData(){
+  return { config: { basePriceNoTheme: 15, themeTiers: [{ minQty: 30, pricePerUnit: 15 }] }, stock: { black: 0, beige: 0 }, sales: [] };
+}
+
+async function getDistributionsWithSha(token){
+  const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { obj: distDefaultData(), sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة distributions.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  const obj = JSON.parse(base64ToUtf8(info.content));
+  return { obj: (obj && typeof obj === "object") ? obj : distDefaultData(), sha: info.sha };
+}
+
+async function putDistributionsJson(obj, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(obj, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updateDistributionsWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { obj, sha } = await getDistributionsWithSha(token);
+  const newObj = mutateFn(obj);
+  try{
+    await putDistributionsJson(newObj, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateDistributionsWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newObj;
+}
+
+function distColorNameAr(c){ return c === "black" ? "أسود" : "بيج"; }
+
+function distComputeUnitPrice(qty, withTheme){
+  if(!withTheme) return Number(distributionsData.config.basePriceNoTheme) || 0;
+  const tiers = (distributionsData.config.themeTiers || []).slice().sort((a,b) => a.minQty - b.minQty);
+  let price = Number(distributionsData.config.basePriceNoTheme) || 0;
+  for(const t of tiers){ if(qty >= t.minQty) price = Number(t.pricePerUnit) || price; }
+  return price;
+}
+
+function distRenderTiers(){
+  const wrap = document.getElementById("dist_tiersWrap");
+  const tiers = distributionsData.config.themeTiers || [];
+  wrap.innerHTML = tiers.map((t, i) => `
+    <div class="row" style="gap:8px; align-items:center; margin-top:6px;" data-tier-idx="${i}">
+      <span style="white-space:nowrap;">من</span>
+      <input type="number" min="1" step="1" class="dist-tier-qty" value="${t.minQty}" style="max-width:100px;">
+      <span style="white-space:nowrap;">قطعة → السعر</span>
+      <input type="number" min="0" step="0.5" class="dist-tier-price" value="${t.pricePerUnit}" style="max-width:100px;">
+      <span style="white-space:nowrap;">درهم/قطعة</span>
+      <button type="button" class="secondary dist-tier-remove" style="padding:8px 12px;">حذف</button>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".dist-tier-remove").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const row = btn.closest("[data-tier-idx]");
+      const idx = Number(row.dataset.tierIdx);
+      distributionsData.config.themeTiers.splice(idx, 1);
+      distRenderTiers();
+    });
+  });
+}
+
+function distReadTiersFromForm(){
+  const rows = Array.from(document.querySelectorAll("#dist_tiersWrap [data-tier-idx]"));
+  return rows.map(row => ({
+    minQty: Number(row.querySelector(".dist-tier-qty").value) || 0,
+    pricePerUnit: Number(row.querySelector(".dist-tier-price").value) || 0
+  }));
+}
+
+function distRenderSalesLog(){
+  const sales = distributionsData.sales || [];
+  const totalUnits = sales.reduce((s,x) => s + (Number(x.qty)||0), 0);
+  const totalRevenue = sales.reduce((s,x) => s + (Number(x.total)||0), 0);
+  document.getElementById("dist_totalUnitsSold").textContent = totalUnits;
+  document.getElementById("dist_totalRevenue").textContent = totalRevenue.toFixed(2) + " AED";
+  const log = document.getElementById("dist_salesLog");
+  if(sales.length === 0){
+    log.innerHTML = `<div class="hint">ما فيه مبيعات مسجّلة بعد.</div>`;
+    return;
+  }
+  log.innerHTML = sales.slice().reverse().map(s => `
+    <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; gap:10px;">
+      <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"} ${s.note ? "— " + s.note : ""}</span>
+      <b>${Number(s.total).toFixed(2)} AED</b>
+    </div>
+  `).join("");
+}
+
+function distUpdateComputedPrice(){
+  const qty = Number(document.getElementById("dist_saleQty").value) || 0;
+  const withTheme = document.getElementById("dist_saleTheme").checked;
+  const unitPrice = distComputeUnitPrice(qty, withTheme);
+  const total = unitPrice * qty;
+  document.getElementById("dist_saleComputedPrice").textContent = qty > 0 ? `السعر المتوقع: ${unitPrice.toFixed(2)} درهم/قطعة × ${qty} = ${total.toFixed(2)} درهم` : "";
+}
+
+function distFillForm(){
+  document.getElementById("dist_stockBlack").value = distributionsData.stock.black || 0;
+  document.getElementById("dist_stockBeige").value = distributionsData.stock.beige || 0;
+  document.getElementById("dist_stockBlackDisplay").textContent = distributionsData.stock.black || 0;
+  document.getElementById("dist_stockBeigeDisplay").textContent = distributionsData.stock.beige || 0;
+  document.getElementById("dist_basePrice").value = distributionsData.config.basePriceNoTheme || 0;
+  distRenderTiers();
+  distRenderSalesLog();
+  distUpdateComputedPrice();
+}
+
+async function loadDistributionsIntoPanel(){
+  try{
+    distShowStatus("جارِ التحميل...", "info");
+    const res = await fetch(DISTRIBUTIONS_JSON_RAW_URL, { cache: "no-store" });
+    if(res.ok){
+      distributionsData = await res.json();
+    } else if(res.status === 404){
+      distributionsData = distDefaultData();
+    } else {
+      throw new Error("HTTP " + res.status);
+    }
+    if(!distributionsData.config) distributionsData.config = { basePriceNoTheme: 15, themeTiers: [{ minQty: 30, pricePerUnit: 15 }] };
+    if(!distributionsData.stock) distributionsData.stock = { black: 0, beige: 0 };
+    if(!distributionsData.sales) distributionsData.sales = [];
+    if(!document.getElementById("dist_saleDate").value) document.getElementById("dist_saleDate").value = todayStr();
+    distFillForm();
+    document.getElementById("dist_statusBox").className = "status";
+  }catch(e){
+    distShowStatus("ما قدرت أجيب بيانات التوزيعات الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
+  }
+}
+
+document.getElementById("dist_reloadBtn").addEventListener("click", loadDistributionsIntoPanel);
+document.getElementById("dist_saleQty").addEventListener("input", distUpdateComputedPrice);
+document.getElementById("dist_saleTheme").addEventListener("change", distUpdateComputedPrice);
+
+document.getElementById("dist_addTierBtn").addEventListener("click", () => {
+  distributionsData.config.themeTiers = distReadTiersFromForm();
+  distributionsData.config.themeTiers.push({ minQty: 1, pricePerUnit: distributionsData.config.basePriceNoTheme || 0 });
+  distRenderTiers();
+});
+
+document.getElementById("dist_saveStockBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  const black = Number(document.getElementById("dist_stockBlack").value) || 0;
+  const beige = Number(document.getElementById("dist_stockBeige").value) || 0;
+  const btn = document.getElementById("dist_saveStockBtn");
+  btn.disabled = true;
+  try{
+    distShowStatus("جارِ الحفظ والنشر...", "info");
+    const updated = await updateDistributionsWithRetry(token, (obj) => { obj.stock = { black, beige }; return obj; }, "Update distributions stock");
+    distributionsData = updated;
+    distFillForm();
+    distShowStatus("تم حفظ المخزون!", "ok");
+  }catch(e){
+    distShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+document.getElementById("dist_savePricingBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  const basePrice = Number(document.getElementById("dist_basePrice").value) || 0;
+  const tiers = distReadTiersFromForm();
+  const btn = document.getElementById("dist_savePricingBtn");
+  btn.disabled = true;
+  try{
+    distShowStatus("جارِ الحفظ والنشر...", "info");
+    const updated = await updateDistributionsWithRetry(token, (obj) => { obj.config = { basePriceNoTheme: basePrice, themeTiers: tiers }; return obj; }, "Update distributions pricing");
+    distributionsData = updated;
+    distFillForm();
+    distShowStatus("تم حفظ التسعير!", "ok");
+  }catch(e){
+    distShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+document.getElementById("dist_logSaleBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  const color = document.getElementById("dist_saleColor").value;
+  const qty = Number(document.getElementById("dist_saleQty").value) || 0;
+  const withTheme = document.getElementById("dist_saleTheme").checked;
+  const date = document.getElementById("dist_saleDate").value || todayStr();
+  const note = document.getElementById("dist_saleNote").value.trim();
+  if(qty <= 0){ distShowStatus("لازم تكتب كمية أكبر من صفر.", "err"); return; }
+  const currentStock = distributionsData.stock[color] || 0;
+  if(qty > currentStock){
+    distShowStatus("المخزون الحالي (" + distColorNameAr(color) + ") بس " + currentStock + " قطعة — عدّل الكمية أو حدّث المخزون أول.", "err");
+    return;
+  }
+  const unitPrice = distComputeUnitPrice(qty, withTheme);
+  const total = unitPrice * qty;
+  const btn = document.getElementById("dist_logSaleBtn");
+  btn.disabled = true;
+  try{
+    distShowStatus("جارِ الحفظ والنشر...", "info");
+    const saleEntry = { id: "dist_" + Date.now(), date, color, qty, withTheme, unitPrice, total, note };
+    const updated = await updateDistributionsWithRetry(token, (obj) => {
+      obj.stock[color] = (obj.stock[color] || 0) - qty;
+      obj.sales = obj.sales || [];
+      obj.sales.push(saleEntry);
+      return obj;
+    }, "Log distribution sale: " + color + " x" + qty);
+    distributionsData = updated;
+    document.getElementById("dist_saleQty").value = 1;
+    document.getElementById("dist_saleNote").value = "";
+    distFillForm();
+    distShowStatus("تم تسجيل البيع وخصم المخزون!", "ok");
+  }catch(e){
+    distShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
 document.getElementById("modeOrdersQueueBtn").addEventListener("click", () => { setMode("ordersQueue"); loadPendingOrdersIntoPanel(); });
 
 // ===== البحث (تعديل + رفع صورة فقط + المخزون يشتركون بنفس مربع البحث) =====
