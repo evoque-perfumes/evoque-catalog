@@ -19,7 +19,7 @@
     "bottlesReady": 0,
     "bags": 1,
     "boxes": 0,
-    "alcoholKg": -1
+    "alcoholKg": -2
   },
   "sales": [
     {
@@ -82,15 +82,6 @@
       "qty": 1,
       "unitPrice": 250,
       "totalPrice": 250,
-      "note": ""
-    },
-    {
-      "id": "distp_1788037606233",
-      "date": "2026-08-30",
-      "material": "alcohol",
-      "qty": 1,
-      "unitPrice": 0,
-      "totalPrice": 0,
       "note": ""
     }
   ]
