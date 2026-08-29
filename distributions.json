@@ -13,10 +13,10 @@
   },
   "stock": {
     "black": 0,
-    "white": 30,
+    "white": 0,
     "bottlesEmpty": 0,
-    "bottlesReady": 30,
-    "bags": 1,
+    "bottlesReady": 0,
+    "bags": 0,
     "boxes": 0
   },
   "sales": [
