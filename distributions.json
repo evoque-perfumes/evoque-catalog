@@ -12,8 +12,8 @@
     }
   },
   "stock": {
-    "black": 0,
-    "white": 0
+    "black": 500,
+    "white": 500
   },
   "sales": []
 }
