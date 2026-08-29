@@ -2705,6 +2705,36 @@ function distCancelEditSale(){
   distUpdateComputedPrice();
 }
 
+// ===== إلغاء طلبية بيع =====
+let distPendingCancelId = null;
+
+async function distCancelSale(saleId){
+  const token = getToken();
+  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  distShowStatus("جارِ إلغاء الطلبية...", "info");
+  try{
+    const updated = await updateDistributionsWithRetry(token, (obj) => {
+      obj.stock = obj.stock || {};
+      const idx = (obj.sales||[]).findIndex(s => s.id === saleId);
+      if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
+      const s = obj.sales[idx];
+      if(s.cancelled) throw new Error("العملية ملغاة أصلًا.");
+      obj.stock[s.color] = (obj.stock[s.color] || 0) + Number(s.qty || 0);
+      obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(s.bottlesUsed || 0);
+      obj.stock.bags = (obj.stock.bags || 0) + Number(s.bagsUsed || 0);
+      obj.stock.boxes = (obj.stock.boxes || 0) + Number(s.boxesUsed || 0);
+      obj.sales[idx] = Object.assign({}, s, { cancelled: true, cancelledAt: new Date().toISOString() });
+      return obj;
+    }, "Cancel distribution sale: " + saleId);
+    distributionsData = updated;
+    if(distEditingSaleId === saleId) distCancelEditSale();
+    distFillForm();
+    distShowStatus("تم إلغاء الطلبية وإرجاع المخزون!", "ok");
+  }catch(e){
+    distShowStatus("صار خطأ: " + e.message, "err");
+  }
+}
+
 // ===== سجل المشتريات =====
 function distMaterialNameAr(m){
   const map = { bag: "كيس", bottle: "زجاجة فارغة", box: "بوكس تغليف", handle: "مسكة", alcohol: "كحول", oil: "زيت عطري" };
@@ -2739,9 +2769,10 @@ function distRenderPurchaseLog(){
 
 function distRenderSalesLog(){
   const sales = distributionsData.sales || [];
-  const totalUnits = sales.reduce((s,x) => s + (Number(x.qty)||0), 0);
-  const totalRevenue = sales.reduce((s,x) => s + (Number(x.netTotal !== undefined ? x.netTotal : x.total)||0), 0);
-  const totalProfit = sales.reduce((s,x) => s + (Number(x.orderProfit)||0), 0);
+  const activeSales = sales.filter(s => !s.cancelled);
+  const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
+  const totalRevenue = activeSales.reduce((s,x) => s + (Number(x.netTotal !== undefined ? x.netTotal : x.total)||0), 0);
+  const totalProfit = activeSales.reduce((s,x) => s + (Number(x.orderProfit)||0), 0);
   document.getElementById("dist_totalUnitsSold").textContent = totalUnits;
   document.getElementById("dist_totalRevenue").textContent = totalRevenue.toFixed(2) + " AED";
   document.getElementById("dist_totalProfit").textContent = totalProfit.toFixed(2) + " AED";
@@ -2755,12 +2786,18 @@ function distRenderSalesLog(){
     const shownTotal = (s.netTotal !== undefined ? s.netTotal : s.total);
     const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "");
     const profitTxt = (s.orderProfit !== undefined ? ` — ربح ${Number(s.orderProfit).toFixed(2)}` : "");
+    const cancelledTxt = s.cancelled ? " — ⛔ ملغاة" : "";
+    const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
+    const actionsHtml = s.cancelled
+      ? `<span style="font-size:12px; color:#963224; font-weight:700; text-decoration:none;">ملغاة</span>`
+      : `<button type="button" class="secondary dist-edit-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+         <button type="button" class="secondary dist-cancel-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
     return `
-    <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-      <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}${discountTxt}${profitTxt}</span>
+    <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; ${rowStyle}">
+      <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}${discountTxt}${profitTxt}${cancelledTxt}</span>
       <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
         <b>${Number(shownTotal).toFixed(2)} AED</b>
-        <button type="button" class="secondary dist-edit-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+        ${actionsHtml}
       </span>
     </div>
   `;
@@ -2896,8 +2933,24 @@ document.getElementById("dist_costOilPerKg").addEventListener("input", distUpdat
 document.getElementById("dist_costAlcoholPerKg").addEventListener("input", distUpdateCostEstimate);
 document.getElementById("dist_cancelEditBtn").addEventListener("click", distCancelEditSale);
 document.getElementById("dist_salesLog").addEventListener("click", (e) => {
-  const btn = e.target.closest(".dist-edit-sale-btn");
-  if(btn) distStartEditSale(btn.dataset.id);
+  const editBtn = e.target.closest(".dist-edit-sale-btn");
+  if(editBtn){ distStartEditSale(editBtn.dataset.id); return; }
+  const cancelBtn = e.target.closest(".dist-cancel-sale-btn");
+  if(cancelBtn){
+    const id = cancelBtn.dataset.id;
+    if(distPendingCancelId === id){
+      distPendingCancelId = null;
+      distCancelSale(id);
+    } else {
+      distPendingCancelId = id;
+      cancelBtn.textContent = "⚠️ تأكيد الإلغاء؟";
+      cancelBtn.style.background = "#963224";
+      cancelBtn.style.color = "#fff";
+      setTimeout(() => {
+        if(distPendingCancelId === id){ distPendingCancelId = null; distRenderSalesLog(); }
+      }, 4000);
+    }
+  }
 });
 document.getElementById("dist_purchaseQty").addEventListener("input", distUpdatePurchaseComputedUnit);
 document.getElementById("dist_purchaseTotalPrice").addEventListener("input", distUpdatePurchaseComputedUnit);
