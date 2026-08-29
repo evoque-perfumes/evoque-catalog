@@ -4,7 +4,7 @@
     "themeFeePerRun": 15,
     "runCapacity": 30,
     "costs": {
-      "bag": 2,
+      "bag": 1,
       "bottle": 2,
       "handle": 1,
       "alcoholPerKg": 12.5,
@@ -17,7 +17,7 @@
     "white": 0,
     "bottlesEmpty": 0,
     "bottlesReady": 0,
-    "bags": 0,
+    "bags": 1,
     "boxes": 0
   },
   "sales": [
@@ -44,6 +44,17 @@
       "editedAt": "2026-08-29T20:50:00.603Z",
       "cancelled": true,
       "cancelledAt": "2026-08-29T20:53:31.307Z"
+    }
+  ],
+  "purchases": [
+    {
+      "id": "distp_1788036854963",
+      "date": "2026-08-30",
+      "material": "bag",
+      "qty": 1,
+      "unitPrice": 1,
+      "totalPrice": 1,
+      "note": ""
     }
   ]
 }
