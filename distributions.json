@@ -17,13 +17,13 @@
     "black": 0,
     "white": 0,
     "bottlesEmpty": 80,
-    "bottlesReady": 1000,
-    "bags": 1,
-    "boxes": 0,
-    "alcoholKg": 19987,
-    "oilKg": 5989,
+    "bottlesReady": 0,
     "bagsPerfume": -1,
-    "oilG": -1000
+    "bagsPackaging": 0,
+    "pins": 0,
+    "boxes": 0,
+    "oilG": -1000,
+    "alcoholMl": 0
   },
   "sales": [
     {
