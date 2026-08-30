@@ -3,15 +3,7 @@
     "basePriceNoTheme": 15,
     "themeFeePerRun": 15,
     "runCapacity": 30,
-    "costs": {
-      "bag": 1,
-      "bottle": 2,
-      "handle": 1,
-      "alcoholPerKg": 0.0125,
-      "oilPerKg": 0.3,
-      "box": 1,
-      "oilPerG": 0.3
-    }
+    "costs": {}
   },
   "stock": {
     "black": 0,
@@ -22,35 +14,10 @@
     "bagsPackaging": 0,
     "pins": 0,
     "boxes": 0,
-    "oilG": -5995,
-    "alcoholMl": -19990
+    "oilG": 0,
+    "alcoholMl": 0
   },
-  "sales": [
-    {
-      "id": "dist_1788035686445",
-      "date": "2026-08-30",
-      "color": "white",
-      "qty": 30,
-      "withTheme": true,
-      "base": 450,
-      "themeSurcharge": 15,
-      "total": 465,
-      "discount": 0,
-      "netTotal": 465,
-      "bottlesUsed": 30,
-      "bagsUsed": 1,
-      "boxesUsed": 0,
-      "orderCost": 140.75,
-      "orderProfit": 324.25,
-      "note": "",
-      "customerName": "ام سلطان",
-      "customerPhone": "0501234567",
-      "emirate": "Alain",
-      "editedAt": "2026-08-29T20:50:00.603Z",
-      "cancelled": true,
-      "cancelledAt": "2026-08-29T20:53:31.307Z"
-    }
-  ],
+  "sales": [],
   "purchases": [],
   "fills": []
 }
