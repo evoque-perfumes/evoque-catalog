@@ -23,7 +23,7 @@
     "pins": 0,
     "boxes": 0,
     "oilG": -6000,
-    "alcoholMl": 0
+    "alcoholMl": -20000
   },
   "sales": [
     {
@@ -51,17 +51,7 @@
       "cancelledAt": "2026-08-29T20:53:31.307Z"
     }
   ],
-  "purchases": [
-    {
-      "id": "distp_1788041303884",
-      "date": "2026-08-30",
-      "material": "alcohol",
-      "qty": 20000,
-      "unitPrice": 0.0125,
-      "totalPrice": 250,
-      "note": ""
-    }
-  ],
+  "purchases": [],
   "fills": [
     {
       "id": "distf_1788041314982",
