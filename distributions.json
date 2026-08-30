@@ -16,14 +16,14 @@
   "stock": {
     "black": 0,
     "white": 0,
-    "bottlesEmpty": 0,
-    "bottlesReady": 0,
+    "bottlesEmpty": 1000,
+    "bottlesReady": -1000,
     "bagsPerfume": 0,
     "bagsPackaging": 0,
     "pins": 0,
     "boxes": 0,
-    "oilG": -6000,
-    "alcoholMl": -20000
+    "oilG": -5995,
+    "alcoholMl": -19990
   },
   "sales": [
     {
@@ -52,13 +52,5 @@
     }
   ],
   "purchases": [],
-  "fills": [
-    {
-      "id": "distf_1788041314982",
-      "date": "2026-08-30",
-      "qty": 1000,
-      "oilUsed": 5,
-      "alcoholUsed": 10
-    }
-  ]
+  "fills": []
 }
