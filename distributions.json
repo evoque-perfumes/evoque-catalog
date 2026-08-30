@@ -22,7 +22,7 @@
     "bagsPackaging": 0,
     "pins": 0,
     "boxes": 0,
-    "oilG": -1000,
+    "oilG": -6000,
     "alcoholMl": 0
   },
   "sales": [
@@ -52,16 +52,6 @@
     }
   ],
   "purchases": [
-    {
-      "id": "distp_1788041226747",
-      "date": "2026-08-30",
-      "material": "oil",
-      "qty": 5000,
-      "unitPrice": 0.3,
-      "totalPrice": 1500,
-      "note": "",
-      "editedAt": "2026-08-30T11:46:39.058Z"
-    },
     {
       "id": "distp_1788041303884",
       "date": "2026-08-30",
