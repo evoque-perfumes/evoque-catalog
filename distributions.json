@@ -16,8 +16,8 @@
   "stock": {
     "black": 0,
     "white": 0,
-    "bottlesEmpty": 1000,
-    "bottlesReady": -1000,
+    "bottlesEmpty": 0,
+    "bottlesReady": 0,
     "bagsPerfume": 0,
     "bagsPackaging": 0,
     "pins": 0,
