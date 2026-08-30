@@ -1,11 +1,11 @@
 {
   "AE": {
-    "standard": 99,
-    "western": 199
+    "standard": 20,
+    "western": 50
   },
   "OM": {
-    "door": 9,
-    "nool": 4
+    "door": 2,
+    "nool": 1
   },
-  "tabbyFeePercent": 7
+  "tabbyFeePercent": 5
 }
