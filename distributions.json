@@ -9,7 +9,8 @@
       "handle": 1,
       "alcoholPerKg": 0.0125,
       "oilPerKg": 0.3,
-      "box": 1
+      "box": 1,
+      "oilPerG": 0.3
     }
   },
   "stock": {
@@ -21,7 +22,8 @@
     "boxes": 0,
     "alcoholKg": 19987,
     "oilKg": 5989,
-    "bagsPerfume": -1
+    "bagsPerfume": -1,
+    "oilG": -1000
   },
   "sales": [
     {
@@ -63,11 +65,11 @@
       "id": "distp_1788041226747",
       "date": "2026-08-30",
       "material": "oil",
-      "qty": 6000,
+      "qty": 5000,
       "unitPrice": 0.3,
-      "totalPrice": 1800,
+      "totalPrice": 1500,
       "note": "",
-      "editedAt": "2026-08-29T22:07:45.271Z"
+      "editedAt": "2026-08-30T11:46:39.058Z"
     },
     {
       "id": "distp_1788041303884",
