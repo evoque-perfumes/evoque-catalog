@@ -611,6 +611,10 @@
       <small class="hint" style="margin-top:0;">
         لما تعبّي زجاجات بمزيج الزيت/الكحول، سجّل العدد هنا — يخصم تلقائيًا من الزجاجات الفارغة والزيت (جرام) والكحول (مل) حسب نسبة الخلط، ويزيد الزجاجات الجاهزة للبيع.
       </small>
+      <div class="row" id="dist_fillEditBanner" style="display:none; align-items:center; justify-content:space-between; background:#FFF6DA; border:1px solid #E4C874; border-radius:8px; padding:8px 10px; margin-bottom:8px;">
+        <span style="font-weight:700;">✏️ تعديل عملية تعبئة سابقة</span>
+        <button type="button" id="dist_cancelFillEditBtn" class="secondary">إلغاء التعديل</button>
+      </div>
       <div class="grid2">
         <div class="field"><label for="dist_fillQty">عدد الزجاجات المراد تعبئتها</label><input type="number" id="dist_fillQty" min="1" step="1" value="1"></div>
         <div class="field"><label for="dist_fillDate">التاريخ</label><input type="date" id="dist_fillDate"></div>
@@ -2910,6 +2914,55 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
     }
 
     // ===== تعبئة الزجاجات =====
+    let distEditingFillId = null;
+    let distPendingDeleteFillId = null;
+
+    function distStartEditFill(fillId){
+      const f = (distributionsData.fills || []).find(x => x.id === fillId);
+      if(!f) return;
+      distEditingFillId = fillId;
+      document.getElementById("dist_fillQty").value = f.qty;
+      document.getElementById("dist_fillDate").value = f.date || todayStr();
+      document.getElementById("dist_fillEditBanner").style.display = "flex";
+      document.getElementById("dist_fillBottlesBtn").textContent = "💾 حفظ تعديل التعبئة";
+      distUpdateFillPreview();
+      document.getElementById("distPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function distCancelEditFill(){
+      distEditingFillId = null;
+      document.getElementById("dist_fillEditBanner").style.display = "none";
+      document.getElementById("dist_fillBottlesBtn").textContent = "🧪 عبّي الزجاجات";
+      document.getElementById("dist_fillQty").value = 1;
+      distUpdateFillPreview();
+    }
+
+    async function distDeleteFill(fillId){
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      distShowStatus("جارِ حذف عملية التعبئة...", "info");
+      try{
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          obj.stock = obj.stock || {};
+          const idx = (obj.fills||[]).findIndex(f => f.id === fillId);
+          if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
+          const f = obj.fills[idx];
+          obj.stock.bottlesEmpty = (obj.stock.bottlesEmpty||0) + Number(f.qty || 0);
+          obj.stock.bottlesReady = (obj.stock.bottlesReady||0) - Number(f.qty || 0);
+          obj.stock.oilG = (obj.stock.oilG||0) + Number(f.oilUsed || 0);
+          obj.stock.alcoholMl = (obj.stock.alcoholMl||0) + Number(f.alcoholUsed || 0);
+          obj.fills.splice(idx, 1);
+          return obj;
+        }, "Delete distribution fill: " + fillId);
+        distributionsData = updated;
+        if(distEditingFillId === fillId) distCancelEditFill();
+        distFillForm();
+        distShowStatus("تم حذف عملية التعبئة وإرجاع المخزون!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }
+    }
+
     function distUpdateFillPreview(){
       const qty = Number(document.getElementById("dist_fillQty").value) || 0;
       const el = document.getElementById("dist_fillPreview");
@@ -2928,9 +2981,12 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
         return;
       }
       log.innerHTML = fills.slice().reverse().map(f => `
-        <div style="border-bottom:1px solid var(--line); padding:6px 0; font-size:13px; display:flex; justify-content:space-between; gap:10px;">
-          <span>${f.date} — تعبئة ${f.qty} زجاجة</span>
-          <span style="color:#666;">زيت ${Number(f.oilUsed).toFixed(1)} جرام + كحول ${Number(f.alcoholUsed).toFixed(1)} مل</span>
+        <div style="border-bottom:1px solid var(--line); padding:6px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <span>${f.date} — تعبئة ${f.qty} زجاجة<br><span style="color:#666;">زيت ${Number(f.oilUsed).toFixed(1)} جرام + كحول ${Number(f.alcoholUsed).toFixed(1)} مل</span></span>
+          <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
+            <button type="button" class="secondary dist-edit-fill-btn" data-id="${f.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+            <button type="button" class="secondary dist-delete-fill-btn" data-id="${f.id}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑 حذف</button>
+          </span>
         </div>
       `).join("");
     }
@@ -3164,6 +3220,27 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
     document.getElementById("dist_purchaseQty").addEventListener("input", distUpdatePurchaseComputedUnit);
     document.getElementById("dist_purchaseTotalPrice").addEventListener("input", distUpdatePurchaseComputedUnit);
     document.getElementById("dist_fillQty").addEventListener("input", distUpdateFillPreview);
+    document.getElementById("dist_cancelFillEditBtn").addEventListener("click", distCancelEditFill);
+    document.getElementById("dist_fillLog").addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".dist-edit-fill-btn");
+      if(editBtn){ distStartEditFill(editBtn.dataset.id); return; }
+      const delBtn = e.target.closest(".dist-delete-fill-btn");
+      if(delBtn){
+        const id = delBtn.dataset.id;
+        if(distPendingDeleteFillId === id){
+          distPendingDeleteFillId = null;
+          distDeleteFill(id);
+        } else {
+          distPendingDeleteFillId = id;
+          delBtn.textContent = "⚠️ تأكيد الحذف؟";
+          delBtn.style.background = "#963224";
+          delBtn.style.color = "#fff";
+          setTimeout(() => {
+            if(distPendingDeleteFillId === id){ distPendingDeleteFillId = null; distRenderFillLog(); }
+          }, 4000);
+        }
+      }
+    });
     document.getElementById("dist_cancelPurchaseEditBtn").addEventListener("click", distCancelEditPurchase);
     document.getElementById("dist_purchaseLog").addEventListener("click", (e) => {
       const editBtn = e.target.closest(".dist-edit-purchase-btn");
@@ -3443,6 +3520,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       const qty = Number(document.getElementById("dist_fillQty").value) || 0;
       const date = document.getElementById("dist_fillDate").value || todayStr();
       if(qty <= 0){ distShowStatus("لازم تكتب عدد أكبر من صفر.", "err"); return; }
+      const editingId = distEditingFillId;
       const btn = document.getElementById("dist_fillBottlesBtn");
       btn.disabled = true;
       try{
@@ -3450,6 +3528,15 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
         const needed = distMaterialsForFill(qty);
         const updated = await updateDistributionsWithRetry(token, (obj) => {
           obj.stock = obj.stock || {};
+          if(editingId){
+            const idx = (obj.fills||[]).findIndex(f => f.id === editingId);
+            if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة (يمكن انحذفت). حدّث الصفحة.");
+            const old = obj.fills[idx];
+            obj.stock.bottlesEmpty = (obj.stock.bottlesEmpty||0) + Number(old.qty || 0);
+            obj.stock.bottlesReady = (obj.stock.bottlesReady||0) - Number(old.qty || 0);
+            obj.stock.oilG = (obj.stock.oilG||0) + Number(old.oilUsed || 0);
+            obj.stock.alcoholMl = (obj.stock.alcoholMl||0) + Number(old.alcoholUsed || 0);
+          }
           if(qty > (obj.stock.bottlesEmpty||0)) throw new Error("المخزون الحالي من الزجاجات الفارغة بس " + (obj.stock.bottlesEmpty||0) + " — عدّل العدد أو حدّث المخزون أول.");
           if(needed.oilG > (obj.stock.oilG||0)) throw new Error("الزيت العطري المتوفر بس " + (obj.stock.oilG||0).toFixed(1) + " جرام ويحتاج " + needed.oilG.toFixed(1) + " جرام.");
           if(needed.alcoholMl > (obj.stock.alcoholMl||0)) throw new Error("الكحول المتوفر بس " + (obj.stock.alcoholMl||0).toFixed(1) + " مل ويحتاج " + needed.alcoholMl.toFixed(1) + " مل.");
@@ -3457,15 +3544,25 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
           obj.stock.bottlesReady = (obj.stock.bottlesReady||0) + qty;
           obj.stock.oilG = (obj.stock.oilG||0) - needed.oilG;
           obj.stock.alcoholMl = (obj.stock.alcoholMl||0) - needed.alcoholMl;
+          const fillEntry = { id: editingId || ("distf_" + Date.now()), date, qty, oilUsed: needed.oilG, alcoholUsed: needed.alcoholMl };
+          if(editingId) fillEntry.editedAt = new Date().toISOString();
           obj.fills = obj.fills || [];
-          obj.fills.push({ id: "distf_" + Date.now(), date, qty, oilUsed: needed.oilG, alcoholUsed: needed.alcoholMl });
+          if(editingId){
+            const idx2 = obj.fills.findIndex(f => f.id === editingId);
+            obj.fills[idx2] = fillEntry;
+          } else {
+            obj.fills.push(fillEntry);
+          }
           return obj;
-        }, "Fill distribution bottles x" + qty);
+        }, editingId ? ("Edit distribution fill: " + editingId) : ("Fill distribution bottles x" + qty));
         distributionsData = updated;
+        distEditingFillId = null;
+        document.getElementById("dist_fillEditBanner").style.display = "none";
+        document.getElementById("dist_fillBottlesBtn").textContent = "🧪 عبّي الزجاجات";
         document.getElementById("dist_fillQty").value = 1;
         distUpdateFillPreview();
         distFillForm();
-        distShowStatus("تم تعبئة الزجاجات وتحديث المخزون!", "ok");
+        distShowStatus(editingId ? "تم حفظ تعديل التعبئة!" : "تم تعبئة الزجاجات وتحديث المخزون!", "ok");
       }catch(e){
         distShowStatus("صار خطأ: " + e.message, "err");
       }finally{
