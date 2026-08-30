@@ -532,17 +532,19 @@ function hasFreeShipping(offerStatus){
   return offerStatus.unlocked.some(o => o.freeShipping);
 }
 
-/* ===== إعدادات الشحن — عدّل الأرقام هنا فقط لو تغيّرت أسعار التوصيل
-   (25 أغسطس 2026: رجّعنا تمييز المنطقة الغربية بأبوظبي — رسومها أعلى من باقي الإمارات) ===== */
-const SHIPPING_RATES = {
+/* ===== إعدادات الشحن — قيم افتراضية احتياطية بس (30 أغسطس 2026: صارت تُدار فعليًا من
+   لوحة التحكم admin-upload.html، وضع "🚚 رسوم التوصيل"، وتُقرأ من shipping-rates.json —
+   شوف loadShippingRatesFromJson() تحت. هذي القيم تُستخدم فقط لو shipping-rates.json
+   غير موجود أو فيه خطأ مؤقت، عشان الموقع ما ينكسر أبدًا). ===== */
+let SHIPPING_RATES = {
   AE: { standard: 20, western: 50 },
   OM: { door: 2, nool: 1 }
 };
 
 /* ===== عمولة تابي — تُضاف تلقائيًا على السعر النهائي فقط لما العميل يختار الدفع عبر تابي
-   (متاح بالإمارات حاليًا فقط، شوف COUNTRIES.AE.tabby). عدّل النسبة هنا فقط لو تغيّرت
-   نسبة عمولة تابي المتفق عليها. ===== */
-const TABBY_FEE_PERCENT = 5;
+   (متاح بالإمارات حاليًا فقط، شوف COUNTRIES.AE.tabby). قيمة افتراضية احتياطية —
+   تُدار فعليًا من نفس تبويب "🚚 رسوم التوصيل" ونفس shipping-rates.json. ===== */
+let TABBY_FEE_PERCENT = 5;
 function tabbyFeeFor(amount){
   if(paymentMethod !== "tabby" || !COUNTRIES[country].tabby) return 0;
   return Math.round(amount * TABBY_FEE_PERCENT / 100);
@@ -932,6 +934,31 @@ async function loadBankInfoFromJson(){
   }
 }
 
+// ------------------------------------------------------------------
+// رسوم التوصيل + عمولة تابي — ملف shipping-rates.json (تُدار من لوحة التحكم
+// admin-upload.html، وضع "🚚 رسوم التوصيل" — 30 أغسطس 2026). لو الملف غير موجود
+// أو فيه خطأ مؤقت أو شكله غلط، نكمل بالقيم الافتراضية الثابتة (SHIPPING_RATES/
+// TABBY_FEE_PERCENT كما عرّفناها أعلى الملف) — الموقع ما ينكسر أبدًا.
+// ------------------------------------------------------------------
+async function loadShippingRatesFromJson(){
+  try{
+    const res = await fetch("./shipping-rates.json");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const ae = data && data.AE;
+    const om = data && data.OM;
+    if(ae && typeof ae.standard === "number" && typeof ae.western === "number" &&
+       om && typeof om.door === "number" && typeof om.nool === "number"){
+      SHIPPING_RATES = { AE: { standard: ae.standard, western: ae.western }, OM: { door: om.door, nool: om.nool } };
+    }
+    if(typeof data.tabbyFeePercent === "number"){
+      TABBY_FEE_PERCENT = data.tabbyFeePercent;
+    }
+  }catch(e){
+    // نكمل بالقيم الافتراضية بصمت — مو ميزة أساسية توقف الموقع
+  }
+}
+
 // تقييمات عطر معيّن، الأحدث أولًا
 function reviewsFor(perfumeId){
   return reviews.filter(r => r.perfumeId === perfumeId)
@@ -1229,6 +1256,7 @@ async function loadPerfumesFromSheet(){
   }
   await loadReviewsFromJson();
   await loadBankInfoFromJson();
+  await loadShippingRatesFromJson();
   renderAll();
 }
 
