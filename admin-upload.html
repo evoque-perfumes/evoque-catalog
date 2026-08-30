@@ -166,6 +166,7 @@
     <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
     <button type="button" id="modeBankBtn">🏦 بيانات البنك</button>
+    <button type="button" id="modeShippingBtn">🚚 رسوم التوصيل</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
     <button type="button" id="modeDistBtn">🎁 توزيعات المناسبات</button>
     <button type="button" id="modeOrdersQueueBtn">🧾 الطلبات الجديدة<span class="badge pending" id="oqNavBadge" style="display:none; margin-inline-start:6px;"></span></button>
@@ -543,6 +544,45 @@
       <button type="button" id="bank_saveBtn">احفظ بيانات البنك</button>
     </div>
     <div class="status" id="bank_statusBox"></div>
+  </div>
+
+  <div class="panel" id="shippingPanel" style="display:none;">
+    <h2>رسوم التوصيل</h2>
+    <small class="hint" style="margin-top:0;">
+      هذي الأرقام هي اللي يشوفها العميل بالموقع فورًا (نموذج الطلب، ملخص السلة، رسالة واتساب السريعة) —
+      عدّلها هنا أي وقت بدون ما تحتاج تلمس أي كود. اضغط "تحميل آخر نسخة" لو فتحت هذا الوضع بعد فترة،
+      عشان تتأكد إنك تعدّل على أحدث أرقام محفوظة.
+    </small>
+    <div class="row" style="margin-bottom:6px;">
+      <button type="button" id="ship_reloadBtn" class="secondary">تحميل آخر نسخة</button>
+    </div>
+
+    <fieldset>
+      <legend>🇦🇪 الإمارات (بالدرهم)</legend>
+      <div class="grid2">
+        <div class="field"><label for="ship_ae_standard">رسوم التوصيل العادية</label><input type="number" id="ship_ae_standard" min="0" step="0.5"></div>
+        <div class="field"><label for="ship_ae_western">رسوم المنطقة الغربية (أبوظبي)</label><input type="number" id="ship_ae_western" min="0" step="0.5"></div>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin-top:16px;">
+      <legend>🇴🇲 عُمان (بالريال العُماني)</legend>
+      <div class="grid2">
+        <div class="field"><label for="ship_om_door">توصيل للمنزل</label><input type="number" id="ship_om_door" min="0" step="0.1"></div>
+        <div class="field"><label for="ship_om_nool">استلام من مكتب NOOL</label><input type="number" id="ship_om_nool" min="0" step="0.1"></div>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin-top:16px;">
+      <legend>💳 عمولة تابي (Tabby)</legend>
+      <small class="hint" style="margin-top:0;">تُضاف تلقائيًا على إجمالي الطلب فقط لما العميل يختار الدفع عبر تابي (الإمارات حاليًا).</small>
+      <div class="field"><label for="ship_tabbyPercent">نسبة العمولة (%)</label><input type="number" id="ship_tabbyPercent" min="0" step="0.1"></div>
+    </fieldset>
+
+    <div class="row">
+      <button type="button" id="ship_saveBtn">احفظ رسوم التوصيل</button>
+    </div>
+    <div class="status" id="ship_statusBox"></div>
   </div>
 
   <div class="panel" id="wishlistPanel" style="display:none;">
@@ -1023,6 +1063,7 @@ const BANK_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${
 const WISHLIST_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/wishlist.json?t=` + Date.now();
 const PENDING_ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/pending-orders.json?t=` + Date.now();
 const DISTRIBUTIONS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/distributions.json?t=` + Date.now();
+const SHIPPING_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/shipping-rates.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
@@ -1031,6 +1072,7 @@ const BANK_JSON_PATH = "bank-info.json";
 const WISHLIST_JSON_PATH = "wishlist.json";
 const PENDING_ORDERS_JSON_PATH = "pending-orders.json";
 const DISTRIBUTIONS_JSON_PATH = "distributions.json";
+const SHIPPING_JSON_PATH = "shipping-rates.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
 let brandFilterValue = "all"; // فلتر البراند المختار من القائمة المنسدلة (يشترك فيه البحث + المخزون)
@@ -2504,6 +2546,7 @@ function setMode(newMode){
   document.getElementById("modeExcelBtn").classList.toggle("active", mode === "excel");
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
   document.getElementById("modeBankBtn").classList.toggle("active", mode === "bank");
+  document.getElementById("modeShippingBtn").classList.toggle("active", mode === "shipping");
   document.getElementById("modeWishlistBtn").classList.toggle("active", mode === "wishlist");
   document.getElementById("modeDistBtn").classList.toggle("active", mode === "dist");
   document.getElementById("modeOrdersQueueBtn").classList.toggle("active", mode === "ordersQueue");
@@ -2516,6 +2559,7 @@ function setMode(newMode){
   document.getElementById("reviewsQuickPanel").style.display = "none";
   document.getElementById("salesQuickPanel").style.display = mode === "sales" ? "block" : "none";
   document.getElementById("bankInfoPanel").style.display = mode === "bank" ? "block" : "none";
+  document.getElementById("shippingPanel").style.display = mode === "shipping" ? "block" : "none";
   document.getElementById("wishlistPanel").style.display = mode === "wishlist" ? "block" : "none";
   document.getElementById("distPanel").style.display = mode === "dist" ? "block" : "none";
   document.getElementById("ordersQueuePanel").style.display = mode === "ordersQueue" ? "block" : "none";
@@ -2597,6 +2641,7 @@ document.getElementById("modeSalesBtn").addEventListener("click", () => setMode(
 document.getElementById("modeExcelBtn").addEventListener("click", () => setMode("excel"));
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
 document.getElementById("modeBankBtn").addEventListener("click", () => { setMode("bank"); loadBankInfoIntoForm(); });
+document.getElementById("modeShippingBtn").addEventListener("click", () => { setMode("shipping"); loadShippingRatesIntoForm(); });
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
 document.getElementById("modeDistBtn").addEventListener("click", () => { setMode("dist"); loadDistributionsIntoPanel(); });
 
@@ -4366,6 +4411,132 @@ document.getElementById("bank_saveBtn").addEventListener("click", async () => {
     bankShowStatus("تم الحفظ! بيانات البنك محدّثة على الموقع الحين.", "ok");
   }catch(e){
     bankShowStatus("صار خطأ: " + e.message, "err");
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+// ===== وضع "🚚 رسوم التوصيل" — 30 أغسطس 2026 =====
+// نفس نمط bank-info.json بالضبط: كائن وحد (مو قائمة)، قراءة عامة برابط raw للعرض،
+// وكتابة عبر GitHub Contents API بتوكن المستخدم. الموقع (assets/catalog.js) يقرأ نفس
+// الملف مباشرة (loadShippingRatesFromJson) فيحدّث رسوم التوصيل وعمولة تابي فورًا
+// بدون أي تعديل كود — هذا كان طلب جاسم بالضبط: "أقدر أغيّر الرسوم أي وقت".
+const SHIPPING_DEFAULTS = { AE: { standard: 20, western: 50 }, OM: { door: 2, nool: 1 }, tabbyFeePercent: 5 };
+let shippingRatesData = JSON.parse(JSON.stringify(SHIPPING_DEFAULTS));
+
+function shipShowStatus(msg, cls){
+  const box = document.getElementById("ship_statusBox");
+  box.textContent = msg;
+  box.className = "status " + (cls || "");
+}
+
+async function getShippingRatesWithSha(token){
+  const res = await fetch(`${API_BASE}/${SHIPPING_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { obj: JSON.parse(JSON.stringify(SHIPPING_DEFAULTS)), sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة shipping-rates.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  const obj = JSON.parse(base64ToUtf8(info.content));
+  return { obj: (obj && typeof obj === "object") ? obj : JSON.parse(JSON.stringify(SHIPPING_DEFAULTS)), sha: info.sha };
+}
+
+async function putShippingRatesJson(obj, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(obj, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${SHIPPING_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. اضغط \"تحميل آخر نسخة\" وجرّب مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updateShippingRatesWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { obj, sha } = await getShippingRatesWithSha(token);
+  const newObj = mutateFn(obj);
+  try{
+    await putShippingRatesJson(newObj, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateShippingRatesWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newObj;
+}
+
+function fillShippingForm(obj){
+  const ae = (obj && obj.AE) || {};
+  const om = (obj && obj.OM) || {};
+  document.getElementById("ship_ae_standard").value = (typeof ae.standard === "number") ? ae.standard : SHIPPING_DEFAULTS.AE.standard;
+  document.getElementById("ship_ae_western").value = (typeof ae.western === "number") ? ae.western : SHIPPING_DEFAULTS.AE.western;
+  document.getElementById("ship_om_door").value = (typeof om.door === "number") ? om.door : SHIPPING_DEFAULTS.OM.door;
+  document.getElementById("ship_om_nool").value = (typeof om.nool === "number") ? om.nool : SHIPPING_DEFAULTS.OM.nool;
+  document.getElementById("ship_tabbyPercent").value = (typeof obj.tabbyFeePercent === "number") ? obj.tabbyFeePercent : SHIPPING_DEFAULTS.tabbyFeePercent;
+}
+
+function readShippingForm(){
+  return {
+    AE: {
+      standard: Number(document.getElementById("ship_ae_standard").value) || 0,
+      western: Number(document.getElementById("ship_ae_western").value) || 0
+    },
+    OM: {
+      door: Number(document.getElementById("ship_om_door").value) || 0,
+      nool: Number(document.getElementById("ship_om_nool").value) || 0
+    },
+    tabbyFeePercent: Number(document.getElementById("ship_tabbyPercent").value) || 0
+  };
+}
+
+// تحميل أحدث نسخة معروفة (رابط raw العام — ما يحتاج توكن — نفس أسلوب bank-info.json)
+async function loadShippingRatesIntoForm(){
+  try{
+    shipShowStatus("جارِ التحميل...", "info");
+    const res = await fetch(SHIPPING_JSON_RAW_URL, { cache: "no-store" });
+    if(res.ok){
+      shippingRatesData = await res.json();
+    } else if(res.status === 404){
+      shippingRatesData = JSON.parse(JSON.stringify(SHIPPING_DEFAULTS));
+    } else {
+      throw new Error("HTTP " + res.status);
+    }
+    fillShippingForm(shippingRatesData);
+    document.getElementById("ship_statusBox").className = "status";
+  }catch(e){
+    shipShowStatus("ما قدرت أجيب رسوم التوصيل الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
+  }
+}
+
+document.getElementById("ship_reloadBtn").addEventListener("click", loadShippingRatesIntoForm);
+
+document.getElementById("ship_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ shipShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  const btn = document.getElementById("ship_saveBtn");
+  btn.disabled = true;
+  try{
+    shipShowStatus("جارِ الحفظ والنشر...", "info");
+    const formData = readShippingForm();
+    const updated = await updateShippingRatesWithRetry(token, () => formData, "Update shipping rates + Tabby fee");
+    shippingRatesData = updated;
+    shipShowStatus("تم الحفظ! رسوم التوصيل محدّثة على الموقع الحين.", "ok");
+  }catch(e){
+    shipShowStatus("صار خطأ: " + e.message, "err");
   }finally{
     btn.disabled = false;
   }
