@@ -563,7 +563,7 @@
   <div class="panel" id="distPanel" style="display:none;">
     <h2>توزيعات وهدايا المناسبات</h2>
     <small class="hint" style="margin-top:0;">
-      منتج منفصل تمامًا عن العطور العادية — كيس بيده (مسكة) لونها أسود أو أبيض، مع عطر 15مل جواه.
+      منتج منفصل تمامًا عن العطور العادية — زجاجة عطر 15مل + كيس + دبوس + مسكة، وأحيانًا ثيم وتغليف إضافي.
       المخزون والمبيعات هنا منفصلة 100% عن بيانات العطور وتقاريرها. اضغط "تحميل آخر نسخة" لو فتحت
       هذا الوضع بعد فترة، عشان تشتغل على أحدث بيانات محفوظة.
     </small>
@@ -572,16 +572,18 @@
     </div>
 
     <fieldset>
-      <legend>📦 المخزون الحالي (قطع جاهزة)</legend>
+      <legend>📦 المخزون الحالي</legend>
       <div class="stats" id="dist_stockStats">
         <div class="stat">مسكة سوداء متوفرة<b id="dist_stockBlackDisplay">—</b></div>
         <div class="stat">مسكة بيضاء متوفرة<b id="dist_stockWhiteDisplay">—</b></div>
         <div class="stat">زجاجات فارغة متوفرة<b id="dist_stockBottlesEmptyDisplay">—</b></div>
         <div class="stat">زجاجات جاهزة للبيع<b id="dist_stockBottlesReadyDisplay">—</b></div>
-        <div class="stat">أكياس متوفرة<b id="dist_stockBagsDisplay">—</b></div>
+        <div class="stat">كيس للعطر متوفر<b id="dist_stockBagsPerfumeDisplay">—</b></div>
+        <div class="stat">كيس للتغليف متوفر<b id="dist_stockBagsPackagingDisplay">—</b></div>
+        <div class="stat">دبابيس متوفرة<b id="dist_stockPinsDisplay">—</b></div>
         <div class="stat">بوكسات تغليف متوفرة<b id="dist_stockBoxesDisplay">—</b></div>
-        <div class="stat">زيت عطري متبقي (كيلو)<b id="dist_stockOilKgDisplay">—</b></div>
-        <div class="stat">كحول متبقي (كيلو)<b id="dist_stockAlcoholKgDisplay">—</b></div>
+        <div class="stat">زيت عطري متبقي (جرام)<b id="dist_stockOilGDisplay">—</b></div>
+        <div class="stat">كحول متبقي (مل)<b id="dist_stockAlcoholMlDisplay">—</b></div>
       </div>
       <div class="grid2" style="margin-top:12px;">
         <div class="field"><label for="dist_stockBlack">تعديل مخزون — مسكة سوداء</label><input type="number" id="dist_stockBlack" min="0" step="1"></div>
@@ -592,7 +594,11 @@
         <div class="field"><label for="dist_stockBottlesReady">تعديل مخزون — زجاجات جاهزة للبيع</label><input type="number" id="dist_stockBottlesReady" min="0" step="1"></div>
       </div>
       <div class="grid2">
-        <div class="field"><label for="dist_stockBags">تعديل مخزون — أكياس</label><input type="number" id="dist_stockBags" min="0" step="1"></div>
+        <div class="field"><label for="dist_stockBagsPerfume">تعديل مخزون — كيس للعطر</label><input type="number" id="dist_stockBagsPerfume" min="0" step="1"></div>
+        <div class="field"><label for="dist_stockBagsPackaging">تعديل مخزون — كيس للتغليف</label><input type="number" id="dist_stockBagsPackaging" min="0" step="1"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="dist_stockPins">تعديل مخزون — دبابيس</label><input type="number" id="dist_stockPins" min="0" step="1"></div>
         <div class="field"><label for="dist_stockBoxes">تعديل مخزون — بوكسات تغليف</label><input type="number" id="dist_stockBoxes" min="0" step="1"></div>
       </div>
       <div class="row">
@@ -603,7 +609,7 @@
     <fieldset style="margin-top:16px;">
       <legend>🧪 تعبئة الزجاجات (تحويل فارغة → جاهزة للبيع)</legend>
       <small class="hint" style="margin-top:0;">
-        لما تعبّي زجاجات بمزيج الزيت/الكحول، سجّل العدد هنا — يخصم تلقائيًا من الزجاجات الفارغة والزيت والكحول المتبقي (حسب نسبة الخلط)، ويزيد الزجاجات الجاهزة للبيع.
+        لما تعبّي زجاجات بمزيج الزيت/الكحول، سجّل العدد هنا — يخصم تلقائيًا من الزجاجات الفارغة والزيت (جرام) والكحول (مل) حسب نسبة الخلط، ويزيد الزجاجات الجاهزة للبيع.
       </small>
       <div class="grid2">
         <div class="field"><label for="dist_fillQty">عدد الزجاجات المراد تعبئتها</label><input type="number" id="dist_fillQty" min="1" step="1" value="1"></div>
@@ -624,19 +630,24 @@
     <fieldset style="margin-top:16px;">
       <legend>🧾 المواد الخام والتكلفة (مرجع لك بس — ما تأثر على الموقع)</legend>
       <small class="hint" style="margin-top:0;">
-        سجّل تكاليفك هنا عشان تعرف هامش ربحك — هذي الأرقام لك انت بس، ما تظهر للعميل ولا تأثر على السعر اللي يدفعه.
-        نسبة الخلط الثابتة: 1 كيلو زيت + 2000 مل كحول = 3000 مل، وحجم زجاجة العطر 15مل — محسوبة تلقائيًا بالأسفل.
+        سجّل تكاليفك هنا عشان تعرف هامش ربحك. نسبة الخلط الثابتة: 1000 جرام زيت + 2000 مل كحول = 3000 مل، وحجم زجاجة العطر 15مل — محسوبة تلقائيًا بالأسفل.
       </small>
       <div class="grid2">
-        <div class="field"><label for="dist_costBag">تكلفة الكيس الواحد (درهم)</label><input type="number" id="dist_costBag" min="0" step="0.1"></div>
+        <div class="field"><label for="dist_costBagPerfume">تكلفة الكيس للعطر (درهم)</label><input type="number" id="dist_costBagPerfume" min="0" step="0.1"></div>
+        <div class="field"><label for="dist_costBagPackaging">تكلفة الكيس للتغليف (درهم)</label><input type="number" id="dist_costBagPackaging" min="0" step="0.1"></div>
+      </div>
+      <div class="grid2">
         <div class="field"><label for="dist_costBottle">تكلفة زجاجة العطر (درهم)</label><input type="number" id="dist_costBottle" min="0" step="0.1"></div>
+        <div class="field"><label for="dist_costPin">تكلفة الدبوس (درهم)</label><input type="number" id="dist_costPin" min="0" step="0.1"></div>
       </div>
       <div class="grid2">
         <div class="field"><label for="dist_costHandle">تكلفة المسكة (درهم) — نفس السعر للأسود والأبيض</label><input type="number" id="dist_costHandle" min="0" step="0.1"></div>
-        <div class="field"><label for="dist_costAlcoholPerKg">تكلفة الكحول لكل كيلو (درهم)</label><input type="number" id="dist_costAlcoholPerKg" min="0" step="0.1" placeholder="مثال: 250 درهم / 20 كيلو = 12.5"></div>
+        <div class="field"><label for="dist_costBox">تكلفة بوكس التغليف الواحد (درهم)</label><input type="number" id="dist_costBox" min="0" step="0.1"></div>
       </div>
-      <div class="field"><label for="dist_costOilPerKg">تكلفة الزيت العطري لكل كيلو (درهم) — يتغير، عدّله كل مرة تشتري</label><input type="number" id="dist_costOilPerKg" min="0" step="0.1"></div>
-      <div class="field"><label for="dist_costBox">تكلفة بوكس التغليف الواحد (درهم)</label><input type="number" id="dist_costBox" min="0" step="0.1"></div>
+      <div class="grid2">
+        <div class="field"><label for="dist_costOilPerG">تكلفة الزيت العطري لكل جرام (درهم)</label><input type="number" id="dist_costOilPerG" min="0" step="0.001"></div>
+        <div class="field"><label for="dist_costAlcoholPerMl">تكلفة الكحول لكل مل (درهم)</label><input type="number" id="dist_costAlcoholPerMl" min="0" step="0.001"></div>
+      </div>
       <div class="row" style="align-items:center; flex-direction:column; align-items:stretch; gap:4px;">
         <span id="dist_estCostDisplay" style="font-weight:700; color:var(--gold-ink);"></span>
         <span id="dist_estMarginDisplay" style="font-weight:700;"></span>
@@ -653,17 +664,19 @@
         <button type="button" id="dist_cancelPurchaseEditBtn" class="secondary">إلغاء التعديل</button>
       </div>
       <small class="hint" style="margin-top:0;">
-        سجّل كل عملية شراء عشان تعرف بالضبط متى اشتريت وكم دفعت — كل عملية شراء تحدّث تلقائيًا تكلفة المادة (وتزيد المخزون تلقائيًا للكيس/الزجاجة الفارغة/البوكس).
+        سجّل كل عملية شراء عشان تعرف بالضبط متى اشتريت وكم دفعت — كل عملية شراء تحدّث تلقائيًا تكلفة المادة (وتزيد المخزون تلقائيًا). للزيت اكتب الكمية بالجرام، وللكحول بالمل.
       </small>
       <div class="grid2">
         <div class="field"><label for="dist_purchaseMaterial">المادة</label>
           <select id="dist_purchaseMaterial">
-            <option value="bag">كيس</option>
+            <option value="bagPerfume">كيس للعطر</option>
+            <option value="bagPackaging">كيس للتغليف</option>
             <option value="bottle">زجاجة فارغة</option>
-            <option value="box">بوكس تغليف</option>
+            <option value="pin">دبوس</option>
             <option value="handle">مسكة</option>
-            <option value="alcohol">كحول (كيلو)</option>
-            <option value="oil">زيت عطري (كيلو)</option>
+            <option value="box">بوكس تغليف</option>
+            <option value="oil">زيت عطري (جرام)</option>
+            <option value="alcohol">كحول (مل)</option>
           </select>
         </div>
         <div class="field"><label for="dist_purchaseQty">الكمية</label><input type="number" id="dist_purchaseQty" min="0" step="0.01" value="1"></div>
@@ -728,10 +741,14 @@
         </label>
       </div>
       <div class="field"><label for="dist_saleDiscount">خصم للعميل (اختياري) — درهم</label><input type="number" id="dist_saleDiscount" min="0" step="0.5" value="0"></div>
-      <small class="hint" style="margin-top:10px;">المواد المستخدمة بهالطلبية (تُخصم من المخزون وتُحسب بيها تكلفة الطلبية) — الزجاجات والأكياس تتعبى تلقائيًا بعدد القطع وتقدر تعدّلها، والبوكس دايمًا يدوي.</small>
+      <small class="hint" style="margin-top:10px;">المواد المستخدمة بهالطلبية (تُخصم من المخزون وتُحسب بيها تكلفة الطلبية) — الزجاجات وكيس العطر والدبابيس تتعبى تلقائيًا بعدد القطع، وتقدر تعدّلها. كيس التغليف والبوكس دايمًا يدوي.</small>
       <div class="grid2">
         <div class="field"><label for="dist_saleBottlesUsed">عدد الزجاجات الجاهزة المستخدمة</label><input type="number" id="dist_saleBottlesUsed" min="0" step="1" value="1"></div>
-        <div class="field"><label for="dist_saleBagsUsed">عدد الأكياس المستخدمة</label><input type="number" id="dist_saleBagsUsed" min="0" step="1" value="1"></div>
+        <div class="field"><label for="dist_saleBagsPerfumeUsed">عدد كيس العطر المستخدم</label><input type="number" id="dist_saleBagsPerfumeUsed" min="0" step="1" value="1"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="dist_salePinsUsed">عدد الدبابيس المستخدمة</label><input type="number" id="dist_salePinsUsed" min="0" step="1" value="1"></div>
+        <div class="field"><label for="dist_saleBagsPackagingUsed">عدد كيس التغليف المستخدم (يدوي)</label><input type="number" id="dist_saleBagsPackagingUsed" min="0" step="1" value="0"></div>
       </div>
       <div class="field"><label for="dist_saleBoxesUsed">عدد بوكسات التغليف المستخدمة (يدوي)</label><input type="number" id="dist_saleBoxesUsed" min="0" step="1" value="0"></div>
       <div class="field"><label for="dist_saleNote">ملاحظة إضافية (اختياري)</label><input type="text" id="dist_saleNote" placeholder="مثال: المناسبة"></div>
@@ -2579,807 +2596,882 @@ document.getElementById("modeBankBtn").addEventListener("click", () => { setMode
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
 document.getElementById("modeDistBtn").addEventListener("click", () => { setMode("dist"); loadDistributionsIntoPanel(); });
 
-// ===== وضع "🎁 توزيعات وهدايا المناسبات" — منتج منفصل بالكامل عن العطور (مخزون + تكاليف + مبيعات) — 29 أغسطس 2026 =====
-// نفس نمط bank-info.json/wishlist.json بالضبط: قراءة عامة (رابط raw) + كتابة عبر GitHub Contents API بتوكن المستخدم.
-// تحديث 29 أغسطس (مساءً #2): تكلفة مسكة واحدة (نفس السعر أسود/أبيض)، حساب تكلفة تلقائي للزيت+الكحول
-// لكل زجاجة 15مل (نسبة ثابتة: 1كيلو زيت + 2000مل كحول = 3000مل)، وحقول عميل (اسم/هاتف/إمارة) بسجل البيع.
-const DIST_MIX_OIL_KG = 1, DIST_MIX_ALCOHOL_ML = 2000, DIST_MIX_TOTAL_ML = 3000, DIST_BOTTLE_ML = 15;
 
-function distDefaultData(){
-  return {
-    config: {
-      basePriceNoTheme: 15,
-      themeFeePerRun: 15,
-      runCapacity: 30,
-      costs: { bag: 1, bottle: 2, handle: 0, alcoholPerKg: 12.5, oilPerKg: 0, box: 0 }
-    },
-    stock: { black: 0, white: 0, bottlesEmpty: 0, bottlesReady: 0, bags: 0, boxes: 0, oilKg: 0, alcoholKg: 0 },
-    sales: [],
-    purchases: [],
-    fills: []
-  };
-}
-let distributionsData = distDefaultData();
+    // ===== وضع "🎁 توزيعات وهدايا المناسبات" — منتج منفصل بالكامل عن العطور (مخزون + تكاليف + إنتاج + مبيعات) — 29-30 أغسطس 2026 =====
+    // نفس نمط bank-info.json/wishlist.json بالضبط: قراءة عامة (رابط raw) + كتابة عبر GitHub Contents API بتوكن المستخدم.
+    // تحديث v8 (30 أغسطس): 8 مواد خام كاملة (زجاجة فارغة، زيت، كحول، كيس للعطر، مسكة، دبوس، كيس للتغليف، بوكس تغليف)،
+    // وحدات الزيت/الكحول بالجرام والمل (بدل كيلو) لمطابقة وصفة الخلط وسهولة إدخال المشتريات، وفصل الكيسين.
+    const DIST_MIX_OIL_G = 1000, DIST_MIX_ALCOHOL_ML = 2000, DIST_MIX_TOTAL_ML = 3000, DIST_BOTTLE_ML = 15;
 
-function distShowStatus(msg, cls){
-  const box = document.getElementById("dist_statusBox");
-  box.textContent = msg;
-  box.className = "status " + (cls || "");
-}
-
-async function getDistributionsWithSha(token){
-  const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}?ref=${BRANCH}`, {
-    cache: "no-store",
-    headers: { "Authorization": `Bearer ${token}` }
-  });
-  if(res.status === 404) return { obj: distDefaultData(), sha: null };
-  if(!res.ok){
-    const err = await res.json().catch(()=>({}));
-    throw new Error("تعذّر قراءة distributions.json الحالي: " + (err.message || res.status));
-  }
-  const info = await res.json();
-  const obj = JSON.parse(base64ToUtf8(info.content));
-  return { obj: (obj && typeof obj === "object") ? obj : distDefaultData(), sha: info.sha };
-}
-
-async function putDistributionsJson(obj, sha, token, commitMsg){
-  const body = {
-    message: commitMsg,
-    content: utf8ToBase64(JSON.stringify(obj, null, 2)),
-    branch: BRANCH
-  };
-  if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}`, {
-    method: "PUT",
-    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  if(!res.ok){
-    const err = await res.json().catch(()=>({}));
-    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
-    throw new Error(err.message || ("HTTP " + res.status));
-  }
-}
-
-async function updateDistributionsWithRetry(token, mutateFn, commitMsg, attempt){
-  attempt = attempt || 0;
-  const { obj, sha } = await getDistributionsWithSha(token);
-  const newObj = mutateFn(obj);
-  try{
-    await putDistributionsJson(newObj, sha, token, commitMsg);
-  }catch(e){
-    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
-      return updateDistributionsWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    function distDefaultData(){
+      return {
+        config: {
+          basePriceNoTheme: 15,
+          themeFeePerRun: 15,
+          runCapacity: 30,
+          costs: { bagPerfume: 1, bagPackaging: 0, bottle: 2, handle: 0, pin: 0, oilPerG: 0, alcoholPerMl: 0, box: 0 }
+        },
+        stock: { black: 0, white: 0, bottlesEmpty: 0, bottlesReady: 0, bagsPerfume: 0, bagsPackaging: 0, pins: 0, boxes: 0, oilG: 0, alcoholMl: 0 },
+        sales: [],
+        purchases: [],
+        fills: []
+      };
     }
-    throw e;
-  }
-  return newObj;
-}
+    let distributionsData = distDefaultData();
 
-function distColorNameAr(c){ return c === "black" ? "أسود" : "أبيض"; }
-
-function distComputeTotal(qty, withTheme){
-  const base = (Number(distributionsData.config.basePriceNoTheme) || 0) * qty;
-  if(!withTheme) return { base, themeSurcharge: 0, total: base, runs: 0 };
-  const capacity = Number(distributionsData.config.runCapacity) || 30;
-  const fee = Number(distributionsData.config.themeFeePerRun) || 0;
-  const runs = Math.max(1, Math.ceil(qty / capacity));
-  const themeSurcharge = runs * fee;
-  return { base, themeSurcharge, total: base + themeSurcharge, runs };
-}
-
-// تكلفة الزيت + الكحول لكل زجاجة 15مل، بناءً على نسبة الخلط الثابتة (1كيلو زيت + 2000مل كحول = 3000مل)
-function distLiquidCostPer15ml(oilPerKg, alcoholPerKg){
-  const mixCost = (oilPerKg * DIST_MIX_OIL_KG) + (alcoholPerKg * (DIST_MIX_ALCOHOL_ML / 1000));
-  const costPerMl = mixCost / DIST_MIX_TOTAL_ML;
-  return costPerMl * DIST_BOTTLE_ML;
-}
-
-// تكلفة الزجاجة "الجاهزة للبيع" = زجاجة فارغة + الزيت/الكحول جواها
-function distReadyBottleCost(costs){
-  return (Number(costs.bottle)||0) + distLiquidCostPer15ml(Number(costs.oilPerKg)||0, Number(costs.alcoholPerKg)||0);
-}
-
-// عدد الزجاجات (15مل) اللي تطلع من دفعة خلط واحدة (1كيلو زيت + 2000مل كحول = 3000مل)
-function distBottlesPerBatch(){ return DIST_MIX_TOTAL_ML / DIST_BOTTLE_ML; }
-
-// كمية الزيت/الكحول (كيلو) اللازمة لتعبئة عدد معيّن من الزجاجات، حسب نسبة الخلط الثابتة
-function distMaterialsForFill(qty){
-  const perBatch = distBottlesPerBatch();
-  return {
-    oilKg: qty * DIST_MIX_OIL_KG / perBatch,
-    alcoholKg: qty * (DIST_MIX_ALCOHOL_ML / 1000) / perBatch
-  };
-}
-
-// أي مفتاح مخزون ترتبط فيه كل مادة شراء (null = مافيه عداد كمية مرتبط، بس تكلفة)
-function distMaterialStockKey(material){
-  if(material === "bag") return "bags";
-  if(material === "bottle") return "bottlesEmpty";
-  if(material === "box") return "boxes";
-  if(material === "oil") return "oilKg";
-  if(material === "alcohol") return "alcoholKg";
-  return null;
-}
-
-// مزامنة عدد الزجاجات/الأكياس المستخدمة تلقائيًا مع الكمية (إلا لو المستخدم عدّلها يدويًا) — البوكس دايمًا يدوي
-let distLastAutoQty = null;
-function distSyncMaterialsDefaults(){
-  const qty = Number(document.getElementById("dist_saleQty").value) || 0;
-  const bottlesEl = document.getElementById("dist_saleBottlesUsed");
-  const bagsEl = document.getElementById("dist_saleBagsUsed");
-  if(distLastAutoQty === null || Number(bottlesEl.value) === distLastAutoQty) bottlesEl.value = qty;
-  if(distLastAutoQty === null || Number(bagsEl.value) === distLastAutoQty) bagsEl.value = qty;
-  distLastAutoQty = qty;
-}
-
-// ===== تعديل عملية بيع سابقة =====
-let distEditingSaleId = null;
-
-function distStartEditSale(saleId){
-  const sale = (distributionsData.sales || []).find(s => s.id === saleId);
-  if(!sale) return;
-  distEditingSaleId = saleId;
-  document.getElementById("dist_saleCustomerName").value = sale.customerName || "";
-  document.getElementById("dist_saleCustomerPhone").value = sale.customerPhone || "";
-  document.getElementById("dist_saleEmirate").value = sale.emirate || "";
-  document.getElementById("dist_saleDate").value = sale.date || todayStr();
-  document.getElementById("dist_saleColor").value = sale.color;
-  document.getElementById("dist_saleQty").value = sale.qty;
-  document.getElementById("dist_saleTheme").checked = !!sale.withTheme;
-  document.getElementById("dist_saleDiscount").value = sale.discount || 0;
-  document.getElementById("dist_saleBottlesUsed").value = (sale.bottlesUsed !== undefined ? sale.bottlesUsed : sale.qty);
-  document.getElementById("dist_saleBagsUsed").value = (sale.bagsUsed !== undefined ? sale.bagsUsed : sale.qty);
-  document.getElementById("dist_saleBoxesUsed").value = sale.boxesUsed || 0;
-  document.getElementById("dist_saleNote").value = sale.note || "";
-  distLastAutoQty = null;
-  document.getElementById("dist_saleEditBanner").style.display = "flex";
-  document.getElementById("dist_logSaleBtn").textContent = "💾 حفظ التعديل";
-  distUpdateComputedPrice();
-  document.getElementById("distPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function distCancelEditSale(){
-  distEditingSaleId = null;
-  document.getElementById("dist_saleEditBanner").style.display = "none";
-  document.getElementById("dist_logSaleBtn").textContent = "✅ سجّل البيع واخصم من المخزون";
-  document.getElementById("dist_saleQty").value = 1;
-  document.getElementById("dist_saleDiscount").value = 0;
-  document.getElementById("dist_saleBoxesUsed").value = 0;
-  document.getElementById("dist_saleNote").value = "";
-  document.getElementById("dist_saleCustomerName").value = "";
-  document.getElementById("dist_saleCustomerPhone").value = "";
-  document.getElementById("dist_saleEmirate").value = "";
-  distLastAutoQty = null;
-  distSyncMaterialsDefaults();
-  distUpdateComputedPrice();
-}
-
-// ===== إلغاء طلبية بيع =====
-let distPendingCancelId = null;
-
-async function distCancelSale(saleId){
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  distShowStatus("جارِ إلغاء الطلبية...", "info");
-  try{
-    const updated = await updateDistributionsWithRetry(token, (obj) => {
-      obj.stock = obj.stock || {};
-      const idx = (obj.sales||[]).findIndex(s => s.id === saleId);
-      if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
-      const s = obj.sales[idx];
-      if(s.cancelled) throw new Error("العملية ملغاة أصلًا.");
-      obj.stock[s.color] = (obj.stock[s.color] || 0) + Number(s.qty || 0);
-      obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(s.bottlesUsed || 0);
-      obj.stock.bags = (obj.stock.bags || 0) + Number(s.bagsUsed || 0);
-      obj.stock.boxes = (obj.stock.boxes || 0) + Number(s.boxesUsed || 0);
-      obj.sales[idx] = Object.assign({}, s, { cancelled: true, cancelledAt: new Date().toISOString() });
-      return obj;
-    }, "Cancel distribution sale: " + saleId);
-    distributionsData = updated;
-    if(distEditingSaleId === saleId) distCancelEditSale();
-    distFillForm();
-    distShowStatus("تم إلغاء الطلبية وإرجاع المخزون!", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }
-}
-
-// ===== سجل المشتريات =====
-function distMaterialNameAr(m){
-  const map = { bag: "كيس", bottle: "زجاجة فارغة", box: "بوكس تغليف", handle: "مسكة", alcohol: "كحول", oil: "زيت عطري" };
-  return map[m] || m;
-}
-
-function distUpdatePurchaseComputedUnit(){
-  const qty = Number(document.getElementById("dist_purchaseQty").value) || 0;
-  const totalPrice = Number(document.getElementById("dist_purchaseTotalPrice").value) || 0;
-  const el = document.getElementById("dist_purchaseComputedUnit");
-  if(qty <= 0){ el.textContent = ""; return; }
-  el.textContent = `سعر الوحدة: ${(totalPrice / qty).toFixed(2)} درهم`;
-}
-
-function distRenderPurchaseLog(){
-  const purchases = distributionsData.purchases || [];
-  const totalSpent = purchases.reduce((s,x) => s + (Number(x.totalPrice)||0), 0);
-  document.getElementById("dist_totalSpent").textContent = totalSpent.toFixed(2) + " AED";
-  document.getElementById("dist_purchaseCount").textContent = purchases.length;
-  const log = document.getElementById("dist_purchaseLog");
-  if(purchases.length === 0){
-    log.innerHTML = `<div class="hint">ما فيه مشتريات مسجّلة بعد.</div>`;
-    return;
-  }
-  log.innerHTML = purchases.slice().reverse().map(p => `
-    <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-      <span>${p.date} — ${distMaterialNameAr(p.material)} × ${p.qty} — سعر الوحدة ${Number(p.unitPrice).toFixed(2)}${p.note ? " — " + p.note : ""}</span>
-      <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
-        <b>${Number(p.totalPrice).toFixed(2)} AED</b>
-        <button type="button" class="secondary dist-edit-purchase-btn" data-id="${p.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
-        <button type="button" class="secondary dist-delete-purchase-btn" data-id="${p.id}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑 حذف</button>
-      </span>
-    </div>
-  `).join("");
-}
-
-// ===== تعديل/حذف عملية شراء =====
-let distEditingPurchaseId = null;
-let distPendingDeletePurchaseId = null;
-
-function distStartEditPurchase(purchaseId){
-  const p = (distributionsData.purchases || []).find(x => x.id === purchaseId);
-  if(!p) return;
-  distEditingPurchaseId = purchaseId;
-  document.getElementById("dist_purchaseMaterial").value = p.material;
-  document.getElementById("dist_purchaseQty").value = p.qty;
-  document.getElementById("dist_purchaseTotalPrice").value = p.totalPrice;
-  document.getElementById("dist_purchaseDate").value = p.date || todayStr();
-  document.getElementById("dist_purchaseNote").value = p.note || "";
-  document.getElementById("dist_purchaseEditBanner").style.display = "flex";
-  document.getElementById("dist_logPurchaseBtn").textContent = "💾 حفظ تعديل الشراء";
-  distUpdatePurchaseComputedUnit();
-  document.getElementById("distPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function distCancelEditPurchase(){
-  distEditingPurchaseId = null;
-  document.getElementById("dist_purchaseEditBanner").style.display = "none";
-  document.getElementById("dist_logPurchaseBtn").textContent = "➕ سجّل عملية شراء";
-  document.getElementById("dist_purchaseQty").value = 1;
-  document.getElementById("dist_purchaseTotalPrice").value = "";
-  document.getElementById("dist_purchaseNote").value = "";
-  distUpdatePurchaseComputedUnit();
-}
-
-async function distDeletePurchase(purchaseId){
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  distShowStatus("جارِ حذف عملية الشراء...", "info");
-  try{
-    const updated = await updateDistributionsWithRetry(token, (obj) => {
-      obj.stock = obj.stock || {};
-      const idx = (obj.purchases||[]).findIndex(p => p.id === purchaseId);
-      if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
-      const p = obj.purchases[idx];
-      const key = distMaterialStockKey(p.material);
-      if(key) obj.stock[key] = (obj.stock[key] || 0) - Number(p.qty || 0);
-      obj.purchases.splice(idx, 1);
-      return obj;
-    }, "Delete distribution purchase: " + purchaseId);
-    distributionsData = updated;
-    if(distEditingPurchaseId === purchaseId) distCancelEditPurchase();
-    distFillForm();
-    distShowStatus("تم حذف عملية الشراء وتصحيح المخزون (التكلفة الحالية ما تغيّرت — عدّلها يدويًا لو احتجت).", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }
-}
-
-// ===== تعبئة الزجاجات =====
-function distUpdateFillPreview(){
-  const qty = Number(document.getElementById("dist_fillQty").value) || 0;
-  const el = document.getElementById("dist_fillPreview");
-  if(qty <= 0){ el.textContent = ""; return; }
-  const needed = distMaterialsForFill(qty);
-  const stk = distributionsData.stock || {};
-  el.textContent = `يحتاج: ${needed.oilKg.toFixed(3)} كيلو زيت + ${needed.alcoholKg.toFixed(3)} كيلو كحول (المتوفر: ${(stk.oilKg||0).toFixed(3)} كيلو زيت، ${(stk.alcoholKg||0).toFixed(3)} كيلو كحول)`;
-}
-
-function distRenderFillLog(){
-  const fills = distributionsData.fills || [];
-  document.getElementById("dist_totalFilled").textContent = fills.reduce((s,x) => s + (Number(x.qty)||0), 0);
-  const log = document.getElementById("dist_fillLog");
-  if(fills.length === 0){
-    log.innerHTML = `<div class="hint">ما فيه عمليات تعبئة مسجّلة بعد.</div>`;
-    return;
-  }
-  log.innerHTML = fills.slice().reverse().map(f => `
-    <div style="border-bottom:1px solid var(--line); padding:6px 0; font-size:13px; display:flex; justify-content:space-between; gap:10px;">
-      <span>${f.date} — تعبئة ${f.qty} زجاجة</span>
-      <span style="color:#666;">زيت ${Number(f.oilUsed).toFixed(3)} + كحول ${Number(f.alcoholUsed).toFixed(3)} كيلو</span>
-    </div>
-  `).join("");
-}
-
-function distRenderSalesLog(){
-  const sales = distributionsData.sales || [];
-  const activeSales = sales.filter(s => !s.cancelled);
-  const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
-  const totalRevenue = activeSales.reduce((s,x) => s + (Number(x.netTotal !== undefined ? x.netTotal : x.total)||0), 0);
-  const totalProfit = activeSales.reduce((s,x) => s + (Number(x.orderProfit)||0), 0);
-  document.getElementById("dist_totalUnitsSold").textContent = totalUnits;
-  document.getElementById("dist_totalRevenue").textContent = totalRevenue.toFixed(2) + " AED";
-  document.getElementById("dist_totalProfit").textContent = totalProfit.toFixed(2) + " AED";
-  const log = document.getElementById("dist_salesLog");
-  if(sales.length === 0){
-    log.innerHTML = `<div class="hint">ما فيه مبيعات مسجّلة بعد.</div>`;
-    return;
-  }
-  log.innerHTML = sales.slice().reverse().map(s => {
-    const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).join(" — ");
-    const shownTotal = (s.netTotal !== undefined ? s.netTotal : s.total);
-    const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "");
-    const profitTxt = (s.orderProfit !== undefined ? ` — ربح ${Number(s.orderProfit).toFixed(2)}` : "");
-    const cancelledTxt = s.cancelled ? " — ⛔ ملغاة" : "";
-    const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
-    const actionsHtml = s.cancelled
-      ? `<span style="font-size:12px; color:#963224; font-weight:700; text-decoration:none;">ملغاة</span>`
-      : `<button type="button" class="secondary dist-edit-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
-         <button type="button" class="secondary dist-cancel-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
-    return `
-    <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; ${rowStyle}">
-      <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}${discountTxt}${profitTxt}${cancelledTxt}</span>
-      <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
-        <b>${Number(shownTotal).toFixed(2)} AED</b>
-        ${actionsHtml}
-      </span>
-    </div>
-  `;
-  }).join("");
-}
-
-function distUpdateComputedPrice(){
-  const qty = Number(document.getElementById("dist_saleQty").value) || 0;
-  const withTheme = document.getElementById("dist_saleTheme").checked;
-  const discount = Number(document.getElementById("dist_saleDiscount").value) || 0;
-  const bottlesUsed = Number(document.getElementById("dist_saleBottlesUsed").value) || 0;
-  const bagsUsed = Number(document.getElementById("dist_saleBagsUsed").value) || 0;
-  const boxesUsed = Number(document.getElementById("dist_saleBoxesUsed").value) || 0;
-  if(qty <= 0){
-    document.getElementById("dist_saleComputedPrice").textContent = "";
-    document.getElementById("dist_saleOrderCost").textContent = "";
-    document.getElementById("dist_saleOrderProfit").textContent = "";
-    return;
-  }
-  const r = distComputeTotal(qty, withTheme);
-  const netTotal = Math.max(0, r.total - discount);
-  let txt = `السعر: ${r.base.toFixed(2)} درهم`;
-  if(withTheme) txt += ` + رسوم ثيم (${r.runs} دفعة × ${(distributionsData.config.themeFeePerRun||0).toFixed(2)}) = ${r.themeSurcharge.toFixed(2)} درهم`;
-  if(discount > 0) txt += ` − خصم ${discount.toFixed(2)} درهم`;
-  txt += ` — الإجمالي المطلوب من العميل: ${netTotal.toFixed(2)} درهم`;
-  document.getElementById("dist_saleComputedPrice").textContent = txt;
-
-  const costs = distributionsData.config.costs || {};
-  const readyBottleCost = distReadyBottleCost(costs);
-  const orderCost = (bottlesUsed * readyBottleCost) + (bagsUsed * (Number(costs.bag)||0)) + (boxesUsed * (Number(costs.box)||0)) + (qty * (Number(costs.handle)||0));
-  const orderProfit = netTotal - orderCost;
-  document.getElementById("dist_saleOrderCost").textContent = `تكلفة المواد لهالطلبية: ${orderCost.toFixed(2)} درهم (زجاجات ${bottlesUsed}×${readyBottleCost.toFixed(2)} + أكياس ${bagsUsed}×${(Number(costs.bag)||0).toFixed(2)} + بوكس ${boxesUsed}×${(Number(costs.box)||0).toFixed(2)} + مسكة ${qty}×${(Number(costs.handle)||0).toFixed(2)})`;
-  const profitEl = document.getElementById("dist_saleOrderProfit");
-  profitEl.textContent = `الربح الصافي لهالطلبية: ${orderProfit.toFixed(2)} درهم`;
-  profitEl.style.color = orderProfit >= 0 ? "#1F6B41" : "#963224";
-}
-
-function distUpdateCostEstimate(){
-  const bag = Number(document.getElementById("dist_costBag").value) || 0;
-  const bottle = Number(document.getElementById("dist_costBottle").value) || 0;
-  const handle = Number(document.getElementById("dist_costHandle").value) || 0;
-  const oilPerKg = Number(document.getElementById("dist_costOilPerKg").value) || 0;
-  const alcoholPerKg = Number(document.getElementById("dist_costAlcoholPerKg").value) || 0;
-  const liquidCost = distLiquidCostPer15ml(oilPerKg, alcoholPerKg);
-  const totalCost = bag + bottle + handle + liquidCost;
-  document.getElementById("dist_estCostDisplay").textContent =
-    `التكلفة الإجمالية التقريبية للقطعة: ${totalCost.toFixed(2)} درهم (كيس ${bag.toFixed(2)} + زجاجة ${bottle.toFixed(2)} + مسكة ${handle.toFixed(2)} + زيت/كحول ${liquidCost.toFixed(2)})`;
-  const basePrice = Number(distributionsData.config.basePriceNoTheme) || 15;
-  const margin = basePrice - totalCost;
-  const marginEl = document.getElementById("dist_estMarginDisplay");
-  marginEl.textContent = `هامش الربح التقريبي (بدون ثيم، سعر بيع ${basePrice.toFixed(2)}): ${margin.toFixed(2)} درهم للقطعة`;
-  marginEl.style.color = margin >= 0 ? "#1F6B41" : "#963224";
-}
-
-function distFillForm(){
-  document.getElementById("dist_stockBlack").value = distributionsData.stock.black || 0;
-  document.getElementById("dist_stockWhite").value = distributionsData.stock.white || 0;
-  document.getElementById("dist_stockBlackDisplay").textContent = distributionsData.stock.black || 0;
-  document.getElementById("dist_stockWhiteDisplay").textContent = distributionsData.stock.white || 0;
-  document.getElementById("dist_stockBottlesEmpty").value = distributionsData.stock.bottlesEmpty || 0;
-  document.getElementById("dist_stockBottlesEmptyDisplay").textContent = distributionsData.stock.bottlesEmpty || 0;
-  document.getElementById("dist_stockBottlesReady").value = distributionsData.stock.bottlesReady || 0;
-  document.getElementById("dist_stockBottlesReadyDisplay").textContent = distributionsData.stock.bottlesReady || 0;
-  document.getElementById("dist_stockBags").value = distributionsData.stock.bags || 0;
-  document.getElementById("dist_stockBagsDisplay").textContent = distributionsData.stock.bags || 0;
-  document.getElementById("dist_stockBoxes").value = distributionsData.stock.boxes || 0;
-  document.getElementById("dist_stockBoxesDisplay").textContent = distributionsData.stock.boxes || 0;
-  document.getElementById("dist_stockOilKgDisplay").textContent = (distributionsData.stock.oilKg || 0).toFixed(3);
-  document.getElementById("dist_stockAlcoholKgDisplay").textContent = (distributionsData.stock.alcoholKg || 0).toFixed(3);
-
-  const costs = distributionsData.config.costs || {};
-  document.getElementById("dist_costBag").value = costs.bag || 0;
-  document.getElementById("dist_costBottle").value = costs.bottle || 0;
-  document.getElementById("dist_costHandle").value = (costs.handle !== undefined ? costs.handle : (costs.handleBlack || costs.handleWhite || 0));
-  document.getElementById("dist_costAlcoholPerKg").value = costs.alcoholPerKg || 0;
-  document.getElementById("dist_costOilPerKg").value = costs.oilPerKg || 0;
-  document.getElementById("dist_costBox").value = costs.box || 0;
-
-  document.getElementById("dist_basePrice").value = distributionsData.config.basePriceNoTheme || 0;
-  document.getElementById("dist_themeFeePerRun").value = distributionsData.config.themeFeePerRun || 0;
-  document.getElementById("dist_runCapacity").value = distributionsData.config.runCapacity || 30;
-
-  distUpdateCostEstimate();
-  distRenderSalesLog();
-  distRenderPurchaseLog();
-  distRenderFillLog();
-  distUpdateFillPreview();
-  distSyncMaterialsDefaults();
-  distUpdateComputedPrice();
-}
-
-async function loadDistributionsIntoPanel(){
-  try{
-    distShowStatus("جارِ التحميل...", "info");
-    const res = await fetch(DISTRIBUTIONS_JSON_RAW_URL, { cache: "no-store" });
-    if(res.ok){
-      distributionsData = await res.json();
-    } else if(res.status === 404){
-      distributionsData = distDefaultData();
-    } else {
-      throw new Error("HTTP " + res.status);
+    function distShowStatus(msg, cls){
+      const box = document.getElementById("dist_statusBox");
+      box.textContent = msg;
+      box.className = "status " + (cls || "");
     }
-    const def = distDefaultData();
-    if(!distributionsData.config) distributionsData.config = def.config;
-    if(!distributionsData.config.costs) distributionsData.config.costs = def.config.costs;
-    if(distributionsData.config.themeFeePerRun === undefined) distributionsData.config.themeFeePerRun = def.config.themeFeePerRun;
-    if(distributionsData.config.runCapacity === undefined) distributionsData.config.runCapacity = def.config.runCapacity;
-    if(!distributionsData.stock) distributionsData.stock = def.stock;
-    if(distributionsData.stock.white === undefined) distributionsData.stock.white = distributionsData.stock.beige || 0;
-    if(distributionsData.stock.bottlesEmpty === undefined) distributionsData.stock.bottlesEmpty = 0;
-    if(distributionsData.stock.bottlesReady === undefined) distributionsData.stock.bottlesReady = 0;
-    if(distributionsData.stock.bags === undefined) distributionsData.stock.bags = 0;
-    if(distributionsData.stock.boxes === undefined) distributionsData.stock.boxes = 0;
-    if(distributionsData.config.costs.box === undefined) distributionsData.config.costs.box = 0;
-    if(!distributionsData.sales) distributionsData.sales = [];
-    if(!distributionsData.purchases) distributionsData.purchases = [];
-    if(!distributionsData.fills) distributionsData.fills = [];
-    if(distributionsData.stock.oilKg === undefined) distributionsData.stock.oilKg = 0;
-    if(distributionsData.stock.alcoholKg === undefined) distributionsData.stock.alcoholKg = 0;
-    if(!document.getElementById("dist_saleDate").value) document.getElementById("dist_saleDate").value = todayStr();
-    if(!document.getElementById("dist_purchaseDate").value) document.getElementById("dist_purchaseDate").value = todayStr();
-    if(!document.getElementById("dist_fillDate").value) document.getElementById("dist_fillDate").value = todayStr();
-    distFillForm();
-    document.getElementById("dist_statusBox").className = "status";
-  }catch(e){
-    distShowStatus("ما قدرت أجيب بيانات التوزيعات الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
-  }
-}
 
-document.getElementById("dist_reloadBtn").addEventListener("click", loadDistributionsIntoPanel);
-document.getElementById("dist_saleQty").addEventListener("input", () => { distSyncMaterialsDefaults(); distUpdateComputedPrice(); });
-document.getElementById("dist_saleTheme").addEventListener("change", distUpdateComputedPrice);
-document.getElementById("dist_saleDiscount").addEventListener("input", distUpdateComputedPrice);
-document.getElementById("dist_saleBottlesUsed").addEventListener("input", distUpdateComputedPrice);
-document.getElementById("dist_saleBagsUsed").addEventListener("input", distUpdateComputedPrice);
-document.getElementById("dist_saleBoxesUsed").addEventListener("input", distUpdateComputedPrice);
-document.getElementById("dist_costBag").addEventListener("input", distUpdateCostEstimate);
-document.getElementById("dist_costBottle").addEventListener("input", distUpdateCostEstimate);
-document.getElementById("dist_costHandle").addEventListener("input", distUpdateCostEstimate);
-document.getElementById("dist_costOilPerKg").addEventListener("input", distUpdateCostEstimate);
-document.getElementById("dist_costAlcoholPerKg").addEventListener("input", distUpdateCostEstimate);
-document.getElementById("dist_cancelEditBtn").addEventListener("click", distCancelEditSale);
-document.getElementById("dist_salesLog").addEventListener("click", (e) => {
-  const editBtn = e.target.closest(".dist-edit-sale-btn");
-  if(editBtn){ distStartEditSale(editBtn.dataset.id); return; }
-  const cancelBtn = e.target.closest(".dist-cancel-sale-btn");
-  if(cancelBtn){
-    const id = cancelBtn.dataset.id;
-    if(distPendingCancelId === id){
-      distPendingCancelId = null;
-      distCancelSale(id);
-    } else {
-      distPendingCancelId = id;
-      cancelBtn.textContent = "⚠️ تأكيد الإلغاء؟";
-      cancelBtn.style.background = "#963224";
-      cancelBtn.style.color = "#fff";
-      setTimeout(() => {
-        if(distPendingCancelId === id){ distPendingCancelId = null; distRenderSalesLog(); }
-      }, 4000);
-    }
-  }
-});
-document.getElementById("dist_purchaseQty").addEventListener("input", distUpdatePurchaseComputedUnit);
-document.getElementById("dist_purchaseTotalPrice").addEventListener("input", distUpdatePurchaseComputedUnit);
-document.getElementById("dist_fillQty").addEventListener("input", distUpdateFillPreview);
-document.getElementById("dist_cancelPurchaseEditBtn").addEventListener("click", distCancelEditPurchase);
-document.getElementById("dist_purchaseLog").addEventListener("click", (e) => {
-  const editBtn = e.target.closest(".dist-edit-purchase-btn");
-  if(editBtn){ distStartEditPurchase(editBtn.dataset.id); return; }
-  const delBtn = e.target.closest(".dist-delete-purchase-btn");
-  if(delBtn){
-    const id = delBtn.dataset.id;
-    if(distPendingDeletePurchaseId === id){
-      distPendingDeletePurchaseId = null;
-      distDeletePurchase(id);
-    } else {
-      distPendingDeletePurchaseId = id;
-      delBtn.textContent = "⚠️ تأكيد الحذف؟";
-      delBtn.style.background = "#963224";
-      delBtn.style.color = "#fff";
-      setTimeout(() => {
-        if(distPendingDeletePurchaseId === id){ distPendingDeletePurchaseId = null; distRenderPurchaseLog(); }
-      }, 4000);
-    }
-  }
-});
-
-document.getElementById("dist_saveStockBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  const black = Number(document.getElementById("dist_stockBlack").value) || 0;
-  const white = Number(document.getElementById("dist_stockWhite").value) || 0;
-  const bottlesEmpty = Number(document.getElementById("dist_stockBottlesEmpty").value) || 0;
-  const bottlesReady = Number(document.getElementById("dist_stockBottlesReady").value) || 0;
-  const bags = Number(document.getElementById("dist_stockBags").value) || 0;
-  const boxes = Number(document.getElementById("dist_stockBoxes").value) || 0;
-  const btn = document.getElementById("dist_saveStockBtn");
-  btn.disabled = true;
-  try{
-    distShowStatus("جارِ الحفظ والنشر...", "info");
-    const updated = await updateDistributionsWithRetry(token, (obj) => { obj.stock = { black, white, bottlesEmpty, bottlesReady, bags, boxes }; return obj; }, "Update distributions stock");
-    distributionsData = updated;
-    distFillForm();
-    distShowStatus("تم حفظ المخزون!", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }finally{
-    btn.disabled = false;
-  }
-});
-
-document.getElementById("dist_saveCostsBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  const costs = {
-    bag: Number(document.getElementById("dist_costBag").value) || 0,
-    bottle: Number(document.getElementById("dist_costBottle").value) || 0,
-    handle: Number(document.getElementById("dist_costHandle").value) || 0,
-    alcoholPerKg: Number(document.getElementById("dist_costAlcoholPerKg").value) || 0,
-    oilPerKg: Number(document.getElementById("dist_costOilPerKg").value) || 0,
-    box: Number(document.getElementById("dist_costBox").value) || 0
-  };
-  const btn = document.getElementById("dist_saveCostsBtn");
-  btn.disabled = true;
-  try{
-    distShowStatus("جارِ الحفظ والنشر...", "info");
-    const updated = await updateDistributionsWithRetry(token, (obj) => { obj.config = obj.config || {}; obj.config.costs = costs; return obj; }, "Update distributions raw material costs");
-    distributionsData = updated;
-    distFillForm();
-    distShowStatus("تم حفظ التكاليف!", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }finally{
-    btn.disabled = false;
-  }
-});
-
-document.getElementById("dist_savePricingBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  const basePrice = Number(document.getElementById("dist_basePrice").value) || 0;
-  const themeFeePerRun = Number(document.getElementById("dist_themeFeePerRun").value) || 0;
-  const runCapacity = Number(document.getElementById("dist_runCapacity").value) || 30;
-  const btn = document.getElementById("dist_savePricingBtn");
-  btn.disabled = true;
-  try{
-    distShowStatus("جارِ الحفظ والنشر...", "info");
-    const updated = await updateDistributionsWithRetry(token, (obj) => {
-      obj.config = obj.config || {};
-      obj.config.basePriceNoTheme = basePrice;
-      obj.config.themeFeePerRun = themeFeePerRun;
-      obj.config.runCapacity = runCapacity;
-      return obj;
-    }, "Update distributions pricing");
-    distributionsData = updated;
-    distFillForm();
-    distShowStatus("تم حفظ التسعير!", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }finally{
-    btn.disabled = false;
-  }
-});
-
-document.getElementById("dist_logSaleBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  const color = document.getElementById("dist_saleColor").value;
-  const qty = Number(document.getElementById("dist_saleQty").value) || 0;
-  const withTheme = document.getElementById("dist_saleTheme").checked;
-  const date = document.getElementById("dist_saleDate").value || todayStr();
-  const note = document.getElementById("dist_saleNote").value.trim();
-  const customerName = document.getElementById("dist_saleCustomerName").value.trim();
-  const customerPhone = document.getElementById("dist_saleCustomerPhone").value.trim();
-  const emirate = document.getElementById("dist_saleEmirate").value.trim();
-  const discount = Number(document.getElementById("dist_saleDiscount").value) || 0;
-  const bottlesUsed = Number(document.getElementById("dist_saleBottlesUsed").value) || 0;
-  const bagsUsed = Number(document.getElementById("dist_saleBagsUsed").value) || 0;
-  const boxesUsed = Number(document.getElementById("dist_saleBoxesUsed").value) || 0;
-  if(qty <= 0){ distShowStatus("لازم تكتب كمية أكبر من صفر.", "err"); return; }
-
-  const editingId = distEditingSaleId;
-  const btn = document.getElementById("dist_logSaleBtn");
-  btn.disabled = true;
-  try{
-    distShowStatus("جارِ الحفظ والنشر...", "info");
-    const updated = await updateDistributionsWithRetry(token, (obj) => {
-      obj.stock = obj.stock || {};
-      obj.config = obj.config || {};
-      let oldEntry = null;
-      if(editingId){
-        const idx = (obj.sales||[]).findIndex(s => s.id === editingId);
-        if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة (يمكن انحذفت). حدّث الصفحة.");
-        oldEntry = obj.sales[idx];
-        obj.stock[oldEntry.color] = (obj.stock[oldEntry.color] || 0) + Number(oldEntry.qty || 0);
-        obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(oldEntry.bottlesUsed || 0);
-        obj.stock.bags = (obj.stock.bags || 0) + Number(oldEntry.bagsUsed || 0);
-        obj.stock.boxes = (obj.stock.boxes || 0) + Number(oldEntry.boxesUsed || 0);
+    async function getDistributionsWithSha(token){
+      const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}?ref=${BRANCH}`, {
+        cache: "no-store",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if(res.status === 404) return { obj: distDefaultData(), sha: null };
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        throw new Error("تعذّر قراءة distributions.json الحالي: " + (err.message || res.status));
       }
-      const curColorStock = obj.stock[color] || 0;
-      if(qty > curColorStock) throw new Error("المخزون الحالي (" + distColorNameAr(color) + ") بس " + curColorStock + " قطعة — عدّل الكمية أو حدّث المخزون أول.");
-      if(bottlesUsed > (obj.stock.bottlesReady||0)) throw new Error("المخزون الحالي من الزجاجات الجاهزة بس " + (obj.stock.bottlesReady||0) + " — عدّل العدد أو حدّث المخزون أول.");
-      if(bagsUsed > (obj.stock.bags||0)) throw new Error("المخزون الحالي من الأكياس بس " + (obj.stock.bags||0) + " — عدّل العدد أو حدّث المخزون أول.");
-      if(boxesUsed > (obj.stock.boxes||0)) throw new Error("المخزون الحالي من بوكسات التغليف بس " + (obj.stock.boxes||0) + " — عدّل العدد أو حدّث المخزون أول.");
+      const info = await res.json();
+      const obj = JSON.parse(base64ToUtf8(info.content));
+      return { obj: (obj && typeof obj === "object") ? obj : distDefaultData(), sha: info.sha };
+    }
 
+    async function putDistributionsJson(obj, sha, token, commitMsg){
+      const body = {
+        message: commitMsg,
+        content: utf8ToBase64(JSON.stringify(obj, null, 2)),
+        branch: BRANCH
+      };
+      if(sha) body.sha = sha;
+      const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}`, {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
+        throw new Error(err.message || ("HTTP " + res.status));
+      }
+    }
+
+    async function updateDistributionsWithRetry(token, mutateFn, commitMsg, attempt){
+      attempt = attempt || 0;
+      const { obj, sha } = await getDistributionsWithSha(token);
+      const newObj = mutateFn(obj);
+      try{
+        await putDistributionsJson(newObj, sha, token, commitMsg);
+      }catch(e){
+        if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+          return updateDistributionsWithRetry(token, mutateFn, commitMsg, attempt + 1);
+        }
+        throw e;
+      }
+      return newObj;
+    }
+
+    function distColorNameAr(c){ return c === "black" ? "أسود" : "أبيض"; }
+
+    function distComputeTotal(qty, withTheme){
+      const base = (Number(distributionsData.config.basePriceNoTheme) || 0) * qty;
+      if(!withTheme) return { base, themeSurcharge: 0, total: base, runs: 0 };
+      const capacity = Number(distributionsData.config.runCapacity) || 30;
+      const fee = Number(distributionsData.config.themeFeePerRun) || 0;
+      const runs = Math.max(1, Math.ceil(qty / capacity));
+      const themeSurcharge = runs * fee;
+      return { base, themeSurcharge, total: base + themeSurcharge, runs };
+    }
+
+    // عدد الزجاجات (15مل) اللي تطلع من دفعة خلط واحدة (1000 جرام زيت + 2000 مل كحول = 3000مل)
+    function distBottlesPerBatch(){ return DIST_MIX_TOTAL_ML / DIST_BOTTLE_ML; }
+
+    // تكلفة الزيت + الكحول لكل زجاجة 15مل، بناءً على نسبة الخلط الثابتة
+    function distLiquidCostPer15ml(oilPerG, alcoholPerMl){
+      const perBatch = distBottlesPerBatch();
+      const oilPerBottleG = DIST_MIX_OIL_G / perBatch;
+      const alcoholPerBottleMl = DIST_MIX_ALCOHOL_ML / perBatch;
+      return (oilPerBottleG * oilPerG) + (alcoholPerBottleMl * alcoholPerMl);
+    }
+
+    // تكلفة الزجاجة "الجاهزة للبيع" = زجاجة فارغة + الزيت/الكحول جواها
+    function distReadyBottleCost(costs){
+      return (Number(costs.bottle)||0) + distLiquidCostPer15ml(Number(costs.oilPerG)||0, Number(costs.alcoholPerMl)||0);
+    }
+
+    // كمية الزيت (جرام) والكحول (مل) اللازمة لتعبئة عدد معيّن من الزجاجات
+    function distMaterialsForFill(qty){
+      const perBatch = distBottlesPerBatch();
+      return {
+        oilG: qty * DIST_MIX_OIL_G / perBatch,
+        alcoholMl: qty * DIST_MIX_ALCOHOL_ML / perBatch
+      };
+    }
+
+    // أي مفتاح مخزون ترتبط فيه كل مادة شراء (null = مافيه عداد كمية مرتبط، بس تكلفة)
+    function distMaterialStockKey(material){
+      if(material === "bagPerfume" || material === "bag") return "bagsPerfume"; // "bag" = قيمة قديمة قبل فصل الكيسين
+      if(material === "bagPackaging") return "bagsPackaging";
+      if(material === "bottle") return "bottlesEmpty";
+      if(material === "box") return "boxes";
+      if(material === "pin") return "pins";
+      if(material === "oil") return "oilG";
+      if(material === "alcohol") return "alcoholMl";
+      return null; // handle -> تكلفة بس، مافيه عداد كمية مستقل
+    }
+
+    function distMaterialNameAr(m){
+      const map = { bagPerfume: "كيس للعطر", bagPackaging: "كيس للتغليف", bag: "كيس (قديم)", bottle: "زجاجة فارغة", box: "بوكس تغليف", handle: "مسكة", pin: "دبوس", alcohol: "كحول", oil: "زيت عطري" };
+      return map[m] || m;
+    }
+
+    function distMaterialUnitAr(m){
+      if(m === "oil") return "جرام";
+      if(m === "alcohol") return "مل";
+      return "قطعة";
+    }
+
+    // مزامنة عدد الزجاجات/كيس العطر/الدبابيس المستخدمة تلقائيًا مع الكمية (إلا لو المستخدم عدّلها يدويًا) — كيس التغليف والبوكس دايمًا يدوي
+    let distLastAutoQty = null;
+    function distSyncMaterialsDefaults(){
+      const qty = Number(document.getElementById("dist_saleQty").value) || 0;
+      const bottlesEl = document.getElementById("dist_saleBottlesUsed");
+      const bagsEl = document.getElementById("dist_saleBagsPerfumeUsed");
+      const pinsEl = document.getElementById("dist_salePinsUsed");
+      if(distLastAutoQty === null || Number(bottlesEl.value) === distLastAutoQty) bottlesEl.value = qty;
+      if(distLastAutoQty === null || Number(bagsEl.value) === distLastAutoQty) bagsEl.value = qty;
+      if(distLastAutoQty === null || Number(pinsEl.value) === distLastAutoQty) pinsEl.value = qty;
+      distLastAutoQty = qty;
+    }
+
+    // ===== تعديل عملية بيع سابقة =====
+    let distEditingSaleId = null;
+
+    function distStartEditSale(saleId){
+      const sale = (distributionsData.sales || []).find(s => s.id === saleId);
+      if(!sale) return;
+      distEditingSaleId = saleId;
+      document.getElementById("dist_saleCustomerName").value = sale.customerName || "";
+      document.getElementById("dist_saleCustomerPhone").value = sale.customerPhone || "";
+      document.getElementById("dist_saleEmirate").value = sale.emirate || "";
+      document.getElementById("dist_saleDate").value = sale.date || todayStr();
+      document.getElementById("dist_saleColor").value = sale.color;
+      document.getElementById("dist_saleQty").value = sale.qty;
+      document.getElementById("dist_saleTheme").checked = !!sale.withTheme;
+      document.getElementById("dist_saleDiscount").value = sale.discount || 0;
+      document.getElementById("dist_saleBottlesUsed").value = (sale.bottlesUsed !== undefined ? sale.bottlesUsed : sale.qty);
+      document.getElementById("dist_saleBagsPerfumeUsed").value = (sale.bagsPerfumeUsed !== undefined ? sale.bagsPerfumeUsed : (sale.bagsUsed !== undefined ? sale.bagsUsed : sale.qty));
+      document.getElementById("dist_salePinsUsed").value = (sale.pinsUsed !== undefined ? sale.pinsUsed : sale.qty);
+      document.getElementById("dist_saleBagsPackagingUsed").value = sale.bagsPackagingUsed || 0;
+      document.getElementById("dist_saleBoxesUsed").value = sale.boxesUsed || 0;
+      document.getElementById("dist_saleNote").value = sale.note || "";
+      distLastAutoQty = null;
+      document.getElementById("dist_saleEditBanner").style.display = "flex";
+      document.getElementById("dist_logSaleBtn").textContent = "💾 حفظ التعديل";
+      distUpdateComputedPrice();
+      document.getElementById("distPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function distCancelEditSale(){
+      distEditingSaleId = null;
+      document.getElementById("dist_saleEditBanner").style.display = "none";
+      document.getElementById("dist_logSaleBtn").textContent = "✅ سجّل البيع واخصم من المخزون";
+      document.getElementById("dist_saleQty").value = 1;
+      document.getElementById("dist_saleDiscount").value = 0;
+      document.getElementById("dist_saleBagsPackagingUsed").value = 0;
+      document.getElementById("dist_saleBoxesUsed").value = 0;
+      document.getElementById("dist_saleNote").value = "";
+      document.getElementById("dist_saleCustomerName").value = "";
+      document.getElementById("dist_saleCustomerPhone").value = "";
+      document.getElementById("dist_saleEmirate").value = "";
+      distLastAutoQty = null;
+      distSyncMaterialsDefaults();
+      distUpdateComputedPrice();
+    }
+
+    // ===== إلغاء طلبية بيع =====
+    let distPendingCancelId = null;
+
+    async function distCancelSale(saleId){
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      distShowStatus("جارِ إلغاء الطلبية...", "info");
+      try{
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          obj.stock = obj.stock || {};
+          const idx = (obj.sales||[]).findIndex(s => s.id === saleId);
+          if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
+          const s = obj.sales[idx];
+          if(s.cancelled) throw new Error("العملية ملغاة أصلًا.");
+          obj.stock[s.color] = (obj.stock[s.color] || 0) + Number(s.qty || 0);
+          obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(s.bottlesUsed || 0);
+          obj.stock.bagsPerfume = (obj.stock.bagsPerfume || 0) + Number((s.bagsPerfumeUsed !== undefined ? s.bagsPerfumeUsed : s.bagsUsed) || 0);
+          obj.stock.pins = (obj.stock.pins || 0) + Number(s.pinsUsed || 0);
+          obj.stock.bagsPackaging = (obj.stock.bagsPackaging || 0) + Number(s.bagsPackagingUsed || 0);
+          obj.stock.boxes = (obj.stock.boxes || 0) + Number(s.boxesUsed || 0);
+          obj.sales[idx] = Object.assign({}, s, { cancelled: true, cancelledAt: new Date().toISOString() });
+          return obj;
+        }, "Cancel distribution sale: " + saleId);
+        distributionsData = updated;
+        if(distEditingSaleId === saleId) distCancelEditSale();
+        distFillForm();
+        distShowStatus("تم إلغاء الطلبية وإرجاع المخزون!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }
+    }
+
+    // ===== سجل المشتريات =====
+    function distUpdatePurchaseComputedUnit(){
+      const qty = Number(document.getElementById("dist_purchaseQty").value) || 0;
+      const totalPrice = Number(document.getElementById("dist_purchaseTotalPrice").value) || 0;
+      const material = document.getElementById("dist_purchaseMaterial").value;
+      const el = document.getElementById("dist_purchaseComputedUnit");
+      if(qty <= 0){ el.textContent = ""; return; }
+      el.textContent = `سعر الوحدة (${distMaterialUnitAr(material)}): ${(totalPrice / qty).toFixed(3)} درهم`;
+    }
+
+    function distRenderPurchaseLog(){
+      const purchases = distributionsData.purchases || [];
+      const totalSpent = purchases.reduce((s,x) => s + (Number(x.totalPrice)||0), 0);
+      document.getElementById("dist_totalSpent").textContent = totalSpent.toFixed(2) + " AED";
+      document.getElementById("dist_purchaseCount").textContent = purchases.length;
+      const log = document.getElementById("dist_purchaseLog");
+      if(purchases.length === 0){
+        log.innerHTML = `<div class="hint">ما فيه مشتريات مسجّلة بعد.</div>`;
+        return;
+      }
+      log.innerHTML = purchases.slice().reverse().map(p => `
+        <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <span>${p.date} — ${distMaterialNameAr(p.material)} × ${p.qty} ${distMaterialUnitAr(p.material)} — سعر الوحدة ${Number(p.unitPrice).toFixed(3)}${p.note ? " — " + p.note : ""}</span>
+          <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
+            <b>${Number(p.totalPrice).toFixed(2)} AED</b>
+            <button type="button" class="secondary dist-edit-purchase-btn" data-id="${p.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+            <button type="button" class="secondary dist-delete-purchase-btn" data-id="${p.id}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑 حذف</button>
+          </span>
+        </div>
+      `).join("");
+    }
+
+    // ===== تعديل/حذف عملية شراء =====
+    let distEditingPurchaseId = null;
+    let distPendingDeletePurchaseId = null;
+
+    function distStartEditPurchase(purchaseId){
+      const p = (distributionsData.purchases || []).find(x => x.id === purchaseId);
+      if(!p) return;
+      distEditingPurchaseId = purchaseId;
+      document.getElementById("dist_purchaseMaterial").value = (p.material === "bag" ? "bagPerfume" : p.material);
+      document.getElementById("dist_purchaseQty").value = p.qty;
+      document.getElementById("dist_purchaseTotalPrice").value = p.totalPrice;
+      document.getElementById("dist_purchaseDate").value = p.date || todayStr();
+      document.getElementById("dist_purchaseNote").value = p.note || "";
+      document.getElementById("dist_purchaseEditBanner").style.display = "flex";
+      document.getElementById("dist_logPurchaseBtn").textContent = "💾 حفظ تعديل الشراء";
+      distUpdatePurchaseComputedUnit();
+      document.getElementById("distPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function distCancelEditPurchase(){
+      distEditingPurchaseId = null;
+      document.getElementById("dist_purchaseEditBanner").style.display = "none";
+      document.getElementById("dist_logPurchaseBtn").textContent = "➕ سجّل عملية شراء";
+      document.getElementById("dist_purchaseQty").value = 1;
+      document.getElementById("dist_purchaseTotalPrice").value = "";
+      document.getElementById("dist_purchaseNote").value = "";
+      distUpdatePurchaseComputedUnit();
+    }
+
+    async function distDeletePurchase(purchaseId){
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      distShowStatus("جارِ حذف عملية الشراء...", "info");
+      try{
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          obj.stock = obj.stock || {};
+          const idx = (obj.purchases||[]).findIndex(p => p.id === purchaseId);
+          if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
+          const p = obj.purchases[idx];
+          const key = distMaterialStockKey(p.material);
+          if(key) obj.stock[key] = (obj.stock[key] || 0) - Number(p.qty || 0);
+          obj.purchases.splice(idx, 1);
+          return obj;
+        }, "Delete distribution purchase: " + purchaseId);
+        distributionsData = updated;
+        if(distEditingPurchaseId === purchaseId) distCancelEditPurchase();
+        distFillForm();
+        distShowStatus("تم حذف عملية الشراء وتصحيح المخزون (التكلفة الحالية ما تغيّرت — عدّلها يدويًا لو احتجت).", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }
+    }
+
+    // ===== تعبئة الزجاجات =====
+    function distUpdateFillPreview(){
+      const qty = Number(document.getElementById("dist_fillQty").value) || 0;
+      const el = document.getElementById("dist_fillPreview");
+      if(qty <= 0){ el.textContent = ""; return; }
+      const needed = distMaterialsForFill(qty);
+      const stk = distributionsData.stock || {};
+      el.textContent = `يحتاج: ${needed.oilG.toFixed(1)} جرام زيت + ${needed.alcoholMl.toFixed(1)} مل كحول (المتوفر: ${(stk.oilG||0).toFixed(1)} جرام زيت، ${(stk.alcoholMl||0).toFixed(1)} مل كحول)`;
+    }
+
+    function distRenderFillLog(){
+      const fills = distributionsData.fills || [];
+      document.getElementById("dist_totalFilled").textContent = fills.reduce((s,x) => s + (Number(x.qty)||0), 0);
+      const log = document.getElementById("dist_fillLog");
+      if(fills.length === 0){
+        log.innerHTML = `<div class="hint">ما فيه عمليات تعبئة مسجّلة بعد.</div>`;
+        return;
+      }
+      log.innerHTML = fills.slice().reverse().map(f => `
+        <div style="border-bottom:1px solid var(--line); padding:6px 0; font-size:13px; display:flex; justify-content:space-between; gap:10px;">
+          <span>${f.date} — تعبئة ${f.qty} زجاجة</span>
+          <span style="color:#666;">زيت ${Number(f.oilUsed).toFixed(1)} جرام + كحول ${Number(f.alcoholUsed).toFixed(1)} مل</span>
+        </div>
+      `).join("");
+    }
+
+    function distRenderSalesLog(){
+      const sales = distributionsData.sales || [];
+      const activeSales = sales.filter(s => !s.cancelled);
+      const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
+      const totalRevenue = activeSales.reduce((s,x) => s + (Number(x.netTotal !== undefined ? x.netTotal : x.total)||0), 0);
+      const totalProfit = activeSales.reduce((s,x) => s + (Number(x.orderProfit)||0), 0);
+      document.getElementById("dist_totalUnitsSold").textContent = totalUnits;
+      document.getElementById("dist_totalRevenue").textContent = totalRevenue.toFixed(2) + " AED";
+      document.getElementById("dist_totalProfit").textContent = totalProfit.toFixed(2) + " AED";
+      const log = document.getElementById("dist_salesLog");
+      if(sales.length === 0){
+        log.innerHTML = `<div class="hint">ما فيه مبيعات مسجّلة بعد.</div>`;
+        return;
+      }
+      log.innerHTML = sales.slice().reverse().map(s => {
+        const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).join(" — ");
+        const shownTotal = (s.netTotal !== undefined ? s.netTotal : s.total);
+        const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "");
+        const profitTxt = (s.orderProfit !== undefined ? ` — ربح ${Number(s.orderProfit).toFixed(2)}` : "");
+        const cancelledTxt = s.cancelled ? " — ⛔ ملغاة" : "";
+        const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
+        const actionsHtml = s.cancelled
+          ? `<span style="font-size:12px; color:#963224; font-weight:700; text-decoration:none;">ملغاة</span>`
+          : `<button type="button" class="secondary dist-edit-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+             <button type="button" class="secondary dist-cancel-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
+        return `
+        <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; ${rowStyle}">
+          <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}${discountTxt}${profitTxt}${cancelledTxt}</span>
+          <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
+            <b>${Number(shownTotal).toFixed(2)} AED</b>
+            ${actionsHtml}
+          </span>
+        </div>
+      `;
+      }).join("");
+    }
+
+    function distUpdateComputedPrice(){
+      const qty = Number(document.getElementById("dist_saleQty").value) || 0;
+      const withTheme = document.getElementById("dist_saleTheme").checked;
+      const discount = Number(document.getElementById("dist_saleDiscount").value) || 0;
+      const bottlesUsed = Number(document.getElementById("dist_saleBottlesUsed").value) || 0;
+      const bagsPerfumeUsed = Number(document.getElementById("dist_saleBagsPerfumeUsed").value) || 0;
+      const pinsUsed = Number(document.getElementById("dist_salePinsUsed").value) || 0;
+      const bagsPackagingUsed = Number(document.getElementById("dist_saleBagsPackagingUsed").value) || 0;
+      const boxesUsed = Number(document.getElementById("dist_saleBoxesUsed").value) || 0;
+      if(qty <= 0){
+        document.getElementById("dist_saleComputedPrice").textContent = "";
+        document.getElementById("dist_saleOrderCost").textContent = "";
+        document.getElementById("dist_saleOrderProfit").textContent = "";
+        return;
+      }
       const r = distComputeTotal(qty, withTheme);
       const netTotal = Math.max(0, r.total - discount);
-      const costs0 = obj.config.costs || {};
-      const readyBottleCost0 = distReadyBottleCost(costs0);
-      const orderCost = (bottlesUsed * readyBottleCost0) + (bagsUsed * (Number(costs0.bag)||0)) + (boxesUsed * (Number(costs0.box)||0)) + (qty * (Number(costs0.handle)||0));
+      let txt = `السعر: ${r.base.toFixed(2)} درهم`;
+      if(withTheme) txt += ` + رسوم ثيم (${r.runs} دفعة × ${(distributionsData.config.themeFeePerRun||0).toFixed(2)}) = ${r.themeSurcharge.toFixed(2)} درهم`;
+      if(discount > 0) txt += ` − خصم ${discount.toFixed(2)} درهم`;
+      txt += ` — الإجمالي المطلوب من العميل: ${netTotal.toFixed(2)} درهم`;
+      document.getElementById("dist_saleComputedPrice").textContent = txt;
+
+      const costs = distributionsData.config.costs || {};
+      const readyBottleCost = distReadyBottleCost(costs);
+      const orderCost = (bottlesUsed * readyBottleCost)
+        + (bagsPerfumeUsed * (Number(costs.bagPerfume)||0))
+        + (pinsUsed * (Number(costs.pin)||0))
+        + (bagsPackagingUsed * (Number(costs.bagPackaging)||0))
+        + (boxesUsed * (Number(costs.box)||0))
+        + (qty * (Number(costs.handle)||0));
       const orderProfit = netTotal - orderCost;
+      document.getElementById("dist_saleOrderCost").textContent = `تكلفة المواد لهالطلبية: ${orderCost.toFixed(2)} درهم (زجاجات ${bottlesUsed}×${readyBottleCost.toFixed(2)} + كيس عطر ${bagsPerfumeUsed}×${(Number(costs.bagPerfume)||0).toFixed(2)} + دبابيس ${pinsUsed}×${(Number(costs.pin)||0).toFixed(2)} + مسكة ${qty}×${(Number(costs.handle)||0).toFixed(2)} + كيس تغليف ${bagsPackagingUsed}×${(Number(costs.bagPackaging)||0).toFixed(2)} + بوكس ${boxesUsed}×${(Number(costs.box)||0).toFixed(2)})`;
+      const profitEl = document.getElementById("dist_saleOrderProfit");
+      profitEl.textContent = `الربح الصافي لهالطلبية: ${orderProfit.toFixed(2)} درهم`;
+      profitEl.style.color = orderProfit >= 0 ? "#1F6B41" : "#963224";
+    }
 
-      const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
-      if(editingId) saleEntry.editedAt = new Date().toISOString();
+    function distUpdateCostEstimate(){
+      const bagPerfume = Number(document.getElementById("dist_costBagPerfume").value) || 0;
+      const bottle = Number(document.getElementById("dist_costBottle").value) || 0;
+      const handle = Number(document.getElementById("dist_costHandle").value) || 0;
+      const pin = Number(document.getElementById("dist_costPin").value) || 0;
+      const oilPerG = Number(document.getElementById("dist_costOilPerG").value) || 0;
+      const alcoholPerMl = Number(document.getElementById("dist_costAlcoholPerMl").value) || 0;
+      const liquidCost = distLiquidCostPer15ml(oilPerG, alcoholPerMl);
+      const totalCost = bagPerfume + bottle + handle + pin + liquidCost;
+      document.getElementById("dist_estCostDisplay").textContent =
+        `التكلفة الإجمالية التقريبية للقطعة: ${totalCost.toFixed(2)} درهم (كيس عطر ${bagPerfume.toFixed(2)} + زجاجة ${bottle.toFixed(2)} + مسكة ${handle.toFixed(2)} + دبوس ${pin.toFixed(2)} + زيت/كحول ${liquidCost.toFixed(2)})`;
+      const basePrice = Number(distributionsData.config.basePriceNoTheme) || 15;
+      const margin = basePrice - totalCost;
+      const marginEl = document.getElementById("dist_estMarginDisplay");
+      marginEl.textContent = `هامش الربح التقريبي (بدون ثيم، سعر بيع ${basePrice.toFixed(2)}): ${margin.toFixed(2)} درهم للقطعة (ما يشمل كيس/بوكس التغليف — هذول اختياريين لكل طلبية)`;
+      marginEl.style.color = margin >= 0 ? "#1F6B41" : "#963224";
+    }
 
-      obj.stock[color] = (obj.stock[color] || 0) - qty;
-      obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) - bottlesUsed;
-      obj.stock.bags = (obj.stock.bags || 0) - bagsUsed;
-      obj.stock.boxes = (obj.stock.boxes || 0) - boxesUsed;
+    function distFillForm(){
+      document.getElementById("dist_stockBlack").value = distributionsData.stock.black || 0;
+      document.getElementById("dist_stockWhite").value = distributionsData.stock.white || 0;
+      document.getElementById("dist_stockBlackDisplay").textContent = distributionsData.stock.black || 0;
+      document.getElementById("dist_stockWhiteDisplay").textContent = distributionsData.stock.white || 0;
+      document.getElementById("dist_stockBottlesEmpty").value = distributionsData.stock.bottlesEmpty || 0;
+      document.getElementById("dist_stockBottlesEmptyDisplay").textContent = distributionsData.stock.bottlesEmpty || 0;
+      document.getElementById("dist_stockBottlesReady").value = distributionsData.stock.bottlesReady || 0;
+      document.getElementById("dist_stockBottlesReadyDisplay").textContent = distributionsData.stock.bottlesReady || 0;
+      document.getElementById("dist_stockBagsPerfume").value = distributionsData.stock.bagsPerfume || 0;
+      document.getElementById("dist_stockBagsPerfumeDisplay").textContent = distributionsData.stock.bagsPerfume || 0;
+      document.getElementById("dist_stockBagsPackaging").value = distributionsData.stock.bagsPackaging || 0;
+      document.getElementById("dist_stockBagsPackagingDisplay").textContent = distributionsData.stock.bagsPackaging || 0;
+      document.getElementById("dist_stockPins").value = distributionsData.stock.pins || 0;
+      document.getElementById("dist_stockPinsDisplay").textContent = distributionsData.stock.pins || 0;
+      document.getElementById("dist_stockBoxes").value = distributionsData.stock.boxes || 0;
+      document.getElementById("dist_stockBoxesDisplay").textContent = distributionsData.stock.boxes || 0;
+      document.getElementById("dist_stockOilGDisplay").textContent = (distributionsData.stock.oilG || 0).toFixed(1);
+      document.getElementById("dist_stockAlcoholMlDisplay").textContent = (distributionsData.stock.alcoholMl || 0).toFixed(1);
 
-      obj.sales = obj.sales || [];
-      if(editingId){
-        const idx2 = obj.sales.findIndex(s => s.id === editingId);
-        obj.sales[idx2] = saleEntry;
-      } else {
-        obj.sales.push(saleEntry);
+      const costs = distributionsData.config.costs || {};
+      document.getElementById("dist_costBagPerfume").value = costs.bagPerfume || 0;
+      document.getElementById("dist_costBagPackaging").value = costs.bagPackaging || 0;
+      document.getElementById("dist_costBottle").value = costs.bottle || 0;
+      document.getElementById("dist_costPin").value = costs.pin || 0;
+      document.getElementById("dist_costHandle").value = costs.handle || 0;
+      document.getElementById("dist_costBox").value = costs.box || 0;
+      document.getElementById("dist_costOilPerG").value = costs.oilPerG || 0;
+      document.getElementById("dist_costAlcoholPerMl").value = costs.alcoholPerMl || 0;
+
+      document.getElementById("dist_basePrice").value = distributionsData.config.basePriceNoTheme || 0;
+      document.getElementById("dist_themeFeePerRun").value = distributionsData.config.themeFeePerRun || 0;
+      document.getElementById("dist_runCapacity").value = distributionsData.config.runCapacity || 30;
+
+      distUpdateCostEstimate();
+      distRenderSalesLog();
+      distRenderPurchaseLog();
+      distRenderFillLog();
+      distUpdateFillPreview();
+      distSyncMaterialsDefaults();
+      distUpdateComputedPrice();
+    }
+
+    async function loadDistributionsIntoPanel(){
+      try{
+        distShowStatus("جارِ التحميل...", "info");
+        const res = await fetch(DISTRIBUTIONS_JSON_RAW_URL, { cache: "no-store" });
+        if(res.ok){
+          distributionsData = await res.json();
+        } else if(res.status === 404){
+          distributionsData = distDefaultData();
+        } else {
+          throw new Error("HTTP " + res.status);
+        }
+        const def = distDefaultData();
+        if(!distributionsData.config) distributionsData.config = def.config;
+        if(!distributionsData.config.costs) distributionsData.config.costs = def.config.costs;
+        if(distributionsData.config.themeFeePerRun === undefined) distributionsData.config.themeFeePerRun = def.config.themeFeePerRun;
+        if(distributionsData.config.runCapacity === undefined) distributionsData.config.runCapacity = def.config.runCapacity;
+        if(!distributionsData.stock) distributionsData.stock = def.stock;
+        if(distributionsData.stock.white === undefined) distributionsData.stock.white = distributionsData.stock.beige || 0;
+        if(!distributionsData.purchases) distributionsData.purchases = [];
+        if(!distributionsData.fills) distributionsData.fills = [];
+        if(!distributionsData.sales) distributionsData.sales = [];
+
+        // ترحيل v8: فصل الكيسين، إضافة الدبوس، وتحويل الزيت/الكحول من "كيلو" (مسمّى قديم) للجرام/المل
+        // (الأرقام اللي كان يدخلها جاسم فعليًا كانت أصلًا بالجرام/المل، بس الحقل كان مسمّى "كيلو" غلط —
+        // فنعيد بناء الرصيد الصحيح من مجموع المشتريات ناقص الاستهلاك الفعلي بدل الاعتماد على رقم قديم قد يكون غير دقيق)
+        if(distributionsData.stock.oilG === undefined || distributionsData.stock.alcoholMl === undefined){
+          const purchasedOilG = (distributionsData.purchases||[]).filter(p=>p.material==="oil").reduce((s,p)=>s+(Number(p.qty)||0),0);
+          const purchasedAlcoholMl = (distributionsData.purchases||[]).filter(p=>p.material==="alcohol").reduce((s,p)=>s+(Number(p.qty)||0),0);
+          const perBatch = distBottlesPerBatch();
+          const consumedOilG = (distributionsData.fills||[]).reduce((s,f)=> s + (Number(f.qty)||0) * DIST_MIX_OIL_G / perBatch, 0);
+          const consumedAlcoholMl = (distributionsData.fills||[]).reduce((s,f)=> s + (Number(f.qty)||0) * DIST_MIX_ALCOHOL_ML / perBatch, 0);
+          distributionsData.stock.oilG = Math.max(0, purchasedOilG - consumedOilG);
+          distributionsData.stock.alcoholMl = Math.max(0, purchasedAlcoholMl - consumedAlcoholMl);
+        }
+        if(distributionsData.stock.bagsPerfume === undefined) distributionsData.stock.bagsPerfume = distributionsData.stock.bags !== undefined ? distributionsData.stock.bags : 0;
+        if(distributionsData.stock.bagsPackaging === undefined) distributionsData.stock.bagsPackaging = 0;
+        if(distributionsData.stock.pins === undefined) distributionsData.stock.pins = 0;
+        if(distributionsData.config.costs.oilPerG === undefined) distributionsData.config.costs.oilPerG = distributionsData.config.costs.oilPerKg !== undefined ? distributionsData.config.costs.oilPerKg : 0;
+        if(distributionsData.config.costs.alcoholPerMl === undefined) distributionsData.config.costs.alcoholPerMl = distributionsData.config.costs.alcoholPerKg !== undefined ? distributionsData.config.costs.alcoholPerKg : 0;
+        if(distributionsData.config.costs.bagPerfume === undefined) distributionsData.config.costs.bagPerfume = distributionsData.config.costs.bag !== undefined ? distributionsData.config.costs.bag : 0;
+        if(distributionsData.config.costs.bagPackaging === undefined) distributionsData.config.costs.bagPackaging = 0;
+        if(distributionsData.config.costs.pin === undefined) distributionsData.config.costs.pin = 0;
+
+        if(!document.getElementById("dist_saleDate").value) document.getElementById("dist_saleDate").value = todayStr();
+        if(!document.getElementById("dist_purchaseDate").value) document.getElementById("dist_purchaseDate").value = todayStr();
+        if(!document.getElementById("dist_fillDate").value) document.getElementById("dist_fillDate").value = todayStr();
+        distFillForm();
+        document.getElementById("dist_statusBox").className = "status";
+      }catch(e){
+        distShowStatus("ما قدرت أجيب بيانات التوزيعات الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
       }
-      return obj;
-    }, editingId ? ("Edit distribution sale: " + editingId) : ("Log distribution sale: " + color + " x" + qty));
+    }
 
-    distributionsData = updated;
-    distEditingSaleId = null;
-    document.getElementById("dist_saleEditBanner").style.display = "none";
-    document.getElementById("dist_logSaleBtn").textContent = "✅ سجّل البيع واخصم من المخزون";
-    document.getElementById("dist_saleQty").value = 1;
-    document.getElementById("dist_saleDiscount").value = 0;
-    document.getElementById("dist_saleBoxesUsed").value = 0;
-    document.getElementById("dist_saleNote").value = "";
-    document.getElementById("dist_saleCustomerName").value = "";
-    document.getElementById("dist_saleCustomerPhone").value = "";
-    document.getElementById("dist_saleEmirate").value = "";
-    distLastAutoQty = null;
-    distFillForm();
-    distShowStatus(editingId ? "تم حفظ التعديل!" : "تم تسجيل البيع وخصم المخزون!", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }finally{
-    btn.disabled = false;
-  }
-});
-
-document.getElementById("dist_logPurchaseBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  const material = document.getElementById("dist_purchaseMaterial").value;
-  const qty = Number(document.getElementById("dist_purchaseQty").value) || 0;
-  const totalPrice = Number(document.getElementById("dist_purchaseTotalPrice").value) || 0;
-  const date = document.getElementById("dist_purchaseDate").value || todayStr();
-  const note = document.getElementById("dist_purchaseNote").value.trim();
-  if(qty <= 0){ distShowStatus("لازم تكتب كمية أكبر من صفر.", "err"); return; }
-  const unitPrice = totalPrice / qty;
-  const editingId = distEditingPurchaseId;
-  const btn = document.getElementById("dist_logPurchaseBtn");
-  btn.disabled = true;
-  try{
-    distShowStatus("جارِ الحفظ والنشر...", "info");
-    const updated = await updateDistributionsWithRetry(token, (obj) => {
-      obj.stock = obj.stock || {};
-      obj.config = obj.config || {};
-      obj.config.costs = obj.config.costs || {};
-      if(editingId){
-        const idx = (obj.purchases||[]).findIndex(p => p.id === editingId);
-        if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة. حدّث الصفحة.");
-        const old = obj.purchases[idx];
-        const oldKey = distMaterialStockKey(old.material);
-        if(oldKey) obj.stock[oldKey] = (obj.stock[oldKey] || 0) - Number(old.qty || 0);
+    document.getElementById("dist_reloadBtn").addEventListener("click", loadDistributionsIntoPanel);
+    document.getElementById("dist_saleQty").addEventListener("input", () => { distSyncMaterialsDefaults(); distUpdateComputedPrice(); });
+    document.getElementById("dist_saleTheme").addEventListener("change", distUpdateComputedPrice);
+    document.getElementById("dist_saleDiscount").addEventListener("input", distUpdateComputedPrice);
+    document.getElementById("dist_saleBottlesUsed").addEventListener("input", distUpdateComputedPrice);
+    document.getElementById("dist_saleBagsPerfumeUsed").addEventListener("input", distUpdateComputedPrice);
+    document.getElementById("dist_salePinsUsed").addEventListener("input", distUpdateComputedPrice);
+    document.getElementById("dist_saleBagsPackagingUsed").addEventListener("input", distUpdateComputedPrice);
+    document.getElementById("dist_saleBoxesUsed").addEventListener("input", distUpdateComputedPrice);
+    document.getElementById("dist_costBagPerfume").addEventListener("input", distUpdateCostEstimate);
+    document.getElementById("dist_costBottle").addEventListener("input", distUpdateCostEstimate);
+    document.getElementById("dist_costHandle").addEventListener("input", distUpdateCostEstimate);
+    document.getElementById("dist_costPin").addEventListener("input", distUpdateCostEstimate);
+    document.getElementById("dist_costOilPerG").addEventListener("input", distUpdateCostEstimate);
+    document.getElementById("dist_costAlcoholPerMl").addEventListener("input", distUpdateCostEstimate);
+    document.getElementById("dist_cancelEditBtn").addEventListener("click", distCancelEditSale);
+    document.getElementById("dist_salesLog").addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".dist-edit-sale-btn");
+      if(editBtn){ distStartEditSale(editBtn.dataset.id); return; }
+      const cancelBtn = e.target.closest(".dist-cancel-sale-btn");
+      if(cancelBtn){
+        const id = cancelBtn.dataset.id;
+        if(distPendingCancelId === id){
+          distPendingCancelId = null;
+          distCancelSale(id);
+        } else {
+          distPendingCancelId = id;
+          cancelBtn.textContent = "⚠️ تأكيد الإلغاء؟";
+          cancelBtn.style.background = "#963224";
+          cancelBtn.style.color = "#fff";
+          setTimeout(() => {
+            if(distPendingCancelId === id){ distPendingCancelId = null; distRenderSalesLog(); }
+          }, 4000);
+        }
       }
-      const key = distMaterialStockKey(material);
-      if(key) obj.stock[key] = (obj.stock[key] || 0) + qty;
-      if(material === "bag") obj.config.costs.bag = unitPrice;
-      else if(material === "bottle") obj.config.costs.bottle = unitPrice;
-      else if(material === "box") obj.config.costs.box = unitPrice;
-      else if(material === "handle") obj.config.costs.handle = unitPrice;
-      else if(material === "alcohol") obj.config.costs.alcoholPerKg = unitPrice;
-      else if(material === "oil") obj.config.costs.oilPerKg = unitPrice;
-
-      const purchaseEntry = { id: editingId || ("distp_" + Date.now()), date, material, qty, unitPrice, totalPrice, note };
-      if(editingId) purchaseEntry.editedAt = new Date().toISOString();
-      obj.purchases = obj.purchases || [];
-      if(editingId){
-        const idx2 = obj.purchases.findIndex(p => p.id === editingId);
-        obj.purchases[idx2] = purchaseEntry;
-      } else {
-        obj.purchases.push(purchaseEntry);
+    });
+    document.getElementById("dist_purchaseMaterial").addEventListener("change", distUpdatePurchaseComputedUnit);
+    document.getElementById("dist_purchaseQty").addEventListener("input", distUpdatePurchaseComputedUnit);
+    document.getElementById("dist_purchaseTotalPrice").addEventListener("input", distUpdatePurchaseComputedUnit);
+    document.getElementById("dist_fillQty").addEventListener("input", distUpdateFillPreview);
+    document.getElementById("dist_cancelPurchaseEditBtn").addEventListener("click", distCancelEditPurchase);
+    document.getElementById("dist_purchaseLog").addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".dist-edit-purchase-btn");
+      if(editBtn){ distStartEditPurchase(editBtn.dataset.id); return; }
+      const delBtn = e.target.closest(".dist-delete-purchase-btn");
+      if(delBtn){
+        const id = delBtn.dataset.id;
+        if(distPendingDeletePurchaseId === id){
+          distPendingDeletePurchaseId = null;
+          distDeletePurchase(id);
+        } else {
+          distPendingDeletePurchaseId = id;
+          delBtn.textContent = "⚠️ تأكيد الحذف؟";
+          delBtn.style.background = "#963224";
+          delBtn.style.color = "#fff";
+          setTimeout(() => {
+            if(distPendingDeletePurchaseId === id){ distPendingDeletePurchaseId = null; distRenderPurchaseLog(); }
+          }, 4000);
+        }
       }
-      return obj;
-    }, editingId ? ("Edit distribution purchase: " + editingId) : ("Log distribution purchase: " + material + " x" + qty));
-    distributionsData = updated;
-    distEditingPurchaseId = null;
-    document.getElementById("dist_purchaseEditBanner").style.display = "none";
-    document.getElementById("dist_logPurchaseBtn").textContent = "➕ سجّل عملية شراء";
-    document.getElementById("dist_purchaseQty").value = 1;
-    document.getElementById("dist_purchaseTotalPrice").value = "";
-    document.getElementById("dist_purchaseNote").value = "";
-    distUpdatePurchaseComputedUnit();
-    distFillForm();
-    distShowStatus(editingId ? "تم حفظ تعديل عملية الشراء!" : "تم تسجيل عملية الشراء وتحديث المخزون/التكلفة تلقائيًا!", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }finally{
-    btn.disabled = false;
-  }
-});
+    });
 
-document.getElementById("dist_fillBottlesBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  const qty = Number(document.getElementById("dist_fillQty").value) || 0;
-  const date = document.getElementById("dist_fillDate").value || todayStr();
-  if(qty <= 0){ distShowStatus("لازم تكتب عدد أكبر من صفر.", "err"); return; }
-  const btn = document.getElementById("dist_fillBottlesBtn");
-  btn.disabled = true;
-  try{
-    distShowStatus("جارِ الحفظ والنشر...", "info");
-    const needed = distMaterialsForFill(qty);
-    const updated = await updateDistributionsWithRetry(token, (obj) => {
-      obj.stock = obj.stock || {};
-      if(qty > (obj.stock.bottlesEmpty||0)) throw new Error("المخزون الحالي من الزجاجات الفارغة بس " + (obj.stock.bottlesEmpty||0) + " — عدّل العدد أو حدّث المخزون أول.");
-      if(needed.oilKg > (obj.stock.oilKg||0)) throw new Error("الزيت العطري المتوفر بس " + (obj.stock.oilKg||0).toFixed(3) + " كيلو ويحتاج " + needed.oilKg.toFixed(3) + " كيلو.");
-      if(needed.alcoholKg > (obj.stock.alcoholKg||0)) throw new Error("الكحول المتوفر بس " + (obj.stock.alcoholKg||0).toFixed(3) + " كيلو ويحتاج " + needed.alcoholKg.toFixed(3) + " كيلو.");
-      obj.stock.bottlesEmpty = (obj.stock.bottlesEmpty||0) - qty;
-      obj.stock.bottlesReady = (obj.stock.bottlesReady||0) + qty;
-      obj.stock.oilKg = (obj.stock.oilKg||0) - needed.oilKg;
-      obj.stock.alcoholKg = (obj.stock.alcoholKg||0) - needed.alcoholKg;
-      obj.fills = obj.fills || [];
-      obj.fills.push({ id: "distf_" + Date.now(), date, qty, oilUsed: needed.oilKg, alcoholUsed: needed.alcoholKg });
-      return obj;
-    }, "Fill distribution bottles x" + qty);
-    distributionsData = updated;
-    document.getElementById("dist_fillQty").value = 1;
-    distUpdateFillPreview();
-    distFillForm();
-    distShowStatus("تم تعبئة الزجاجات وتحديث المخزون!", "ok");
-  }catch(e){
-    distShowStatus("صار خطأ: " + e.message, "err");
-  }finally{
-    btn.disabled = false;
-  }
-});
+    document.getElementById("dist_saveStockBtn").addEventListener("click", async () => {
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const black = Number(document.getElementById("dist_stockBlack").value) || 0;
+      const white = Number(document.getElementById("dist_stockWhite").value) || 0;
+      const bottlesEmpty = Number(document.getElementById("dist_stockBottlesEmpty").value) || 0;
+      const bottlesReady = Number(document.getElementById("dist_stockBottlesReady").value) || 0;
+      const bagsPerfume = Number(document.getElementById("dist_stockBagsPerfume").value) || 0;
+      const bagsPackaging = Number(document.getElementById("dist_stockBagsPackaging").value) || 0;
+      const pins = Number(document.getElementById("dist_stockPins").value) || 0;
+      const boxes = Number(document.getElementById("dist_stockBoxes").value) || 0;
+      const btn = document.getElementById("dist_saveStockBtn");
+      btn.disabled = true;
+      try{
+        distShowStatus("جارِ الحفظ والنشر...", "info");
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          const oilG = obj.stock ? obj.stock.oilG : undefined;
+          const alcoholMl = obj.stock ? obj.stock.alcoholMl : undefined;
+          obj.stock = { black, white, bottlesEmpty, bottlesReady, bagsPerfume, bagsPackaging, pins, boxes, oilG: oilG || 0, alcoholMl: alcoholMl || 0 };
+          return obj;
+        }, "Update distributions stock");
+        distributionsData = updated;
+        distFillForm();
+        distShowStatus("تم حفظ المخزون!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }finally{
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("dist_saveCostsBtn").addEventListener("click", async () => {
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const costs = {
+        bagPerfume: Number(document.getElementById("dist_costBagPerfume").value) || 0,
+        bagPackaging: Number(document.getElementById("dist_costBagPackaging").value) || 0,
+        bottle: Number(document.getElementById("dist_costBottle").value) || 0,
+        handle: Number(document.getElementById("dist_costHandle").value) || 0,
+        pin: Number(document.getElementById("dist_costPin").value) || 0,
+        oilPerG: Number(document.getElementById("dist_costOilPerG").value) || 0,
+        alcoholPerMl: Number(document.getElementById("dist_costAlcoholPerMl").value) || 0,
+        box: Number(document.getElementById("dist_costBox").value) || 0
+      };
+      const btn = document.getElementById("dist_saveCostsBtn");
+      btn.disabled = true;
+      try{
+        distShowStatus("جارِ الحفظ والنشر...", "info");
+        const updated = await updateDistributionsWithRetry(token, (obj) => { obj.config = obj.config || {}; obj.config.costs = costs; return obj; }, "Update distributions raw material costs");
+        distributionsData = updated;
+        distFillForm();
+        distShowStatus("تم حفظ التكاليف!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }finally{
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("dist_savePricingBtn").addEventListener("click", async () => {
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const basePrice = Number(document.getElementById("dist_basePrice").value) || 0;
+      const themeFeePerRun = Number(document.getElementById("dist_themeFeePerRun").value) || 0;
+      const runCapacity = Number(document.getElementById("dist_runCapacity").value) || 30;
+      const btn = document.getElementById("dist_savePricingBtn");
+      btn.disabled = true;
+      try{
+        distShowStatus("جارِ الحفظ والنشر...", "info");
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          obj.config = obj.config || {};
+          obj.config.basePriceNoTheme = basePrice;
+          obj.config.themeFeePerRun = themeFeePerRun;
+          obj.config.runCapacity = runCapacity;
+          return obj;
+        }, "Update distributions pricing");
+        distributionsData = updated;
+        distFillForm();
+        distShowStatus("تم حفظ التسعير!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }finally{
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("dist_logSaleBtn").addEventListener("click", async () => {
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const color = document.getElementById("dist_saleColor").value;
+      const qty = Number(document.getElementById("dist_saleQty").value) || 0;
+      const withTheme = document.getElementById("dist_saleTheme").checked;
+      const date = document.getElementById("dist_saleDate").value || todayStr();
+      const note = document.getElementById("dist_saleNote").value.trim();
+      const customerName = document.getElementById("dist_saleCustomerName").value.trim();
+      const customerPhone = document.getElementById("dist_saleCustomerPhone").value.trim();
+      const emirate = document.getElementById("dist_saleEmirate").value.trim();
+      const discount = Number(document.getElementById("dist_saleDiscount").value) || 0;
+      const bottlesUsed = Number(document.getElementById("dist_saleBottlesUsed").value) || 0;
+      const bagsPerfumeUsed = Number(document.getElementById("dist_saleBagsPerfumeUsed").value) || 0;
+      const pinsUsed = Number(document.getElementById("dist_salePinsUsed").value) || 0;
+      const bagsPackagingUsed = Number(document.getElementById("dist_saleBagsPackagingUsed").value) || 0;
+      const boxesUsed = Number(document.getElementById("dist_saleBoxesUsed").value) || 0;
+      if(qty <= 0){ distShowStatus("لازم تكتب كمية أكبر من صفر.", "err"); return; }
+
+      const editingId = distEditingSaleId;
+      const btn = document.getElementById("dist_logSaleBtn");
+      btn.disabled = true;
+      try{
+        distShowStatus("جارِ الحفظ والنشر...", "info");
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          obj.stock = obj.stock || {};
+          obj.config = obj.config || {};
+          if(editingId){
+            const idx = (obj.sales||[]).findIndex(s => s.id === editingId);
+            if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة (يمكن انحذفت). حدّث الصفحة.");
+            const oldEntry = obj.sales[idx];
+            obj.stock[oldEntry.color] = (obj.stock[oldEntry.color] || 0) + Number(oldEntry.qty || 0);
+            obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(oldEntry.bottlesUsed || 0);
+            obj.stock.bagsPerfume = (obj.stock.bagsPerfume || 0) + Number((oldEntry.bagsPerfumeUsed !== undefined ? oldEntry.bagsPerfumeUsed : oldEntry.bagsUsed) || 0);
+            obj.stock.pins = (obj.stock.pins || 0) + Number(oldEntry.pinsUsed || 0);
+            obj.stock.bagsPackaging = (obj.stock.bagsPackaging || 0) + Number(oldEntry.bagsPackagingUsed || 0);
+            obj.stock.boxes = (obj.stock.boxes || 0) + Number(oldEntry.boxesUsed || 0);
+          }
+          const curColorStock = obj.stock[color] || 0;
+          if(qty > curColorStock) throw new Error("المخزون الحالي (" + distColorNameAr(color) + ") بس " + curColorStock + " قطعة — عدّل الكمية أو حدّث المخزون أول.");
+          if(bottlesUsed > (obj.stock.bottlesReady||0)) throw new Error("المخزون الحالي من الزجاجات الجاهزة بس " + (obj.stock.bottlesReady||0) + ".");
+          if(bagsPerfumeUsed > (obj.stock.bagsPerfume||0)) throw new Error("المخزون الحالي من كيس العطر بس " + (obj.stock.bagsPerfume||0) + ".");
+          if(pinsUsed > (obj.stock.pins||0)) throw new Error("المخزون الحالي من الدبابيس بس " + (obj.stock.pins||0) + ".");
+          if(bagsPackagingUsed > (obj.stock.bagsPackaging||0)) throw new Error("المخزون الحالي من كيس التغليف بس " + (obj.stock.bagsPackaging||0) + ".");
+          if(boxesUsed > (obj.stock.boxes||0)) throw new Error("المخزون الحالي من بوكسات التغليف بس " + (obj.stock.boxes||0) + ".");
+
+          const r = distComputeTotal(qty, withTheme);
+          const netTotal = Math.max(0, r.total - discount);
+          const costs0 = obj.config.costs || {};
+          const readyBottleCost0 = distReadyBottleCost(costs0);
+          const orderCost = (bottlesUsed * readyBottleCost0)
+            + (bagsPerfumeUsed * (Number(costs0.bagPerfume)||0))
+            + (pinsUsed * (Number(costs0.pin)||0))
+            + (bagsPackagingUsed * (Number(costs0.bagPackaging)||0))
+            + (boxesUsed * (Number(costs0.box)||0))
+            + (qty * (Number(costs0.handle)||0));
+          const orderProfit = netTotal - orderCost;
+
+          const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsPerfumeUsed, pinsUsed, bagsPackagingUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
+          if(editingId) saleEntry.editedAt = new Date().toISOString();
+
+          obj.stock[color] = (obj.stock[color] || 0) - qty;
+          obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) - bottlesUsed;
+          obj.stock.bagsPerfume = (obj.stock.bagsPerfume || 0) - bagsPerfumeUsed;
+          obj.stock.pins = (obj.stock.pins || 0) - pinsUsed;
+          obj.stock.bagsPackaging = (obj.stock.bagsPackaging || 0) - bagsPackagingUsed;
+          obj.stock.boxes = (obj.stock.boxes || 0) - boxesUsed;
+
+          obj.sales = obj.sales || [];
+          if(editingId){
+            const idx2 = obj.sales.findIndex(s => s.id === editingId);
+            obj.sales[idx2] = saleEntry;
+          } else {
+            obj.sales.push(saleEntry);
+          }
+          return obj;
+        }, editingId ? ("Edit distribution sale: " + editingId) : ("Log distribution sale: " + color + " x" + qty));
+
+        distributionsData = updated;
+        distEditingSaleId = null;
+        document.getElementById("dist_saleEditBanner").style.display = "none";
+        document.getElementById("dist_logSaleBtn").textContent = "✅ سجّل البيع واخصم من المخزون";
+        document.getElementById("dist_saleQty").value = 1;
+        document.getElementById("dist_saleDiscount").value = 0;
+        document.getElementById("dist_saleBagsPackagingUsed").value = 0;
+        document.getElementById("dist_saleBoxesUsed").value = 0;
+        document.getElementById("dist_saleNote").value = "";
+        document.getElementById("dist_saleCustomerName").value = "";
+        document.getElementById("dist_saleCustomerPhone").value = "";
+        document.getElementById("dist_saleEmirate").value = "";
+        distLastAutoQty = null;
+        distFillForm();
+        distShowStatus(editingId ? "تم حفظ التعديل!" : "تم تسجيل البيع وخصم المخزون!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }finally{
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("dist_logPurchaseBtn").addEventListener("click", async () => {
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const material = document.getElementById("dist_purchaseMaterial").value;
+      const qty = Number(document.getElementById("dist_purchaseQty").value) || 0;
+      const totalPrice = Number(document.getElementById("dist_purchaseTotalPrice").value) || 0;
+      const date = document.getElementById("dist_purchaseDate").value || todayStr();
+      const note = document.getElementById("dist_purchaseNote").value.trim();
+      if(qty <= 0){ distShowStatus("لازم تكتب كمية أكبر من صفر.", "err"); return; }
+      const unitPrice = totalPrice / qty;
+      const editingId = distEditingPurchaseId;
+      const btn = document.getElementById("dist_logPurchaseBtn");
+      btn.disabled = true;
+      try{
+        distShowStatus("جارِ الحفظ والنشر...", "info");
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          obj.stock = obj.stock || {};
+          obj.config = obj.config || {};
+          obj.config.costs = obj.config.costs || {};
+          if(editingId){
+            const idx = (obj.purchases||[]).findIndex(p => p.id === editingId);
+            if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة. حدّث الصفحة.");
+            const old = obj.purchases[idx];
+            const oldKey = distMaterialStockKey(old.material);
+            if(oldKey) obj.stock[oldKey] = (obj.stock[oldKey] || 0) - Number(old.qty || 0);
+          }
+          const key = distMaterialStockKey(material);
+          if(key) obj.stock[key] = (obj.stock[key] || 0) + qty;
+          if(material === "bagPerfume") obj.config.costs.bagPerfume = unitPrice;
+          else if(material === "bagPackaging") obj.config.costs.bagPackaging = unitPrice;
+          else if(material === "bottle") obj.config.costs.bottle = unitPrice;
+          else if(material === "box") obj.config.costs.box = unitPrice;
+          else if(material === "handle") obj.config.costs.handle = unitPrice;
+          else if(material === "pin") obj.config.costs.pin = unitPrice;
+          else if(material === "alcohol") obj.config.costs.alcoholPerMl = unitPrice;
+          else if(material === "oil") obj.config.costs.oilPerG = unitPrice;
+
+          const purchaseEntry = { id: editingId || ("distp_" + Date.now()), date, material, qty, unitPrice, totalPrice, note };
+          if(editingId) purchaseEntry.editedAt = new Date().toISOString();
+          obj.purchases = obj.purchases || [];
+          if(editingId){
+            const idx2 = obj.purchases.findIndex(p => p.id === editingId);
+            obj.purchases[idx2] = purchaseEntry;
+          } else {
+            obj.purchases.push(purchaseEntry);
+          }
+          return obj;
+        }, editingId ? ("Edit distribution purchase: " + editingId) : ("Log distribution purchase: " + material + " x" + qty));
+        distributionsData = updated;
+        distEditingPurchaseId = null;
+        document.getElementById("dist_purchaseEditBanner").style.display = "none";
+        document.getElementById("dist_logPurchaseBtn").textContent = "➕ سجّل عملية شراء";
+        document.getElementById("dist_purchaseQty").value = 1;
+        document.getElementById("dist_purchaseTotalPrice").value = "";
+        document.getElementById("dist_purchaseNote").value = "";
+        distUpdatePurchaseComputedUnit();
+        distFillForm();
+        distShowStatus(editingId ? "تم حفظ تعديل عملية الشراء!" : "تم تسجيل عملية الشراء وتحديث المخزون/التكلفة تلقائيًا!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }finally{
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("dist_fillBottlesBtn").addEventListener("click", async () => {
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      const qty = Number(document.getElementById("dist_fillQty").value) || 0;
+      const date = document.getElementById("dist_fillDate").value || todayStr();
+      if(qty <= 0){ distShowStatus("لازم تكتب عدد أكبر من صفر.", "err"); return; }
+      const btn = document.getElementById("dist_fillBottlesBtn");
+      btn.disabled = true;
+      try{
+        distShowStatus("جارِ الحفظ والنشر...", "info");
+        const needed = distMaterialsForFill(qty);
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          obj.stock = obj.stock || {};
+          if(qty > (obj.stock.bottlesEmpty||0)) throw new Error("المخزون الحالي من الزجاجات الفارغة بس " + (obj.stock.bottlesEmpty||0) + " — عدّل العدد أو حدّث المخزون أول.");
+          if(needed.oilG > (obj.stock.oilG||0)) throw new Error("الزيت العطري المتوفر بس " + (obj.stock.oilG||0).toFixed(1) + " جرام ويحتاج " + needed.oilG.toFixed(1) + " جرام.");
+          if(needed.alcoholMl > (obj.stock.alcoholMl||0)) throw new Error("الكحول المتوفر بس " + (obj.stock.alcoholMl||0).toFixed(1) + " مل ويحتاج " + needed.alcoholMl.toFixed(1) + " مل.");
+          obj.stock.bottlesEmpty = (obj.stock.bottlesEmpty||0) - qty;
+          obj.stock.bottlesReady = (obj.stock.bottlesReady||0) + qty;
+          obj.stock.oilG = (obj.stock.oilG||0) - needed.oilG;
+          obj.stock.alcoholMl = (obj.stock.alcoholMl||0) - needed.alcoholMl;
+          obj.fills = obj.fills || [];
+          obj.fills.push({ id: "distf_" + Date.now(), date, qty, oilUsed: needed.oilG, alcoholUsed: needed.alcoholMl });
+          return obj;
+        }, "Fill distribution bottles x" + qty);
+        distributionsData = updated;
+        document.getElementById("dist_fillQty").value = 1;
+        distUpdateFillPreview();
+        distFillForm();
+        distShowStatus("تم تعبئة الزجاجات وتحديث المخزون!", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }finally{
+        btn.disabled = false;
+      }
+    });
 
 document.getElementById("modeOrdersQueueBtn").addEventListener("click", () => { setMode("ordersQueue"); loadPendingOrdersIntoPanel(); });
 
