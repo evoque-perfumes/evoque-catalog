@@ -615,7 +615,7 @@
       <legend>📦 المخزون الحالي</legend>
       <div class="stats" id="dist_stockStats">
         <div class="stat">مسكة سوداء متوفرة<b id="dist_stockBlackDisplay">—</b></div>
-        <div class="stat">مسكة بيضاء متوفرة<b id="dist_stockWhiteDisplay">—</b></div>
+        <div class="stat">مسكة بيج متوفرة<b id="dist_stockWhiteDisplay">—</b></div>
         <div class="stat">زجاجات فارغة متوفرة<b id="dist_stockBottlesEmptyDisplay">—</b></div>
         <div class="stat">زجاجات جاهزة للبيع<b id="dist_stockBottlesReadyDisplay">—</b></div>
         <div class="stat">كيس للعطر متوفر<b id="dist_stockBagsPerfumeDisplay">—</b></div>
@@ -627,7 +627,7 @@
       </div>
       <div class="grid2" style="margin-top:12px;">
         <div class="field"><label for="dist_stockBlack">تعديل مخزون — مسكة سوداء</label><input type="number" id="dist_stockBlack" min="0" step="1"></div>
-        <div class="field"><label for="dist_stockWhite">تعديل مخزون — مسكة بيضاء</label><input type="number" id="dist_stockWhite" min="0" step="1"></div>
+        <div class="field"><label for="dist_stockWhite">تعديل مخزون — مسكة بيج</label><input type="number" id="dist_stockWhite" min="0" step="1"></div>
       </div>
       <div class="grid2">
         <div class="field"><label for="dist_stockBottlesEmpty">تعديل مخزون — زجاجات فارغة</label><input type="number" id="dist_stockBottlesEmpty" min="0" step="1"></div>
@@ -715,6 +715,13 @@
           </select>
         </div>
         <div class="field"><label for="dist_purchaseQty">الكمية</label><input type="number" id="dist_purchaseQty" min="0" step="0.01" value="1"></div>
+      </div>
+      <div class="field" id="dist_purchaseHandleColorField" style="display:none;">
+        <label for="dist_purchaseHandleColor">لون المسكة</label>
+        <select id="dist_purchaseHandleColor">
+          <option value="black">أسود</option>
+          <option value="white">بيج</option>
+        </select>
       </div>
       <div class="grid2">
         <div class="field"><label for="dist_purchaseTotalPrice">إجمالي المبلغ المدفوع (درهم)</label><input type="number" id="dist_purchaseTotalPrice" min="0" step="0.1"></div>
@@ -2752,7 +2759,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
     }
 
     // أي مفتاح مخزون ترتبط فيه كل مادة شراء (null = مافيه عداد كمية مرتبط، بس تكلفة)
-    function distMaterialStockKey(material){
+    function distMaterialStockKey(material, color){
       if(material === "bagPerfume" || material === "bag") return "bagsPerfume"; // "bag" = قيمة قديمة قبل فصل الكيسين
       if(material === "bagPackaging") return "bagsPackaging";
       if(material === "bottle") return "bottlesEmpty";
@@ -2760,7 +2767,8 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       if(material === "pin") return "pins";
       if(material === "oil") return "oilG";
       if(material === "alcohol") return "alcoholMl";
-      return null; // handle -> تكلفة بس، مافيه عداد كمية مستقل
+      if(material === "handle") return (color === "black" || color === "white") ? color : null; // مسكة: العداد حسب اللون (يشارك نفس عدادات المخزون black/white)
+      return null;
     }
 
     function distMaterialNameAr(m){
@@ -2768,6 +2776,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       return map[m] || m;
     }
 
+    function distHandleColorNameAr(c){ return c === "black" ? "أسود" : "بيج"; }
     function distMaterialUnitAr(m){
       if(m === "oil") return "جرام";
       if(m === "alcohol") return "مل";
@@ -2870,6 +2879,8 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       const qty = Number(document.getElementById("dist_purchaseQty").value) || 0;
       const totalPrice = Number(document.getElementById("dist_purchaseTotalPrice").value) || 0;
       const material = document.getElementById("dist_purchaseMaterial").value;
+      const colorField = document.getElementById("dist_purchaseHandleColorField");
+      if(colorField) colorField.style.display = (material === "handle") ? "block" : "none";
       const el = document.getElementById("dist_purchaseComputedUnit");
       if(qty <= 0){ el.textContent = ""; return; }
       el.textContent = `سعر الوحدة (${distMaterialUnitAr(material)}): ${(totalPrice / qty).toFixed(3)} درهم`;
@@ -2887,7 +2898,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       }
       log.innerHTML = purchases.slice().reverse().map(p => `
         <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-          <span>${p.date} — ${distMaterialNameAr(p.material)} × ${p.qty} ${distMaterialUnitAr(p.material)} — سعر الوحدة ${Number(p.unitPrice).toFixed(3)}${p.note ? " — " + p.note : ""}</span>
+          <span>${p.date} — ${distMaterialNameAr(p.material)}${p.material === "handle" && p.color ? " (" + distHandleColorNameAr(p.color) + ")" : ""} × ${p.qty} ${distMaterialUnitAr(p.material)} — سعر الوحدة ${Number(p.unitPrice).toFixed(3)}${p.note ? " — " + p.note : ""}</span>
           <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
             <b>${Number(p.totalPrice).toFixed(2)} AED</b>
             <button type="button" class="secondary dist-edit-purchase-btn" data-id="${p.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
@@ -2906,6 +2917,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       if(!p) return;
       distEditingPurchaseId = purchaseId;
       document.getElementById("dist_purchaseMaterial").value = (p.material === "bag" ? "bagPerfume" : p.material);
+      document.getElementById("dist_purchaseHandleColor").value = p.color || "black";
       document.getElementById("dist_purchaseQty").value = p.qty;
       document.getElementById("dist_purchaseTotalPrice").value = p.totalPrice;
       document.getElementById("dist_purchaseDate").value = p.date || todayStr();
@@ -2936,7 +2948,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
           const idx = (obj.purchases||[]).findIndex(p => p.id === purchaseId);
           if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
           const p = obj.purchases[idx];
-          const key = distMaterialStockKey(p.material);
+          const key = distMaterialStockKey(p.material, p.color);
           if(key) obj.stock[key] = Math.max(0, (obj.stock[key] || 0) - Number(p.qty || 0));
           obj.purchases.splice(idx, 1);
           return obj;
@@ -3515,6 +3527,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       const token = getToken();
       if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
       const material = document.getElementById("dist_purchaseMaterial").value;
+      const color = document.getElementById("dist_purchaseHandleColor").value;
       const qty = Number(document.getElementById("dist_purchaseQty").value) || 0;
       const totalPrice = Number(document.getElementById("dist_purchaseTotalPrice").value) || 0;
       const date = document.getElementById("dist_purchaseDate").value || todayStr();
@@ -3533,13 +3546,14 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
             const idx = (obj.purchases||[]).findIndex(p => p.id === editingId);
             if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة. حدّث الصفحة.");
             const old = obj.purchases[idx];
-            const oldKey = distMaterialStockKey(old.material);
+            const oldKey = distMaterialStockKey(old.material, old.color);
             if(oldKey) obj.stock[oldKey] = Math.max(0, (obj.stock[oldKey] || 0) - Number(old.qty || 0));
           }
-          const key = distMaterialStockKey(material);
+          const key = distMaterialStockKey(material, color);
           if(key) obj.stock[key] = (obj.stock[key] || 0) + qty;
 
           const purchaseEntry = { id: editingId || ("distp_" + Date.now()), date, material, qty, unitPrice, totalPrice, note };
+          if(material === "handle") purchaseEntry.color = color;
           if(editingId) purchaseEntry.editedAt = new Date().toISOString();
           obj.purchases = obj.purchases || [];
           if(editingId){
