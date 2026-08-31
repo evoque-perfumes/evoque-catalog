@@ -775,10 +775,19 @@
         <div class="field"><label for="dist_saleDate">التاريخ</label><input type="date" id="dist_saleDate"></div>
       </div>
       <div class="grid2">
-        <div class="field"><label for="dist_saleColor">لون المسكة</label>
-          <select id="dist_saleColor"><option value="black">أسود</option><option value="white">أبيض</option></select>
+        <div class="field" id="dist_saleColorField"><label for="dist_saleColor">لون المسكة</label>
+          <select id="dist_saleColor"><option value="black">أسود</option><option value="white">بيج</option></select>
         </div>
         <div class="field"><label for="dist_saleQty">الكمية</label><input type="number" id="dist_saleQty" min="1" step="1" value="1"></div>
+      </div>
+      <div class="field">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="dist_saleMixedColors" style="width:auto; margin:0;"> نفس الطلبية فيها أكثر من لون مسكة (أسود وبيج مع بعض)
+        </label>
+      </div>
+      <div class="grid2" id="dist_saleMixedFields" style="display:none;">
+        <div class="field"><label for="dist_saleQtyBlack">عدد الأسود</label><input type="number" id="dist_saleQtyBlack" min="0" step="1" value="0"></div>
+        <div class="field"><label for="dist_saleQtyWhite">عدد البيج</label><input type="number" id="dist_saleQtyWhite" min="0" step="1" value="0"></div>
       </div>
       <div class="field">
         <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
@@ -2762,7 +2771,49 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       return newObj;
     }
 
-    function distColorNameAr(c){ return c === "black" ? "أسود" : "أبيض"; }
+    function distColorNameAr(c){ return c === "black" ? "أسود" : "بيج"; }
+
+    function distSaleColorBreakdown(sale){
+      if(sale.colorBreakdown) return { black: Number(sale.colorBreakdown.black)||0, white: Number(sale.colorBreakdown.white)||0 };
+      const b = { black: 0, white: 0 };
+      if(sale.color === "black") b.black = Number(sale.qty)||0;
+      else if(sale.color === "white") b.white = Number(sale.qty)||0;
+      return b;
+    }
+
+    function distApplyColorStockDelta(stock, breakdown, sign){
+      stock.black = (stock.black || 0) + sign * breakdown.black;
+      stock.white = (stock.white || 0) + sign * breakdown.white;
+    }
+
+    function distSaleColorLabel(sale){
+      if(sale.colorBreakdown){
+        const bd = sale.colorBreakdown;
+        const parts = [];
+        if(bd.black) parts.push("أسود×" + bd.black);
+        if(bd.white) parts.push("بيج×" + bd.white);
+        return parts.length ? parts.join(" + ") : "—";
+      }
+      return distColorNameAr(sale.color);
+    }
+
+    function distToggleSaleMixedColors(){
+      const mixed = document.getElementById("dist_saleMixedColors").checked;
+      document.getElementById("dist_saleColorField").style.display = mixed ? "none" : "block";
+      document.getElementById("dist_saleMixedFields").style.display = mixed ? "grid" : "none";
+      const qtyEl = document.getElementById("dist_saleQty");
+      qtyEl.readOnly = mixed;
+      qtyEl.style.background = mixed ? "#eee" : "";
+      if(mixed) distSyncSaleMixedQty();
+    }
+
+    function distSyncSaleMixedQty(){
+      const blk = Number(document.getElementById("dist_saleQtyBlack").value) || 0;
+      const wht = Number(document.getElementById("dist_saleQtyWhite").value) || 0;
+      document.getElementById("dist_saleQty").value = blk + wht;
+      distSyncMaterialsDefaults();
+      distUpdateComputedPrice();
+    }
 
     function distComputeTotal(qty, withTheme){
       const base = (Number(distributionsData.config.basePriceNoTheme) || 0) * qty;
@@ -2848,7 +2899,12 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       document.getElementById("dist_saleCustomerPhone").value = sale.customerPhone || "";
       document.getElementById("dist_saleEmirate").value = sale.emirate || "";
       document.getElementById("dist_saleDate").value = sale.date || todayStr();
-      document.getElementById("dist_saleColor").value = sale.color;
+      const distSaleEditMixed = !!sale.colorBreakdown;
+      document.getElementById("dist_saleMixedColors").checked = distSaleEditMixed;
+      document.getElementById("dist_saleColor").value = sale.color || "black";
+      document.getElementById("dist_saleQtyBlack").value = distSaleEditMixed ? sale.colorBreakdown.black : 0;
+      document.getElementById("dist_saleQtyWhite").value = distSaleEditMixed ? sale.colorBreakdown.white : 0;
+      distToggleSaleMixedColors();
       document.getElementById("dist_saleQty").value = sale.qty;
       document.getElementById("dist_saleTheme").checked = !!sale.withTheme;
       document.getElementById("dist_saleDiscount").value = sale.discount || 0;
@@ -2869,6 +2925,10 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       distEditingSaleId = null;
       document.getElementById("dist_saleEditBanner").style.display = "none";
       document.getElementById("dist_logSaleBtn").textContent = "✅ سجّل البيع واخصم من المخزون";
+      document.getElementById("dist_saleMixedColors").checked = false;
+      document.getElementById("dist_saleQtyBlack").value = 0;
+      document.getElementById("dist_saleQtyWhite").value = 0;
+      distToggleSaleMixedColors();
       document.getElementById("dist_saleQty").value = 1;
       document.getElementById("dist_saleDiscount").value = 0;
       document.getElementById("dist_saleBagsPackagingUsed").value = 0;
@@ -2897,7 +2957,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
           if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
           const s = obj.sales[idx];
           if(s.cancelled) throw new Error("العملية ملغاة أصلًا.");
-          obj.stock[s.color] = (obj.stock[s.color] || 0) + Number(s.qty || 0);
+          distApplyColorStockDelta(obj.stock, distSaleColorBreakdown(s), 1);
           obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(s.bottlesUsed || 0);
           obj.stock.bagsPerfume = (obj.stock.bagsPerfume || 0) + Number((s.bagsPerfumeUsed !== undefined ? s.bagsPerfumeUsed : s.bagsUsed) || 0);
           obj.stock.pins = (obj.stock.pins || 0) + Number(s.pinsUsed || 0);
@@ -3014,7 +3074,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
           if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
           const s = obj.sales[idx];
           if(!s.cancelled){
-            obj.stock[s.color] = (obj.stock[s.color] || 0) + Number(s.qty || 0);
+            distApplyColorStockDelta(obj.stock, distSaleColorBreakdown(s), 1);
             obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(s.bottlesUsed || 0);
             obj.stock.bagsPerfume = (obj.stock.bagsPerfume || 0) + Number((s.bagsPerfumeUsed !== undefined ? s.bagsPerfumeUsed : s.bagsUsed) || 0);
             obj.stock.pins = (obj.stock.pins || 0) + Number(s.pinsUsed || 0);
@@ -3140,7 +3200,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
              ${deleteBtnHtml}`;
         return `
         <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; ${rowStyle}">
-          <span>${s.date} — ${distColorNameAr(s.color)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}${discountTxt}${profitTxt}${cancelledTxt}</span>
+          <span>${s.date} — ${distSaleColorLabel(s)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}${discountTxt}${profitTxt}${cancelledTxt}</span>
           <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
             <b>${Number(shownTotal).toFixed(2)} AED</b>
             ${actionsHtml}
@@ -3315,6 +3375,9 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
 
     document.getElementById("dist_reloadBtn").addEventListener("click", loadDistributionsIntoPanel);
     document.getElementById("dist_saleQty").addEventListener("input", () => { distSyncMaterialsDefaults(); distUpdateComputedPrice(); });
+    document.getElementById("dist_saleMixedColors").addEventListener("change", distToggleSaleMixedColors);
+    document.getElementById("dist_saleQtyBlack").addEventListener("input", distSyncSaleMixedQty);
+    document.getElementById("dist_saleQtyWhite").addEventListener("input", distSyncSaleMixedQty);
     document.getElementById("dist_saleTheme").addEventListener("change", distUpdateComputedPrice);
     document.getElementById("dist_saleDiscount").addEventListener("input", distUpdateComputedPrice);
     document.getElementById("dist_saleBottlesUsed").addEventListener("input", distUpdateComputedPrice);
@@ -3467,8 +3530,11 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
     document.getElementById("dist_logSaleBtn").addEventListener("click", async () => {
       const token = getToken();
       if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-      const color = document.getElementById("dist_saleColor").value;
-      const qty = Number(document.getElementById("dist_saleQty").value) || 0;
+      const mixedColors = document.getElementById("dist_saleMixedColors").checked;
+      const qtyBlack = mixedColors ? (Number(document.getElementById("dist_saleQtyBlack").value) || 0) : 0;
+      const qtyWhite = mixedColors ? (Number(document.getElementById("dist_saleQtyWhite").value) || 0) : 0;
+      const color = mixedColors ? null : document.getElementById("dist_saleColor").value;
+      const qty = mixedColors ? (qtyBlack + qtyWhite) : (Number(document.getElementById("dist_saleQty").value) || 0);
       const withTheme = document.getElementById("dist_saleTheme").checked;
       const date = document.getElementById("dist_saleDate").value || todayStr();
       const note = document.getElementById("dist_saleNote").value.trim();
@@ -3495,15 +3561,24 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
             const idx = (obj.sales||[]).findIndex(s => s.id === editingId);
             if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة (يمكن انحذفت). حدّث الصفحة.");
             const oldEntry = obj.sales[idx];
-            obj.stock[oldEntry.color] = (obj.stock[oldEntry.color] || 0) + Number(oldEntry.qty || 0);
+            distApplyColorStockDelta(obj.stock, distSaleColorBreakdown(oldEntry), 1);
             obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) + Number(oldEntry.bottlesUsed || 0);
             obj.stock.bagsPerfume = (obj.stock.bagsPerfume || 0) + Number((oldEntry.bagsPerfumeUsed !== undefined ? oldEntry.bagsPerfumeUsed : oldEntry.bagsUsed) || 0);
             obj.stock.pins = (obj.stock.pins || 0) + Number(oldEntry.pinsUsed || 0);
             obj.stock.bagsPackaging = (obj.stock.bagsPackaging || 0) + Number(oldEntry.bagsPackagingUsed || 0);
             obj.stock.boxes = (obj.stock.boxes || 0) + Number(oldEntry.boxesUsed || 0);
           }
-          const curColorStock = obj.stock[color] || 0;
-          if(qty > curColorStock) throw new Error("المخزون الحالي (" + distColorNameAr(color) + ") بس " + curColorStock + " قطعة — عدّل الكمية أو حدّث المخزون أول.");
+          if(mixedColors){
+            const curBlack = obj.stock.black || 0;
+            const curWhite = obj.stock.white || 0;
+            const shortages = [];
+            if(qtyBlack > curBlack) shortages.push("أسود: بس " + curBlack + " متوفر");
+            if(qtyWhite > curWhite) shortages.push("بيج: بس " + curWhite + " متوفر");
+            if(shortages.length) throw new Error("المخزون ما يكفي — " + shortages.join("، ") + ". عدّل الكمية أو حدّث المخزون أول.");
+          } else {
+            const curColorStock = obj.stock[color] || 0;
+            if(qty > curColorStock) throw new Error("المخزون الحالي (" + distColorNameAr(color) + ") بس " + curColorStock + " قطعة — عدّل الكمية أو حدّث المخزون أول.");
+          }
           if(bottlesUsed > (obj.stock.bottlesReady||0)) throw new Error("المخزون الحالي من الزجاجات الجاهزة بس " + (obj.stock.bottlesReady||0) + ".");
           if(bagsPerfumeUsed > (obj.stock.bagsPerfume||0)) throw new Error("المخزون الحالي من كيس العطر بس " + (obj.stock.bagsPerfume||0) + ".");
           if(pinsUsed > (obj.stock.pins||0)) throw new Error("المخزون الحالي من الدبابيس بس " + (obj.stock.pins||0) + ".");
@@ -3523,9 +3598,15 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
           const orderProfit = netTotal - orderCost;
 
           const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsPerfumeUsed, pinsUsed, bagsPackagingUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
+          if(mixedColors) saleEntry.colorBreakdown = { black: qtyBlack, white: qtyWhite };
           if(editingId) saleEntry.editedAt = new Date().toISOString();
 
-          obj.stock[color] = (obj.stock[color] || 0) - qty;
+          if(mixedColors){
+            obj.stock.black = (obj.stock.black || 0) - qtyBlack;
+            obj.stock.white = (obj.stock.white || 0) - qtyWhite;
+          } else {
+            obj.stock[color] = (obj.stock[color] || 0) - qty;
+          }
           obj.stock.bottlesReady = (obj.stock.bottlesReady || 0) - bottlesUsed;
           obj.stock.bagsPerfume = (obj.stock.bagsPerfume || 0) - bagsPerfumeUsed;
           obj.stock.pins = (obj.stock.pins || 0) - pinsUsed;
@@ -3540,7 +3621,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
             obj.sales.push(saleEntry);
           }
           return obj;
-        }, editingId ? ("Edit distribution sale: " + editingId) : ("Log distribution sale: " + color + " x" + qty));
+        }, editingId ? ("Edit distribution sale: " + editingId) : ("Log distribution sale: " + (mixedColors ? ("mixed black:" + qtyBlack + " white:" + qtyWhite) : color) + " x" + qty));
 
         distributionsData = updated;
         distEditingSaleId = null;
@@ -3554,6 +3635,10 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
         document.getElementById("dist_saleCustomerName").value = "";
         document.getElementById("dist_saleCustomerPhone").value = "";
         document.getElementById("dist_saleEmirate").value = "";
+        document.getElementById("dist_saleMixedColors").checked = false;
+        document.getElementById("dist_saleQtyBlack").value = 0;
+        document.getElementById("dist_saleQtyWhite").value = 0;
+        distToggleSaleMixedColors();
         distLastAutoQty = null;
         distFillForm();
         distShowStatus(editingId ? "تم حفظ التعديل!" : "تم تسجيل البيع وخصم المخزون!", "ok");
