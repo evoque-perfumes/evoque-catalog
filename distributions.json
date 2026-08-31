@@ -7,7 +7,7 @@
   },
   "stock": {
     "black": 300,
-    "white": 469,
+    "white": 500,
     "bottlesEmpty": 80,
     "bottlesReady": 968,
     "bagsPerfume": 968,
@@ -135,11 +135,11 @@
       "date": "2026-08-31",
       "material": "handle",
       "qty": 500,
-      "unitPrice": 1,
-      "totalPrice": 500,
+      "unitPrice": 0.4,
+      "totalPrice": 200,
       "note": "لون بيج",
-      "editedAt": "2026-08-31T16:53:52.672Z",
-      "color": "white"
+      "color": "white",
+      "editedAt": "2026-08-31T18:32:51.627Z"
     },
     {
       "id": "distp_1788195256939",
