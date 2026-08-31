@@ -32,39 +32,5 @@
         "lineTotal": 10
       }
     ]
-  },
-  {
-    "orderId": "pend-1788198271140-4859",
-    "receivedAt": "2026-08-31T17:44:31.140Z",
-    "status": "pending",
-    "source": "form",
-    "lang": "ar",
-    "name": "Ammar",
-    "phone": "0505272120",
-    "email": "jasim.aj@gmail.com",
-    "country": "الإمارات",
-    "emirateOrWilayat": "الشارقة",
-    "deliveryMethod": "",
-    "address": "الرحمانيه",
-    "notes": "",
-    "currency": "د.إ",
-    "paymentMethod": "الدفع عند الاستلام",
-    "subtotal": 50,
-    "shippingFee": 25,
-    "shippingFree": false,
-    "tabbyFee": 0,
-    "total": 75,
-    "offers": "",
-    "items": [
-      {
-        "perfumeId": "mancera-roses-vanille",
-        "brand": "Mancera",
-        "name": "Roses Vanille",
-        "size": 50,
-        "qty": 1,
-        "unitPrice": 50,
-        "lineTotal": 50
-      }
-    ]
   }
 ]
