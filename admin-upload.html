@@ -3765,10 +3765,14 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
             if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة. حدّث الصفحة.");
             const old = obj.purchases[idx];
             const oldKey = distMaterialStockKey(old.material, old.color);
-            if(oldKey) obj.stock[oldKey] = Math.max(0, (obj.stock[oldKey] || 0) - Number(old.qty || 0));
+            if(oldKey) obj.stock[oldKey] = (obj.stock[oldKey] || 0) - Number(old.qty || 0);
           }
           const key = distMaterialStockKey(material, color);
-          if(key) obj.stock[key] = (obj.stock[key] || 0) + qty;
+          if(key){
+            const projected = (obj.stock[key] || 0) + qty;
+            if(projected < 0) throw new Error("ما تقدر تنزّل الكمية لهالحد — فيه " + Math.abs(projected) + " قطعة من هالمادة تم بيعها/استخدامها فعليًا من هالعملية. لازم الكمية الجديدة ما تقل عن اللي تم صرفه فعليًا.");
+            obj.stock[key] = projected;
+          }
 
           const purchaseEntry = { id: editingId || ("distp_" + Date.now()), date, material, qty, unitPrice, totalPrice, note };
           if(material === "handle") purchaseEntry.color = color;
@@ -3818,15 +3822,17 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
             if(idx === -1) throw new Error("العملية اللي تحاول تعدّلها ماعادت موجودة (يمكن انحذفت). حدّث الصفحة.");
             const old = obj.fills[idx];
             obj.stock.bottlesEmpty = (obj.stock.bottlesEmpty||0) + Number(old.qty || 0);
-            obj.stock.bottlesReady = Math.max(0, (obj.stock.bottlesReady||0) - Number(old.qty || 0));
+            obj.stock.bottlesReady = (obj.stock.bottlesReady||0) - Number(old.qty || 0);
             obj.stock.oilG = (obj.stock.oilG||0) + Number(old.oilUsed || 0);
             obj.stock.alcoholMl = (obj.stock.alcoholMl||0) + Number(old.alcoholUsed || 0);
           }
           if(qty > (obj.stock.bottlesEmpty||0)) throw new Error("المخزون الحالي من الزجاجات الفارغة بس " + (obj.stock.bottlesEmpty||0) + " — عدّل العدد أو حدّث المخزون أول.");
           if(needed.oilG > (obj.stock.oilG||0)) throw new Error("الزيت العطري المتوفر بس " + (obj.stock.oilG||0).toFixed(1) + " جرام ويحتاج " + needed.oilG.toFixed(1) + " جرام.");
           if(needed.alcoholMl > (obj.stock.alcoholMl||0)) throw new Error("الكحول المتوفر بس " + (obj.stock.alcoholMl||0).toFixed(1) + " مل ويحتاج " + needed.alcoholMl.toFixed(1) + " مل.");
+          const projectedBottlesReady = (obj.stock.bottlesReady||0) + qty;
+          if(projectedBottlesReady < 0) throw new Error("ما تقدر تنزّل عدد التعبئة لهالحد — فيه زجاجات جاهزة اتباعت فعليًا من هالتعبئة. لازم العدد الجديد ما يقل عن اللي تم بيعه فعليًا.");
           obj.stock.bottlesEmpty = (obj.stock.bottlesEmpty||0) - qty;
-          obj.stock.bottlesReady = (obj.stock.bottlesReady||0) + qty;
+          obj.stock.bottlesReady = projectedBottlesReady;
           obj.stock.oilG = (obj.stock.oilG||0) - needed.oilG;
           obj.stock.alcoholMl = (obj.stock.alcoholMl||0) - needed.alcoholMl;
           const fillEntry = { id: editingId || ("distf_" + Date.now()), date, qty, oilUsed: needed.oilG, alcoholUsed: needed.alcoholMl };
