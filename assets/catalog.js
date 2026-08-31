@@ -1266,7 +1266,7 @@ let searchQuery = "";
 const PAGE_SIZE = 12;
 let visibleCount = PAGE_SIZE;
 let showMoreObserver = null; // يراقب عنصر التحميل التلقائي أثناء التمرير (Infinite Scroll)
-let cart = {}; // in-memory only, no browser storage: { perfumeId: {size, qty} } — نجيب البراند/الاسم/السعر وقت العرض من مصفوفة perfumes نفسها
+let cart = {}; // { perfumeId: {size, qty} } — نجيب البراند/الاسم/السعر وقت العرض من مصفوفة perfumes نفسها. تُحفظ فعليًا بالـ localStorage (شوف persistCartState/restoreCartState تحت) عشان تضل موجودة حتى لو سكر الزائر المتصفح.
 let paymentMethod = "cod"; // "cod" | "tabby" | "bank"
 
 /* ===== Offers banner (نصوص العروض ثابتة ومطابقة لتعليمات المتجر — تُحدَّث يدويًا هنا لو تغيّرت العروض) ===== */
@@ -1925,41 +1925,53 @@ function cartItemsList(){
 }
 
 // ------------------------------------------------------------------
-// استمرارية السلة والدولة عبر الصفحات — 21 أغسطس 2026
+// استمرارية السلة والدولة عبر الصفحات وحتى لو سكر المتصفح — 21 أغسطس 2026، عدّلت 31 أغسطس 2026
 // بعد تحويل الموقع لعدة صفحات منفصلة (رئيسية + رجالي/نسائي/للجنسين)، كل صفحة
 // تحمّل نفسها من الصفر، فبدون هذا الحفظ كانت السلة تنمسح كل ما ينتقل الزائر
 // من صفحة لصفحة (مثلاً يضيف عطر من الرئيسية وبعدين يروح رجالي). نستخدم
-// sessionStorage (يمسح تلقائيًا لما يسكر المتصفح — مو تتبع دائم) بدل
-// localStorage، ونتعامل بحذر (try/catch) لو المتصفح يمنع الوصول لأي سبب.
+// localStorage (يضل محفوظ حتى لو الزائر سكر المتصفح كامل وفتحه بعدين — عكس
+// sessionStorage اللي يمسح مع كل تبويب/متصفح ينسكر ومحصور بنفس التبويب فقط)
+// مع طابع وقت (CART_SAVED_AT_KEY) عشان السلة تنتهي صلاحيتها تلقائيًا بعد مدة
+// معينة (CART_EXPIRY_MS) بدل ما تضل عالقة للأبد. نتعامل بحذر (try/catch) لو
+// المتصفح يمنع الوصول لأي سبب.
 const CART_STORAGE_KEY = "evoque_cart_v1";
+const CART_SAVED_AT_KEY = "evoque_cart_saved_at_v1";
 const COUNTRY_STORAGE_KEY = "evoque_country_v1";
 const PAYMENT_STORAGE_KEY = "evoque_payment_v1";
+const CART_EXPIRY_MS = 24 * 60 * 60 * 1000; // ٢٤ ساعة من آخر تعديل بالسلة
 
 function persistCartState(){
   try{
-    sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-    sessionStorage.setItem(COUNTRY_STORAGE_KEY, country);
-    sessionStorage.setItem(PAYMENT_STORAGE_KEY, paymentMethod);
-  }catch(e){ /* sessionStorage غير متاح — نتجاهل بصمت، السلة تشتغل بالذاكرة بس لهذي الصفحة */ }
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    localStorage.setItem(CART_SAVED_AT_KEY, String(Date.now()));
+    localStorage.setItem(COUNTRY_STORAGE_KEY, country);
+    localStorage.setItem(PAYMENT_STORAGE_KEY, paymentMethod);
+  }catch(e){ /* localStorage غير متاح — نتجاهل بصمت، السلة تشتغل بالذاكرة بس لهذي الزيارة */ }
 }
 
 function restoreCartState(){
   try{
-    const savedCart = sessionStorage.getItem(CART_STORAGE_KEY);
-    if(savedCart){
+    const savedAt = Number(localStorage.getItem(CART_SAVED_AT_KEY)) || 0;
+    const isFresh = savedAt > 0 && (Date.now() - savedAt) < CART_EXPIRY_MS;
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+    if(isFresh && savedCart){
       const parsed = JSON.parse(savedCart);
       if(parsed && typeof parsed === "object") cart = parsed;
+    } else if(savedCart){
+      // سلة قديمة عمرها أكثر من CART_EXPIRY_MS — نمسحها ونبدأ بسلة فاضية بدل ما نعرض عطور قديمة ممكن تكون تغيّر سعرها أو ماعادت متوفرة
+      try{ localStorage.removeItem(CART_STORAGE_KEY); localStorage.removeItem(CART_SAVED_AT_KEY); }catch(e2){}
     }
-    const savedCountry = sessionStorage.getItem(COUNTRY_STORAGE_KEY);
+    const savedCountry = localStorage.getItem(COUNTRY_STORAGE_KEY);
     if(savedCountry && COUNTRIES[savedCountry]) country = savedCountry;
-    const savedPayment = sessionStorage.getItem(PAYMENT_STORAGE_KEY);
+    const savedPayment = localStorage.getItem(PAYMENT_STORAGE_KEY);
     if(savedPayment === "cod" || savedPayment === "tabby" || savedPayment === "bank") paymentMethod = savedPayment;
-  }catch(e){ /* أول زيارة أو sessionStorage غير متاح — نبدأ بسلة فاضية عادي */ }
+  }catch(e){ /* أول زيارة أو localStorage غير متاح — نبدأ بسلة فاضية عادي */ }
 }
 
 /* ===== المفضلة (❤️ Wishlist) — 25 أغسطس 2026 =====
-   عكس السلة، نخزّن المفضلة بـlocalStorage (لا sessionStorage) عشان تضل محفوظة
-   للعميل حتى لو رجع الموقع بعد أيام، مو بس بنفس الجلسة. كل عطر معرَّف بـp.id
+   زي السلة تمامًا، نخزّن المفضلة بـlocalStorage عشان تضل محفوظة للعميل حتى لو
+   رجع الموقع بعد أيام — بس المفضلة بدون تاريخ انتهاء (السلة عندها CART_EXPIRY_MS،
+   المفضلة تضل للأبد لين يشيلها العميل بنفسه). كل عطر معرَّف بـp.id
    الثابت (نفس المعرّف المستخدم بالتقييمات). */
 const WISHLIST_STORAGE_KEY = "evoque_wishlist_v1";
 let myWishlist = new Set();
@@ -2218,7 +2230,7 @@ function onOrderCountryChange(e){
   renderOrderPaymentSection();
   renderBankDetailsBlock();
   renderCountrySelect(); // نزامن قائمة الدولة بأعلى الصفحة مع نفس الاختيار
-  renderCart(); // يحدّث سلة السفلي والتخزين المؤقت (sessionStorage) بنفس الدولة الجديدة
+  renderCart(); // يحدّث سلة السفلي والتخزين (localStorage) بنفس الدولة الجديدة
 }
 
 function populateOrderCountrySelect(){
