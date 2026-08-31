@@ -32,57 +32,5 @@
         "lineTotal": 10
       }
     ]
-  },
-  {
-    "orderId": "pend-1788203993054-3134",
-    "receivedAt": "2026-08-31T19:19:53.054Z",
-    "status": "pending",
-    "source": "form",
-    "lang": "ar",
-    "name": "Hakkim",
-    "phone": "0563544169",
-    "email": "evuqoe.ae@gmail.com",
-    "country": "الإمارات",
-    "emirateOrWilayat": "دبي",
-    "deliveryMethod": "",
-    "address": "القوز",
-    "notes": "",
-    "currency": "د.إ",
-    "paymentMethod": "الدفع عند الاستلام",
-    "subtotal": 30,
-    "shippingFee": 25,
-    "shippingFree": false,
-    "tabbyFee": 0,
-    "total": 55,
-    "offers": "",
-    "items": [
-      {
-        "perfumeId": "ysl-tuxedo",
-        "brand": "Ysl",
-        "name": "Tuxedo",
-        "size": 10,
-        "qty": 1,
-        "unitPrice": 10,
-        "lineTotal": 10
-      },
-      {
-        "perfumeId": "gucci-gucci-guilty-elixir-de-parfum-pour-homme",
-        "brand": "Gucci",
-        "name": "Gucci Guilty Elixir De Parfum Pour Homme",
-        "size": 10,
-        "qty": 1,
-        "unitPrice": 10,
-        "lineTotal": 10
-      },
-      {
-        "perfumeId": "nishane-hacivat",
-        "brand": "Nishane",
-        "name": "Hacivat",
-        "size": 10,
-        "qty": 1,
-        "unitPrice": 10,
-        "lineTotal": 10
-      }
-    ]
   }
 ]
