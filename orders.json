@@ -13,7 +13,8 @@
     "address": "العين - شعاب الاشجر",
     "orderId": "order-1787603350106",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "lancome-idole-1787603350106-1",
@@ -29,7 +30,8 @@
     "address": "العين - شعاب الاشجر",
     "orderId": "order-1787603350106",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "guerlain-les-absolus-d-orient-patchouli-ardent-1787688687024-0",
