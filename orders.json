@@ -305,7 +305,8 @@
     "address": "القوز",
     "orderId": "pend-1788203993054-3134",
     "source": "website",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "gucci-gucci-guilty-elixir-de-parfum-pour-homme-1788204096448-1",
@@ -321,7 +322,8 @@
     "address": "القوز",
     "orderId": "pend-1788203993054-3134",
     "source": "website",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "nishane-hacivat-1788204096448-2",
@@ -337,6 +339,7 @@
     "address": "القوز",
     "orderId": "pend-1788203993054-3134",
     "source": "website",
-    "paid": true
+    "paid": true,
+    "status": "received"
   }
 ]
