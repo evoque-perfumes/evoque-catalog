@@ -81,9 +81,10 @@
       "date": "2026-08-31",
       "material": "handle",
       "qty": 500,
-      "unitPrice": 0.002,
-      "totalPrice": 1,
-      "note": "لون بيج"
+      "unitPrice": 1,
+      "totalPrice": 500,
+      "note": "لون بيج",
+      "editedAt": "2026-08-31T16:53:52.672Z"
     }
   ],
   "fills": []
