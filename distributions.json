@@ -71,7 +71,8 @@
       "customerPhone": "0589110224",
       "emirate": "العين",
       "editedAt": "2026-08-31T18:25:56.812Z",
-      "status": "received"
+      "status": "received",
+      "paid": true
     }
   ],
   "purchases": [
