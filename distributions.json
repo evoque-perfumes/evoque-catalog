@@ -8,14 +8,14 @@
   "stock": {
     "black": 500,
     "white": 500,
-    "bottlesEmpty": 1080,
-    "bottlesReady": 0,
+    "bottlesEmpty": 80,
+    "bottlesReady": 1000,
     "bagsPerfume": 1000,
     "bagsPackaging": 2,
     "pins": 1000,
     "boxes": 0,
-    "oilG": 5000,
-    "alcoholMl": 20000
+    "oilG": 0,
+    "alcoholMl": 10000
   },
   "sales": [],
   "purchases": [
@@ -98,5 +98,13 @@
       "note": "دبوس ذهبي"
     }
   ],
-  "fills": []
+  "fills": [
+    {
+      "id": "distf_1788198827681",
+      "date": "2026-08-31",
+      "qty": 1000,
+      "oilUsed": 5000,
+      "alcoholUsed": 10000
+    }
+  ]
 }
