@@ -24,9 +24,10 @@
       "date": "2026-08-31",
       "material": "bagPerfume",
       "qty": 1000,
-      "unitPrice": 0.001,
-      "totalPrice": 1,
-      "note": "مطبعة الفارس"
+      "unitPrice": 1.05,
+      "totalPrice": 1050,
+      "note": "مطبعة الفارس",
+      "editedAt": "2026-08-31T16:49:40.262Z"
     }
   ],
   "fills": []
