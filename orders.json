@@ -63,7 +63,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "valentino-uomo-1788196253429-1",
@@ -79,7 +80,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "tom-ford-tomford-noir-1788196253429-2",
@@ -95,7 +97,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "paco-rabanne-1-million-1788196253429-3",
@@ -111,7 +114,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "hugo-boss-bottled-absolu-1788196253429-4",
@@ -127,7 +131,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "hermes-terre-d-harmes-1788196253429-5",
@@ -143,7 +148,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "guerlain-l-instant-pour-homme-1788196253429-6",
@@ -159,7 +165,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "guerlain-l-homme-ideal-l-intense-1788196253429-7",
@@ -175,7 +182,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "gucci-gucci-guilty-absolute-man-1788196253429-8",
@@ -191,7 +199,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "givenchy-gentleman-reserve-privee-1788196253429-9",
@@ -207,7 +216,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "giorgio-armani-armani-eau-de-nuit-oud-1788196253429-10",
@@ -223,7 +233,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "gift-louis-vuitton-imagination-1788196253429-0",
@@ -241,7 +252,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "gift-louis-vuitton-lovers-1788196253429-1",
@@ -259,7 +271,8 @@
     "address": "Saif al hamrani street - Bhnd Ridwan S/M - villa 18 - Liwara 1",
     "orderId": "pend-1788194047885-6607",
     "source": "website",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "mancera-roses-vanille-1788198608893-0",
