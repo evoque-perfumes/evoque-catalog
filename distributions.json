@@ -11,7 +11,7 @@
     "bottlesEmpty": 80,
     "bottlesReady": 968,
     "bagsPerfume": 968,
-    "bagsPackaging": 2,
+    "bagsPackaging": 1,
     "pins": 968,
     "boxes": 0,
     "oilG": 0,
@@ -32,10 +32,10 @@
       "bottlesUsed": 2,
       "bagsPerfumeUsed": 2,
       "pinsUsed": 2,
-      "bagsPackagingUsed": 0,
+      "bagsPackagingUsed": 1,
       "boxesUsed": 0,
-      "orderCost": 12.5,
-      "orderProfit": 17.5,
+      "orderCost": 13.5,
+      "orderProfit": 16.5,
       "note": "",
       "customerName": "ام عبدالله",
       "customerPhone": "0507733470",
@@ -43,7 +43,8 @@
       "colorBreakdown": {
         "black": 1,
         "white": 1
-      }
+      },
+      "editedAt": "2026-08-31T18:25:44.316Z"
     },
     {
       "id": "dist_1788200632990",
