@@ -11,7 +11,7 @@
     "bottlesEmpty": 1080,
     "bottlesReady": 0,
     "bagsPerfume": 1000,
-    "bagsPackaging": 0,
+    "bagsPackaging": 2,
     "pins": 0,
     "boxes": 0,
     "oilG": 5000,
@@ -56,6 +56,15 @@
       "unitPrice": 0.0125,
       "totalPrice": 250,
       "note": "كحول"
+    },
+    {
+      "id": "distp_1788195123935",
+      "date": "2026-08-31",
+      "material": "bagPackaging",
+      "qty": 2,
+      "unitPrice": 1,
+      "totalPrice": 2,
+      "note": ""
     }
   ],
   "fills": []
