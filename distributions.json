@@ -15,7 +15,7 @@
     "pins": 0,
     "boxes": 0,
     "oilG": 5000,
-    "alcoholMl": 0
+    "alcoholMl": 20000
   },
   "sales": [],
   "purchases": [
@@ -47,6 +47,15 @@
       "unitPrice": 0.315,
       "totalPrice": 1575,
       "note": "شاهدة"
+    },
+    {
+      "id": "distp_1788195102528",
+      "date": "2026-08-31",
+      "material": "alcohol",
+      "qty": 20000,
+      "unitPrice": 0.0125,
+      "totalPrice": 250,
+      "note": "كحول"
     }
   ],
   "fills": []
