@@ -11,7 +11,7 @@
     "bottlesEmpty": 80,
     "bottlesReady": 968,
     "bagsPerfume": 968,
-    "bagsPackaging": 1,
+    "bagsPackaging": 0,
     "pins": 968,
     "boxes": 0,
     "oilG": 0,
@@ -60,14 +60,15 @@
       "bottlesUsed": 30,
       "bagsPerfumeUsed": 30,
       "pinsUsed": 30,
-      "bagsPackagingUsed": 0,
+      "bagsPackagingUsed": 1,
       "boxesUsed": 0,
-      "orderCost": 187.5,
-      "orderProfit": 272.5,
+      "orderCost": 188.5,
+      "orderProfit": 271.5,
       "note": "",
       "customerName": "ام سلطان",
       "customerPhone": "0589110224",
-      "emirate": "العين"
+      "emirate": "العين",
+      "editedAt": "2026-08-31T18:25:56.812Z"
     }
   ],
   "purchases": [
