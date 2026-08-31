@@ -45,7 +45,8 @@
         "white": 1
       },
       "editedAt": "2026-08-31T18:25:44.316Z",
-      "paid": true
+      "paid": true,
+      "status": "received"
     },
     {
       "id": "dist_1788200632990",
