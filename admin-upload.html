@@ -57,6 +57,9 @@
   .review-row-actions, .sale-row-actions{ display:flex; gap:8px; margin-top:8px; }
   .review-row-actions button, .sale-row-actions button{ padding:5px 10px; font-size:12px; margin:0; width:auto; }
   .sale-row-amount{ color:var(--emerald); font-weight:700; font-size:13.5px; }
+  .sale-row-items{ margin:6px 0; }
+  .sale-row-item{ color:var(--ink); font-size:12.5px; line-height:1.7; }
+  .sale-row-status-select{ width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; }
   input[type=file]{
     width:100%; padding:10px; border-radius:8px; border:1px dashed #C9BBA0;
     background:var(--panel-2); color:var(--ink); font-size:13px; margin-bottom:14px;
@@ -2359,6 +2362,30 @@ function groupSalesData(){
   return Array.from(map.values()).reverse(); // الأحدث أول
 }
 
+function orderStatusLabel(s){
+  if(s === "prep") return "🔧 قيد التجهيز";
+  if(s === "needs_oil") return "🛢️ يحتاج زيت";
+  if(s === "shipped") return "✅ طلعت";
+  return "🆕 جديد";
+}
+function orderStatusColor(s){
+  if(s === "prep") return "#8a6d1f";
+  if(s === "needs_oil") return "#963224";
+  if(s === "shipped") return "#1F6B41";
+  return "var(--muted)";
+}
+async function slUpdateOrderStatus(orderId, status){
+  const token = getToken();
+  if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  try{
+    const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.map(o => (o.orderId || o.id) === orderId ? Object.assign({}, o, { status }) : o), `Update order status: ${orderId} -> ${status || "جديد"}`);
+    salesData = updatedList;
+    renderSalesHistory();
+    slShowStatus("تم تحديث حالة الطلب.", "ok");
+  }catch(err){
+    slShowStatus("صار خطأ بتحديث حالة الطلب: " + err.message, "err");
+  }
+}
 function renderSalesHistory(){
   const groups = groupSalesData();
   const wrap = document.getElementById("sl_history");
@@ -2372,23 +2399,37 @@ function renderSalesHistory(){
   wrap.style.display = "block";
   wrap.innerHTML = groups.slice(0, 15).map(g => {
     const total = g.items.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
-    const itemsLabel = g.items.map(o => {
+    const status = (g.items[0] && g.items[0].status) || "";
+    const itemsListHtml = g.items.map(o => {
       const p = perfumes.find(x => x.id === o.perfumeId);
       const label = p ? `${p.brand} — ${p.name}` : o.perfumeId;
-      return `${label} (${o.size}مل×${o.qty})${o.isGift ? " 🎁هدية" : ""}`;
-    }).join("، ");
+      return `<div class="sale-row-item">• ${label} (${o.size}مل×${o.qty})${o.isGift ? " 🎁هدية" : ""}</div>`;
+    }).join("");
     return `<div class="sale-row" data-key="${g.key}">
       <div class="sale-row-top">
-        <span class="sale-row-name">${itemsLabel}${g.customer ? " — " + String(g.customer).replace(/</g,"&lt;") : ""}</span>
+        <span class="sale-row-name">${g.customer ? String(g.customer).replace(/</g,"&lt;") : "بدون اسم"}</span>
         <span class="sale-row-amount">${fmtNum(total)} AED</span>
       </div>
+      <div class="sale-row-items">${itemsListHtml}</div>
       <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}</div>
       <div class="sale-row-actions">
+        <select class="sale-row-status-select" data-key="${g.key}" style="color:${orderStatusColor(status)};">
+          <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
+          <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
+          <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
+          <option value="shipped" ${status === "shipped" ? "selected" : ""}>✅ طلعت</option>
+        </select>
         <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
         <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
       </div>
     </div>`;
   }).join("");
+  wrap.querySelectorAll(".sale-row-status-select").forEach(sel => {
+    sel.addEventListener("change", (e) => {
+      const key = e.target.dataset.key;
+      slUpdateOrderStatus(key, e.target.value);
+    });
+  });
   wrap.querySelectorAll(".sl-history-edit-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const key = e.target.closest(".sale-row").dataset.key;
