@@ -34,9 +34,10 @@
       "date": "2026-08-31",
       "material": "bottle",
       "qty": 1080,
-      "unitPrice": 2.4166666666666665,
-      "totalPrice": 2610,
-      "note": "سكاي لاين"
+      "unitPrice": 2,
+      "totalPrice": 2160,
+      "note": "سكاي لاين",
+      "editedAt": "2026-08-31T16:50:51.955Z"
     }
   ],
   "fills": []
