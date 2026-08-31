@@ -12,7 +12,7 @@
     "bottlesReady": 0,
     "bagsPerfume": 1000,
     "bagsPackaging": 2,
-    "pins": 0,
+    "pins": 1000,
     "boxes": 0,
     "oilG": 5000,
     "alcoholMl": 20000
@@ -85,6 +85,15 @@
       "totalPrice": 500,
       "note": "لون بيج",
       "editedAt": "2026-08-31T16:53:52.672Z"
+    },
+    {
+      "id": "distp_1788195256939",
+      "date": "2026-08-31",
+      "material": "pin",
+      "qty": 1000,
+      "unitPrice": 0.5,
+      "totalPrice": 500,
+      "note": "دبوس ذهبي"
     }
   ],
   "fills": []
