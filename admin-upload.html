@@ -390,6 +390,21 @@
     <div class="status" id="sq_statusBox"></div>
   </div>
 
+  <div class="panel" id="reviewsOrdersPanel" style="display:none;">
+    <h2>🧾 طلبات العملاء (تقييم حسب رقم الطلب)</h2>
+    <small class="hint" style="margin-top:0;">
+      القائمة تحت فيها كل طلب وشو العطور اللي بداخله، وكم منها اتكتب له تقييم لين الحين. اضغط على أي طلب
+      عشان تفتحه وتشوف عطوره، وبعدين اضغط "أضف تقييم" على أي عطر عشان يفتح لك فورم التقييم تحت مع تعبئة
+      اسم العميل والتاريخ تلقائيًا من بيانات الطلب.
+    </small>
+    <div class="row" style="margin-top:10px;">
+      <button type="button" id="rv_ordersToggleBtn" class="secondary">👁️ عرض كل الطلبات</button>
+      <span class="hint" id="rv_ordersCountBadge" style="margin:0;"></span>
+    </div>
+    <div id="rv_ordersList" style="margin-top:10px; display:flex; flex-direction:column; gap:8px;"></div>
+    <small class="hint" id="rv_ordersEmptyHint" style="margin-top:0; display:none;">🎉 كل الطلبات المسجّلة إلها تقييم كامل حاليًا — ولا فيه طلب ناقص.</small>
+  </div>
+
   <div class="panel" id="reviewsQuickPanel" style="display:none;">
     <h2 id="reviewsQuickPanelTitle">تقييمات العطر</h2>
 
@@ -1279,6 +1294,9 @@ document.getElementById("bp_applyBtn").addEventListener("click", async () => {
 let reviewsData = [];        // آخر نسخة معروفة من reviews.json (للعرض/البحث فقط)
 let reviewsSelected = null;  // العطر المختار حاليًا بوضع "التقييمات"
 let reviewsEditingId = null; // id التقييم الحالي المفتوح للتعديل (null = فورم إضافة جديد)
+let reviewsOrderContext = null; // {orderId, customer, date} لو التقييم الحالي مفتوح من "طلبات العملاء" — يُضاف orderId للتقييم الجديد
+let reviewsOrdersExpandedKey = null; // رقم الطلب المفتوح حاليًا بقائمة "طلبات العملاء" (null = كلها مطوية)
+let reviewsOrdersShowAll = false; // false = نخفي الطلبات اللي كل عطورها اتقيّمت
 let salesData = [];          // آخر نسخة معروفة من orders.json (مبيعات واتساب المسجّلة يدويًا)
 let salesSelected = null;    // العطر المختار حاليًا بوضع "المبيعات"
 let siteOrders = null;       // طلبات نموذج الموقع (Google Sheet) — null لين يتحدّث أول مرة
@@ -1364,6 +1382,76 @@ function salesForPerfume(perfumeId){
 function reviewsForPerfume(perfumeId){
   return reviewsData.filter(r => r.perfumeId === perfumeId)
     .sort((a,b) => (b.date||"").localeCompare(a.date||""));
+}
+
+function orderReviewStatus(group){
+  const total = group.items.length;
+  const reviewed = group.items.filter(o => reviewsData.some(r => r.orderId === group.key && r.perfumeId === o.perfumeId)).length;
+  return { total, reviewed };
+}
+
+function startReviewFromOrder(orderKey, perfumeId){
+  const p = perfumes.find(x => x.id === perfumeId);
+  if(!p){ alert("العطر ماعاد موجود بالكتالوج."); return; }
+  const group = groupSalesData().find(g => g.key === orderKey);
+  const orderContext = group ? { orderId: group.key, customer: group.customer, date: group.date } : null;
+  selectPerfumeForReviews(p, orderContext);
+  document.getElementById("reviewsQuickPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderReviewsOrdersList(){
+  const wrap = document.getElementById("rv_ordersList");
+  const emptyHint = document.getElementById("rv_ordersEmptyHint");
+  const toggleBtn = document.getElementById("rv_ordersToggleBtn");
+  const countBadge = document.getElementById("rv_ordersCountBadge");
+  if(!wrap) return;
+  const groups = groupSalesData();
+  const withStatus = groups.map(g => ({ g, st: orderReviewStatus(g) }));
+  const filtered = reviewsOrdersShowAll ? withStatus : withStatus.filter(x => x.st.reviewed < x.st.total);
+  if(toggleBtn) toggleBtn.textContent = reviewsOrdersShowAll ? "🙈 إخفاء الطلبات المكتملة" : "👁️ عرض كل الطلبات";
+  if(countBadge) countBadge.textContent = filtered.length + " طلب" + (reviewsOrdersShowAll ? "" : " ناقص تقييم");
+  if(filtered.length === 0){
+    wrap.innerHTML = "";
+    if(emptyHint) emptyHint.style.display = "block";
+    return;
+  }
+  if(emptyHint) emptyHint.style.display = "none";
+  wrap.innerHTML = filtered.map(({ g, st }) => {
+    const isOpen = reviewsOrdersExpandedKey === g.key;
+    const itemsHtml = g.items.map(o => {
+      const p = perfumes.find(x => x.id === o.perfumeId);
+      const label = p ? `${p.brand} — ${p.name}` : o.perfumeId;
+      const already = reviewsData.some(r => r.orderId === g.key && r.perfumeId === o.perfumeId);
+      return `<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-top:1px dashed var(--line);">
+        <span style="font-size:12.5px;">${label.replace(/</g,"&lt;")} (${o.size}مل×${o.qty})</span>
+        ${already
+          ? '<span style="color:#1F6B41; font-size:12px; white-space:nowrap;">✅ تم التقييم</span>'
+          : `<button type="button" class="secondary rv-order-item-btn" data-order-key="${g.key}" data-perfume-id="${o.perfumeId}" style="white-space:nowrap;">➕ أضف تقييم</button>`
+        }
+      </div>`;
+    }).join("");
+    return `<div class="review-row" data-order-key="${g.key}">
+      <div class="review-row-top" style="cursor:pointer;" data-order-toggle="${g.key}">
+        <span class="review-row-name">🧾 ${g.key} — ${(g.customer||"").replace(/</g,"&lt;") || "<i>بدون اسم</i>"}</span>
+        <span class="review-row-stars" style="color:var(--ink);">${st.reviewed}/${st.total}</span>
+      </div>
+      <div class="review-row-meta">${g.date || ""} ${isOpen ? "▲" : "▼"}</div>
+      ${isOpen ? `<div style="margin-top:6px;">${itemsHtml}</div>` : ""}
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll("[data-order-toggle]").forEach(el => {
+    el.addEventListener("click", () => {
+      const key = el.getAttribute("data-order-toggle");
+      reviewsOrdersExpandedKey = (reviewsOrdersExpandedKey === key) ? null : key;
+      renderReviewsOrdersList();
+    });
+  });
+  wrap.querySelectorAll(".rv-order-item-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      startReviewFromOrder(btn.getAttribute("data-order-key"), btn.getAttribute("data-perfume-id"));
+    });
+  });
 }
 
 function hasImage(p){
@@ -1912,8 +2000,9 @@ function renderReviewsList(){
   });
 }
 
-function selectPerfumeForReviews(p){
+function selectPerfumeForReviews(p, orderContext){
   reviewsSelected = p;
+  reviewsOrderContext = orderContext || null;
   const wrap = document.getElementById("selectedChipWrap");
   wrap.innerHTML = `<div class="selected-chip">
     <span>${p.brand} — ${p.name}</span>
@@ -1921,6 +2010,7 @@ function selectPerfumeForReviews(p){
   </div>`;
   document.getElementById("deselectBtn").addEventListener("click", () => {
     reviewsSelected = null;
+    reviewsOrderContext = null;
     wrap.innerHTML = "";
     document.getElementById("reviewsQuickPanel").style.display = "none";
   });
@@ -1929,6 +2019,10 @@ function selectPerfumeForReviews(p){
   document.getElementById("reviewsQuickPanel").style.display = "block";
   document.getElementById("rv_statusBox").className = "status";
   resetReviewForm();
+  if(reviewsOrderContext){
+    document.getElementById("rv_name").value = reviewsOrderContext.customer || "";
+    document.getElementById("rv_date").value = reviewsOrderContext.date || todayStr();
+  }
   renderReviewsList();
 }
 
@@ -1939,6 +2033,10 @@ function rvShowStatus(msg, type){
 }
 
 document.getElementById("rv_cancelEditBtn").addEventListener("click", () => resetReviewForm());
+document.getElementById("rv_ordersToggleBtn").addEventListener("click", () => {
+  reviewsOrdersShowAll = !reviewsOrdersShowAll;
+  renderReviewsOrdersList();
+});
 
 document.getElementById("rv_saveBtn").addEventListener("click", async () => {
   const token = getToken();
@@ -1974,11 +2072,14 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
         visible: true,
         source: "admin"
       };
+      if(reviewsOrderContext && reviewsOrderContext.orderId) newReview.orderId = reviewsOrderContext.orderId;
       updatedList = await updateReviewsJsonWithRetry(token, (list) => { list.push(newReview); return list; }, `Add review: ${p.brand} — ${p.name}`);
       rvShowStatus("تم إضافة التقييم. يأخذ بضع دقايق يظهر بالموقع الحي.", "ok");
     }
     reviewsData = updatedList;
     renderReviewsList();
+    renderReviewsOrdersList();
+    reviewsOrderContext = null;
     resetReviewForm();
   }catch(e){
     rvShowStatus("صار خطأ: " + e.message, "err");
@@ -2630,6 +2731,8 @@ function setMode(newMode){
   document.getElementById("stockCategoryWrap").style.display = mode === "stock" ? "block" : "none";
   document.getElementById("stockQuickPanel").style.display = "none";
   document.getElementById("reviewsQuickPanel").style.display = "none";
+  document.getElementById("reviewsOrdersPanel").style.display = mode === "reviews" ? "block" : "none";
+  if(mode === "reviews") renderReviewsOrdersList();
   document.getElementById("salesQuickPanel").style.display = mode === "sales" ? "block" : "none";
   document.getElementById("bankInfoPanel").style.display = mode === "bank" ? "block" : "none";
   document.getElementById("shippingPanel").style.display = mode === "shipping" ? "block" : "none";
