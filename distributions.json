@@ -124,11 +124,11 @@
       "date": "2026-08-31",
       "material": "handle",
       "qty": 300,
-      "unitPrice": 1.6666666666666667,
-      "totalPrice": 500,
+      "unitPrice": 0.3333333333333333,
+      "totalPrice": 100,
       "note": "لون اسود",
       "color": "black",
-      "editedAt": "2026-08-31T18:31:17.641Z"
+      "editedAt": "2026-08-31T18:33:06.897Z"
     },
     {
       "id": "distp_1788195189250",
