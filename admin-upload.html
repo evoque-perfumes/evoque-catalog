@@ -2374,13 +2374,15 @@ function groupSalesData(){
 function orderStatusLabel(s){
   if(s === "prep") return "🔧 قيد التجهيز";
   if(s === "needs_oil") return "🛢️ يحتاج زيت";
-  if(s === "shipped") return "✅ طلعت";
+  if(s === "shipped") return "🚚 تم الشحن";
+  if(s === "received") return "📦 تم الاستلام";
   return "🆕 جديد";
 }
 function orderStatusColor(s){
   if(s === "prep") return "#8a6d1f";
   if(s === "needs_oil") return "#963224";
   if(s === "shipped") return "#1F6B41";
+  if(s === "received") return "#2f5fa8";
   return "var(--muted)";
 }
 async function slUpdateOrderStatus(orderId, status){
@@ -2393,6 +2395,18 @@ async function slUpdateOrderStatus(orderId, status){
     slShowStatus("تم تحديث حالة الطلب.", "ok");
   }catch(err){
     slShowStatus("صار خطأ بتحديث حالة الطلب: " + err.message, "err");
+  }
+}
+async function slUpdateOrderPaid(orderId, paid){
+  const token = getToken();
+  if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+  try{
+    const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.map(o => (o.orderId || o.id) === orderId ? Object.assign({}, o, { paid }) : o), `Update order paid: ${orderId} -> ${paid}`);
+    salesData = updatedList;
+    renderSalesHistory();
+    slShowStatus(paid ? "تم تأكيد استلام المبلغ." : "تم إلغاء تأكيد الاستلام.", "ok");
+  }catch(err){
+    slShowStatus("صار خطأ بتحديث حالة الدفع: " + err.message, "err");
   }
 }
 function renderSalesHistory(){
@@ -2409,6 +2423,7 @@ function renderSalesHistory(){
   wrap.innerHTML = groups.slice(0, 15).map(g => {
     const total = g.items.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
     const status = (g.items[0] && g.items[0].status) || "";
+    const paid = !!(g.items[0] && g.items[0].paid);
     const itemsListHtml = g.items.map(o => {
       const p = perfumes.find(x => x.id === o.perfumeId);
       const label = p ? `${p.brand} — ${p.name}` : o.perfumeId;
@@ -2426,8 +2441,12 @@ function renderSalesHistory(){
           <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
           <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
           <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
-          <option value="shipped" ${status === "shipped" ? "selected" : ""}>✅ طلعت</option>
+          <option value="shipped" ${status === "shipped" ? "selected" : ""}>🚚 تم الشحن</option>
+          <option value="received" ${status === "received" ? "selected" : ""}>📦 تم الاستلام</option>
         </select>
+        <label class="sale-row-paid-label" style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
+          <input type="checkbox" class="sale-row-paid-check" data-key="${g.key}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
+        </label>
         <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
         <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
       </div>
@@ -2437,6 +2456,12 @@ function renderSalesHistory(){
     sel.addEventListener("change", (e) => {
       const key = e.target.dataset.key;
       slUpdateOrderStatus(key, e.target.value);
+    });
+  });
+  wrap.querySelectorAll(".sale-row-paid-check").forEach(chk => {
+    chk.addEventListener("change", (e) => {
+      const key = e.target.dataset.key;
+      slUpdateOrderPaid(key, e.target.checked);
     });
   });
   wrap.querySelectorAll(".sl-history-edit-btn").forEach(btn => {
@@ -3171,6 +3196,42 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       `).join("");
     }
 
+    async function distUpdateSaleStatus(saleId, status){
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      try{
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          const idx = (obj.sales||[]).findIndex(s => s.id === saleId);
+          if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
+          obj.sales[idx] = Object.assign({}, obj.sales[idx], { status });
+          return obj;
+        }, "Update distribution sale status: " + saleId + " -> " + (status || "جديد"));
+        distributionsData = updated;
+        distRenderSalesLog();
+        distShowStatus("تم تحديث حالة الطلب.", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }
+    }
+
+    async function distUpdateSalePaid(saleId, paid){
+      const token = getToken();
+      if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
+      try{
+        const updated = await updateDistributionsWithRetry(token, (obj) => {
+          const idx = (obj.sales||[]).findIndex(s => s.id === saleId);
+          if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
+          obj.sales[idx] = Object.assign({}, obj.sales[idx], { paid });
+          return obj;
+        }, "Update distribution sale paid: " + saleId + " -> " + paid);
+        distributionsData = updated;
+        distRenderSalesLog();
+        distShowStatus(paid ? "تم تأكيد استلام المبلغ." : "تم إلغاء تأكيد الاستلام.", "ok");
+      }catch(e){
+        distShowStatus("صار خطأ: " + e.message, "err");
+      }
+    }
+
     function distRenderSalesLog(){
       const sales = distributionsData.sales || [];
       const activeSales = sales.filter(s => !s.cancelled);
@@ -3189,25 +3250,56 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
         const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).join(" — ");
         const shownTotal = (s.netTotal !== undefined ? s.netTotal : s.total);
         const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "");
-        const profitTxt = (s.orderProfit !== undefined ? ` — ربح ${Number(s.orderProfit).toFixed(2)}` : "");
+        const costVal = Number(s.orderCost) || 0;
+        const profitVal = Number(s.orderProfit) || 0;
         const cancelledTxt = s.cancelled ? " — ⛔ ملغاة" : "";
         const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
+        const status = s.status || "";
+        const paid = !!s.paid;
         const deleteBtnHtml = `<button type="button" class="secondary dist-delete-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑️ حذف نهائي</button>`;
-        const actionsHtml = s.cancelled
-          ? `<span style="font-size:12px; color:#963224; font-weight:700; text-decoration:none;">ملغاة</span> ${deleteBtnHtml}`
+        const editCancelHtml = s.cancelled
+          ? `<span style="font-size:12px; color:#963224; font-weight:700;">ملغاة</span>`
           : `<button type="button" class="secondary dist-edit-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
-             <button type="button" class="secondary dist-cancel-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>
-             ${deleteBtnHtml}`;
+             <button type="button" class="secondary dist-cancel-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
+        const statusPaidHtml = s.cancelled ? "" : `
+            <select class="dist-sale-status-select" data-id="${s.id}" style="width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; color:${orderStatusColor(status)};">
+              <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
+              <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
+              <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
+              <option value="shipped" ${status === "shipped" ? "selected" : ""}>🚚 تم الشحن</option>
+              <option value="received" ${status === "received" ? "selected" : ""}>📦 تم الاستلام</option>
+            </select>
+            <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
+              <input type="checkbox" class="dist-sale-paid-check" data-id="${s.id}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
+            </label>`;
         return `
-        <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; ${rowStyle}">
-          <span>${s.date} — ${distSaleColorLabel(s)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${who ? " — " + who : ""}${s.note ? " — " + s.note : ""}${discountTxt}${profitTxt}${cancelledTxt}</span>
-          <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
-            <b>${Number(shownTotal).toFixed(2)} AED</b>
-            ${actionsHtml}
-          </span>
+        <div style="border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; ${rowStyle}">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+            <div>
+              <div style="font-weight:600;">${s.date} — ${distSaleColorLabel(s)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${cancelledTxt}</div>
+              ${who ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${who}</div>` : ""}
+              ${s.note ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${s.note}</div>` : ""}
+              <div style="margin-top:4px; font-size:12px;">الإيراد: <b>${Number(shownTotal).toFixed(2)}</b> AED${discountTxt} — التكلفة: <b>${costVal.toFixed(2)}</b> AED — الربح: <b style="color:${profitVal >= 0 ? "#1F6B41" : "#963224"};">${profitVal.toFixed(2)}</b> AED</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px;">
+            ${statusPaidHtml}
+            ${editCancelHtml}
+            ${deleteBtnHtml}
+          </div>
         </div>
       `;
       }).join("");
+      log.querySelectorAll(".dist-sale-status-select").forEach(sel => {
+        sel.addEventListener("change", (e) => {
+          distUpdateSaleStatus(e.target.dataset.id, e.target.value);
+        });
+      });
+      log.querySelectorAll(".dist-sale-paid-check").forEach(chk => {
+        chk.addEventListener("change", (e) => {
+          distUpdateSalePaid(e.target.dataset.id, e.target.checked);
+        });
+      });
     }
 
     function distMaterialWeightedAvgCost(purchases, material){
