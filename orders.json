@@ -304,7 +304,8 @@
     "phone": "0563544169",
     "address": "القوز",
     "orderId": "pend-1788203993054-3134",
-    "source": "website"
+    "source": "website",
+    "paid": true
   },
   {
     "id": "gucci-gucci-guilty-elixir-de-parfum-pour-homme-1788204096448-1",
@@ -319,7 +320,8 @@
     "phone": "0563544169",
     "address": "القوز",
     "orderId": "pend-1788203993054-3134",
-    "source": "website"
+    "source": "website",
+    "paid": true
   },
   {
     "id": "nishane-hacivat-1788204096448-2",
@@ -334,6 +336,7 @@
     "phone": "0563544169",
     "address": "القوز",
     "orderId": "pend-1788203993054-3134",
-    "source": "website"
+    "source": "website",
+    "paid": true
   }
 ]
