@@ -42,7 +42,8 @@
     "phone": "",
     "address": "عجمان - البستان",
     "orderId": "order-1787688687024",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "valentino-uomo-born-in-roma-intense-1788196253429-0",
