@@ -14,7 +14,7 @@
     "bagsPackaging": 0,
     "pins": 0,
     "boxes": 0,
-    "oilG": 0,
+    "oilG": 5000,
     "alcoholMl": 0
   },
   "sales": [],
@@ -38,6 +38,15 @@
       "totalPrice": 2160,
       "note": "سكاي لاين",
       "editedAt": "2026-08-31T16:50:51.955Z"
+    },
+    {
+      "id": "distp_1788195087476",
+      "date": "2026-08-31",
+      "material": "oil",
+      "qty": 5000,
+      "unitPrice": 0.315,
+      "totalPrice": 1575,
+      "note": "شاهدة"
     }
   ],
   "fills": []
