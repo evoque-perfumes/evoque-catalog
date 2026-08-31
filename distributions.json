@@ -8,7 +8,7 @@
   "stock": {
     "black": 0,
     "white": 0,
-    "bottlesEmpty": 0,
+    "bottlesEmpty": 1080,
     "bottlesReady": 0,
     "bagsPerfume": 1000,
     "bagsPackaging": 0,
@@ -28,6 +28,15 @@
       "totalPrice": 1050,
       "note": "مطبعة الفارس",
       "editedAt": "2026-08-31T16:49:40.262Z"
+    },
+    {
+      "id": "distp_1788195015450",
+      "date": "2026-08-31",
+      "material": "bottle",
+      "qty": 1080,
+      "unitPrice": 2.4166666666666665,
+      "totalPrice": 2610,
+      "note": "سكاي لاين"
     }
   ],
   "fills": []
