@@ -6,7 +6,7 @@
     "costs": {}
   },
   "stock": {
-    "black": 499,
+    "black": 300,
     "white": 469,
     "bottlesEmpty": 80,
     "bottlesReady": 968,
@@ -123,12 +123,12 @@
       "id": "distp_1788195176054",
       "date": "2026-08-31",
       "material": "handle",
-      "qty": 500,
-      "unitPrice": 1,
+      "qty": 300,
+      "unitPrice": 1.6666666666666667,
       "totalPrice": 500,
       "note": "لون اسود",
-      "editedAt": "2026-08-31T16:53:43.655Z",
-      "color": "black"
+      "color": "black",
+      "editedAt": "2026-08-31T18:31:17.641Z"
     },
     {
       "id": "distp_1788195189250",
