@@ -6,18 +6,46 @@
     "costs": {}
   },
   "stock": {
-    "black": 500,
-    "white": 500,
+    "black": 499,
+    "white": 499,
     "bottlesEmpty": 80,
-    "bottlesReady": 1000,
-    "bagsPerfume": 1000,
+    "bottlesReady": 998,
+    "bagsPerfume": 998,
     "bagsPackaging": 2,
-    "pins": 1000,
+    "pins": 998,
     "boxes": 0,
     "oilG": 0,
     "alcoholMl": 10000
   },
-  "sales": [],
+  "sales": [
+    {
+      "id": "dist_1788200488848",
+      "date": "2026-08-31",
+      "color": null,
+      "qty": 2,
+      "withTheme": false,
+      "base": 30,
+      "themeSurcharge": 0,
+      "total": 30,
+      "discount": 0,
+      "netTotal": 30,
+      "bottlesUsed": 2,
+      "bagsPerfumeUsed": 2,
+      "pinsUsed": 2,
+      "bagsPackagingUsed": 0,
+      "boxesUsed": 0,
+      "orderCost": 12.5,
+      "orderProfit": 17.5,
+      "note": "",
+      "customerName": "ام عبدالله",
+      "customerPhone": "0507733470",
+      "emirate": "العين",
+      "colorBreakdown": {
+        "black": 1,
+        "white": 1
+      }
+    }
+  ],
   "purchases": [
     {
       "id": "distp_1788194945338",
