@@ -6,13 +6,13 @@
     "costs": {}
   },
   "stock": {
-    "black": 300,
-    "white": 500,
+    "black": 299,
+    "white": 469,
     "bottlesEmpty": 80,
     "bottlesReady": 968,
     "bagsPerfume": 968,
     "bagsPackaging": 0,
-    "pins": 1000,
+    "pins": 968,
     "boxes": 0,
     "oilG": 0,
     "alcoholMl": 10000
