@@ -12,7 +12,8 @@
     "phone": "+971 564002687",
     "address": "العين - شعاب الاشجر",
     "orderId": "order-1787603350106",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "lancome-idole-1787603350106-1",
@@ -27,7 +28,8 @@
     "phone": "+971 564002687",
     "address": "العين - شعاب الاشجر",
     "orderId": "order-1787603350106",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "guerlain-les-absolus-d-orient-patchouli-ardent-1787688687024-0",
