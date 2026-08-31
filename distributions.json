@@ -74,6 +74,15 @@
       "unitPrice": 0.002,
       "totalPrice": 1,
       "note": "لون اسود"
+    },
+    {
+      "id": "distp_1788195189250",
+      "date": "2026-08-31",
+      "material": "handle",
+      "qty": 500,
+      "unitPrice": 0.002,
+      "totalPrice": 1,
+      "note": "لون بيج"
     }
   ],
   "fills": []
