@@ -12,7 +12,7 @@
     "bottlesReady": 968,
     "bagsPerfume": 968,
     "bagsPackaging": 0,
-    "pins": 968,
+    "pins": 1000,
     "boxes": 0,
     "oilG": 0,
     "alcoholMl": 10000
@@ -146,9 +146,10 @@
       "date": "2026-08-31",
       "material": "pin",
       "qty": 1000,
-      "unitPrice": 0.5,
-      "totalPrice": 500,
-      "note": "دبوس ذهبي"
+      "unitPrice": 0.1,
+      "totalPrice": 100,
+      "note": "دبوس ذهبي",
+      "editedAt": "2026-08-31T18:32:19.378Z"
     }
   ],
   "fills": [
