@@ -6,8 +6,8 @@
     "costs": {}
   },
   "stock": {
-    "black": 0,
-    "white": 0,
+    "black": 500,
+    "white": 500,
     "bottlesEmpty": 1080,
     "bottlesReady": 0,
     "bagsPerfume": 1000,
@@ -74,7 +74,8 @@
       "unitPrice": 1,
       "totalPrice": 500,
       "note": "لون اسود",
-      "editedAt": "2026-08-31T16:53:43.655Z"
+      "editedAt": "2026-08-31T16:53:43.655Z",
+      "color": "black"
     },
     {
       "id": "distp_1788195189250",
@@ -84,7 +85,8 @@
       "unitPrice": 1,
       "totalPrice": 500,
       "note": "لون بيج",
-      "editedAt": "2026-08-31T16:53:52.672Z"
+      "editedAt": "2026-08-31T16:53:52.672Z",
+      "color": "white"
     },
     {
       "id": "distp_1788195256939",
