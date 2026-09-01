@@ -22,5 +22,11 @@
     "brand": "GUCCI",
     "name": "GUCCI GUILTY ABSOLUTE MAN",
     "lastAt": "2026-08-25T20:45:11.364Z"
+  },
+  "test-diagnostic-perfume": {
+    "count": 1,
+    "brand": "TEST",
+    "name": "DIAGNOSTIC",
+    "lastAt": "2026-09-01T18:09:18.626Z"
   }
 }
