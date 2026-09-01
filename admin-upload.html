@@ -528,6 +528,16 @@
     </div>
     <div class="status" id="sl_statusBox"></div>
 
+    <div class="ov-section-title" style="margin-top:26px;">📊 حالة الطلبات</div>
+    <div class="stats" id="sl_statusStats">
+      <div class="stat">🆕 طلبات جديدة<b id="sl_stat_new">—</b></div>
+      <div class="stat">🔧 قيد التجهيز<b id="sl_stat_prep">—</b></div>
+      <div class="stat">🛢️ يحتاج زيت<b id="sl_stat_needsOil">—</b></div>
+      <div class="stat">🚚 تم الشحن<b id="sl_stat_shipped">—</b></div>
+      <div class="stat">📦 تم الاستلام<b id="sl_stat_received">—</b></div>
+      <div class="stat">💰 باقي استلام المبلغ<b id="sl_stat_unpaid">—</b></div>
+    </div>
+
     <div class="ov-section-title" style="margin-top:26px;">آخر الطلبات المسجّلة</div>
     <div id="sl_history" class="static-list" style="display:none;"></div>
     <small class="hint" id="sl_historyEmptyHint" style="margin-top:0;">ما فيه مبيعات مسجّلة بعد.</small>
@@ -649,6 +659,12 @@
         <div class="stat">إجمالي الإيراد (بعد الخصومات)<b id="dist_ov_revenue">—</b></div>
         <div class="stat">إجمالي الربح الصافي<b id="dist_ov_profit">—</b></div>
         <div class="stat">آخر عملية بيع<b id="dist_ov_latest">—</b></div>
+        <div class="stat">🆕 طلبات جديدة<b id="dist_ov_new">—</b></div>
+        <div class="stat">🔧 قيد التجهيز<b id="dist_ov_prep">—</b></div>
+        <div class="stat">🛢️ يحتاج زيت<b id="dist_ov_needsOil">—</b></div>
+        <div class="stat">🚚 تم الشحن<b id="dist_ov_shipped">—</b></div>
+        <div class="stat">📦 تم الاستلام<b id="dist_ov_received">—</b></div>
+        <div class="stat">💰 باقي استلام المبلغ<b id="dist_ov_unpaid">—</b></div>
       </div>
     </fieldset>
 
@@ -2544,6 +2560,23 @@ function groupSalesData(){
   return Array.from(map.values()).reverse(); // الأحدث أول
 }
 
+// عدّاد عام لحالات الطلبات (جديد/قيد التجهيز/يحتاج زيت/تم الشحن/تم الاستلام) + عدد الطلبات اللي لسا ما استلمنا مبلغها —
+// نفس المنطق يُستخدم لمبيعات العطور (مجموعة حسب الطلب) ومبيعات التوزيعات (كل عملية بيع طلب لحاله)
+function countOrderStatuses(list, getStatus, getPaid){
+  const counts = { total: 0, new: 0, prep: 0, needs_oil: 0, shipped: 0, received: 0, unpaid: 0 };
+  list.forEach(item => {
+    counts.total++;
+    const s = getStatus(item) || "";
+    if(s === "prep") counts.prep++;
+    else if(s === "needs_oil") counts.needs_oil++;
+    else if(s === "shipped") counts.shipped++;
+    else if(s === "received") counts.received++;
+    else counts.new++;
+    if(!getPaid(item)) counts.unpaid++;
+  });
+  return counts;
+}
+
 function orderStatusLabel(s){
   if(s === "prep") return "🔧 قيد التجهيز";
   if(s === "needs_oil") return "🛢️ يحتاج زيت";
@@ -2582,7 +2615,18 @@ async function slUpdateOrderPaid(orderId, paid){
     slShowStatus("صار خطأ بتحديث حالة الدفع: " + err.message, "err");
   }
 }
+function renderSalesStatusOverview(){
+  const counts = countOrderStatuses(groupSalesData(), g => (g.items[0] && g.items[0].status), g => !!(g.items[0] && g.items[0].paid));
+  document.getElementById("sl_stat_new").textContent = counts.new;
+  document.getElementById("sl_stat_prep").textContent = counts.prep;
+  document.getElementById("sl_stat_needsOil").textContent = counts.needs_oil;
+  document.getElementById("sl_stat_shipped").textContent = counts.shipped;
+  document.getElementById("sl_stat_received").textContent = counts.received;
+  document.getElementById("sl_stat_unpaid").textContent = counts.unpaid;
+}
+
 function renderSalesHistory(){
+  renderSalesStatusOverview();
   const groups = groupSalesData();
   const wrap = document.getElementById("sl_history");
   const emptyHint = document.getElementById("sl_historyEmptyHint");
@@ -3419,6 +3463,13 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
   document.getElementById("dist_ov_profit").textContent = totalProfit.toFixed(2) + " AED";
   const sorted = activeSales.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
   document.getElementById("dist_ov_latest").textContent = sorted[0] ? sorted[0].date : "—";
+  const counts = countOrderStatuses(activeSales, s => s.status, s => !!s.paid);
+  document.getElementById("dist_ov_new").textContent = counts.new;
+  document.getElementById("dist_ov_prep").textContent = counts.prep;
+  document.getElementById("dist_ov_needsOil").textContent = counts.needs_oil;
+  document.getElementById("dist_ov_shipped").textContent = counts.shipped;
+  document.getElementById("dist_ov_received").textContent = counts.received;
+  document.getElementById("dist_ov_unpaid").textContent = counts.unpaid;
 }
 
 function distRenderSalesLog(){
