@@ -357,7 +357,8 @@
     "address": "dubai",
     "orderId": "order-1788290351109",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "prep"
   },
   {
     "id": "hermes-terre-d-harmes-1788290351109-1",
@@ -373,7 +374,8 @@
     "address": "dubai",
     "orderId": "order-1788290351109",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "prep"
   },
   {
     "id": "louis-vuitton-imagination-1788290351109-2",
@@ -389,7 +391,8 @@
     "address": "dubai",
     "orderId": "order-1788290351109",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "prep"
   },
   {
     "id": "giorgio-armani-my-way-1788290351109-3",
@@ -405,7 +408,8 @@
     "address": "dubai",
     "orderId": "order-1788290351109",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "prep"
   },
   {
     "id": "giorgio-armani-si-passione-red-musk-1788290351109-4",
@@ -421,7 +425,8 @@
     "address": "dubai",
     "orderId": "order-1788290351109",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "prep"
   },
   {
     "id": "gift-oman-luxury-wanderlust-1788290351109-0",
@@ -439,6 +444,7 @@
     "address": "dubai",
     "orderId": "order-1788290351109",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "prep"
   }
 ]
