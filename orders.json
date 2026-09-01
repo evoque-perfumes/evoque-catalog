@@ -509,7 +509,8 @@
     "address": "",
     "orderId": "order-1788293211983",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "penhaligon-s-halfeti-1788293211984-1",
@@ -525,6 +526,7 @@
     "address": "",
     "orderId": "order-1788293211983",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   }
 ]
