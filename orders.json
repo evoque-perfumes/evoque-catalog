@@ -476,5 +476,20 @@
     "address": "dubai",
     "orderId": "order-1788290445576",
     "source": "admin"
+  },
+  {
+    "id": "gucci-gucci-guilty-elixir-de-parfum-pour-homme-1788290487145-0",
+    "perfumeId": "gucci-gucci-guilty-elixir-de-parfum-pour-homme",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "Ammar",
+    "date": "2026-09-01",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "",
+    "address": "Dubai",
+    "orderId": "order-1788290487145",
+    "source": "admin"
   }
 ]
