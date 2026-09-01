@@ -543,7 +543,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1788293337249",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "diptyque-fleur-de-peau-edp-1788293337249-1",
@@ -558,6 +559,7 @@
     "phone": "",
     "address": "",
     "orderId": "order-1788293337249",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   }
 ]
