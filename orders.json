@@ -491,5 +491,20 @@
     "address": "Dubai",
     "orderId": "order-1788290487145",
     "source": "admin"
+  },
+  {
+    "id": "penhaligon-s-halfeti-1788290600906-0",
+    "perfumeId": "penhaligon-s-halfeti",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "لبنى الحارثي",
+    "date": "2026-09-01",
+    "country": "OM",
+    "countryLabel": "🇴🇲 عُمان",
+    "phone": "+968 99759003",
+    "address": "بوشر - الانصب",
+    "orderId": "order-1788290600906",
+    "source": "admin"
   }
 ]
