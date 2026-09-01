@@ -279,6 +279,7 @@ const I18N = {
     lblName: "الاسم الكامل",
     lblPhone: "رقم الهاتف",
     lblEmail: "البريد الإلكتروني",
+    emailOptionalHint: "اختياري — إذا تركته فاضي، ما راح يوصلك إيميل تأكيد الطلب.",
     lblAddress: "العنوان التفصيلي (الشارع، البناية، أقرب معلم)",
     lblNotes: "ملاحظات (اختياري)",
     lblCountry: "الدولة",
@@ -446,6 +447,7 @@ const I18N = {
     lblName: "Full Name",
     lblPhone: "Phone Number",
     lblEmail: "Email Address",
+    emailOptionalHint: "Optional — if left empty, you won't receive an order confirmation email.",
     lblAddress: "Detailed Address (Street, Building, Nearest Landmark)",
     lblNotes: "Notes (optional)",
     lblCountry: "Country",
@@ -2303,6 +2305,7 @@ function applyOrderFormLabels(){
   document.getElementById("lblName").textContent = t.lblName;
   document.getElementById("lblPhone").textContent = t.lblPhone;
   document.getElementById("lblEmail").textContent = t.lblEmail;
+  document.getElementById("ofEmailHint").textContent = t.emailOptionalHint;
   document.getElementById("lblCountry").textContent = t.lblCountry;
   document.getElementById("ofCountryHint").textContent = t.ofCountryHint;
   document.getElementById("lblPaymentMethodModal").textContent = t.paymentTitle;
