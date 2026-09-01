@@ -356,7 +356,8 @@
     "phone": "+971 528078496",
     "address": "dubai",
     "orderId": "order-1788290351109",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "hermes-terre-d-harmes-1788290351109-1",
@@ -371,7 +372,8 @@
     "phone": "+971 528078496",
     "address": "dubai",
     "orderId": "order-1788290351109",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "louis-vuitton-imagination-1788290351109-2",
@@ -386,7 +388,8 @@
     "phone": "+971 528078496",
     "address": "dubai",
     "orderId": "order-1788290351109",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "giorgio-armani-my-way-1788290351109-3",
@@ -401,7 +404,8 @@
     "phone": "+971 528078496",
     "address": "dubai",
     "orderId": "order-1788290351109",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "giorgio-armani-si-passione-red-musk-1788290351109-4",
@@ -416,7 +420,8 @@
     "phone": "+971 528078496",
     "address": "dubai",
     "orderId": "order-1788290351109",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "gift-oman-luxury-wanderlust-1788290351109-0",
@@ -433,6 +438,7 @@
     "phone": "+971 528078496",
     "address": "dubai",
     "orderId": "order-1788290351109",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   }
 ]
