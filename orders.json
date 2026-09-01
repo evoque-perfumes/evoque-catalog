@@ -508,7 +508,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1788293211983",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "penhaligon-s-halfeti-1788293211984-1",
@@ -523,6 +524,7 @@
     "phone": "",
     "address": "",
     "orderId": "order-1788293211983",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   }
 ]
