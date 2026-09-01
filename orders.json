@@ -494,5 +494,35 @@
     "orderId": "order-1788290487145",
     "source": "admin",
     "status": "shipped"
+  },
+  {
+    "id": "frederic-malle-promise-1788293211983-0",
+    "perfumeId": "frederic-malle-promise",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "",
+    "date": "2026-09-02",
+    "country": "OM",
+    "countryLabel": "🇴🇲 عُمان",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1788293211983",
+    "source": "admin"
+  },
+  {
+    "id": "penhaligon-s-halfeti-1788293211984-1",
+    "perfumeId": "penhaligon-s-halfeti",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "",
+    "date": "2026-09-02",
+    "country": "OM",
+    "countryLabel": "🇴🇲 عُمان",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1788293211983",
+    "source": "admin"
   }
 ]
