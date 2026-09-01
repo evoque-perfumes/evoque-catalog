@@ -7,12 +7,12 @@
   },
   "stock": {
     "black": 299,
-    "white": 469,
+    "white": 468,
     "bottlesEmpty": 80,
-    "bottlesReady": 968,
-    "bagsPerfume": 968,
+    "bottlesReady": 967,
+    "bagsPerfume": 967,
     "bagsPackaging": 0,
-    "pins": 968,
+    "pins": 967,
     "boxes": 0,
     "oilG": 0,
     "alcoholMl": 10000
@@ -73,6 +73,29 @@
       "editedAt": "2026-08-31T18:25:56.812Z",
       "status": "received",
       "paid": true
+    },
+    {
+      "id": "dist_1788293413004",
+      "date": "2026-09-02",
+      "color": "white",
+      "qty": 1,
+      "withTheme": false,
+      "base": 15,
+      "themeSurcharge": 0,
+      "total": 15,
+      "discount": 0,
+      "netTotal": 15,
+      "bottlesUsed": 1,
+      "bagsPerfumeUsed": 1,
+      "pinsUsed": 1,
+      "bagsPackagingUsed": 0,
+      "boxesUsed": 0,
+      "orderCost": 5.225,
+      "orderProfit": 9.775,
+      "note": "",
+      "customerName": "ام خالد",
+      "customerPhone": "",
+      "emirate": "دبي الخوانيج"
     }
   ],
   "purchases": [
