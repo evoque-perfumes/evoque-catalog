@@ -490,7 +490,8 @@
     "phone": "",
     "address": "Dubai",
     "orderId": "order-1788290487145",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "penhaligon-s-halfeti-1788290600906-0",
