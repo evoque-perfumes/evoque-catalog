@@ -240,6 +240,11 @@
       <div id="ov_yearlyStats" class="static-list"></div>
     </div>
 
+    <div id="ov_countryStatsWrap" style="display:none;">
+      <div class="ov-section-title" style="margin-top:22px;">🌍 المبيعات حسب الدولة</div>
+      <div id="ov_countryStats" class="static-list"></div>
+    </div>
+
     <div class="ov-section-title">طلبات نموذج الموقع (Google Sheet) — اختياري</div>
     <div class="kpi-grid" id="ov_siteGrid">
       <div class="kpi-card"><div class="kpi-label">عدد الطلبات</div><div class="kpi-value" id="ov_siteCount">—</div></div>
@@ -635,6 +640,17 @@
     <div class="row" style="margin-bottom:6px;">
       <button type="button" id="dist_reloadBtn" class="secondary">تحميل آخر نسخة</button>
     </div>
+
+    <fieldset>
+      <legend>📊 نظرة عامة على مبيعات التوزيعات</legend>
+      <div class="stats" id="dist_overviewStats">
+        <div class="stat">عدد عمليات البيع<b id="dist_ov_count">—</b></div>
+        <div class="stat">إجمالي القطع المباعة<b id="dist_ov_units">—</b></div>
+        <div class="stat">إجمالي الإيراد (بعد الخصومات)<b id="dist_ov_revenue">—</b></div>
+        <div class="stat">إجمالي الربح الصافي<b id="dist_ov_profit">—</b></div>
+        <div class="stat">آخر عملية بيع<b id="dist_ov_latest">—</b></div>
+      </div>
+    </fieldset>
 
     <fieldset>
       <legend>📦 المخزون الحالي</legend>
@@ -1573,10 +1589,12 @@ function renderOverview(){
     el("ov_salesWeek").textContent = fmtNum(weekCount);
 
     renderPeriodStats();
+    renderCountryStats();
   } else {
     el("ov_salesEmpty").style.display = "block";
     el("ov_salesGrid").style.display = "none";
     el("ov_periodStatsWrap").style.display = "none";
+    document.getElementById("ov_countryStatsWrap").style.display = "none";
   }
 
   renderSiteOrdersOverview();
@@ -1657,6 +1675,53 @@ function renderPeriodStats(){
         <span class="sale-row-amount">${fmtNum(y.revenue)} AED</span>
       </div>
       <div class="sale-row-meta">${fmtNum(y.units)} قطعة مباعة</div>
+    </div>
+  `).join("");
+}
+
+// تصنيف الدولة لعدة صيغ محتملة بنفس السجل (AE/UAE/الإمارات، OM/Oman/عمان...) عشان إحصائيات الدولة تطلع دقيقة
+function countrySalesBucket(country){
+  const c = String(country || "").trim();
+  if(/OM|Oman|عمان|عُمان/i.test(c)) return "OM";
+  if(/AE|UAE|امارات|إمارات/i.test(c)) return "AE";
+  return "other";
+}
+
+function buildSalesCountryStats(){
+  const buckets = {
+    AE: { orderIds: new Set(), units: 0, revenue: 0 },
+    OM: { orderIds: new Set(), units: 0, revenue: 0 },
+    other: { orderIds: new Set(), units: 0, revenue: 0 }
+  };
+  salesData.filter(o => !o.isGift).forEach(o => {
+    const bucket = countrySalesBucket(o.country);
+    const b = buckets[bucket];
+    const orderKey = o.orderId || o.id;
+    const qty = Number(o.qty) || 0;
+    const revenue = qty * (Number(o.unitPrice) || 0);
+    b.orderIds.add(orderKey); b.units += qty; b.revenue += revenue;
+  });
+  return buckets;
+}
+
+function renderCountryStats(){
+  const buckets = buildSalesCountryStats();
+  const wrap = document.getElementById("ov_countryStatsWrap");
+  const anyData = buckets.AE.orderIds.size || buckets.OM.orderIds.size || buckets.other.orderIds.size;
+  if(!anyData){ wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  const rows = [
+    { label: "🇦🇪 الإمارات", b: buckets.AE },
+    { label: "🇴🇲 عُمان", b: buckets.OM }
+  ];
+  if(buckets.other.orderIds.size) rows.push({ label: "🌐 دول أخرى / غير محددة", b: buckets.other });
+  document.getElementById("ov_countryStats").innerHTML = rows.map(r => `
+    <div class="sale-row">
+      <div class="sale-row-top">
+        <span class="sale-row-name">${r.label} — ${r.b.orderIds.size} ${r.b.orderIds.size === 1 ? "طلب" : "طلبات"}</span>
+        <span class="sale-row-amount">${fmtNum(r.b.revenue)} AED</span>
+      </div>
+      <div class="sale-row-meta">${fmtNum(r.b.units)} قطعة مباعة</div>
     </div>
   `).join("");
 }
@@ -3342,7 +3407,21 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       }
     }
 
-    function distRenderSalesLog(){
+    function distRenderOverviewStats(){
+  const sales = distributionsData.sales || [];
+  const activeSales = sales.filter(s => !s.cancelled);
+  const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
+  const totalRevenue = activeSales.reduce((s,x) => s + (Number(x.netTotal !== undefined ? x.netTotal : x.total)||0), 0);
+  const totalProfit = activeSales.reduce((s,x) => s + (Number(x.orderProfit)||0), 0);
+  document.getElementById("dist_ov_count").textContent = activeSales.length;
+  document.getElementById("dist_ov_units").textContent = totalUnits;
+  document.getElementById("dist_ov_revenue").textContent = totalRevenue.toFixed(2) + " AED";
+  document.getElementById("dist_ov_profit").textContent = totalProfit.toFixed(2) + " AED";
+  const sorted = activeSales.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
+  document.getElementById("dist_ov_latest").textContent = sorted[0] ? sorted[0].date : "—";
+}
+
+function distRenderSalesLog(){
       const sales = distributionsData.sales || [];
       const activeSales = sales.filter(s => !s.cancelled);
       const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
@@ -3514,6 +3593,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       document.getElementById("dist_runCapacity").value = distributionsData.config.runCapacity || 30;
 
       distUpdateCostEstimate();
+      distRenderOverviewStats();
       distRenderSalesLog();
       distRenderPurchaseLog();
       distRenderFillLog();
