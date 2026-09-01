@@ -2283,7 +2283,14 @@ function renderShippingSummary(){
   const tabbyRowHtml = tabbyFee > 0
     ? `<div class="os-row"><span>${t.tabbyFeeLabel}</span><span>${tabbyFee} ${cur}</span></div>`
     : "";
+  // 1 سبتمبر 2026: نعرض تفاصيل كل عطر بالسلة (الاسم + الحجم + الكمية + السعر) قبل
+  // المجموع الفرعي، عشان العميل يشوف طلبه كامل وواضح قبل ما يضغط إرسال — بدل ما
+  // يوصله بس رقم إجمالي بدون تفاصيل.
+  const itemsHtml = items.length
+    ? `<div class="os-items">${items.map(i => `<div class="os-row os-item"><span>${toTitleCase(i.p.brand)} - ${toTitleCase(i.p.name)} (${i.size}ml) x${i.qty}</span><span>${i.lineTotal} ${cur}</span></div>`).join("")}</div>`
+    : "";
   document.getElementById("orderShippingSummary").innerHTML = `
+    ${itemsHtml}
     <div class="os-row"><span>${t.shipSubtotal}</span><span>${subtotal} ${cur}</span></div>
     <div class="os-row"><span>${t.shipFee}</span><span>${feeHtml}</span></div>
     ${tabbyRowHtml}
