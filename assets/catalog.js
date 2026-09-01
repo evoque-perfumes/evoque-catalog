@@ -7,7 +7,7 @@
 const WHATSAPP_NUMBER = "971522275255";
 const COMING_SOON_IMAGE = "assets/coming-soon.jpg"; // صورة "الصور قيد التجهيز" الموحدة — 29 أغسطس 2026
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
-const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwC3s_nTuYaQ_OVku-gcrX3Lv2idt7DY1kHV4EJl9CfiGdRIOedetUBPjPMShc8-ffB/exec";
+const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbxz93KyzZTa0Y4_HNaGZfK1wh-i4a6bLhH9koUAHnUSn2Ged0PC110kIMuAOqVCDeyM/exec";
 // رابط Google Apps Script Web App منفصل لاستقبال تقييمات العملاء — انشره حسب
 // دليل reviews-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
 const REVIEWS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxwC7mC6JegXo-XZ-TryKrdyf3CP-K2i_zRIHAMh0EDBkriLBaJ1JYtP2lgMevkd5JHAA/exec";
