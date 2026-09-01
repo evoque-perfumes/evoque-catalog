@@ -32,5 +32,39 @@
         "lineTotal": 50
       }
     ]
+  },
+  {
+    "orderId": "pend-1788285917026-6160",
+    "receivedAt": "2026-09-01T18:05:17.026Z",
+    "status": "pending",
+    "source": "form",
+    "lang": "ar",
+    "name": "DIAGNOSTIC-OLDENDPOINT-WITHITEMS-1788285919048",
+    "phone": "",
+    "email": "",
+    "country": "TEST",
+    "emirateOrWilayat": "",
+    "deliveryMethod": "",
+    "address": "",
+    "notes": "old endpoint diagnostic with real item",
+    "currency": "AED",
+    "paymentMethod": "test",
+    "subtotal": 50,
+    "shippingFee": 0,
+    "shippingFree": true,
+    "tabbyFee": 0,
+    "total": 50,
+    "offers": "",
+    "items": [
+      {
+        "perfumeId": "test-diagnostic-perfume",
+        "brand": "TEST",
+        "name": "DIAGNOSTIC",
+        "size": 50,
+        "qty": 1,
+        "unitPrice": 50,
+        "lineTotal": 50
+      }
+    ]
   }
 ]
