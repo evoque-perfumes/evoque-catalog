@@ -32,48 +32,5 @@
         "lineTotal": 50
       }
     ]
-  },
-  {
-    "orderId": "pend-1788460599517-5786",
-    "receivedAt": "2026-09-03T18:36:39.518Z",
-    "status": "pending",
-    "source": "form",
-    "lang": "ar",
-    "name": "jobin",
-    "phone": "0552409999",
-    "email": "",
-    "country": "الإمارات",
-    "emirateOrWilayat": "دبي",
-    "deliveryMethod": "",
-    "address": "dubai",
-    "notes": "",
-    "currency": "د.إ",
-    "paymentMethod": "الدفع عند الاستلام",
-    "subtotal": 20,
-    "shippingFee": 25,
-    "shippingFree": false,
-    "tabbyFee": 0,
-    "total": 45,
-    "offers": "",
-    "items": [
-      {
-        "perfumeId": "giorgio-armani-my-way",
-        "brand": "Giorgio Armani",
-        "name": "My Way",
-        "size": 10,
-        "qty": 1,
-        "unitPrice": 10,
-        "lineTotal": 10
-      },
-      {
-        "perfumeId": "giorgio-armani-si-passione-red-musk",
-        "brand": "Giorgio Armani",
-        "name": "Si Passione Red Musk",
-        "size": 10,
-        "qty": 1,
-        "unitPrice": 10,
-        "lineTotal": 10
-      }
-    ]
   }
 ]
