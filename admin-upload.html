@@ -3473,6 +3473,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
 }
 
 function distRenderSalesLog(){
+      distRenderOverviewStats(); // نحدّث أرقام النظرة العامة (فوق) كل ما نعيد رسم سجل المبيعات — يشمل تغيير الحالة أو تأكيد الدفع
       const sales = distributionsData.sales || [];
       const activeSales = sales.filter(s => !s.cancelled);
       const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
