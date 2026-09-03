@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@300;400;500;700&family=Jost:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/catalog.css?v=20260901a">
+<link rel="stylesheet" href="assets/catalog.css?v=20260903a">
 <!-- ===== إضافات SEO ===== -->
 <meta name="description" content="تشكيلة Evoque Perfume من العطور الرجالية الفاخرة البديلة — فلتر حسب الموسم والوقت، وأكمل طلبك مباشرة عبر واتساب.">
 <link rel="canonical" href="https://evoqueperfumes.com/men.html">
@@ -163,6 +163,16 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 
 <div class="notfound-banner" id="notfoundBanner"></div>
 
+<div class="sale-toast" id="saleToast">
+  <button type="button" class="sale-toast-close" id="saleToastClose">&times;</button>
+  <div class="sale-toast-icon">✨</div>
+  <div class="sale-toast-txt">
+    <b id="saleToastCity"></b>
+    <span id="saleToastProduct"></span>
+    <div class="sale-toast-verified">✔ <span id="saleToastTime"></span></div>
+  </div>
+</div>
+
 <p class="category-intro" id="categoryIntro"></p>
 
 <div class="search-controls">
@@ -173,12 +183,25 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <select class="brand-select" id="brandSelect"></select>
 </div>
 
-<div class="results-count" id="resultsCount"></div>
-
-<div class="filters" id="filters"></div>
-
-<div class="grid" id="grid"></div>
-<div class="show-more-wrap" id="showMoreWrap"></div>
+<div class="shop-layout">
+  <aside class="shop-sidebar" id="shopSidebar">
+    <div class="sidebar-block">
+      <h4 id="sidebarCategoriesTitle"></h4>
+      <div id="sidebarCategories"></div>
+    </div>
+    <div class="sidebar-block">
+      <h4 id="sidebarAvailabilityTitle"></h4>
+      <label class="sidebar-check"><input type="checkbox" id="availInStock" checked> <span id="availInLabel"></span></label>
+      <label class="sidebar-check"><input type="checkbox" id="availOutStock"> <span id="availOutLabel"></span></label>
+    </div>
+  </aside>
+  <div class="shop-main">
+    <div class="results-count" id="resultsCount"></div>
+    <div class="filters" id="filters"></div>
+    <div class="grid" id="grid"></div>
+    <div class="show-more-wrap" id="showMoreWrap"></div>
+  </div>
+</div>
 
 <div class="cart-bar">
   <div class="cart-bottom-row">
@@ -296,7 +319,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 <script>
   window.EVOQUE_PAGE = { mode: "category", gender: "men" };
 </script>
-<script src="assets/catalog.js?v=20260901e"></script>
+<script src="assets/catalog.js?v=20260903a"></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>
