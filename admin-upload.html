@@ -163,6 +163,7 @@
       </div>
     </div>
     <span class="livepill"><span class="dot2"></span> متصل مباشرة بالموقع الحي</span>
+    <button type="button" class="secondary" id="pageRefreshBtn" title="تحديث الصفحة">🔄 تحديث الصفحة</button>
   </div>
 
   <nav class="tabs">
@@ -2904,6 +2905,7 @@ function setMode(newMode){
   hideStatus();
   updateSaveBtnState();
 }
+document.getElementById("pageRefreshBtn").addEventListener("click", () => location.reload());
 document.getElementById("modeOverviewBtn").addEventListener("click", () => setMode("overview"));
 document.getElementById("modeAddBtn").addEventListener("click", () => setMode("add"));
 document.getElementById("modeEditBtn").addEventListener("click", () => setMode("edit"));
