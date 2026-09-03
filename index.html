@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@300;400;500;700&family=Jost:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/catalog.css?v=20260901a">
+<link rel="stylesheet" href="assets/catalog.css?v=20260903a">
 <!-- ===== إضافات SEO ===== -->
 <meta name="description" content="متجر Evoque Perfume لعطور بديلة فاخرة في الإمارات وعُمان — تصفح الأكثر مبيعًا واختر تصنيفك (رجالي/نسائي/للجنسين)، وتواصل معنا مباشرة عبر واتساب.">
 <link rel="canonical" href="https://evoqueperfumes.com/">
@@ -163,6 +163,16 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 
 <div class="notfound-banner" id="notfoundBanner"></div>
 
+<div class="sale-toast" id="saleToast">
+  <button type="button" class="sale-toast-close" id="saleToastClose">&times;</button>
+  <div class="sale-toast-icon">✨</div>
+  <div class="sale-toast-txt">
+    <b id="saleToastCity"></b>
+    <span id="saleToastProduct"></span>
+    <div class="sale-toast-verified">✔ <span id="saleToastTime"></span></div>
+  </div>
+</div>
+
 <!-- مربع بحث الصفحة الرئيسية (27 أغسطس 2026) — يبحث بكل العطور (كل الأجناس) بالاسم أو
      البراند مباشرة من غير ما الزائر يحتاج يفتح تصنيف رجالي/نسائي أول -->
 <div class="search-controls">
@@ -179,7 +189,13 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <p id="bestSellersSubtitle"></p>
 </section>
 <div class="results-count" id="resultsCount"></div>
-<div class="grid" id="grid"></div>
+<div class="bs-slider-wrap">
+  <div class="grid" id="grid"></div>
+  <div id="bsArrows">
+    <button type="button" class="bs-arrow right" id="bsArrowRight" aria-label="التالي">&rsaquo;</button>
+    <button type="button" class="bs-arrow left" id="bsArrowLeft" aria-label="السابق">&lsaquo;</button>
+  </div>
+</div>
 <div class="show-more-wrap" id="showMoreWrap"></div>
 
 <div class="category-nav-wrap" id="categoryNavWrap">
@@ -306,7 +322,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 <script>
   window.EVOQUE_PAGE = { mode: "home" };
 </script>
-<script src="assets/catalog.js?v=20260901e"></script>
+<script src="assets/catalog.js?v=20260903a"></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>
