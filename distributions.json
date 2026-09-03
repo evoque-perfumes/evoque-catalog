@@ -1,6 +1,6 @@
 {
   "config": {
-    "basePriceNoTheme": 15,
+    "basePriceNoTheme": 12,
     "themeFeePerRun": 15,
     "runCapacity": 30,
     "costs": {}
