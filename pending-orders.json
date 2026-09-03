@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "orderId": "pend-1788460462488-1273",
+    "receivedAt": "2026-09-03T18:34:22.488Z",
+    "status": "pending",
+    "source": "form",
+    "lang": "ar",
+    "name": "Ali",
+    "phone": "0552409999",
+    "email": "",
+    "country": "الإمارات",
+    "emirateOrWilayat": "دبي",
+    "deliveryMethod": "",
+    "address": "dubai",
+    "notes": "",
+    "currency": "د.إ",
+    "paymentMethod": "الدفع عند الاستلام",
+    "subtotal": 50,
+    "shippingFee": 25,
+    "shippingFree": false,
+    "tabbyFee": 0,
+    "total": 75,
+    "offers": "",
+    "items": [
+      {
+        "perfumeId": "tom-ford-lost-cherry",
+        "brand": "Tom Ford",
+        "name": "Lost Cherry",
+        "size": 50,
+        "qty": 1,
+        "unitPrice": 50,
+        "lineTotal": 50
+      }
+    ]
+  }
+]
