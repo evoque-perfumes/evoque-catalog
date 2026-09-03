@@ -563,5 +563,35 @@
     "source": "admin",
     "paid": true,
     "status": "received"
+  },
+  {
+    "id": "giorgio-armani-my-way-1788461164059-0",
+    "perfumeId": "giorgio-armani-my-way",
+    "size": 10,
+    "qty": 1,
+    "unitPrice": 10,
+    "customer": "jobin",
+    "date": "2026-09-03",
+    "country": "الإمارات",
+    "countryLabel": "الإمارات",
+    "phone": "0552409999",
+    "address": "dubai",
+    "orderId": "pend-1788460599517-5786",
+    "source": "website"
+  },
+  {
+    "id": "giorgio-armani-si-passione-red-musk-1788461164059-1",
+    "perfumeId": "giorgio-armani-si-passione-red-musk",
+    "size": 10,
+    "qty": 1,
+    "unitPrice": 10,
+    "customer": "jobin",
+    "date": "2026-09-03",
+    "country": "الإمارات",
+    "countryLabel": "الإمارات",
+    "phone": "0552409999",
+    "address": "dubai",
+    "orderId": "pend-1788460599517-5786",
+    "source": "website"
   }
 ]
