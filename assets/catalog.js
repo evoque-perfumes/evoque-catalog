@@ -2399,7 +2399,15 @@ function openOrderModal(){
   resetOrderForm();
   document.getElementById("orderModalOverlay").classList.add("open");
 }
-function closeOrderModal(){ document.getElementById("orderModalOverlay").classList.remove("open"); }
+let orderJustSucceeded = false; // بعد نجاح الطلب، نسوي تحديث كامل للصفحة لما يسكر نافذة الطلب —
+// renderAll() لحاله ما يعيد بناء كروت العطور بكل الصفحات (مثل الرئيسية)، فبدون هالتحديث
+// كرت العطر القديم يضل عارض "بالسلة" ويندمج غلط مع طلب جديد لو العميل ضاف عطر بعده.
+function closeOrderModal(){
+  document.getElementById("orderModalOverlay").classList.remove("open");
+  if(orderJustSucceeded){
+    location.reload();
+  }
+}
 
 document.getElementById("orderFormBtn").onclick = openOrderModal;
 document.getElementById("orderModalClose").onclick = closeOrderModal;
@@ -2463,6 +2471,7 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
       </div>`;
     document.querySelector(".order-modal-foot").style.display = "none";
     cart = {}; renderAll();
+    orderJustSucceeded = true;
   }
   function showError(){
     document.getElementById("orderModalBody").innerHTML = `
