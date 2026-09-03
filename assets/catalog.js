@@ -1574,8 +1574,13 @@ function renderHomeSearch(){
 
   // قائمة البراندات المنسدلة بالرئيسية (28 أغسطس 2026) — نفس فكرة brandSelect
   // بصفحات التصنيف بالضبط، بس هنا بدون تقييد بجنس معيّن (LOCKED_GENDER فاضي بالرئيسية).
+  // 4 سبتمبر 2026: نتأكد إن الكتالوج فعلًا اتحمّل (perfumes.length) قبل ما نعيد بناء
+  // القائمة — لأن renderAll() تنرسم مرة مبكرة (من setLang) قبل وصول بيانات الكتالوج،
+  // وقتها perfumes = [] فيصير أي براند غير موجود بالقائمة الفاضية ويرجع selectedBrand
+  // لـ"all" تلقائيًا — وهذا كان يلغي فلتر البراند الجاي من رابط index.html?brand=...
+  // (قائمة البراندات المنسدلة بالهيدر) قبل ما يظهر أي نتيجة للزائر.
   const brandSelect = document.getElementById("brandSelect");
-  if(brandSelect){
+  if(brandSelect && perfumes.length){
     const brands = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
       .sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
     const prevSelection = selectedBrand;
@@ -1668,17 +1673,21 @@ function renderSearchControls(){
   searchInput.oninput = (e)=>{ searchQuery = e.target.value; visibleCount = PAGE_SIZE; renderGrid(); };
 
   const brandSelect = document.getElementById("brandSelect");
-  // بصفحة تصنيف نعرض بس براندات هذا الجنس (رجالي/نسائي/للجنسين) بقائمة البراندات
-  const relevantForBrands = LOCKED_GENDER ? perfumes.filter(p => p.gender === LOCKED_GENDER) : perfumes;
-  const brands = Array.from(new Set(relevantForBrands.map(p => p.brand).filter(Boolean)))
-    .sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
+  // بصفحة تصنيف نعرض بس براندات هذا الجنس (رجالي/نسائي/للجنسين) بقائمة البراندات.
+  // 4 سبتمبر 2026: نفس إصلاح renderHomeSearch — ما نلمس selectedBrand إلا بعد
+  // ما يتحمّل الكتالوج فعليًا (perfumes.length)، عشان ما نلغي فلتر برابط ?brand=... قبل ما يوصل.
+  if(brandSelect && perfumes.length){
+    const relevantForBrands = LOCKED_GENDER ? perfumes.filter(p => p.gender === LOCKED_GENDER) : perfumes;
+    const brands = Array.from(new Set(relevantForBrands.map(p => p.brand).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
 
-  const prevSelection = selectedBrand;
-  brandSelect.innerHTML = `<option value="all">${t.allBrands}</option>` +
-    brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${toTitleCase(b)}</option>`).join("");
-  selectedBrand = brands.includes(prevSelection) ? prevSelection : "all";
-  brandSelect.value = selectedBrand;
-  brandSelect.onchange = (e)=>{ selectedBrand = e.target.value; visibleCount = PAGE_SIZE; renderGrid(); };
+    const prevSelection = selectedBrand;
+    brandSelect.innerHTML = `<option value="all">${t.allBrands}</option>` +
+      brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${toTitleCase(b)}</option>`).join("");
+    selectedBrand = brands.includes(prevSelection) ? prevSelection : "all";
+    brandSelect.value = selectedBrand;
+    brandSelect.onchange = (e)=>{ selectedBrand = e.target.value; visibleCount = PAGE_SIZE; renderGrid(); };
+  }
 }
 
 // ===================================================================
@@ -1888,7 +1897,10 @@ function renderGrid(explicitList){
       const brandSelect = document.getElementById("brandSelect");
       if(brandSelect) brandSelect.value = p.brand;
       visibleCount = PAGE_SIZE;
-      renderGrid();
+      // بالرئيسية نمرّ عبر renderBestSellers() عشان تتحدث العنوان وتنشال حالة سلايدر
+      // "الأكثر مبيعًا" تلقائيًا (نفس منطق isSearching) — renderGrid() المباشرة تسيب
+      // العنوان القديم وشكل السلايدر زي ما هو. بصفحات التصنيف renderGrid() تكفي كالمعتاد.
+      if(PAGE.mode === "home") renderBestSellers(); else renderGrid();
       window.scrollTo({top:0, behavior:"smooth"});
     };
 
