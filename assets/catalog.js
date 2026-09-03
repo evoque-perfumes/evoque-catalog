@@ -74,6 +74,45 @@ function bsStockScore(p){
   return (Number(p.stock10) || 0) + (Number(p.stock50) || 0);
 }
 
+// ===================================================================
+// إشعار المبيعات المنبثق (3 سبتمبر 2026) — يقرأ من assets/sale-notifications.json
+// (ملف قابل للتعديل يدويًا، مو بيانات ثابتة بالكود) ويدور بينها بشكل عشوائي كل فترة.
+// وقت "قبل X دقيقة" تقريبي (عرض فقط)، مو من سجل طلبات فعلي لحظي.
+// ===================================================================
+let saleNotifData = [];
+let saleToastIdx = 0;
+async function loadSaleNotifications(){
+  try{
+    const res = await fetch("assets/sale-notifications.json?t=" + Date.now(), { cache: "no-store" });
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data) && data.length) saleNotifData = data;
+    }
+  }catch(e){}
+  if(saleNotifData.length) startSaleToastLoop();
+}
+function showSaleToastOnce(){
+  const el = document.getElementById("saleToast");
+  if(!el || !saleNotifData.length) return;
+  const t = I18N[lang];
+  const item = saleNotifData[saleToastIdx % saleNotifData.length];
+  saleToastIdx++;
+  const mins = 3 + Math.floor(Math.random() * 45);
+  const cityEl = document.getElementById("saleToastCity");
+  const prodEl = document.getElementById("saleToastProduct");
+  const timeEl = document.getElementById("saleToastTime");
+  if(cityEl) cityEl.textContent = item.city || "";
+  if(prodEl) prodEl.textContent = (t.saleToastBought || "") + " " + (item.product || "");
+  if(timeEl) timeEl.textContent = t.saleToastAgo ? t.saleToastAgo(mins) : "";
+  el.classList.add("show");
+  clearTimeout(el._hideTimer);
+  el._hideTimer = setTimeout(()=> el.classList.remove("show"), 6000);
+}
+function startSaleToastLoop(){
+  setTimeout(showSaleToastOnce, 4000);
+  setInterval(showSaleToastOnce, 14000);
+}
+
 // PRNG بسيط وثابت (mulberry32) — نفس seed يعطي نفس الترتيب دائمًا، عشان كل
 // الزوار بنفس فترة الدوران يشوفون نفس الاختيار بالضبط
 function bsMulberry32(seed){
@@ -189,6 +228,14 @@ const I18N = {
     pageTitle: "Evoque Perfume",
     searchPlaceholder: "ابحث باسم العطر أو البراند...",
     allBrands: "كل البراندات",
+    brandsMenuLabel: "البراندات",
+    brandsMenuHeading: "تسوّق حسب البراند",
+    sidebarCategoriesTitle: "التصنيفات",
+    sidebarAvailabilityTitle: "التوفر",
+    availabilityIn: "متوفر بالمخزون",
+    availabilityOut: "غير متوفر حاليًا",
+    saleToastBought: "اشترى",
+    saleToastAgo: (n) => n === 1 ? "قبل دقيقة" : n === 2 ? "قبل دقيقتين" : (n >= 3 && n <= 10) ? `قبل ${n} دقائق` : `قبل ${n} دقيقة`,
     countryLabel: "الدولة",
     paymentTitle: "طريقة الدفع المفضلة",
     paymentCOD: "الدفع عند الاستلام",
@@ -357,6 +404,14 @@ const I18N = {
     pageTitle: "Evoque Perfume",
     searchPlaceholder: "Search by perfume or brand...",
     allBrands: "All brands",
+    brandsMenuLabel: "Brands",
+    brandsMenuHeading: "Shop by Brand",
+    sidebarCategoriesTitle: "Categories",
+    sidebarAvailabilityTitle: "Availability",
+    availabilityIn: "In stock",
+    availabilityOut: "Out of stock",
+    saleToastBought: "bought",
+    saleToastAgo: (n) => n === 1 ? "1 minute ago" : `${n} minutes ago`,
     countryLabel: "Country",
     paymentTitle: "Preferred payment method",
     paymentCOD: "Cash on delivery",
@@ -1265,6 +1320,12 @@ async function loadPerfumesFromSheet(){
 let activeFilter = "all";
 let selectedBrand = "all";
 let searchQuery = "";
+let availabilityFilter = "all"; // "all" | "in" | "out" — فلتر التوفر بالشريط الجانبي (3 سبتمبر 2026)
+// لو الزائر جاي من رابط قائمة البراندات بالهيدر (index.html?brand=...) نفعّل فلتر البراند فورًا
+try{
+  const _qBrand = new URLSearchParams(location.search).get("brand");
+  if(_qBrand) selectedBrand = _qBrand;
+}catch(e){}
 const PAGE_SIZE = 12;
 let visibleCount = PAGE_SIZE;
 let showMoreObserver = null; // يراقب عنصر التحميل التلقائي أثناء التمرير (Infinite Scroll)
@@ -1444,6 +1505,7 @@ function renderAll(){
     renderCategoryIntro();
     renderSearchControls();
     renderFilters();
+    renderShopSidebar();
     renderGrid();
   }
 
@@ -1465,9 +1527,26 @@ function renderSiteNav(){
     { key:"unisex", label:t.navUnisex, href: CATEGORY_PAGES.unisex.url }
   ];
   const currentKey = PAGE.mode === "home" ? "home" : PAGE.gender;
-  wrap.innerHTML = items.map(it =>
+  const linksHtml = items.map(it =>
     `<a class="site-nav-link${it.key===currentKey ? " active" : ""}" href="${it.href}">${it.label}</a>`
   ).join("");
+
+  // قائمة "البراندات" المنسدلة بالهيدر (3 سبتمبر 2026) — تعرض كل البراندات الأصلية
+  // بالكتالوج، وكل رابط ينقل لصفحة الرئيسية مفلترة على هذا البراند مباشرة
+  const brandNames = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
+  const brandsHtml = brandNames.length ? `
+    <div class="site-nav-brands" id="siteNavBrands">
+      <button type="button" class="site-nav-link site-nav-brands-btn" id="siteNavBrandsBtn">${t.brandsMenuLabel} <span class="bm-arrow">▾</span></button>
+      <div class="brands-mega" id="brandsMega">
+        <div class="brands-mega-title">${t.brandsMenuHeading}</div>
+        <div class="brands-mega-grid">
+          ${brandNames.map(b => `<a class="bm-item" href="index.html?brand=${encodeURIComponent(b)}">${toTitleCase(b)}</a>`).join("")}
+        </div>
+      </div>
+    </div>` : "";
+
+  wrap.innerHTML = linksHtml + brandsHtml;
 }
 
 // جملة تعريفية صغيرة أعلى شبكة المنتجات بصفحات التصنيف (مو موجودة بالرئيسية)
@@ -1529,12 +1608,26 @@ function renderBestSellers(){
   // بالاسم مباشرة، مو يتصفّح تصنيفات، ونرجعها لما يمسح البحث.
   if(categoryNavWrap) categoryNavWrap.style.display = isSearching ? "none" : "";
 
-  if(loadState !== "loaded"){ renderGrid(); return; } // يعرض حالة التحميل/الخطأ بنفس أسلوب renderGrid المعتاد
+  const gridEl = document.getElementById("grid");
+  const bsArrows = document.getElementById("bsArrows");
+
+  if(loadState !== "loaded"){
+    if(gridEl) gridEl.classList.remove("bs-slider");
+    if(bsArrows) bsArrows.style.display = "none";
+    renderGrid(); // يعرض حالة التحميل/الخطأ بنفس أسلوب renderGrid المعتاد
+    return;
+  }
 
   if(isSearching){
+    if(gridEl) gridEl.classList.remove("bs-slider");
+    if(bsArrows) bsArrows.style.display = "none";
     renderGrid(); // بدون قائمة صريحة = perfumes.filter(matches) على كامل الكتالوج (LOCKED_GENDER فاضي بالرئيسية)
     return;
   }
+  // سلايدر "الأكثر مبيعًا" الأفقي بالرئيسية (3 سبتمبر 2026) — نفس بيانات pickAutoBestSellers
+  // الحقيقية بالضبط، بس بعرض أفقي قابل للتمرير بدل الشبكة الكاملة
+  if(gridEl) gridEl.classList.add("bs-slider");
+  if(bsArrows) bsArrows.style.display = "";
   const curated = pickAutoBestSellers();
   renderGrid(curated);
 }
@@ -1588,6 +1681,51 @@ function renderSearchControls(){
   brandSelect.onchange = (e)=>{ selectedBrand = e.target.value; visibleCount = PAGE_SIZE; renderGrid(); };
 }
 
+// ===================================================================
+// الشريط الجانبي بصفحات التصنيف (رجالي/نسائي/للجنسين) — تصنيفات (روابط تنقل
+// بين الصفحات مع عدد كل تصنيف) + فلتر التوفر (متوفر/غير متوفر). 3 سبتمبر 2026.
+// ===================================================================
+function renderShopSidebar(){
+  const t = I18N[lang];
+  const catTitle = document.getElementById("sidebarCategoriesTitle");
+  const catList = document.getElementById("sidebarCategories");
+  if(!catList) return; // الرئيسية ما فيها هالعناصر أصلًا
+  if(catTitle) catTitle.textContent = t.sidebarCategoriesTitle;
+  const availTitle = document.getElementById("sidebarAvailabilityTitle");
+  if(availTitle) availTitle.textContent = t.sidebarAvailabilityTitle;
+
+  const cats = [
+    { key:"men",    label:t.navMen,    href: CATEGORY_PAGES.men.url },
+    { key:"women",  label:t.navWomen,  href: CATEGORY_PAGES.women.url },
+    { key:"unisex", label:t.navUnisex, href: CATEGORY_PAGES.unisex.url },
+  ];
+  catList.innerHTML = cats.map(c => {
+    const count = perfumes.filter(p => p.gender === c.key).length;
+    return `<a class="sidebar-link${c.key===PAGE.gender ? " active" : ""}" href="${c.href}">${c.label} <span class="sb-count">(${count})</span></a>`;
+  }).join("");
+
+  const inEl = document.getElementById("availInStock");
+  const outEl = document.getElementById("availOutStock");
+  const inLabel = document.getElementById("availInLabel");
+  const outLabel = document.getElementById("availOutLabel");
+  if(inLabel) inLabel.textContent = t.availabilityIn;
+  if(outLabel) outLabel.textContent = t.availabilityOut;
+  if(inEl && outEl){
+    inEl.checked = availabilityFilter !== "out";
+    outEl.checked = availabilityFilter !== "in";
+    const update = ()=>{
+      if(inEl.checked && outEl.checked) availabilityFilter = "all";
+      else if(inEl.checked) availabilityFilter = "in";
+      else if(outEl.checked) availabilityFilter = "out";
+      else { inEl.checked = true; availabilityFilter = "all"; } // ما نسمح نلغي الاثنين مع بعض
+      visibleCount = PAGE_SIZE;
+      renderGrid();
+    };
+    inEl.onchange = update;
+    outEl.onchange = update;
+  }
+}
+
 function renderFilters(){
   const t = I18N[lang];
   const wrap = document.getElementById("filters");
@@ -1609,6 +1747,9 @@ function matches(p){
   // صفحات التصنيف (رجالي/نسائي/للجنسين) مقفولة على جنس واحد بغض النظر عن أي فلتر ثاني
   if(LOCKED_GENDER && p.gender !== LOCKED_GENDER) return false;
   if(selectedBrand !== "all" && p.brand !== selectedBrand) return false;
+  // فلتر التوفر (الشريط الجانبي بصفحات التصنيف) — 3 سبتمبر 2026
+  if(availabilityFilter === "in" && bsStockScore(p) <= 0) return false;
+  if(availabilityFilter === "out" && bsStockScore(p) > 0) return false;
   if(searchQuery.trim()){
     const q = searchQuery.trim().toLowerCase();
     if(!(p.brand.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))) return false;
@@ -2528,6 +2669,30 @@ document.getElementById("lightboxClose").onclick = closeLightbox;
 document.getElementById("lightboxOverlay").addEventListener("click", (e)=>{ if(e.target.id === "lightboxOverlay") closeLightbox(); });
 document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeLightbox(); });
 
+// قائمة "البراندات" المنسدلة بالهيدر — فتح/إغلاق بالنقر (delegation عشان يشتغل حتى
+// بعد إعادة رسم الهيدر بكل renderAll، بدون تكرار ربط المستمع كل مرة). 3 سبتمبر 2026.
+document.addEventListener("click", (e)=>{
+  const wrap = document.getElementById("siteNavBrands");
+  if(!wrap) return;
+  if(e.target.closest("#siteNavBrandsBtn")){ wrap.classList.toggle("open"); return; }
+  if(!wrap.contains(e.target)) wrap.classList.remove("open");
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key !== "Escape") return;
+  const wrap = document.getElementById("siteNavBrands");
+  if(wrap) wrap.classList.remove("open");
+});
+
+// أسهم سلايدر "الأكثر مبيعًا" بالرئيسية
+const bsArrowRight = document.getElementById("bsArrowRight");
+const bsArrowLeft = document.getElementById("bsArrowLeft");
+if(bsArrowRight) bsArrowRight.onclick = ()=>{ const g = document.getElementById("grid"); if(g) g.scrollBy({left:260, behavior:"smooth"}); };
+if(bsArrowLeft) bsArrowLeft.onclick = ()=>{ const g = document.getElementById("grid"); if(g) g.scrollBy({left:-260, behavior:"smooth"}); };
+
+// زر إغلاق إشعار المبيعات المنبثق
+const saleToastCloseBtn = document.getElementById("saleToastClose");
+if(saleToastCloseBtn) saleToastCloseBtn.onclick = ()=>{ const el = document.getElementById("saleToast"); if(el) el.classList.remove("show"); };
+
 // نرجع السلة/الدولة/طريقة الدفع المحفوظة (لو الزائر انتقل من صفحة ثانية بنفس الجلسة) قبل أول رسم للصفحة
 restoreCartState();
 loadMyWishlistFromStorage();
@@ -2540,4 +2705,5 @@ if(!savedLang){ openLangModal(); }
 
 resetOfferTimer();
 loadPerfumesFromSheet();
+loadSaleNotifications();
 
