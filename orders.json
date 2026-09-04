@@ -578,7 +578,8 @@
     "address": "dubai",
     "orderId": "pend-1788460599517-5786",
     "source": "website",
-    "status": "received"
+    "status": "received",
+    "paid": true
   },
   {
     "id": "giorgio-armani-si-passione-red-musk-1788461164059-1",
@@ -594,7 +595,8 @@
     "address": "dubai",
     "orderId": "pend-1788460599517-5786",
     "source": "website",
-    "status": "received"
+    "status": "received",
+    "paid": true
   },
   {
     "id": "tom-ford-lost-cherry-1788461174336-0",
