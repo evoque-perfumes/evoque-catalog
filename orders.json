@@ -577,7 +577,8 @@
     "phone": "0552409999",
     "address": "dubai",
     "orderId": "pend-1788460599517-5786",
-    "source": "website"
+    "source": "website",
+    "status": "received"
   },
   {
     "id": "giorgio-armani-si-passione-red-musk-1788461164059-1",
@@ -592,7 +593,8 @@
     "phone": "0552409999",
     "address": "dubai",
     "orderId": "pend-1788460599517-5786",
-    "source": "website"
+    "source": "website",
+    "status": "received"
   },
   {
     "id": "tom-ford-lost-cherry-1788461174336-0",
