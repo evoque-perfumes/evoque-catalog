@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "orderId": "pend-1789318167421-9998",
+    "receivedAt": "2026-09-13T16:49:27.421Z",
+    "status": "pending",
+    "source": "form",
+    "lang": "ar",
+    "name": "علي الهاشمي",
+    "phone": "0502409999",
+    "email": "",
+    "country": "الإمارات",
+    "emirateOrWilayat": "عجمان",
+    "deliveryMethod": "",
+    "address": "عجمان العالية",
+    "notes": "",
+    "currency": "د.إ",
+    "paymentMethod": "الدفع عند الاستلام",
+    "subtotal": 300,
+    "shippingFee": 0,
+    "shippingFree": true,
+    "tabbyFee": 0,
+    "total": 300,
+    "offers": "توصيل مجاني",
+    "items": [
+      {
+        "perfumeId": "louis-vuitton-pacific-chill",
+        "brand": "Louis Vuitton",
+        "name": "Pacific Chill",
+        "size": 50,
+        "qty": 1,
+        "unitPrice": 50,
+        "lineTotal": 50
+      },
+      {
+        "perfumeId": "xerjoff-accento",
+        "brand": "Xerjoff",
+        "name": "Accento",
+        "size": 50,
+        "qty": 2,
+        "unitPrice": 50,
+        "lineTotal": 100
+      },
+      {
+        "perfumeId": "xerjoff-erba-pura",
+        "brand": "Xerjoff",
+        "name": "Erba Pura",
+        "size": 50,
+        "qty": 3,
+        "unitPrice": 50,
+        "lineTotal": 150
+      }
+    ]
+  }
+]
