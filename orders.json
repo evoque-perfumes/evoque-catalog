@@ -629,7 +629,8 @@
     "phone": "0502409999",
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   },
   {
     "id": "gift-bvlgari-tygar-1789318372670-0",
@@ -646,7 +647,8 @@
     "phone": "0502409999",
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   },
   {
     "id": "louis-vuitton-pacific-chill-1789318389372-0",
