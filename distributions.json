@@ -1,8 +1,8 @@
 {
   "config": {
     "basePriceNoTheme": 12,
-    "themeFeePerRun": 15,
-    "runCapacity": 30,
+    "themeFeePerRun": 5,
+    "runCapacity": 20,
     "costs": {}
   },
   "stock": {
