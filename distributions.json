@@ -96,7 +96,8 @@
       "customerName": "ام خالد",
       "customerPhone": "",
       "emirate": "دبي الخوانيج",
-      "status": "received"
+      "status": "received",
+      "paid": true
     }
   ],
   "purchases": [
