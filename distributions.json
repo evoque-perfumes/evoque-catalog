@@ -125,7 +125,8 @@
         "black": 11,
         "white": 14
       },
-      "paid": true
+      "paid": true,
+      "status": "received"
     }
   ],
   "purchases": [
