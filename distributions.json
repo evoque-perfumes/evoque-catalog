@@ -150,7 +150,8 @@
       "customerName": "اسماء",
       "customerPhone": "0521077003",
       "emirate": "دبي القوز 1",
-      "paid": true
+      "paid": true,
+      "status": "prep"
     }
   ],
   "purchases": [
