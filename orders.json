@@ -461,7 +461,8 @@
     "address": "dubai",
     "orderId": "order-1788290445576",
     "source": "admin",
-    "status": "received"
+    "status": "received",
+    "paid": true
   },
   {
     "id": "creed-aventus-1788290445576-1",
@@ -477,7 +478,8 @@
     "address": "dubai",
     "orderId": "order-1788290445576",
     "source": "admin",
-    "status": "received"
+    "status": "received",
+    "paid": true
   },
   {
     "id": "gucci-gucci-guilty-elixir-de-parfum-pour-homme-1788290487145-0",
