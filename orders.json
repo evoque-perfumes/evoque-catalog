@@ -627,6 +627,7 @@
     "phone": "0552409999",
     "address": "ajman",
     "orderId": "pend-1789317480999-5310",
-    "source": "website"
+    "source": "website",
+    "status": "shipped"
   }
 ]
