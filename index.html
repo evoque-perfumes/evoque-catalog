@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@300;400;500;700&family=Jost:wght@300;400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/catalog.css?v=20260904a">
+<link rel="stylesheet" href="assets/catalog.css?v=20260914b">
 <!-- ===== إضافات SEO ===== -->
 <meta name="description" content="متجر Evoque Perfume لعطور بديلة فاخرة في الإمارات وعُمان — تصفح الأكثر مبيعًا واختر تصنيفك (رجالي/نسائي/للجنسين)، وتواصل معنا مباشرة عبر واتساب.">
 <link rel="canonical" href="https://evoqueperfumes.com/">
@@ -146,10 +146,6 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
     <div class="hero-eyebrow"><span class="hr"></span><span id="heroEyebrow"></span><span class="hr"></span></div>
     <h2 id="heroTitle"></h2>
     <p id="heroSubtitle"></p>
-    <div class="hero-ctas">
-      <button type="button" class="hero-btn primary" id="heroCtaShop"></button>
-      <a class="hero-btn secondary" id="heroCtaWhatsapp" target="_blank"></a>
-    </div>
   </div>
 </section>
 
@@ -187,15 +183,37 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
   <h2 id="bestSellersTitle"></h2>
   <p id="bestSellersSubtitle"></p>
 </section>
-<div class="results-count" id="resultsCount"></div>
-<div class="bs-slider-wrap">
-  <div class="grid" id="grid"></div>
-  <div id="bsArrows">
-    <button type="button" class="bs-arrow right" id="bsArrowRight" aria-label="التالي">&rsaquo;</button>
-    <button type="button" class="bs-arrow left" id="bsArrowLeft" aria-label="السابق">&lsaquo;</button>
+
+<!-- الشريط الجانبي (تصنيفات + توفر) — 14 سبتمبر 2026: صار موجود بالرئيسية نفسها
+     بدل صفحات رجالي/نسائي/للجنسين منفصلة. يظهر بس لما نعرض نتائج مفلترة فعليًا
+     (براند/جنس/بحث) — مخفي تلقائيًا فوق سلايدر "الأكثر مبيعًا" عبر كلاس no-sidebar
+     (شوف renderBestSellers بـcatalog.js). class="no-sidebar" مبدئيًا بالـHTML عشان
+     ما تطلع وميضة (flash) قبل ما يشتغل الجافاسكربت بأول تحميل عادي للصفحة. -->
+<div class="shop-layout no-sidebar" id="shopLayout">
+  <aside class="shop-sidebar" id="shopSidebar">
+    <div class="sidebar-block">
+      <h4 id="sidebarCategoriesTitle"></h4>
+      <div id="sidebarCategories"></div>
+    </div>
+    <div class="sidebar-block">
+      <h4 id="sidebarAvailabilityTitle"></h4>
+      <label class="sidebar-check"><input type="checkbox" id="availInStock" checked> <span id="availInLabel"></span></label>
+      <label class="sidebar-check"><input type="checkbox" id="availOutStock"> <span id="availOutLabel"></span></label>
+    </div>
+  </aside>
+  <div class="shop-main">
+    <div class="results-count" id="resultsCount"></div>
+    <div class="filters" id="filters"></div>
+    <div class="bs-slider-wrap">
+      <div class="grid" id="grid"></div>
+      <div id="bsArrows">
+        <button type="button" class="bs-arrow right" id="bsArrowRight" aria-label="التالي">&rsaquo;</button>
+        <button type="button" class="bs-arrow left" id="bsArrowLeft" aria-label="السابق">&lsaquo;</button>
+      </div>
+    </div>
+    <div class="show-more-wrap" id="showMoreWrap"></div>
   </div>
 </div>
-<div class="show-more-wrap" id="showMoreWrap"></div>
 
 <div class="category-nav-wrap" id="categoryNavWrap">
   <section class="section-head" id="shopByCategoryHead">
@@ -321,7 +339,7 @@ src="https://www.facebook.com/tr?id=1801502767941852&ev=PageView&noscript=1"
 <script>
   window.EVOQUE_PAGE = { mode: "home" };
 </script>
-<script src="assets/catalog.js?v=20260914a"></script>
+<script src="assets/catalog.js?v=20260914b"></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>
