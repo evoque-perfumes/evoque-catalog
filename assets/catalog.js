@@ -1323,10 +1323,17 @@ let activeFilter = "all";
 let selectedBrand = "all";
 let searchQuery = "";
 let availabilityFilter = "all"; // "all" | "in" | "out" — فلتر التوفر بالشريط الجانبي (3 سبتمبر 2026)
-// لو الزائر جاي من رابط قائمة البراندات بالهيدر (index.html?brand=...) نفعّل فلتر البراند فورًا
+// فلتر الجنس بالرئيسية (14 سبتمبر 2026) — مستقل عن activeFilter (اللي صار مقتصر على
+// الموسم/الوقت بس) عشان يقدر الزائر يجمع فلتر جنس + فلتر موسم مع بعض بنفس الوقت.
+// ما يُستخدم إطلاقًا بصفحات رجالي/نسائي/للجنسين القديمة (LOCKED_GENDER already يقفلها).
+let genderFilter = "all"; // "all" | "men" | "women" | "unisex"
+// لو الزائر جاي من رابط قائمة البراندات بالهيدر (index.html?brand=...) نفعّل فلتر البراند فورًا،
+// أو من بطاقة "تسوّق حسب التصنيف" بالرئيسية (index.html?gender=...) نفعّل فلتر الجنس فورًا
 try{
   const _qBrand = new URLSearchParams(location.search).get("brand");
   if(_qBrand) selectedBrand = _qBrand;
+  const _qGender = new URLSearchParams(location.search).get("gender");
+  if(_qGender && ["men","women","unisex"].includes(_qGender)) genderFilter = _qGender;
 }catch(e){}
 const PAGE_SIZE = 12;
 let visibleCount = PAGE_SIZE;
@@ -1380,16 +1387,9 @@ function renderHero(){
   document.getElementById("heroEyebrow").textContent = t.heroEyebrow;
   document.getElementById("heroTitle").textContent = t.heroTitle;
   document.getElementById("heroSubtitle").textContent = t.heroSubtitle;
-
-  const shopBtn = document.getElementById("heroCtaShop");
-  shopBtn.innerHTML = `${svgIcon("ic-search")}<span>${t.heroCtaShop}</span>`;
-  shopBtn.onclick = ()=>{
-    document.querySelector(".search-controls").scrollIntoView({behavior:"smooth", block:"start"});
-  };
-
-  const waBtn = document.getElementById("heroCtaWhatsapp");
-  waBtn.innerHTML = `${svgIcon("ic-whatsapp")}<span>${t.heroCtaWhatsapp}</span>`;
-  waBtn.href = `https://wa.me/${WHATSAPP_NUMBER}`;
+  // 14 سبتمبر 2026: شلنا زرّي "تصفح العطور" و"راسلنا على واتساب" من قسم البطل —
+  // واتساب موجود أصلًا كأيقونة ثابتة بأعلى الصفحة (waHeaderBtn)، وزر "تصفح العطور"
+  // كان بس يمرّر لمربع البحث تحت بدون فايدة حقيقية إضافية.
 }
 
 /* ===================================================================
@@ -1501,6 +1501,8 @@ function renderAll(){
 
   if(PAGE.mode === "home"){
     renderHomeSearch();
+    renderFilters();
+    renderShopSidebar();
     renderBestSellers();
     renderCategoryNav();
   } else {
@@ -1515,23 +1517,19 @@ function renderAll(){
 }
 
 // ===================================================================
-// شريط تنقل التصنيفات — يظهر بكل الصفحات (الرئيسية + الثلاث صفحات تصنيف)
-// عشان الزائر يقدر يتنقل بينها بأي وقت بدون رجوع للرئيسية أول
+// شريط تنقل الهيدر — يظهر بكل الصفحات. من 14 سبتمبر 2026 صار بس رابط
+// "الرئيسية" + قائمة "البراندات" (شوف تعليق renderSiteNav تحت للتفاصيل).
 // ===================================================================
 function renderSiteNav(){
   const t = I18N[lang];
   const wrap = document.getElementById("siteNav");
   if(!wrap) return;
-  const items = [
-    { key:"home",   label:t.navHome,   href:"index.html" },
-    { key:"men",    label:t.navMen,    href: CATEGORY_PAGES.men.url },
-    { key:"women",  label:t.navWomen,  href: CATEGORY_PAGES.women.url },
-    { key:"unisex", label:t.navUnisex, href: CATEGORY_PAGES.unisex.url }
-  ];
-  const currentKey = PAGE.mode === "home" ? "home" : PAGE.gender;
-  const linksHtml = items.map(it =>
-    `<a class="site-nav-link${it.key===currentKey ? " active" : ""}" href="${it.href}">${it.label}</a>`
-  ).join("");
+  // 14 سبتمبر 2026: شلنا روابط رجالي/نسائي/للجنسين من الهيدر — التصفح بينهم صار
+  // عبر قائمة "البراندات" أو بطاقات "تسوّق حسب التصنيف" بالرئيسية، وبعدها فلتر
+  // الجنس بالشريط الجانبي بنفس صفحة النتائج (index.html)، بدل ٣ صفحات منفصلة.
+  // صفحات men.html/women.html/unisex.html القديمة باقية شغالة لأي رابط قديم
+  // محفوظ عند أحد (بحث Google، مفضلة متصفح...)، بس ما تربط من أي مكان بالموقع بعد الحين.
+  const linksHtml = `<a class="site-nav-link" href="index.html">${t.navHome}</a>`;
 
   // قائمة "البراندات" المنسدلة بالهيدر (3 سبتمبر 2026) — تعرض كل البراندات الأصلية
   // بالكتالوج، وكل رابط ينقل لصفحة الرئيسية مفلترة على هذا البراند مباشرة
@@ -1606,7 +1604,9 @@ function renderBestSellers(){
   const titleEl = document.getElementById("bestSellersTitle");
   const subEl = document.getElementById("bestSellersSubtitle");
   const categoryNavWrap = document.getElementById("categoryNavWrap");
-  const isSearching = !!searchQuery.trim() || selectedBrand !== "all";
+  // 14 سبتمبر 2026: أضفنا genderFilter — اختيار جنس من الشريط الجانبي أو بطاقة
+  // "تسوّق حسب التصنيف" يُعتبر "بحث/تصفح" بالضبط زي البراند أو كلمة البحث.
+  const isSearching = !!searchQuery.trim() || selectedBrand !== "all" || genderFilter !== "all";
 
   if(eyebrowEl) eyebrowEl.textContent = isSearching ? t.searchResultsEyebrow : t.bestSellersEyebrow;
   if(titleEl) titleEl.textContent = isSearching ? t.searchResultsTitle : t.bestSellersTitle;
@@ -1614,6 +1614,10 @@ function renderBestSellers(){
   // نخفي بطاقات "تسوّق حسب التصنيف" أثناء البحث الفعلي — الزائر جاي يدور
   // بالاسم مباشرة، مو يتصفّح تصنيفات، ونرجعها لما يمسح البحث.
   if(categoryNavWrap) categoryNavWrap.style.display = isSearching ? "none" : "";
+  // الشريط الجانبي (فلتر + توفر) ما له معنى فوق سلايدر "الأكثر مبيعًا" المختار
+  // يدويًا — يظهر بس لما نكون فعليًا نعرض نتائج مفلترة (14 سبتمبر 2026)
+  const shopLayout = document.getElementById("shopLayout");
+  if(shopLayout) shopLayout.classList.toggle("no-sidebar", !isSearching);
 
   const gridEl = document.getElementById("grid");
   const bsArrows = document.getElementById("bsArrows");
@@ -1640,7 +1644,8 @@ function renderBestSellers(){
 }
 
 // ===================================================================
-// بطاقات "تسوّق حسب التصنيف" بالصفحة الرئيسية — تنقل لصفحات رجالي/نسائي/للجنسين
+// بطاقات "تسوّق حسب التصنيف" بالصفحة الرئيسية — من 14 سبتمبر 2026 ما تنقل
+// لصفحات منفصلة بعد، تفعّل فلتر الجنس بنفس صفحة النتائج (index.html?gender=...)
 // ===================================================================
 function renderCategoryNav(){
   const t = I18N[lang];
@@ -1652,9 +1657,9 @@ function renderCategoryNav(){
   const wrap = document.getElementById("categoryNav");
   if(!wrap) return;
   const cards = [
-    { gender:"men",    title:t.categoryCardMenTitle,    desc:t.categoryCardMenDesc,    icon:ICONS.men,    href:CATEGORY_PAGES.men.url },
-    { gender:"women",  title:t.categoryCardWomenTitle,  desc:t.categoryCardWomenDesc,  icon:ICONS.women,  href:CATEGORY_PAGES.women.url },
-    { gender:"unisex", title:t.categoryCardUnisexTitle, desc:t.categoryCardUnisexDesc, icon:ICONS.unisex, href:CATEGORY_PAGES.unisex.url }
+    { gender:"men",    title:t.categoryCardMenTitle,    desc:t.categoryCardMenDesc,    icon:ICONS.men,    href:"index.html?gender=men" },
+    { gender:"women",  title:t.categoryCardWomenTitle,  desc:t.categoryCardWomenDesc,  icon:ICONS.women,  href:"index.html?gender=women" },
+    { gender:"unisex", title:t.categoryCardUnisexTitle, desc:t.categoryCardUnisexDesc, icon:ICONS.unisex, href:"index.html?gender=unisex" }
   ];
   wrap.innerHTML = cards.map(c => `
     <a class="category-card" href="${c.href}">
@@ -1693,27 +1698,52 @@ function renderSearchControls(){
 }
 
 // ===================================================================
-// الشريط الجانبي بصفحات التصنيف (رجالي/نسائي/للجنسين) — تصنيفات (روابط تنقل
-// بين الصفحات مع عدد كل تصنيف) + فلتر التوفر (متوفر/غير متوفر). 3 سبتمبر 2026.
+// الشريط الجانبي — تصنيفات + فلتر التوفر (متوفر/غير متوفر). 3 سبتمبر 2026،
+// مُعدَّل 14 سبتمبر 2026: صار يظهر بالرئيسية كمان (مو بس صفحات رجالي/نسائي/
+// للجنسين القديمة). بصفحات التصنيف القديمة (LOCKED_GENDER) قسم "التصنيفات"
+// لسا روابط تنقل حقيقية بين الصفحات زي ما كان (ما نلمسها — صفحات ما تربط من
+// أي مكان بعد الحين، بس تشتغل لأي زائر يوصلها برابط قديم). بالرئيسية، نفس
+// القسم صار أزرار فلترة فورية بنفس الصفحة (genderFilter) بدل تنقل.
 // ===================================================================
 function renderShopSidebar(){
   const t = I18N[lang];
   const catTitle = document.getElementById("sidebarCategoriesTitle");
   const catList = document.getElementById("sidebarCategories");
-  if(!catList) return; // الرئيسية ما فيها هالعناصر أصلًا
+  if(!catList) return; // بعض الصفحات ما فيها هالعناصر أصلًا
   if(catTitle) catTitle.textContent = t.sidebarCategoriesTitle;
   const availTitle = document.getElementById("sidebarAvailabilityTitle");
   if(availTitle) availTitle.textContent = t.sidebarAvailabilityTitle;
 
-  const cats = [
-    { key:"men",    label:t.navMen,    href: CATEGORY_PAGES.men.url },
-    { key:"women",  label:t.navWomen,  href: CATEGORY_PAGES.women.url },
-    { key:"unisex", label:t.navUnisex, href: CATEGORY_PAGES.unisex.url },
-  ];
-  catList.innerHTML = cats.map(c => {
-    const count = perfumes.filter(p => p.gender === c.key).length;
-    return `<a class="sidebar-link${c.key===PAGE.gender ? " active" : ""}" href="${c.href}">${c.label} <span class="sb-count">(${count})</span></a>`;
-  }).join("");
+  if(LOCKED_GENDER){
+    const cats = [
+      { key:"men",    label:t.navMen,    href: CATEGORY_PAGES.men.url },
+      { key:"women",  label:t.navWomen,  href: CATEGORY_PAGES.women.url },
+      { key:"unisex", label:t.navUnisex, href: CATEGORY_PAGES.unisex.url },
+    ];
+    catList.innerHTML = cats.map(c => {
+      const count = perfumes.filter(p => p.gender === c.key).length;
+      return `<a class="sidebar-link${c.key===PAGE.gender ? " active" : ""}" href="${c.href}">${c.label} <span class="sb-count">(${count})</span></a>`;
+    }).join("");
+  } else {
+    const cats = [
+      { key:"all",    label:t.filters[0].label },
+      { key:"men",    label:t.navMen },
+      { key:"women",  label:t.navWomen },
+      { key:"unisex", label:t.navUnisex },
+    ];
+    catList.innerHTML = cats.map(c => {
+      const count = c.key === "all" ? perfumes.length : perfumes.filter(p => p.gender === c.key).length;
+      return `<button type="button" class="sidebar-link${c.key===genderFilter ? " active" : ""}" data-gender="${c.key}">${c.label} <span class="sb-count">(${count})</span></button>`;
+    }).join("");
+    catList.querySelectorAll("button[data-gender]").forEach(btn => {
+      btn.onclick = () => {
+        genderFilter = btn.dataset.gender;
+        visibleCount = PAGE_SIZE;
+        renderBestSellers();
+        renderShopSidebar();
+      };
+    });
+  }
 
   const inEl = document.getElementById("availInStock");
   const outEl = document.getElementById("availOutStock");
@@ -1742,9 +1772,10 @@ function renderFilters(){
   const wrap = document.getElementById("filters");
   if(!wrap) return;
   wrap.innerHTML = "";
-  // بصفحة تصنيف الجنس مقفول أصلًا (مو فلتر يختاره الزائر) — نخفي أزرار رجالي/نسائي/للجنسين
-  // ونسيب بس "الكل" (داخل هذا التصنيف) + فلاتر الموسم/الوقت
-  const list = LOCKED_GENDER ? t.filters.filter(f => !["men","women","unisex"].includes(f.key)) : t.filters;
+  // فلتر الجنس صار حصريًا بالشريط الجانبي (14 سبتمبر 2026) — هنا بس "الكل" +
+  // فلاتر الموسم/الوقت، بكل الصفحات بدون استثناء (عشان ما يصير فلتر جنس مكرر
+  // بمكانين مختلفين بنفس الوقت).
+  const list = t.filters.filter(f => !["men","women","unisex"].includes(f.key));
   list.forEach(f=>{
     const btn = document.createElement("button");
     btn.className = "filter-btn" + (f.key===activeFilter ? " active" : "");
@@ -1757,6 +1788,8 @@ function renderFilters(){
 function matches(p){
   // صفحات التصنيف (رجالي/نسائي/للجنسين) مقفولة على جنس واحد بغض النظر عن أي فلتر ثاني
   if(LOCKED_GENDER && p.gender !== LOCKED_GENDER) return false;
+  // فلتر الجنس بالشريط الجانبي بالرئيسية (14 سبتمبر 2026) — مستقل عن activeFilter
+  if(genderFilter !== "all" && p.gender !== genderFilter) return false;
   if(selectedBrand !== "all" && p.brand !== selectedBrand) return false;
   // فلتر التوفر (الشريط الجانبي بصفحات التصنيف) — 3 سبتمبر 2026
   if(availabilityFilter === "in" && bsStockScore(p) <= 0) return false;

@@ -667,7 +667,7 @@
   .bs-arrow.left{ left:-6px; }
   @media(max-width:640px){ .bs-arrow{ display:none; } }
 
-  /* -- فلتر جانبي (تصنيفات + توفر) بصفحات التصنيف -- */
+  /* -- فلتر جانبي (تصنيفات + توفر) — بصفحات التصنيف القديمة وبالرئيسية من 14 سبتمبر 2026 -- */
   .shop-layout{ display:flex; align-items:flex-start; gap:24px; max-width:1180px; margin:0 auto; padding:0 16px; }
   .shop-sidebar{
     flex:0 0 210px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
@@ -677,13 +677,21 @@
   .sidebar-block h4{ font-size:12.5px; font-weight:800; margin:0 0 10px; color:var(--ink); }
   .sidebar-link{
     display:flex; justify-content:space-between; align-items:center; gap:6px; color:var(--ink);
-    text-decoration:none; font-size:13px; padding:7px 4px; border-radius:6px;
+    text-decoration:none; font-size:13px; padding:7px 4px; border-radius:6px; width:100%;
   }
+  /* بالرئيسية، عناصر التصنيفات أزرار فلترة (<button>) مو روابط تنقل (<a>) — نفس المظهر بالضبط */
+  button.sidebar-link{ appearance:none; -webkit-appearance:none; background:none; border:none; font:inherit; text-align:inherit; cursor:pointer; }
   .sidebar-link:hover{ color:var(--gold-deep); background:var(--gold-pale); }
   .sidebar-link.active{ color:var(--gold-deep); font-weight:700; }
   .sb-count{ color:var(--muted-soft); font-size:11px; }
   .sidebar-check{ display:flex; align-items:center; gap:8px; font-size:13px; padding:6px 2px; cursor:pointer; }
   .shop-main{ flex:1; min-width:0; }
+  /* الرئيسية فقط: سلايدر "الأكثر مبيعًا" (مو نتائج مفلترة فعليًا) يخفي الشريط الجانبي
+     وشريط الفلاتر تمامًا ويرجع عرض كامل — 14 سبتمبر 2026 */
+  .shop-layout.no-sidebar{ display:block; max-width:none; padding:0; }
+  .shop-layout.no-sidebar .shop-sidebar,
+  .shop-layout.no-sidebar .filters{ display:none; }
+  .shop-layout.no-sidebar .shop-main{ width:100%; }
   @media(max-width:820px){
     .shop-layout{ flex-direction:column; padding:0 16px; }
     .shop-sidebar{ flex:none; width:100%; position:static; }
