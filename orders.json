@@ -651,19 +651,18 @@
     "status": "prep"
   },
   {
-    "id": "louis-vuitton-pacific-chill-1789318389372-0",
+    "id": "louis-vuitton-pacific-chill-1789410525792-0",
     "perfumeId": "louis-vuitton-pacific-chill",
     "size": 50,
     "qty": 1,
     "unitPrice": 50,
     "customer": "Ammar",
     "date": "2026-09-13",
-    "country": "",
-    "countryLabel": "",
-    "phone": "0552409999",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "+971 0552409999",
     "address": "ajman",
     "orderId": "pend-1789317480999-5310",
-    "source": "admin",
-    "status": "shipped"
+    "source": "admin"
   }
 ]
