@@ -644,7 +644,8 @@
     "phone": "+971 0502409999",
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   },
   {
     "id": "gift-bvlgari-tygar-1789410573312-0",
@@ -661,6 +662,7 @@
     "phone": "+971 0502409999",
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   }
 ]
