@@ -2181,6 +2181,13 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
 let salesCart = []; // {perfumeId, brand, name, size, qty, unitPrice} — عناصر الطلب الحالي قبل الحفظ
 let salesEditingOrderId = null; // لو مو null، معناها نعدّل طلب محفوظ سابقًا بدل ما نسجّل طلب جديد
 let salesEditingOriginalItems = []; // نسخة من عناصر الطلب الأصلية وقت بداية التعديل — تُستخدم لحساب فرق المخزون الصحيح عند الحفظ
+// 14 سبتمبر 2026: خيارات قائمة "sl_country" أكواد (AE/OM/...) بس الطلبات الجاية من
+// الموقع العام تخزّن الدولة كنص كامل (مثلاً "الإمارات" أو "UAE") — فلمّا نفتح طلب
+// كذا للتعديل، sl_country ما يلقى خيار مطابق ويرجع فاضي، ولو الأدمن حفظ التعديل بدون
+// ما يلاحظ/يعدّل حقل الدولة، كانت تنمسح الدولة صامتًا. الحين نحفظ القيمة الأصلية هنا
+// ونرجّعها عند الحفظ لو الأدمن ما لمس حقل الدولة إطلاقًا.
+let salesEditingOriginalCountry = null; // {country, countryLabel} وقت بداية التعديل
+let sl_countryTouched = false; // صار true بس لو الأدمن غيّر حقل الدولة يدويًا بهذا التعديل
 
 function slShowStatus(msg, type){
   const box = document.getElementById("sl_statusBox");
@@ -2243,7 +2250,21 @@ document.getElementById("sl_country").addEventListener("change", () => {
   const opt = sel.options[sel.selectedIndex];
   const code = opt ? (opt.dataset.code || "") : "";
   document.getElementById("sl_phoneCode").textContent = code || "+___";
+  sl_countryTouched = true; // الأدمن غيّر حقل الدولة يدويًا — التغيير هذا مقصود، نطبّقه بالحفظ
 });
+
+// يطابق قيمة دولة مخزّنة (كود زي "AE"، أو نص كامل زي "الإمارات"/"UAE" من الموقع
+// العام) مع إحدى خيارات قائمة sl_country. يرجع "" لو ما انطابقت (يخلّي المتصل
+// يقرر: يحافظ على القيمة الأصلية بدل ما يفرغها بالغلط).
+function matchCountrySelectValue(raw){
+  if(!raw) return "";
+  const sel = document.getElementById("sl_country");
+  for(const opt of sel.options){ if(opt.value && opt.value === raw) return opt.value; }
+  const norm = String(raw).trim().toLowerCase();
+  if(["الإمارات","الامارات","uae","united arab emirates"].includes(norm)) return "AE";
+  if(["عُمان","عمان","oman"].includes(norm)) return "OM";
+  return "";
+}
 
 document.getElementById("sl_addToCartBtn").addEventListener("click", () => {
   if(!salesSelected) return;
@@ -2337,6 +2358,8 @@ function slResetOrderFields(){
   document.getElementById("sl_phoneCode").textContent = "+___";
   document.getElementById("sl_phone").value = "";
   document.getElementById("sl_address").value = "";
+  salesEditingOriginalCountry = null;
+  sl_countryTouched = false;
 }
 
 function slExitEditMode(){
@@ -2517,11 +2540,13 @@ function slLoadOrderForEdit(key){
   });
   salesEditingOrderId = key;
   salesEditingOriginalItems = g.items.map(o => ({ perfumeId: o.perfumeId, size: Number(o.size), qty: Number(o.qty) || 0 }));
+  salesEditingOriginalCountry = { country: g.country || "", countryLabel: g.countryLabel || "" };
+  sl_countryTouched = false;
 
   document.getElementById("sl_customer").value = g.customer || "";
   document.getElementById("sl_date").value = g.date || todayStr();
   const countrySel = document.getElementById("sl_country");
-  countrySel.value = g.country || "";
+  countrySel.value = matchCountrySelectValue(g.country || "");
   const opt = countrySel.options[countrySel.selectedIndex];
   const code = (opt && opt.value) ? (opt.dataset.code || "") : "";
   document.getElementById("sl_phoneCode").textContent = code || "+___";
@@ -2740,8 +2765,16 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   const date = document.getElementById("sl_date").value.trim() || todayStr();
   const countrySel = document.getElementById("sl_country");
   const countryOpt = countrySel.options[countrySel.selectedIndex];
-  const country = countrySel.value || "";
-  const countryLabel = country ? countryOpt.textContent.trim() : "";
+  let country = countrySel.value || "";
+  let countryLabel = country ? countryOpt.textContent.trim() : "";
+  // لو نعدّل طلب موجود وما لمس الأدمن حقل الدولة إطلاقًا بهذا التعديل، وطلعت قيمة
+  // الدولة فاضية (لأنها جات من الموقع كنص ما انطابق مع خيارات القائمة — راجع
+  // matchCountrySelectValue وتعليق salesEditingOriginalCountry أعلاه)، نحافظ على
+  // القيمة الأصلية بدل ما نفرّغها بالغلط.
+  if(salesEditingOrderId && !sl_countryTouched && !country && salesEditingOriginalCountry && salesEditingOriginalCountry.country){
+    country = salesEditingOriginalCountry.country;
+    countryLabel = salesEditingOriginalCountry.countryLabel || country;
+  }
   const phoneCode = document.getElementById("sl_phoneCode").textContent.trim();
   const phoneLocal = document.getElementById("sl_phone").value.trim();
   const phone = phoneLocal ? ((phoneCode && phoneCode !== "+___") ? phoneCode + " " + phoneLocal : phoneLocal) : "";
