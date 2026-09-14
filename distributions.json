@@ -178,7 +178,8 @@
       "colorBreakdown": {
         "black": 1,
         "white": 1
-      }
+      },
+      "status": "shipped"
     }
   ],
   "purchases": [
