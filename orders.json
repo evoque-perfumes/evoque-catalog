@@ -633,7 +633,7 @@
     "status": "received"
   },
   {
-    "id": "xerjoff-erba-pura-1789410573311-0",
+    "id": "xerjoff-erba-pura-1789412202568-0",
     "perfumeId": "xerjoff-erba-pura",
     "size": 50,
     "qty": 3,
@@ -645,25 +645,6 @@
     "phone": "+971 0502409999",
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
-    "source": "admin",
-    "status": "prep"
-  },
-  {
-    "id": "gift-bvlgari-tygar-1789410573312-0",
-    "perfumeId": "bvlgari-tygar",
-    "size": "10",
-    "qty": 1,
-    "unitPrice": 0,
-    "isGift": true,
-    "giftReason": "هدية مجانية (عطر 10مل أو معطر سيارة)",
-    "customer": "علي الهاشمي",
-    "date": "2026-09-13",
-    "country": "AE",
-    "countryLabel": "🇦🇪 الإمارات",
-    "phone": "+971 0502409999",
-    "address": "عجمان العالية",
-    "orderId": "pend-1789318167421-9998",
-    "source": "admin",
-    "status": "prep"
+    "source": "admin"
   }
 ]
