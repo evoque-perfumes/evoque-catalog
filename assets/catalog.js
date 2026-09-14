@@ -75,9 +75,12 @@ function bsStockScore(p){
 }
 
 // ===================================================================
-// إشعار المبيعات المنبثق (3 سبتمبر 2026) — يقرأ من assets/sale-notifications.json
-// (ملف قابل للتعديل يدويًا، مو بيانات ثابتة بالكود) ويدور بينها بشكل عشوائي كل فترة.
-// وقت "قبل X دقيقة" تقريبي (عرض فقط)، مو من سجل طلبات فعلي لحظي.
+// إشعار المبيعات المنبثق (3 سبتمبر 2026، مُعدَّل 14 سبتمبر 2026) — يقرأ من
+// assets/sale-notifications.json (ملف قابل للتعديل يدويًا، مو بيانات ثابتة
+// بالكود) ويدور بينها بشكل عشوائي كل فترة. هذي أمثلة عامة فقط — مو مرتبطة
+// بسجل طلبات فعلي، ولذلك ما تتغير أو تتحدث لما يوصل طلب حقيقي جديد. تعمّدنا
+// عدم ذكر رقم دقايق محدد أو أي ادّعاء "موثّق" (شيلنا علامة ✔ من الواجهة)
+// عشان ما نوهم العميل بدقة/واقعية غير موجودة فعليًا.
 // ===================================================================
 let saleNotifData = [];
 let saleToastIdx = 0;
@@ -97,13 +100,12 @@ function showSaleToastOnce(){
   const t = I18N[lang];
   const item = saleNotifData[saleToastIdx % saleNotifData.length];
   saleToastIdx++;
-  const mins = 3 + Math.floor(Math.random() * 45);
   const cityEl = document.getElementById("saleToastCity");
   const prodEl = document.getElementById("saleToastProduct");
   const timeEl = document.getElementById("saleToastTime");
   if(cityEl) cityEl.textContent = item.city || "";
   if(prodEl) prodEl.textContent = (t.saleToastBought || "") + " " + (item.product || "");
-  if(timeEl) timeEl.textContent = t.saleToastAgo ? t.saleToastAgo(mins) : "";
+  if(timeEl) timeEl.textContent = t.saleToastAgo || "";
   el.classList.add("show");
   clearTimeout(el._hideTimer);
   el._hideTimer = setTimeout(()=> el.classList.remove("show"), 6000);
@@ -235,7 +237,7 @@ const I18N = {
     availabilityIn: "متوفر بالمخزون",
     availabilityOut: "غير متوفر حاليًا",
     saleToastBought: "اشترى",
-    saleToastAgo: (n) => n === 1 ? "قبل دقيقة" : n === 2 ? "قبل دقيقتين" : (n >= 3 && n <= 10) ? `قبل ${n} دقائق` : `قبل ${n} دقيقة`,
+    saleToastAgo: "مؤخرًا",
     countryLabel: "الدولة",
     paymentTitle: "طريقة الدفع المفضلة",
     paymentCOD: "الدفع عند الاستلام",
@@ -411,7 +413,7 @@ const I18N = {
     availabilityIn: "In stock",
     availabilityOut: "Out of stock",
     saleToastBought: "bought",
-    saleToastAgo: (n) => n === 1 ? "1 minute ago" : `${n} minutes ago`,
+    saleToastAgo: "Recently",
     countryLabel: "Country",
     paymentTitle: "Preferred payment method",
     paymentCOD: "Cash on delivery",
