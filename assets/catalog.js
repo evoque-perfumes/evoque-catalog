@@ -1570,7 +1570,9 @@ function renderHomeSearch(){
   if(!input) return;
   input.placeholder = t.homeSearchPlaceholder;
   input.value = searchQuery;
-  input.oninput = (e)=>{ searchQuery = e.target.value; visibleCount = PAGE_SIZE; renderBestSellers(); };
+  // 15 سبتمبر 2026: renderShopSidebar() كمان — عشان أرقام رجالي/نسائي/للجنسين
+  // تتحدّث فورًا وهو يكتب بمربع البحث (شوف matchesExceptGender)
+  input.oninput = (e)=>{ searchQuery = e.target.value; visibleCount = PAGE_SIZE; renderBestSellers(); renderShopSidebar(); };
 
   // قائمة البراندات المنسدلة بالرئيسية (28 أغسطس 2026) — نفس فكرة brandSelect
   // بصفحات التصنيف بالضبط، بس هنا بدون تقييد بجنس معيّن (LOCKED_GENDER فاضي بالرئيسية).
@@ -1588,7 +1590,9 @@ function renderHomeSearch(){
       brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${toTitleCase(b)}</option>`).join("");
     selectedBrand = brands.includes(prevSelection) ? prevSelection : "all";
     brandSelect.value = selectedBrand;
-    brandSelect.onchange = (e)=>{ selectedBrand = e.target.value; visibleCount = PAGE_SIZE; renderBestSellers(); };
+    // 15 سبتمبر 2026: renderShopSidebar() كمان — عشان أرقام رجالي/نسائي/للجنسين
+    // تتحدّث فورًا حسب البراند المختار (شوف matchesExceptGender)
+    brandSelect.onchange = (e)=>{ selectedBrand = e.target.value; visibleCount = PAGE_SIZE; renderBestSellers(); renderShopSidebar(); };
   }
 }
 
@@ -1732,7 +1736,9 @@ function renderShopSidebar(){
       { key:"unisex", label:t.navUnisex },
     ];
     catList.innerHTML = cats.map(c => {
-      const count = c.key === "all" ? perfumes.length : perfumes.filter(p => p.gender === c.key).length;
+      // 15 سبتمبر 2026: الرقم صار محسوب بعد تطبيق باقي الفلاتر الفعّالة (براند/موسم/
+      // توفر/بحث) — شوف matchesExceptGender أعلاه — مو إجمالي الكتالوج كامل دائمًا
+      const count = perfumes.filter(p => matchesExceptGender(p, c.key)).length;
       return `<button type="button" class="sidebar-link${c.key===genderFilter ? " active" : ""}" data-gender="${c.key}">${c.label} <span class="sb-count">(${count})</span></button>`;
     }).join("");
     catList.querySelectorAll("button[data-gender]").forEach(btn => {
@@ -1761,6 +1767,9 @@ function renderShopSidebar(){
       else { inEl.checked = true; availabilityFilter = "all"; } // ما نسمح نلغي الاثنين مع بعض
       visibleCount = PAGE_SIZE;
       renderGrid();
+      // 15 سبتمبر 2026: نحدّث أرقام التصنيفات (رجالي/نسائي/للجنسين) بالرئيسية كمان،
+      // عشان تفضل تعكس فعليًا التوفر المختار (شوف matchesExceptGender)
+      renderShopSidebar();
     };
     inEl.onchange = update;
     outEl.onchange = update;
@@ -1780,7 +1789,9 @@ function renderFilters(){
     const btn = document.createElement("button");
     btn.className = "filter-btn" + (f.key===activeFilter ? " active" : "");
     btn.innerHTML = svgIcon(ICONS[f.icon]) + `<span>${f.label}</span>`;
-    btn.onclick = ()=>{ activeFilter = f.key; visibleCount = PAGE_SIZE; renderFilters(); renderGrid(); };
+    // 15 سبتمبر 2026: renderShopSidebar() كمان — عشان أرقام رجالي/نسائي/للجنسين
+    // بالرئيسية تتحدّث فورًا لو غيّر الموسم/الوقت وهو مختار جنس أو براند معيّن
+    btn.onclick = ()=>{ activeFilter = f.key; visibleCount = PAGE_SIZE; renderFilters(); renderGrid(); renderShopSidebar(); };
     wrap.appendChild(btn);
   });
 }
@@ -1802,6 +1813,32 @@ function matches(p){
   if(activeFilter==="night" || activeFilter==="day") return p.daynight.includes(activeFilter);
   if(activeFilter==="men" || activeFilter==="women" || activeFilter==="unisex") return p.gender === activeFilter;
   return p.seasons.includes(activeFilter) || p.seasons.includes("all");
+}
+
+// حساب عدد العطور لكل زر جنس بالشريط الجانبي بالرئيسية (15 سبتمبر 2026) —
+// نفس منطق matches(p) بالضبط ما عدا فلتر الجنس نفسه (عشان الزر يقدر يحسب
+// عدده هو)، عشان لو العميل مختار براند/موسم/توفر معيّن، الرقم يعكس فعليًا
+// كم عطر بيطلع لو ضغط هالزر بالذات — مو إجمالي الكتالوج كامل بدون أي فلتر.
+// مثال: لو مختار براند فيه بس عطرين "للجنسين"، لازم رجالي/نسائي يطلعوا (0)
+// مو الرقم الإجمالي بكل الكتالوج.
+function matchesExceptGender(p, genderKey){
+  if(LOCKED_GENDER && p.gender !== LOCKED_GENDER) return false;
+  if(selectedBrand !== "all" && p.brand !== selectedBrand) return false;
+  if(availabilityFilter === "in" && bsStockScore(p) <= 0) return false;
+  if(availabilityFilter === "out" && bsStockScore(p) > 0) return false;
+  if(searchQuery.trim()){
+    const q = searchQuery.trim().toLowerCase();
+    if(!(p.brand.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))) return false;
+  }
+  if(activeFilter!=="all"){
+    if(activeFilter==="night" || activeFilter==="day"){
+      if(!p.daynight.includes(activeFilter)) return false;
+    } else {
+      if(!(p.seasons.includes(activeFilter) || p.seasons.includes("all"))) return false;
+    }
+  }
+  if(genderKey !== "all" && p.gender !== genderKey) return false;
+  return true;
 }
 
 // عرّفنا list (اختياري) عشان الصفحة الرئيسية تقدر تستخدم نفس بطاقة العرض لعرض
