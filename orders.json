@@ -630,7 +630,8 @@
     "address": "ajman",
     "orderId": "pend-1789317480999-5310",
     "source": "admin",
-    "status": "received"
+    "status": "received",
+    "paid": true
   },
   {
     "id": "xerjoff-erba-pura-1789412239076-0",
