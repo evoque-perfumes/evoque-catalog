@@ -679,7 +679,8 @@
     "address": "",
     "orderId": "order-1789811321416",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "xerjoff-accento-1789811321416-1",
@@ -695,6 +696,7 @@
     "address": "",
     "orderId": "order-1789811321416",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   }
 ]
