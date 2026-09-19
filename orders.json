@@ -678,7 +678,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1789811321416",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "xerjoff-accento-1789811321416-1",
@@ -693,6 +694,7 @@
     "phone": "",
     "address": "",
     "orderId": "order-1789811321416",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   }
 ]
