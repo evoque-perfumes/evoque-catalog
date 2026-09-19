@@ -664,5 +664,35 @@
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
     "source": "admin"
+  },
+  {
+    "id": "dolce-gabbana-light-blue-1789811321416-0",
+    "perfumeId": "dolce-gabbana-light-blue",
+    "size": 50,
+    "qty": 3,
+    "unitPrice": 50,
+    "customer": "arnal",
+    "date": "2026-09-19",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1789811321416",
+    "source": "admin"
+  },
+  {
+    "id": "xerjoff-accento-1789811321416-1",
+    "perfumeId": "xerjoff-accento",
+    "size": 50,
+    "qty": 2,
+    "unitPrice": 50,
+    "customer": "arnal",
+    "date": "2026-09-19",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1789811321416",
+    "source": "admin"
   }
 ]
