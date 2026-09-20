@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "orderId": "pend-1789905124845-807",
+    "receivedAt": "2026-09-20T11:52:04.845Z",
+    "status": "pending",
+    "source": "form",
+    "lang": "ar",
+    "name": "بومحمد",
+    "phone": "0501234567",
+    "email": "",
+    "country": "الإمارات",
+    "emirateOrWilayat": "عجمان",
+    "deliveryMethod": "",
+    "address": "Ajman",
+    "notes": "تم التحويل",
+    "currency": "د.إ",
+    "paymentMethod": "تحويل بنكي",
+    "subtotal": 100,
+    "shippingFee": 25,
+    "shippingFree": false,
+    "tabbyFee": 0,
+    "total": 125,
+    "offers": "",
+    "items": [
+      {
+        "perfumeId": "guerlain-les-absolus-d-orient-patchouli-ardent",
+        "brand": "Guerlain",
+        "name": "Les Absolus D Orient Patchouli Ardent",
+        "size": 50,
+        "qty": 2,
+        "unitPrice": 50,
+        "lineTotal": 100
+      }
+    ]
+  }
+]
