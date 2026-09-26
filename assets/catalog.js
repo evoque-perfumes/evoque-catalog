@@ -252,8 +252,6 @@ const I18N = {
       {key:"unisex", label:"للجنسين", icon:"unisex"},
       {key:"summer", label:"صيفي", icon:"summer"},
       {key:"winter", label:"شتوي", icon:"winter"},
-      {key:"day", label:"نهاري", icon:"day"},
-      {key:"night", label:"سهرة", icon:"night"},
     ],
     trust:[
       {icon:"ic-check", text:"منشأة مرخصة رسميًا"},
@@ -427,8 +425,6 @@ const I18N = {
       {key:"unisex", label:"Unisex", icon:"unisex"},
       {key:"summer", label:"Summer", icon:"summer"},
       {key:"winter", label:"Winter", icon:"winter"},
-      {key:"day", label:"Day", icon:"day"},
-      {key:"night", label:"Evening", icon:"night"},
     ],
     trust:[
       {icon:"ic-check", text:"Officially licensed business"},
