@@ -179,7 +179,8 @@
         "black": 1,
         "white": 1
       },
-      "status": "shipped"
+      "status": "shipped",
+      "paid": true
     },
     {
       "id": "dist_1790418622438",
