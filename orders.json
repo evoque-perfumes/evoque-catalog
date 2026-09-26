@@ -802,5 +802,20 @@
     "orderId": "order-1790419478831",
     "source": "admin",
     "status": "prep"
+  },
+  {
+    "id": "nishane-favonius-1790421836429-0",
+    "perfumeId": "nishane-favonius",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "Ammar",
+    "date": "2026-09-26",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1790421836429",
+    "source": "admin"
   }
 ]
