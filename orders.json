@@ -833,7 +833,7 @@
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
     "source": "admin",
-    "status": "shipped",
+    "status": "received",
     "paid": true
   },
   {
@@ -850,7 +850,7 @@
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
     "source": "admin",
-    "status": "shipped",
+    "status": "received",
     "paid": true
   },
   {
@@ -869,7 +869,7 @@
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
     "source": "admin",
-    "status": "shipped",
+    "status": "received",
     "paid": true
   }
 ]
