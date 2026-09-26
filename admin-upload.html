@@ -1166,14 +1166,6 @@
     </fieldset>
 
     <fieldset>
-      <legend>وقت الاستخدام</legend>
-      <div class="chkrow">
-        <label><input type="checkbox" class="f_daynight" value="day"> نهاري</label>
-        <label><input type="checkbox" class="f_daynight" value="night"> ليلي</label>
-      </div>
-    </fieldset>
-
-    <fieldset>
       <legend>الأسعار — الإمارات (AED)</legend>
       <div class="grid4">
         <div class="field"><label for="f_price50">50مل</label><input type="number" id="f_price50" min="0" step="0.01"></div>
@@ -2015,8 +2007,8 @@ document.getElementById("ov_appsFetchBtn").addEventListener("click", async () =>
 });
 
 // ===== وضع "المخزون" (تحديد أي عطر متوفر/خلص + العطور اللي بياناتها ناقصة) =====
-const STOCK_CHECK_FIELDS = ["accords", "notesTop", "longevity", "sillage", "seasons", "daynight"];
-const STOCK_FIELD_LABELS = { accords:"الأكوردات", notesTop:"النوتات", longevity:"الثبات", sillage:"الفوحان", seasons:"المواسم", daynight:"وقت الاستخدام" };
+const STOCK_CHECK_FIELDS = ["accords", "notesTop", "longevity", "sillage", "seasons"];
+const STOCK_FIELD_LABELS = { accords:"الأكوردات", notesTop:"النوتات", longevity:"الثبات", sillage:"الفوحان", seasons:"المواسم" };
 function getMissingFields(p){
   return STOCK_CHECK_FIELDS.filter(f => {
     const v = p[f];
@@ -4544,7 +4536,6 @@ function fillForm(p){
   document.getElementById("f_name").value = p.name || "";
   document.getElementById("f_gender").value = p.gender || "unisex";
   document.querySelectorAll(".f_season").forEach(cb => cb.checked = (p.seasons||[]).includes(cb.value));
-  document.querySelectorAll(".f_daynight").forEach(cb => cb.checked = (p.daynight||[]).includes(cb.value));
   document.getElementById("f_price50").value = p.price50 ?? "";
   document.getElementById("f_price10").value = p.price10 ?? "";
   document.getElementById("f_price50Om").value = p.price50Om ?? "";
@@ -4588,7 +4579,6 @@ function resetForm(){
   document.getElementById("f_name").value = "";
   document.getElementById("f_gender").value = "unisex";
   document.querySelectorAll(".f_season").forEach(cb => cb.checked = (cb.value === "winter"));
-  document.querySelectorAll(".f_daynight").forEach(cb => cb.checked = false);
   ["f_price50","f_price10","f_price50Om","f_price10Om","f_price50Before","f_price10Before","f_price50OmBefore","f_price10OmBefore"]
     .forEach(id => document.getElementById(id).value = "");
   document.getElementById("f_stock50").value = 1;
@@ -5147,7 +5137,6 @@ function readFormAsPerfume(existingImage){
     name: document.getElementById("f_name").value.trim(),
     image: existingImage || "",
     seasons: Array.from(document.querySelectorAll(".f_season:checked")).map(cb => cb.value),
-    daynight: Array.from(document.querySelectorAll(".f_daynight:checked")).map(cb => cb.value),
     gender: document.getElementById("f_gender").value,
     price50: num("f_price50"), price10: num("f_price10"),
     price50Om: num("f_price50Om"), price10Om: num("f_price10Om"),
@@ -6279,7 +6268,7 @@ document.getElementById("bulk_startBtn").addEventListener("click", async () => {
 
 // ===== وضع "استيراد عطور من إكسل" (عطور جديدة كليًا بس — ما يعدّل الموجود) =====
 const XLSX_HEADERS = {
-  brand: "البراند", name: "اسم العطر", gender: "الجنس", seasons: "المواسم", daynight: "وقت الاستخدام",
+  brand: "البراند", name: "اسم العطر", gender: "الجنس", seasons: "المواسم",
   price50: "سعر 50مل AED", price10: "سعر 10مل AED",
   price50Before: "سعر 50مل قبل الخصم AED", price10Before: "سعر 10مل قبل الخصم AED",
   price50Om: "سعر 50مل OMR", price10Om: "سعر 10مل OMR",
@@ -6290,7 +6279,6 @@ const XLSX_HEADERS = {
   longevity: "الثبات", sillage: "الفوحان",
 };
 const XLSX_SEASON_MAP = {"صيف":"summer","صيفي":"summer","شتاء":"winter","شتوي":"winter"};
-const XLSX_DAYNIGHT_MAP = {"نهاري":"day","ليلي":"night"};
 
 // الموقع صار يفلتر بالصيفي والشتوي بس (26 سبتمبر 2026). الخانة تقبل قيمة وحدة
 // ("صيفي") أو قيمتين مفصولتين بفاصلة ("صيفي، شتوي") لعطر مناسب للاثنين — يظهر
@@ -6353,7 +6341,6 @@ function xlsxProcessRows(rawRows){
       id: slug, brand, name, image: "",
       gender: xlsxParseGender(xlsxGetCell(row,"gender")),
       seasons: xlsxParseSeasonsCell(xlsxGetCell(row,"seasons")) || ["winter"],
-      daynight: xlsxParseList(xlsxGetCell(row,"daynight"), XLSX_DAYNIGHT_MAP),
       price50: xlsxParseNum(xlsxGetCell(row,"price50")), price10: xlsxParseNum(xlsxGetCell(row,"price10")),
       price50Om: xlsxParseNum(xlsxGetCell(row,"price50Om")), price10Om: xlsxParseNum(xlsxGetCell(row,"price10Om")),
       price50Before: xlsxParseNum(xlsxGetCell(row,"price50Before")), price10Before: xlsxParseNum(xlsxGetCell(row,"price10Before")),
