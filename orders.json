@@ -733,6 +733,7 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790418500144",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   }
 ]
