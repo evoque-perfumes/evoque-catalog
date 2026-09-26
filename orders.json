@@ -750,7 +750,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790419478831",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   },
   {
     "id": "amouage-purpose-50-1790419478831-1",
@@ -765,7 +766,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790419478831",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   },
   {
     "id": "oman-luxury-wanderlust-1790419478831-2",
@@ -780,7 +782,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790419478831",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   },
   {
     "id": "gift-amouage-guidance-46-1790419478832-0",
@@ -797,6 +800,7 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790419478831",
-    "source": "admin"
+    "source": "admin",
+    "status": "prep"
   }
 ]
