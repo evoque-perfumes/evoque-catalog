@@ -820,23 +820,38 @@
     "status": "shipped"
   },
   {
-    "id": "van-cleef-arpels-rose-rouge-1790441536006-0",
+    "id": "van-cleef-arpels-rose-rouge-1790441635156-0",
     "perfumeId": "van-cleef-arpels-rose-rouge",
     "size": 50,
-    "qty": 3,
+    "qty": 2,
     "unitPrice": 50,
     "customer": "Hamda",
     "date": "2026-09-26",
-    "country": "الإمارات",
-    "countryLabel": "الإمارات",
-    "phone": "0501919160",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "+971 0501919160",
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
-    "source": "website"
+    "source": "admin"
   },
   {
-    "id": "gift-kilian-can-t-stop-loving-you-1790441536006-0",
-    "perfumeId": "kilian-can-t-stop-loving-you",
+    "id": "bvlgari-splendida-rose-rose-1790441635156-1",
+    "perfumeId": "bvlgari-splendida-rose-rose",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "Hamda",
+    "date": "2026-09-26",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "+971 0501919160",
+    "address": ", Villa 20, Um Gafa, Al Ain",
+    "orderId": "pend-1790433015967-5118",
+    "source": "admin"
+  },
+  {
+    "id": "gift-louis-vuitton-les-sables-roses-1790441635156-0",
+    "perfumeId": "louis-vuitton-les-sables-roses",
     "size": "10",
     "qty": 1,
     "unitPrice": 0,
@@ -844,11 +859,11 @@
     "giftReason": "هدية مجانية (عطر 10مل أو معطر سيارة)",
     "customer": "Hamda",
     "date": "2026-09-26",
-    "country": "الإمارات",
-    "countryLabel": "الإمارات",
-    "phone": "0501919160",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "+971 0501919160",
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
-    "source": "website"
+    "source": "admin"
   }
 ]
