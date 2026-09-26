@@ -15,6 +15,14 @@
       "qty": 300,
       "totalPrice": 0.5,
       "note": ""
+    },
+    {
+      "id": "matp_1790453184176",
+      "date": "2026-09-27",
+      "material": "alcohol",
+      "qty": 20000,
+      "totalPrice": 300,
+      "note": ""
     }
   ]
 }
