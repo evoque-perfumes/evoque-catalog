@@ -719,5 +719,20 @@
     "source": "website",
     "paid": true,
     "status": "received"
+  },
+  {
+    "id": "penhaligon-s-halfeti-1790418500144-0",
+    "perfumeId": "penhaligon-s-halfeti",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "عميل",
+    "date": "2026-09-26",
+    "country": "OM",
+    "countryLabel": "🇴🇲 عُمان",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1790418500144",
+    "source": "admin"
   }
 ]
