@@ -1,0 +1,12 @@
+{
+  "purchases": [
+    {
+      "id": "matp_1790453156321",
+      "date": "2026-09-27",
+      "material": "bottle50",
+      "qty": 1000,
+      "totalPrice": 2.5,
+      "note": ""
+    }
+  ]
+}
