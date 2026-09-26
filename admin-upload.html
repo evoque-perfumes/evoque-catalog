@@ -5330,11 +5330,21 @@ function renderOrdersQueueList(){
     const phone = edits.phone != null ? edits.phone : (o.phone || "");
     const address = edits.address != null ? edits.address : (o.address || "");
     const sourceLabel = o.source === "quick-whatsapp" ? "💬 واتساب سريع (بدون بيانات عميل)" : "🌐 نموذج الطلب الكامل";
+    // 26 سبتمبر 2026: نعرض المخزون الحالي المتوفر جنب كل عنصر بالطلب عشان المديرة تلاحظ
+    // أي طلب بكمية أكبر من المتوفر فعليًا قبل ما تضغط اعتماد (هذا سبب حادثة تجاوز المخزون سابقًا)
     const itemsHtml = (o.items || []).map(it => {
       const live = perfumes.find(p => p.id === it.perfumeId);
       const label = live ? `${live.brand} — ${live.name}` : `${it.brand || "?"} — ${it.name || it.perfumeId || "?"}`;
       const notFoundNote = it.perfumeId && !live ? ` <span style="color:#c0475a;">(ما انلقى بالكتالوج — ما راح يتخصم مخزونه تلقائيًا)</span>` : "";
-      return `<div>• ${label} (${it.size}مل × ${it.qty}) — ${fmtNum(it.lineTotal || (it.unitPrice*it.qty) || 0)} ${o.currency || ""}${notFoundNote}</div>`;
+      let stockBadge = "";
+      if(live){
+        const field = Number(it.size) === 50 ? "stock50" : "stock10";
+        const curStock = stockAsQty(live[field]);
+        const qtyRequested = Number(it.qty) || 0;
+        const short = qtyRequested > curStock;
+        stockBadge = ` <span style="color:${short ? "#c0475a" : "var(--muted)"}; font-weight:${short ? "700" : "400"};">(المخزون الحالي: ${curStock}${short ? " ⚠️ أقل من الكمية المطلوبة!" : ""})</span>`;
+      }
+      return `<div>• ${label} (${it.size}مل × ${it.qty}) — ${fmtNum(it.lineTotal || (it.unitPrice*it.qty) || 0)} ${o.currency || ""}${notFoundNote}${stockBadge}</div>`;
     }).join("");
     const metaParts = [
       o.country ? `📍 ${o.country}${o.emirateOrWilayat ? " — " + o.emirateOrWilayat : ""}` : "",
@@ -5385,6 +5395,27 @@ function renderOrdersQueueList(){
       if(!order){ oqShowStatus("الطلب ما انلقى — يمكن اتعامل معه من جلسة ثانية. حدّث القائمة.", "err"); return; }
       const items = (order.items || []).filter(it => it.perfumeId && Number(it.qty) > 0);
       if(!items.length){ oqShowStatus("هذا الطلب ما فيه عناصر صالحة للاعتماد.", "err"); return; }
+
+      // 26 سبتمبر 2026: قبل الاعتماد نتأكد إن الكمية المطلوبة ما تتجاوز المخزون الحالي —
+      // هذا الفحص كان ناقص تمامًا وهو سبب حادثة عميل طلب 3 قطع وما فيه إلا 2 بالمخزون.
+      // ما نمنع الاعتماد نهائيًا (يمكن العميل يكون دفع فعلاً والمديرة تبا تسجّل الطلب رغم كذا)،
+      // لكن لازم تأكيد صريح بدل ما يكمل بصمت زي قبل.
+      const shortages = items
+        .map(it => {
+          const live = perfumes.find(p => p.id === it.perfumeId);
+          if(!live) return null;
+          const field = Number(it.size) === 50 ? "stock50" : "stock10";
+          const curStock = stockAsQty(live[field]);
+          const qtyRequested = Number(it.qty) || 0;
+          return qtyRequested > curStock ? { label: `${live.brand} — ${live.name}`, curStock, qtyRequested } : null;
+        })
+        .filter(Boolean);
+      if(shortages.length){
+        const msg = "⚠️ تنبيه تجاوز مخزون:\n\n" +
+          shortages.map(s => `• ${s.label}: المخزون الحالي ${s.curStock} فقط، والطلب بكمية ${s.qtyRequested}`).join("\n") +
+          "\n\nلو تعتمد الطلب بكل الأحوال، المخزون بينزل لصفر (مو رقم سالب) وما راح يعكس الفعلي. تأكد قبل لا تكمل. تبا تكمل الاعتماد؟";
+        if(!confirm(msg)) return;
+      }
 
       // لو الطلب يستحق هدية عطر، لازم تُختار قبل الاعتماد
       const giftCheck = readGiftSelections(card.querySelector(".gift-picker-wrap"));
