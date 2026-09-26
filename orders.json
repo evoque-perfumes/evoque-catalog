@@ -646,7 +646,8 @@
     "phone": "+971 0502409999",
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "gift-bvlgari-tygar-1789412239076-0",
@@ -663,7 +664,8 @@
     "phone": "+971 0502409999",
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
-    "source": "admin"
+    "source": "admin",
+    "paid": true
   },
   {
     "id": "dolce-gabbana-light-blue-1789811321416-0",
