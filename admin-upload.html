@@ -238,8 +238,8 @@
       <div class="kpi-card"><div class="kpi-label">إجمالي العطور</div><div class="kpi-value" id="ov_total">—</div><div class="kpi-sub" id="ov_totalSub"></div></div>
       <div class="kpi-card good"><div class="kpi-label">نسبة اكتمال الصور</div><div class="kpi-value" id="ov_imagesPct">—</div><div class="kpi-sub" id="ov_imagesSub"></div></div>
       <div class="kpi-card clickable alert" id="ov_missingCard"><div class="kpi-label">بيانات ناقصة (اضغط للمراجعة)</div><div class="kpi-value" id="ov_missing">—</div><div class="kpi-sub">أكوردات / نوتات / ثبات / فوحان...</div></div>
-      <div class="kpi-card clickable alert-red" id="ov_outCard"><div class="kpi-label">فيها حجم خلص (اضغط للتحديث)</div><div class="kpi-value" id="ov_out">—</div><div class="kpi-sub" id="ov_outSub"></div></div>
-      <div class="kpi-card clickable alert" id="ov_lowCard"><div class="kpi-label">قارب على النفاد — بقي حجم وحد (اضغط للمراجعة)</div><div class="kpi-value" id="ov_low">—</div><div class="kpi-sub">قطعة وحدة متبقية — جهّز شراء</div></div>
+      <div class="kpi-card clickable alert-red" id="ov_outCard"><div class="kpi-label">خلص عندها 50 مل (اضغط للتحديث)</div><div class="kpi-value" id="ov_out">—</div><div class="kpi-sub" id="ov_outSub"></div></div>
+      <div class="kpi-card clickable alert" id="ov_lowCard"><div class="kpi-label">قارب على النفاد — 50 مل (اضغط للمراجعة)</div><div class="kpi-value" id="ov_low">—</div><div class="kpi-sub">قطعة وحدة متبقية بحجم 50 مل — جهّز شراء</div></div>
       <div class="kpi-card"><div class="kpi-label">عدد البراندات</div><div class="kpi-value" id="ov_brands">—</div></div>
       <div class="kpi-card"><div class="kpi-label">متوسط سعر 50مل (AED)</div><div class="kpi-value" id="ov_avgPrice">—</div></div>
       <div class="kpi-card"><div class="kpi-label">قيمة المخزون التقديرية (AED)</div><div class="kpi-value" id="ov_stockValue">—</div><div class="kpi-sub">حسب السعر × الكمية المتوفرة</div></div>
@@ -329,9 +329,9 @@
       <div id="stockCategoryWrap" style="display:none;">
         <div class="row" style="margin-bottom:6px; align-items:stretch;">
           <div class="stat-clickable" id="stockCatMissing"><div style="color:var(--muted); font-size:13px;">بياناتها ناقصة</div><b id="stockCatMissingCount" style="font-size:20px; display:block;">—</b></div>
-          <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">فيها حجم مب متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
-          <div class="stat-clickable" id="stockCatLow"><div style="color:var(--muted); font-size:13px;">قارب على النفاد (بقي 1)</div><b id="stockCatLowCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
-          <div class="stat-clickable" id="stockCatIn"><div style="color:var(--muted); font-size:13px;">متوفرة بالكامل</div><b id="stockCatInCount" style="font-size:20px; display:block; color:#1F6B41;">—</b></div>
+          <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">50 مل غير متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
+          <div class="stat-clickable" id="stockCatLow"><div style="color:var(--muted); font-size:13px;">50 مل قارب على النفاد (بقي 1-2)</div><b id="stockCatLowCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
+          <div class="stat-clickable" id="stockCatIn"><div style="color:var(--muted); font-size:13px;">50 مل متوفر</div><b id="stockCatInCount" style="font-size:20px; display:block; color:#1F6B41;">—</b></div>
         </div>
         <small class="hint" style="margin-top:0;">اضغط أي تصنيف فوق تشوف قائمته، أو ابحث باسم العطر تحت مباشرة، أو اختر براند معيّن من القائمة تحت عشان تحصر النتائج فيه بس.</small>
         <div class="static-list" id="stockCategoryList" style="display:none;"></div>
@@ -1727,9 +1727,8 @@ function renderOverview(){
   el("ov_missing").textContent = total ? fmtNum(missingCount) : "—";
 
   const outCount = perfumes.filter(isOutOfStock).length;
-  const outBoth = perfumes.filter(p => stockAsQty(p.stock10) <= 0 && stockAsQty(p.stock50) <= 0).length;
   el("ov_out").textContent = total ? fmtNum(outCount) : "—";
-  el("ov_outSub").textContent = total ? `منها ${outBoth} خلصت بالحجمين كليًا` : "";
+  el("ov_outSub").textContent = "";
 
   const lowCount = perfumes.filter(isLowStock).length;
   el("ov_low").textContent = total ? fmtNum(lowCount) : "—";
@@ -2021,7 +2020,11 @@ function stockAsQty(v){
   if(typeof v === "number") return v;
   return v === false ? 0 : 1;
 }
-function isOutOfStock(p){ return stockAsQty(p.stock10) <= 0 || stockAsQty(p.stock50) <= 0; }
+// 26 سبتمبر 2026: بطلب المستخدم — تنبيهات "خلص/قارب على النفاد" بلوحة التحكم صارت
+// تعتمد على حجم 50 مل فقط (هو الأهم عنده). حجم 10 مل ما يعد يفعّل أي تنبيه بلوحة
+// التحكم حتى لو خلص تمامًا — يبقى فقط شارة "نفذ" بصفحة الموقع نفسها (catalog.js
+// عندها منطقها المستقل، ما لمسناه، فتبقى دقيقة للعميل بغض النظر عن هذا التغيير).
+function isOutOfStock(p){ return stockAsQty(p.stock50) <= 0; }
 // 27 أغسطس 2026: طابع وقت "آخر تحديث" لكل حجم على حدة — يتحدّث فقط لو الكمية
 // فعليًا تغيّرت (يدويًا من لوحة التحكم أو تلقائيًا بعد اعتماد طلب/تسجيل بيع)،
 // عشان ما يتحرك بلا داعي لو المستخدم حفظ نفس الرقم أو عدّل حقول ثانية بالعطر.
@@ -2046,12 +2049,13 @@ function latestStockUpdateLabel(p){
   if(!parts.length) return "";
   return `<div style="font-size:11px;color:var(--muted);margin-top:4px;">🕒 آخر تحديث — ${parts.join(" · ")}</div>`;
 }
-// "قارب على النفاد" — بقي قطعة وحدة بحجم وحد على الأقل (وذاك الحجم لسا مو صفر، يعني لسا متوفر بس على وشك يخلص)
+// "قارب على النفاد" — بقي قطعة وحدة بحجم 50 مل تحديدًا (وذاك الحجم لسا مو صفر، يعني لسا متوفر بس على وشك يخلص)
 // 27 أغسطس 2026: رفعنا العتبة من "1 بالضبط" إلى "أقل من 3" (يعني 1 أو 2) — نفس
 // العتبة المستخدمة بالضبط لبادج "🔥 باقي X فقط" على الموقع الحي (catalog.js).
+// 26 سبتمبر 2026: بطلب المستخدم — صار الفحص بحجم 50 مل فقط (حجم 10 مل ما يهمه).
 function isLowStock(p){
-  const s10 = stockAsQty(p.stock10), s50 = stockAsQty(p.stock50);
-  return (s10 > 0 && s10 < 3) || (s50 > 0 && s50 < 3);
+  const s50 = stockAsQty(p.stock50);
+  return (s50 > 0 && s50 < 3);
 }
 
 let stockCategoryActive = null; // 'missing' | 'out' | 'low' | 'in' | null
