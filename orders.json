@@ -832,7 +832,8 @@
     "phone": "+971 0501919160",
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "bvlgari-splendida-rose-rose-1790441635156-1",
@@ -847,7 +848,8 @@
     "phone": "+971 0501919160",
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "gift-louis-vuitton-les-sables-roses-1790441635156-0",
@@ -864,6 +866,7 @@
     "phone": "+971 0501919160",
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   }
 ]
