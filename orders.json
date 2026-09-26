@@ -735,7 +735,7 @@
     "orderId": "order-1790418500144",
     "source": "admin",
     "paid": true,
-    "status": "shipped"
+    "status": "prep"
   },
   {
     "id": "creed-aventus-1790419478831-0",
