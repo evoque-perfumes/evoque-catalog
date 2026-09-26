@@ -7,6 +7,14 @@
       "qty": 1000,
       "totalPrice": 2.5,
       "note": ""
+    },
+    {
+      "id": "matp_1790453172883",
+      "date": "2026-09-27",
+      "material": "bottle10",
+      "qty": 300,
+      "totalPrice": 0.5,
+      "note": ""
     }
   ]
 }
