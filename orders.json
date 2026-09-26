@@ -833,7 +833,8 @@
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "bvlgari-splendida-rose-rose-1790441635156-1",
@@ -849,7 +850,8 @@
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "gift-louis-vuitton-les-sables-roses-1790441635156-0",
@@ -867,6 +869,7 @@
     "address": ", Villa 20, Um Gafa, Al Ain",
     "orderId": "pend-1790433015967-5118",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   }
 ]
