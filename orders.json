@@ -734,6 +734,7 @@
     "address": "",
     "orderId": "order-1790418500144",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "shipped"
   }
 ]
