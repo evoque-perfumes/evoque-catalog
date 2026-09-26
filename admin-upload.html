@@ -164,6 +164,7 @@
     </div>
     <span class="livepill"><span class="dot2"></span> متصل مباشرة بالموقع الحي</span>
     <button type="button" class="secondary" id="pageRefreshBtn" title="تحديث الصفحة">🔄 تحديث الصفحة</button>
+    <button type="button" class="secondary" id="exportExcelBtn" title="تصدير كل العطور إلى ملف إكسل">📤 تصدير إكسل</button>
   </div>
 
   <nav class="tabs">
@@ -5867,6 +5868,64 @@ document.getElementById("xlsx_importBtn").addEventListener("click", async () => 
     btn.disabled = false;
   }
 });
+
+// ============================================================================
+// تصدير كل العطور لملف إكسل — إضافة 26 سبتمبر 2026
+// ============================================================================
+const GENDER_AR_EXPORT = { men: "رجالي", women: "حريمي", unisex: "للجنسين" };
+
+function exportToExcel(){
+  if(!perfumes || !perfumes.length){
+    alert("ما فيه بيانات عطور محملة بعد. انتظر لين تحمل الصفحة كامل وحاول مرة ثانية.");
+    return;
+  }
+
+  const rows = perfumes.map((p, i) => {
+    const s50 = Number(p.stock50) || 0;
+    const s10 = Number(p.stock10) || 0;
+    const hasImage = !!(p.image && String(p.image).trim());
+    const hasNotes = !!((p.accords && p.accords.trim()) || (p.notesTop && p.notesTop.trim()));
+    return {
+      "#": i + 1,
+      "البراند": p.brand || "",
+      "اسم العطر": p.name || "",
+      "الفئة": GENDER_AR_EXPORT[p.gender] || p.gender || "",
+      "سعر 50ml (ر.ع)": p.price50Om ?? "",
+      "سعر 10ml (ر.ع)": p.price10Om ?? "",
+      "مخزون 50ml": s50,
+      "مخزون 10ml": s10,
+      "إجمالي المخزون": s50 + s10,
+      "الحالة": (s50 + s10) > 0 ? "متوفر" : "غير متوفر",
+      "صورة؟": hasImage ? "نعم" : "لا",
+      "معلومات العطر؟": hasNotes ? "نعم" : "لا",
+    };
+  });
+
+  const missingImageRows = rows.filter(r => r["صورة؟"] === "لا");
+  const missingNotesRows = rows.filter(r => r["معلومات العطر؟"] === "لا");
+  const outOfStockRows = rows.filter(r => r["الحالة"] === "غير متوفر");
+
+  const summaryRows = [
+    { "البند": "إجمالي عدد العطور", "العدد": rows.length },
+    { "البند": "إجمالي عدد البراندات", "العدد": new Set(rows.map(r => r["البراند"])).size },
+    { "البند": "عطور ناقصة الصورة", "العدد": missingImageRows.length },
+    { "البند": "عطور ناقصة معلومات العطر (النوتات)", "العدد": missingNotesRows.length },
+    { "البند": "عطور غير متوفرة إطلاقًا (0 بالحجمين)", "العدد": outOfStockRows.length },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  wb.Workbook = { Views: [{ RTL: true }] };
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryRows), "الملخص");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الكتالوج الكامل");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(missingImageRows), "ناقصين صور");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(missingNotesRows), "ناقصين معلومات العطر");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(outOfStockRows), "غير متوفر");
+
+  const today = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `Evoque_Inventory_${today}.xlsx`);
+}
+
+document.getElementById("exportExcelBtn").addEventListener("click", exportToExcel);
 
 document.getElementById("saveBtn").addEventListener("click", async () => {
   const token = getToken();
