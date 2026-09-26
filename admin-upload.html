@@ -967,9 +967,10 @@
     <div id="xlsxUpdateWrap" style="display:none;">
       <h2>تحديث بيانات عطور موجودة من إكسل</h2>
       <small class="hint" style="margin-top:0;">
-        هذا الوضع <b>يحدّث فقط</b> حقول الأكوردات/النوتات/الثبات/الفوحان للعطور <b>الموجودة أصلًا</b> بالكتالوج
+        هذا الوضع <b>يحدّث فقط</b> حقول الأكوردات/النوتات/الثبات/الفوحان/الموسم للعطور <b>الموجودة أصلًا</b> بالكتالوج
         (يطابق كل صف حسب البراند + اسم العطر) — باقي بيانات العطر (السعر، المخزون، الصورة...) ما تتأثر إطلاقًا.
-        تقدر ترفع مباشرة نفس ملف "بيانات العطور الناقصة" اللي أرسلته لك بالمحادثة بدون أي تعديل عليه.
+        تقدر ترفع مباشرة نفس ملف "بيانات العطور الناقصة" أو "تصنيف الموسم" اللي أرسلته لك بالمحادثة بدون أي تعديل عليه.
+        عمود "الموسم" يقبل قيمة وحدة ("صيفي" أو "شتوي") أو قيمتين مفصولتين بفاصلة ("صيفي، شتوي") لعطر مناسب للموسمين.
         أي خانة تسيبها فاضية بالإكسل، القيمة القديمة المسجّلة بالموقع تضل زي ما هي (ما تنمسح).
       </small>
       <label for="xlsxUpd_fileInput">اختر ملف الإكسل</label>
@@ -1111,13 +1112,11 @@
     </select>
 
     <fieldset>
-      <legend>المواسم المناسبة</legend>
+      <legend>الموسم المناسب</legend>
+      <small class="hint" style="margin-top:0;">الموقع صار يفلتر بالصيفي والشتوي بس (26 سبتمبر 2026). لو العطر مناسب للاثنين، حطّي علامة على الخانتين عشان يظهر بالصفحتين.</small>
       <div class="chkrow">
-        <label><input type="checkbox" class="f_season" value="all"> كل المواسم</label>
-        <label><input type="checkbox" class="f_season" value="summer"> صيف</label>
-        <label><input type="checkbox" class="f_season" value="winter"> شتاء</label>
-        <label><input type="checkbox" class="f_season" value="spring"> ربيع</label>
-        <label><input type="checkbox" class="f_season" value="autumn"> خريف</label>
+        <label><input type="checkbox" class="f_season" value="summer"> ☀️ صيفي</label>
+        <label><input type="checkbox" class="f_season" value="winter" checked> ❄️ شتوي</label>
       </div>
     </fieldset>
 
@@ -4524,7 +4523,7 @@ function resetForm(){
   document.getElementById("f_brand").value = "";
   document.getElementById("f_name").value = "";
   document.getElementById("f_gender").value = "unisex";
-  document.querySelectorAll(".f_season").forEach(cb => cb.checked = false);
+  document.querySelectorAll(".f_season").forEach(cb => cb.checked = (cb.value === "winter"));
   document.querySelectorAll(".f_daynight").forEach(cb => cb.checked = false);
   ["f_price50","f_price10","f_price50Om","f_price10Om","f_price50Before","f_price10Before","f_price50OmBefore","f_price10OmBefore"]
     .forEach(id => document.getElementById(id).value = "");
@@ -6048,8 +6047,18 @@ const XLSX_HEADERS = {
   notesTop: "النوتات EN", notesTopAR: "النوتات AR",
   longevity: "الثبات", sillage: "الفوحان",
 };
-const XLSX_SEASON_MAP = {"الكل":"all","صيف":"summer","شتاء":"winter","ربيع":"spring","خريف":"autumn"};
+const XLSX_SEASON_MAP = {"صيف":"summer","صيفي":"summer","شتاء":"winter","شتوي":"winter"};
 const XLSX_DAYNIGHT_MAP = {"نهاري":"day","ليلي":"night"};
+
+// الموقع صار يفلتر بالصيفي والشتوي بس (26 سبتمبر 2026). الخانة تقبل قيمة وحدة
+// ("صيفي") أو قيمتين مفصولتين بفاصلة ("صيفي، شتوي") لعطر مناسب للاثنين — يظهر
+// حينها بصفحتي الفلتر الاثنين. نرجع null لو الخانة فاضية أو ما فيها قيمة معروفة
+// (وضع التحديث يسيب القيمة القديمة، ووضع إضافة عطر جديد يستخدم افتراضي شتوي).
+function xlsxParseSeasonsCell(v){
+  const tokens = (v||"").toString().split(/[,،]/).map(s => s.trim()).filter(Boolean);
+  const mapped = Array.from(new Set(tokens.map(t => XLSX_SEASON_MAP[t]).filter(Boolean)));
+  return mapped.length ? mapped : null;
+}
 
 function xlsxParseGender(v){
   v = (v||"").toString().trim();
@@ -6101,7 +6110,7 @@ function xlsxProcessRows(rawRows){
     const record = {
       id: slug, brand, name, image: "",
       gender: xlsxParseGender(xlsxGetCell(row,"gender")),
-      seasons: xlsxParseList(xlsxGetCell(row,"seasons"), XLSX_SEASON_MAP),
+      seasons: xlsxParseSeasonsCell(xlsxGetCell(row,"seasons")) || ["winter"],
       daynight: xlsxParseList(xlsxGetCell(row,"daynight"), XLSX_DAYNIGHT_MAP),
       price50: xlsxParseNum(xlsxGetCell(row,"price50")), price10: xlsxParseNum(xlsxGetCell(row,"price10")),
       price50Om: xlsxParseNum(xlsxGetCell(row,"price50Om")), price10Om: xlsxParseNum(xlsxGetCell(row,"price10Om")),
@@ -6226,6 +6235,7 @@ const XLSX_UPDATE_HEADERS = {
   accordsAR: "المكونات (عربي)", accords: "المكونات (English)",
   notesTopAR: "أهم النوتس (عربي)", notesTop: "أهم النوتس (English)",
   longevity: "الثبات", sillage: "الفوحان",
+  seasons: "الموسم",
 };
 function xlsxUpdGetCell(row, key){
   const targetHeader = XLSX_UPDATE_HEADERS[key];
@@ -6260,6 +6270,10 @@ function xlsxProcessUpdateRows(rawRows){
       const v = (xlsxUpdGetCell(row,key)||"").toString().trim();
       if(v) patch[key] = v;
     });
+    // عمود "الموسم" — يقبل قيمة وحدة ("صيفي") أو قيمتين مفصولتين بفاصلة ("صيفي، شتوي")
+    // لعطر مناسب للموسمين، فيظهر حينها بصفحتي الفلتر. خانة فاضية أو غير مفهومة = تجاهل بصمت.
+    const seasonsPatch = xlsxParseSeasonsCell(xlsxUpdGetCell(row,"seasons"));
+    if(seasonsPatch) patch.seasons = seasonsPatch;
     if(Object.keys(patch).length === 0){
       return { valid:false, reason:"ما فيه أي خانة معبّاة لتحديثها بهذا الصف", rowNum:i+2, brand, name };
     }
@@ -6283,7 +6297,12 @@ function renderXlsxUpdPreview(){
   const listBox = document.getElementById("xlsxUpd_previewList");
   if(valid.length > 0){
     listBox.style.display = "block";
-    listBox.innerHTML = valid.map(r => `<div class="dropdown-item"><span class="name">${r.brand} — ${r.name} — سيحدّث: ${Object.keys(r.patch).join("، ")}</span></div>`).join("");
+    const FIELD_LABELS_AR = { accordsAR:"المكونات (عربي)", accords:"المكونات (English)", notesTopAR:"النوتس (عربي)", notesTop:"النوتس (English)", longevity:"الثبات", sillage:"الفوحان", seasons:"الموسم" };
+    const SEASON_LABEL = { summer:"صيفي", winter:"شتوي" };
+    listBox.innerHTML = valid.map(r => {
+      const fieldsTxt = Object.keys(r.patch).map(k => k === "seasons" ? `الموسم (${r.patch.seasons.map(s=>SEASON_LABEL[s]||s).join("+")})` : FIELD_LABELS_AR[k] || k).join("، ");
+      return `<div class="dropdown-item"><span class="name">${r.brand} — ${r.name} — سيحدّث: ${fieldsTxt}</span></div>`;
+    }).join("");
   } else {
     listBox.style.display = "none";
     listBox.innerHTML = "";
