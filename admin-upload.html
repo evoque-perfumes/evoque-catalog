@@ -999,7 +999,52 @@
       (نفس منطق "الأكثر مبيعًا فعليًا") لكن تكلفتها معروضة لحالها تحت.
     </small>
 
-    <div class="ov-section-title">نظرة عامة على الأرباح</div>
+    <div class="ov-section-title">📦 مشتريات المواد الخام والمخزون</div>
+    <small class="hint" style="margin-top:0;">
+      سجّلي هنا كل عملية شراء (زجاجات، كحول، تغليف) — النظام يحسب متوسط سعر الوحدة تلقائيًا من كل مشترياتك، ويطرح
+      منه اللي استُهلك فعليًا بالطلبات الحقيقية المعتمدة، عشان تعرفي كم باقي عندك بالمخزون بأي لحظة (زي "كم زجاجة فاضية
+      باقية"). تقدير الاستهلاك: كل قطعة مباعة = زجاجة وحدة من حجمها + وحدة تغليف وحدة + كحول بمقدار حجم القطعة تقريبًا
+      (تقدير تقريبي لعدم معرفة نسبة الزيت بالضبط بكل عطر — قابل للتعديل يدويًا لاحقًا لو احتجتِ دقة أكبر).
+      <b>ملاحظة:</b> تكلفة الزيت العطري لكل عطر تبقى تُدخل من نموذج "✏️ تعديل عطر" لحاله (لأن كل عطر له زيت مختلف السعر).
+    </small>
+    <div class="kpi-grid" id="mat_kpiGrid"></div>
+
+    <div class="row" style="margin-top:16px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="flex:1; min-width:160px;">
+        <label for="mat_material">المادة</label>
+        <select id="mat_material">
+          <option value="bottle50">زجاجة 50 مل</option>
+          <option value="bottle10">زجاجة 10 مل</option>
+          <option value="alcohol">الكحول (مل)</option>
+          <option value="packaging">مواد التغليف (علبة/كيس)</option>
+        </select>
+      </div>
+      <div class="field" style="min-width:110px;">
+        <label for="mat_qty">الكمية المشتراة</label>
+        <input type="number" id="mat_qty" min="0" step="1">
+      </div>
+      <div class="field" style="min-width:130px;">
+        <label for="mat_totalPrice">السعر الإجمالي (AED)</label>
+        <input type="number" id="mat_totalPrice" min="0" step="0.01">
+      </div>
+      <div class="field" style="min-width:150px;">
+        <label for="mat_date">التاريخ</label>
+        <input type="date" id="mat_date">
+      </div>
+      <div class="field" style="flex:2; min-width:180px;">
+        <label for="mat_note">ملاحظة (اختياري)</label>
+        <input type="text" id="mat_note" placeholder="مثال: اسم المورّد">
+      </div>
+      <button type="button" id="mat_addBtn">➕ سجّل عملية الشراء</button>
+    </div>
+    <div class="status" id="mat_statusBox"></div>
+
+    <div style="margin-top:14px;">
+      <small class="hint" style="margin-top:0;">سجل آخر المشتريات (الأحدث أول):</small>
+      <div class="static-list" id="mat_historyList"></div>
+    </div>
+
+    <div class="ov-section-title" style="margin-top:26px;">نظرة عامة على الأرباح</div>
     <div id="cost_empty" class="ov-empty-note" style="display:none;">
       ما فيه طلبات محتسبة بعد. لما تُعتمد أول طلبية من تبويب "🧾 الطلبات الجديدة"، الأرقام هنا بتظهر تلقائيًا.
     </div>
@@ -1248,6 +1293,7 @@ const WISHLIST_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO
 const PENDING_ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/pending-orders.json?t=` + Date.now();
 const DISTRIBUTIONS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/distributions.json?t=` + Date.now();
 const SHIPPING_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/shipping-rates.json?t=` + Date.now();
+const MATERIALS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/materials.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
@@ -1257,6 +1303,7 @@ const WISHLIST_JSON_PATH = "wishlist.json";
 const PENDING_ORDERS_JSON_PATH = "pending-orders.json";
 const DISTRIBUTIONS_JSON_PATH = "distributions.json";
 const SHIPPING_JSON_PATH = "shipping-rates.json";
+const MATERIALS_JSON_PATH = "materials.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
 let brandFilterValue = "all"; // فلتر البراند المختار من القائمة المنسدلة (يشترك فيه البحث + المخزون)
@@ -1457,6 +1504,7 @@ let reviewsOrderContext = null; // {orderId, customer, date} لو التقييم
 let reviewsOrdersExpandedKey = null; // رقم الطلب المفتوح حاليًا بقائمة "طلبات العملاء" (null = كلها مطوية)
 let reviewsOrdersShowAll = false; // false = نخفي الطلبات اللي كل عطورها اتقيّمت
 let salesData = [];          // آخر نسخة معروفة من orders.json (مبيعات واتساب المسجّلة يدويًا)
+let materialsData = { purchases: [] }; // آخر نسخة معروفة من materials.json (مشتريات المواد الخام)
 let salesSelected = null;    // العطر المختار حاليًا بوضع "المبيعات"
 let siteOrders = null;       // طلبات نموذج الموقع (Google Sheet) — null لين يتحدّث أول مرة
 let bankInfoData = { AE:{}, OM:{} }; // آخر نسخة معروفة من bank-info.json
@@ -1541,6 +1589,19 @@ async function loadOrders(){
     if(!Array.isArray(salesData)) salesData = [];
   }catch(e){
     salesData = []; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
+  }
+  renderOverview();
+}
+
+// ===== تحميل مشتريات المواد الخام (materials.json) — نفس منطق loadOrders بالضبط =====
+async function loadMaterials(){
+  try{
+    const res = await fetch(MATERIALS_JSON_RAW_URL, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const obj = await res.json();
+    materialsData = (obj && Array.isArray(obj.purchases)) ? obj : { purchases: [] };
+  }catch(e){
+    materialsData = { purchases: [] }; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
   }
   renderOverview();
 }
@@ -3063,7 +3124,10 @@ function setMode(newMode){
     document.getElementById("quickPhotoPanel").style.display = "none";
   }
   if(mode === "overview") renderOverview();
-  if(mode === "cost") renderCostPanel();
+  if(mode === "cost"){
+    if(!document.getElementById("mat_date").value) document.getElementById("mat_date").value = todayStr();
+    renderCostPanel();
+  }
   if(mode === "sales"){
     document.getElementById("sl_addItemWrap").style.display = "none";
     document.getElementById("sl_pickHint").style.display = "block";
@@ -4673,8 +4737,133 @@ function renderCostManageList(filterText){
   });
 }
 
+// ===================================================================
+// 📦 مشتريات المواد الخام والمخزون (26 سبتمبر 2026)
+// نفس روح نظام "التوزيعات" (متوسط سعر مرجّح من كل المشتريات) بس مبسّط لأربع
+// مواد مشتركة بين كل العطور — الزيت العطري يبقى بره هذا النظام لأنه يختلف
+// سعره لكل عطر لحاله (يُدخل من نموذج تعديل العطر مباشرة).
+// ===================================================================
+const MATERIALS_DEF = {
+  bottle50: { labelAr: "زجاجة 50 مل", unit: "قطعة", lowStockAt: 30 },
+  bottle10: { labelAr: "زجاجة 10 مل", unit: "قطعة", lowStockAt: 30 },
+  alcohol: { labelAr: "الكحول", unit: "مل", lowStockAt: 2000 },
+  packaging: { labelAr: "مواد التغليف (علبة/كيس)", unit: "قطعة", lowStockAt: 30 },
+};
+
+function materialPurchasesOf(material){
+  return materialsData.purchases.filter(p => p.material === material);
+}
+function materialWeightedAvgCost(material){
+  const list = materialPurchasesOf(material);
+  const totalQty = list.reduce((s,p) => s + (Number(p.qty)||0), 0);
+  const totalSpent = list.reduce((s,p) => s + (Number(p.totalPrice)||0), 0);
+  return totalQty > 0 ? totalSpent / totalQty : 0;
+}
+function materialTotalPurchased(material){
+  return materialPurchasesOf(material).reduce((s,p) => s + (Number(p.qty)||0), 0);
+}
+function materialTotalSpent(material){
+  return materialPurchasesOf(material).reduce((s,p) => s + (Number(p.totalPrice)||0), 0);
+}
+// كمية كل مادة استُهلكت فعليًا حسب الطلبات الحقيقية المعتمدة (نفس بيانات تبويب الأرباح،
+// بدون هدايا العروض المجانية) — تقدير: قطعة مباعة = زجاجة حجمها + تغليف + كحول بمقدار حجمها
+function materialTotalUsed(material){
+  const nonGift = (salesData||[]).filter(o => !o.isGift);
+  if(material === "bottle50") return nonGift.filter(o => Number(o.size)===50).reduce((s,o)=>s+(Number(o.qty)||0),0);
+  if(material === "bottle10") return nonGift.filter(o => Number(o.size)===10).reduce((s,o)=>s+(Number(o.qty)||0),0);
+  if(material === "packaging") return nonGift.reduce((s,o)=>s+(Number(o.qty)||0),0);
+  if(material === "alcohol") return nonGift.reduce((s,o)=>s+(Number(o.qty)||0)*(Number(o.size)||0),0);
+  return 0;
+}
+function materialCurrentStock(material){
+  return materialTotalPurchased(material) - materialTotalUsed(material);
+}
+
+function renderMaterialsSection(){
+  const grid = document.getElementById("mat_kpiGrid");
+  if(!grid) return;
+  grid.innerHTML = Object.keys(MATERIALS_DEF).map(key => {
+    const def = MATERIALS_DEF[key];
+    const stock = materialCurrentStock(key);
+    const low = stock < def.lowStockAt;
+    const avgCost = materialWeightedAvgCost(key);
+    return `<div class="kpi-card ${low ? "alert-red" : "good"}">
+      <div class="kpi-label">${low ? "⚠️ " : ""}${def.labelAr} — الباقي بالمخزون</div>
+      <div class="kpi-value">${fmtNum(stock)} ${def.unit}</div>
+      <div class="kpi-sub">متوسط سعر الوحدة: ${avgCost.toFixed(3)} AED — إجمالي المصروف: ${fmtNum(materialTotalSpent(key))} AED</div>
+    </div>`;
+  }).join("");
+
+  const hist = materialsData.purchases.slice().sort((a,b) => (b.date||"").localeCompare(a.date||"") || (b.id||"").localeCompare(a.id||""));
+  const histBox = document.getElementById("mat_historyList");
+  if(!hist.length){
+    histBox.innerHTML = `<div class="ov-empty-note">ما فيه أي عملية شراء مسجّلة بعد — سجّلي أول عملية شراء من الفورم فوق.</div>`;
+  } else {
+    histBox.innerHTML = hist.map(p => `
+      <div class="sale-row">
+        <div class="sale-row-top">
+          <span class="sale-row-name">${p.date} — ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : p.material} × ${fmtNum(p.qty)} ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].unit : ""}</span>
+          <span class="sale-row-amount">${fmtNum(p.totalPrice)} AED</span>
+        </div>
+        <div class="sale-row-meta">
+          سعر الوحدة: ${(Number(p.totalPrice)/Math.max(1,Number(p.qty))).toFixed(3)} AED${p.note ? " — " + p.note : ""}
+          <button type="button" class="secondary mat-delete-btn" data-id="${p.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+        </div>
+      </div>`).join("");
+    histBox.querySelectorAll(".mat-delete-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if(!confirm("تأكيد حذف عملية الشراء هذي؟")) return;
+        const token = getToken();
+        if(!token){ document.getElementById("mat_statusBox").className = "status show err"; document.getElementById("mat_statusBox").textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+        try{
+          materialsData = await updateMaterialsJsonWithRetry(token, (obj) => {
+            return { ...obj, purchases: obj.purchases.filter(x => x.id !== btn.dataset.id) };
+          }, "Delete material purchase entry");
+          renderCostPanel();
+        }catch(e){
+          const box = document.getElementById("mat_statusBox");
+          box.className = "status show err";
+          box.textContent = "صار خطأ أثناء الحذف: " + e.message;
+        }
+      });
+    });
+  }
+}
+
+document.getElementById("mat_addBtn").addEventListener("click", async () => {
+  const token = getToken();
+  const box = document.getElementById("mat_statusBox");
+  if(!token){ box.className = "status show err"; box.textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+  const material = document.getElementById("mat_material").value;
+  const qty = parseFloat(document.getElementById("mat_qty").value);
+  const totalPrice = parseFloat(document.getElementById("mat_totalPrice").value);
+  const date = document.getElementById("mat_date").value || todayStr();
+  const note = document.getElementById("mat_note").value.trim();
+  if(!qty || qty <= 0){ box.className = "status show err"; box.textContent = "اكتبي الكمية المشتراة أول."; return; }
+  if(!totalPrice || totalPrice <= 0){ box.className = "status show err"; box.textContent = "اكتبي السعر الإجمالي أول."; return; }
+  const btn = document.getElementById("mat_addBtn");
+  btn.disabled = true;
+  try{
+    box.className = "status show info"; box.textContent = "جارِ الحفظ...";
+    const entry = { id: "matp_" + Date.now(), date, material, qty, totalPrice, note };
+    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => {
+      return { ...obj, purchases: [...obj.purchases, entry] };
+    }, `Log material purchase: ${MATERIALS_DEF[material].labelAr} x${qty}`);
+    document.getElementById("mat_qty").value = "";
+    document.getElementById("mat_totalPrice").value = "";
+    document.getElementById("mat_note").value = "";
+    box.className = "status show ok"; box.textContent = "تم تسجيل عملية الشراء بنجاح.";
+    renderCostPanel();
+  }catch(e){
+    box.className = "status show err"; box.textContent = "صار خطأ: " + e.message;
+  }finally{
+    btn.disabled = false;
+  }
+});
+
 function renderCostPanel(){
   if(!document.getElementById("cost_units")) return; // الصفحة لسا ما خلصت تحميل
+  renderMaterialsSection();
   const report = computeProfitReport();
   document.getElementById("cost_empty").style.display = report.unitsCount ? "none" : "block";
   document.getElementById("cost_kpiGrid").style.display = report.unitsCount ? "grid" : "none";
@@ -5094,6 +5283,59 @@ async function updateReviewsJsonWithRetry(token, mutateFn, commitMsg, attempt){
     throw e;
   }
   return newList;
+}
+
+// ===== قراءة/كتابة materials.json (مشتريات المواد الخام: زجاجات/كحول/تغليف — 26 سبتمبر 2026) =====
+// نفس منطق reviews.json بالضبط، بس المحتوى كائن {purchases:[...]} مو مصفوفة مباشرة.
+async function getMaterialsJsonWithSha(token){
+  const res = await fetch(`${API_BASE}/${MATERIALS_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { obj: { purchases: [] }, sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة materials.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  let obj;
+  try{ obj = JSON.parse(base64ToUtf8(info.content)); }catch(e){ obj = { purchases: [] }; }
+  if(!obj || !Array.isArray(obj.purchases)) obj = { purchases: [] };
+  return { obj, sha: info.sha };
+}
+
+async function putMaterialsJson(obj, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(obj, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${MATERIALS_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updateMaterialsJsonWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { obj, sha } = await getMaterialsJsonWithSha(token);
+  const newObj = mutateFn(obj);
+  try{
+    await putMaterialsJson(newObj, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateMaterialsJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newObj;
 }
 
 // ===== قراءة/كتابة orders.json (مبيعات واتساب المسجّلة يدويًا) — نفس منطق reviews.json بالضبط =====
@@ -6537,6 +6779,7 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
 loadData();
 loadReviews();
 loadOrders();
+loadMaterials();
 loadPendingOrdersIntoPanel(); // تحميل مبكر بس عشان يظهر رقم الطلبات الجديدة بالتبويب فورًا من غير ما ينتظر المستخدم يضغطه
 loadAppsScriptSettings();
 if(document.getElementById("ov_appsUrl").value.trim()){
