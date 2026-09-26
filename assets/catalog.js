@@ -301,6 +301,7 @@ const I18N = {
     outOfStock: "نفذ",
     allOutOfStock: "نفذت الكمية",
     lowStockNote: "🔥 باقي {n} فقط!",
+    maxStockNote: "وصلت للحد الأقصى المتوفر ({n})",
     wishlistAddTitle: "أضف للمفضلة",
     wishlistRemoveTitle: "إزالة من المفضلة",
     add: "أضف للسلة",
@@ -477,6 +478,7 @@ const I18N = {
     outOfStock: "out of stock",
     allOutOfStock: "Out of stock",
     lowStockNote: "🔥 Only {n} left!",
+    maxStockNote: "Reached maximum available stock ({n})",
     wishlistAddTitle: "Add to wishlist",
     wishlistRemoveTitle: "Remove from wishlist",
     add: "Add to cart",
@@ -2018,23 +2020,32 @@ function renderGrid(explicitList){
       const entry = cart[p.id];
       if(entry){
         // العطر بالسلة أصلًا — نعرض عدّاد الكمية (+/-) بدل زر الإضافة
+        // 26 سبتمبر 2026: نمنع تجاوز الكمية المتوفرة فعليًا (stock) لهذا الحجم —
+        // كان الزر يسمح بالزيادة بلا حدود وهذا سبب طلب عميل بكمية أكبر من المخزون.
+        const maxQty = Number(p["stock" + entry.size]) || 0;
+        const atMax = entry.qty >= maxQty;
         actionArea.innerHTML = `
           <div class="qty-stepper">
             <button type="button" class="qty-minus" aria-label="-">−</button>
             <div class="qty-mid">${svgIcon("ic-check")}<span>${entry.qty} ${t.inCartLabel}</span></div>
-            <button type="button" class="qty-plus" aria-label="+">+</button>
-          </div>`;
+            <button type="button" class="qty-plus" aria-label="+" ${atMax ? "disabled" : ""}>+</button>
+          </div>
+          ${atMax ? `<div style="font-size:9px;color:#c0475a;font-weight:700;margin-top:2px;">${t.maxStockNote.replace("{n}", maxQty)}</div>` : ""}`;
         actionArea.querySelector(".qty-minus").onclick = ()=>{
           if(entry.qty > 1){ entry.qty -= 1; }
           else { delete cart[p.id]; }
           renderActionArea();
           renderCart();
         };
-        actionArea.querySelector(".qty-plus").onclick = ()=>{
-          entry.qty += 1;
-          renderActionArea();
-          renderCart();
-        };
+        const plusBtn = actionArea.querySelector(".qty-plus");
+        if(plusBtn){
+          plusBtn.onclick = ()=>{
+            if(entry.qty >= maxQty) return;
+            entry.qty += 1;
+            renderActionArea();
+            renderCart();
+          };
+        }
       } else {
         const addBtn = document.createElement("button");
         addBtn.className = "add-btn";
@@ -2067,7 +2078,13 @@ function renderGrid(explicitList){
         bottom.querySelectorAll(".size-pill").forEach(x=>x.classList.remove("active"));
         pill.classList.add("active");
         // لو العطر أصلًا بالسلة، تغيير المقاس ينقل نفس الكمية للمقاس الجديد
-        if(cart[p.id]) cart[p.id].size = selectedSize;
+        // 26 سبتمبر 2026: مع حد أقصى = المخزون المتوفر للمقاس الجديد، حتى ما تتجاوز الكمية المخزون
+        if(cart[p.id]){
+          cart[p.id].size = selectedSize;
+          const maxQ = Number(p["stock" + selectedSize]) || 0;
+          if(cart[p.id].qty > maxQ) cart[p.id].qty = maxQ;
+        }
+        renderActionArea();
         renderCart();
       };
     });
@@ -2369,24 +2386,29 @@ function renderCartModal(){
     </div>`;
   }
 
-  body.innerHTML = offerBannerHtml + items.map(i => `
+  body.innerHTML = offerBannerHtml + items.map(i => {
+    const maxQty = Number(i.p["stock" + i.size]) || 0;
+    const atMax = i.qty >= maxQty;
+    return `
     <div class="cart-modal-item" data-id="${i.id}">
       ${i.p.image ? `<img src="${i.p.image}" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:var(--bg-soft);flex:none;"></div>`}
       <div class="ci-info">
         <div class="ci-brand">${toTitleCase(i.p.brand)}</div>
         <div class="ci-name">${toTitleCase(i.p.name)}</div>
         <div class="ci-meta">${i.size}ml · ${i.unitPrice != null ? `${i.unitPrice} ${cur}` : t.askPrice}${i.lineTotal != null ? ` = <b>${i.lineTotal} ${cur}</b>` : ""}</div>
+        ${atMax ? `<div style="font-size:9px;color:#c0475a;font-weight:700;">${t.maxStockNote.replace("{n}", maxQty)}</div>` : ""}
       </div>
       <div class="ci-actions">
         <div class="qty-stepper">
           <button type="button" class="qty-minus" aria-label="-">−</button>
           <div class="qty-mid">${i.qty}</div>
-          <button type="button" class="qty-plus" aria-label="+">+</button>
+          <button type="button" class="qty-plus" aria-label="+" ${atMax ? "disabled" : ""}>+</button>
         </div>
         <button type="button" class="remove-btn" aria-label="${t.removeItem}">${svgIcon("ic-trash")}</button>
       </div>
     </div>
-  `).join("");
+  `;
+  }).join("");
 
   body.querySelectorAll(".cart-modal-item").forEach(row=>{
     const id = row.dataset.id;
@@ -2397,6 +2419,10 @@ function renderCartModal(){
     };
     row.querySelector(".qty-plus").onclick = ()=>{
       if(!cart[id]) return;
+      // 26 سبتمبر 2026: نفس حد المخزون المطبّق على زر البطاقة، هنا في نافذة السلة كمان
+      const prod = perfumes.find(x => x.id === id);
+      const maxQty = prod ? (Number(prod["stock" + cart[id].size]) || 0) : Infinity;
+      if(cart[id].qty >= maxQty) return;
       cart[id].qty += 1;
       renderCart(); renderGrid();
     };
