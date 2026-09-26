@@ -816,6 +816,7 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790421836429",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   }
 ]
