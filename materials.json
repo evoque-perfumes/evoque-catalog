@@ -23,6 +23,14 @@
       "qty": 20000,
       "totalPrice": 300,
       "note": ""
+    },
+    {
+      "id": "matp_1790453199622",
+      "date": "2026-09-27",
+      "material": "packaging",
+      "qty": 500,
+      "totalPrice": 2,
+      "note": ""
     }
   ]
 }
