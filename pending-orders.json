@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "orderId": "pend-1790433015967-5118",
+    "receivedAt": "2026-09-26T14:30:15.967Z",
+    "status": "pending",
+    "source": "form",
+    "lang": "ar",
+    "name": "Hamda",
+    "phone": "0501919160",
+    "email": "",
+    "country": "الإمارات",
+    "emirateOrWilayat": "أبوظبي",
+    "deliveryMethod": "",
+    "address": ", Villa 20, Um Gafa, Al Ain",
+    "notes": "",
+    "currency": "د.إ",
+    "paymentMethod": "تحويل بنكي",
+    "subtotal": 150,
+    "shippingFee": 25,
+    "shippingFree": false,
+    "tabbyFee": 0,
+    "total": 175,
+    "offers": "هدية مجانية (عطر 10مل أو معطر سيارة)",
+    "items": [
+      {
+        "perfumeId": "van-cleef-arpels-rose-rouge",
+        "brand": "Van Cleef & Arpels",
+        "name": "Rose Rouge",
+        "size": 50,
+        "qty": 3,
+        "unitPrice": 50,
+        "lineTotal": 150
+      }
+    ]
+  }
+]
