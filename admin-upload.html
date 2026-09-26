@@ -184,20 +184,44 @@
   </nav>
 
   <div class="panel" id="tokenPanel">
-    <h2>مفتاح الدخول (مرة وحدة بكل جلسة)</h2>
-    <label for="tokenInput">GitHub Personal Access Token</label>
-    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-    <button type="button" class="toggle-token" id="toggleTokenBtn">إظهار المفتاح</button>
-    <small class="hint">
-      يبقى بمتصفحك فقط، ما يترسل لأي مكان غير GitHub مباشرة. ما عندك مفتاح؟ من حسابك بـ GitHub:
-      Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token —
-      اختر ريبو evoque-catalog بس، وامنحه صلاحية "Contents: Read and write".
-    </small>
-    <div class="row">
-      <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="rememberToken" style="width:auto; margin:0;"> احفظ المفتاح بهذا المتصفح (اختياري)
-      </label>
+    <h2>تسجيل الدخول</h2>
+    <label for="adminPasswordInput">كلمة المرور</label>
+    <input type="password" id="adminPasswordInput" placeholder="كلمة المرور" autocomplete="current-password">
+    <div class="row" style="margin-top:8px;">
+      <button type="button" id="adminLoginBtn">دخول</button>
+      <button type="button" id="adminLogoutBtn" style="display:none;">تسجيل خروج من هذا الجهاز</button>
     </div>
+    <small class="hint" id="adminLoginStatus"></small>
+    <small class="hint">
+      أول مرة؟ لازم تضيف كلمة مرور قوية (تختارها انت بنفسك، بدون ما تشاركها مع
+      أي أحد) بمشروع
+      order-queue-apps-script
+      بجوجل (⚙️ Project Settings ← Script Properties ← أضف خاصية
+      ADMIN_PASSWORD)
+      قبل ما تقدر تسجّل دخول من هنا. هذا الرابط مفتوح لأي شخص بالإنترنت، فكلمة
+      المرور لازم تكون طويلة وصعبة التخمين فعليًا (مو تاريخ ميلاد أو اسم) —
+      فيه قفل تلقائي 24 ساعة بعد 5 محاولات خاطئة كحماية إضافية.
+    </small>
+
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer; color:#8B8073; font-size:13px;">خيارات متقدمة: إدخال مفتاح GitHub مباشرة</summary>
+      <div style="margin-top:10px;">
+        <label for="tokenInput">GitHub Personal Access Token</label>
+        <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+        <button type="button" class="toggle-token" id="toggleTokenBtn">إظهار المفتاح</button>
+        <small class="hint">
+          يبقى بمتصفحك فقط، ما يترسل لأي مكان غير GitHub مباشرة. تستخدم هذا الخيار بس لو
+          تسجيل الدخول بكلمة المرور ما اشتغل لأي سبب. ما عندك مفتاح؟ من حسابك بـ GitHub:
+          Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token —
+          اختر ريبو evoque-catalog بس، وامنحه صلاحية "Contents: Read and write".
+        </small>
+        <div class="row">
+          <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="rememberToken" style="width:auto; margin:0;"> احفظ المفتاح بهذا المتصفح (اختياري)
+          </label>
+        </div>
+      </div>
+    </details>
   </div>
 
   <div class="panel" id="overviewPanel">
@@ -4543,7 +4567,12 @@ document.getElementById("toggleTokenBtn").addEventListener("click", () => {
 window.addEventListener("DOMContentLoaded", () => {
   try{
     const saved = localStorage.getItem("evoque_admin_token");
-    if(saved){ document.getElementById("tokenInput").value = saved; document.getElementById("rememberToken").checked = true; }
+    if(saved){
+      document.getElementById("tokenInput").value = saved;
+      document.getElementById("rememberToken").checked = true;
+      document.getElementById("adminLogoutBtn").style.display = "";
+      adminLoginStatus("✅ مسجّل دخول بهذا الجهاز", "ok");
+    }
   }catch(e){}
   setMode("overview");
 });
@@ -4555,6 +4584,62 @@ document.getElementById("rememberToken").addEventListener("change", (e) => {
 });
 document.getElementById("tokenInput").addEventListener("change", () => {
   try{ if(document.getElementById("rememberToken").checked) localStorage.setItem("evoque_admin_token", getToken()); }catch(e){}
+});
+
+// ===== تسجيل الدخول بكلمة مرور (17 سبتمبر 2026) =====
+// نفس رابط order-queue-apps-script الموجود أصلًا بـassets/catalog.js
+// (ORDER_QUEUE_ENDPOINT) — أضفنا لهذا السكربت بالذات doGet جديد يتحقق من كلمة
+// المرور ويرجّع GITHUB_TOKEN المخزّن بـScript Properties لو صحيحة. شوف الشرح
+// الكامل بأعلى ملف order-queue-apps-script/Code.gs.
+const ADMIN_LOGIN_ENDPOINT = "https://script.google.com/macros/s/AKfycbxXrXt26AgddAb5kGWzUtUM34CfM_SbMw6Q27SB2nAgRBmCztsB62IpISya-ird3o2I/exec";
+
+function adminLoginStatus(msg, type){
+  const el = document.getElementById("adminLoginStatus");
+  el.textContent = msg;
+  el.style.color = type === "ok" ? "#1F6B41" : (type === "err" ? "#B3261E" : "");
+}
+
+async function doAdminLogin(){
+  const pwInput = document.getElementById("adminPasswordInput");
+  const password = pwInput.value;
+  if(!password){ adminLoginStatus("اكتب كلمة المرور أول.", "err"); return; }
+  const btn = document.getElementById("adminLoginBtn");
+  btn.disabled = true;
+  adminLoginStatus("جارِ تسجيل الدخول...", "");
+  try{
+    const url = `${ADMIN_LOGIN_ENDPOINT}?action=adminLogin&password=${encodeURIComponent(password)}`;
+    const res = await fetch(url, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    if(!data.token) throw new Error("رد غير متوقع من السكربت");
+
+    const tokenInput = document.getElementById("tokenInput");
+    tokenInput.value = data.token;
+    tokenInput.dispatchEvent(new Event("input"));
+    tokenInput.dispatchEvent(new Event("change"));
+    document.getElementById("rememberToken").checked = true;
+    try{ localStorage.setItem("evoque_admin_token", data.token); }catch(e){}
+
+    pwInput.value = "";
+    document.getElementById("adminLogoutBtn").style.display = "";
+    adminLoginStatus("✅ تم تسجيل الدخول", "ok");
+  }catch(e){
+    adminLoginStatus("ما قدرت أسجّل الدخول: " + e.message + " — تأكد من كلمة المرور، أو استخدم خيار المفتاح المباشر تحت للطوارئ.", "err");
+  }finally{
+    btn.disabled = false;
+  }
+}
+document.getElementById("adminLoginBtn").addEventListener("click", doAdminLogin);
+document.getElementById("adminPasswordInput").addEventListener("keydown", (e) => {
+  if(e.key === "Enter") doAdminLogin();
+});
+document.getElementById("adminLogoutBtn").addEventListener("click", () => {
+  try{ localStorage.removeItem("evoque_admin_token"); }catch(e){}
+  document.getElementById("tokenInput").value = "";
+  document.getElementById("rememberToken").checked = false;
+  document.getElementById("adminLogoutBtn").style.display = "none";
+  adminLoginStatus("تم تسجيل الخروج من هذا الجهاز.", "");
 });
 
 function updateSaveBtnState(){
