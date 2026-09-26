@@ -647,7 +647,8 @@
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "gift-bvlgari-tygar-1789412239076-0",
@@ -665,7 +666,8 @@
     "address": "عجمان العالية",
     "orderId": "pend-1789318167421-9998",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "dolce-gabbana-light-blue-1789811321416-0",
