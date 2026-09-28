@@ -821,7 +821,8 @@
     "address": "",
     "orderId": "order-1790419478831",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "amouage-purpose-50-1790621250717-1",
@@ -837,7 +838,8 @@
     "address": "",
     "orderId": "order-1790419478831",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   },
   {
     "id": "oman-luxury-wanderlust-1790621250717-2",
@@ -853,6 +855,7 @@
     "address": "",
     "orderId": "order-1790419478831",
     "source": "admin",
-    "paid": true
+    "paid": true,
+    "status": "received"
   }
 ]
