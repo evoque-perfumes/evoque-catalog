@@ -820,7 +820,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790419478831",
-    "source": "admin"
+    "source": "admin",
+    "status": "received"
   },
   {
     "id": "amouage-purpose-50-1790621213453-1",
@@ -835,7 +836,8 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790419478831",
-    "source": "admin"
+    "source": "admin",
+    "status": "received"
   },
   {
     "id": "oman-luxury-wanderlust-1790621213453-2",
@@ -850,6 +852,7 @@
     "phone": "",
     "address": "",
     "orderId": "order-1790419478831",
-    "source": "admin"
+    "source": "admin",
+    "status": "received"
   }
 ]
