@@ -751,7 +751,8 @@
     "address": "",
     "orderId": "order-1790419478831",
     "source": "admin",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "amouage-purpose-50-1790419478831-1",
@@ -767,7 +768,8 @@
     "address": "",
     "orderId": "order-1790419478831",
     "source": "admin",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "oman-luxury-wanderlust-1790419478831-2",
@@ -783,7 +785,8 @@
     "address": "",
     "orderId": "order-1790419478831",
     "source": "admin",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "gift-amouage-guidance-46-1790419478832-0",
@@ -801,7 +804,8 @@
     "address": "",
     "orderId": "order-1790419478831",
     "source": "admin",
-    "status": "prep"
+    "status": "prep",
+    "paid": true
   },
   {
     "id": "nishane-favonius-1790421836429-0",
