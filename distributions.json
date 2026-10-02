@@ -7,12 +7,12 @@
   },
   "stock": {
     "black": 287,
-    "white": 262,
+    "white": 247,
     "bottlesEmpty": 80,
-    "bottlesReady": 749,
-    "bagsPerfume": 749,
+    "bottlesReady": 734,
+    "bagsPerfume": 734,
     "bagsPackaging": 0,
-    "pins": 749,
+    "pins": 734,
     "boxes": 0,
     "oilG": 0,
     "alcoholMl": 10000
@@ -281,6 +281,29 @@
       "emirate": "الفجيرة",
       "status": "shipped",
       "paid": true
+    },
+    {
+      "id": "dist_1790964199293",
+      "date": "2026-10-02",
+      "color": "white",
+      "qty": 15,
+      "withTheme": true,
+      "base": 180,
+      "themeSurcharge": 5,
+      "total": 185,
+      "discount": 0,
+      "netTotal": 185,
+      "bottlesUsed": 15,
+      "bagsPerfumeUsed": 15,
+      "pinsUsed": 15,
+      "bagsPackagingUsed": 0,
+      "boxesUsed": 0,
+      "orderCost": 78.375,
+      "orderProfit": 106.625,
+      "note": "",
+      "customerName": "عفاف",
+      "customerPhone": "0506662635",
+      "emirate": "ابوظبي الخالدية"
     }
   ],
   "purchases": [
