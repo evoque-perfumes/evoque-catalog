@@ -279,7 +279,8 @@
       "customerName": "ام حمدان",
       "customerPhone": "0507519191",
       "emirate": "الفجيرة",
-      "status": "shipped"
+      "status": "shipped",
+      "paid": true
     }
   ],
   "purchases": [
