@@ -7,12 +7,12 @@
   },
   "stock": {
     "black": 287,
-    "white": 297,
+    "white": 262,
     "bottlesEmpty": 80,
-    "bottlesReady": 784,
-    "bagsPerfume": 784,
+    "bottlesReady": 749,
+    "bagsPerfume": 749,
     "bagsPackaging": 0,
-    "pins": 784,
+    "pins": 749,
     "boxes": 0,
     "oilG": 0,
     "alcoholMl": 10000
@@ -256,6 +256,29 @@
       "emirate": "ابوظبي مدينة خليفة ا",
       "status": "prep",
       "paid": true
+    },
+    {
+      "id": "dist_1790964094816",
+      "date": "2026-10-02",
+      "color": "white",
+      "qty": 35,
+      "withTheme": true,
+      "base": 420,
+      "themeSurcharge": 10,
+      "total": 430,
+      "discount": 0,
+      "netTotal": 430,
+      "bottlesUsed": 35,
+      "bagsPerfumeUsed": 35,
+      "pinsUsed": 35,
+      "bagsPackagingUsed": 0,
+      "boxesUsed": 0,
+      "orderCost": 182.875,
+      "orderProfit": 247.125,
+      "note": "",
+      "customerName": "ام حمدان",
+      "customerPhone": "0507519191",
+      "emirate": "الفجيرة"
     }
   ],
   "purchases": [
