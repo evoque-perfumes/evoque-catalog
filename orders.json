@@ -872,7 +872,7 @@
     "address": "",
     "orderId": "order-1790876086577",
     "source": "admin",
-    "status": "received",
+    "status": "shipped",
     "paid": false
   },
   {
