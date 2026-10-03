@@ -2600,6 +2600,16 @@ function slExitEditMode(){
 // ⚠️ لو تغيّرت شروط العروض بالموقع (OFFERS_CONFIG بـ catalog.js)، لازم تحدّث
 // هذي القائمة يدويًا بنفس الوقت عشان تضل متطابقة.
 // ===================================================================
+
+// 3 أكتوبر 2026: شارة "🚚 توصيل مجاني" بسجل المبيعات — orders.json ما يخزّن حالة
+// التوصيل المجاني أصلاً (هذا الحقل موجود بس بـpending-orders.json قبل الاعتماد
+// وينضاع بعد كذا)، فنحسبها هنا مباشرة من كمية عطور 50مل بالطلب (نفس حد OFFERS_CONFIG
+// بملف catalog.js: 5 قطع 50مل فأكثر = توصيل مجاني، بغض النظر لو استحق هدية عطر
+// فعلية مع كذا أو لا — شوف GIFT_OFFERS_CONFIG فوق).
+function hasFreeShippingForItems(items){
+  const qty50 = (items || []).reduce((s, it) => s + (String(it.size) === "50" ? (Number(it.qty) || 0) : 0), 0);
+  return qty50 >= 5;
+}
 const GIFT_OFFERS_CONFIG = [
   { size:"50", minQty:10, label:"توصيل مجاني + عطرين 10مل ومعطر سيارة مجانًا", giftSize:"10", giftQty:2, optional:false },
   { size:"50", minQty:5,  label:"توصيل مجاني (بدون هدية عطر)",                  giftSize:null,  giftQty:0, optional:false },
@@ -2900,7 +2910,7 @@ function renderSalesHistory(){
         <span class="sale-row-amount">${fmtNum(total)} AED${discountTxt}</span>
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
-      <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}</div>
+      <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
       <div class="sale-row-actions">
         <select class="sale-row-status-select" data-key="${g.key}" style="color:${orderStatusColor(status)};">
           <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
