@@ -1010,6 +1010,7 @@
     "phone": "+968 77087964",
     "address": "مسقط الغبرة",
     "orderId": "order-1791041625617",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   }
 ]
