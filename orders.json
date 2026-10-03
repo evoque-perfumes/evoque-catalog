@@ -996,5 +996,20 @@
     "source": "admin",
     "status": "received",
     "paid": true
+  },
+  {
+    "id": "dior-sauvage-elixir-1791041625617-0",
+    "perfumeId": "dior-sauvage-elixir",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 55,
+    "customer": "عادل",
+    "date": "2026-10-03",
+    "country": "OM",
+    "countryLabel": "🇴🇲 عُمان",
+    "phone": "+968 77087964",
+    "address": "مسقط الغبرة",
+    "orderId": "order-1791041625617",
+    "source": "admin"
   }
 ]
