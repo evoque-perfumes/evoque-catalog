@@ -353,7 +353,8 @@
       "customerPhone": "0507555756",
       "emirate": "الفجيرة",
       "editedAt": "2026-10-03T15:39:45.701Z",
-      "status": "shipped"
+      "status": "shipped",
+      "paid": true
     },
     {
       "id": "dist_1791039546254",
