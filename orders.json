@@ -1044,5 +1044,20 @@
     "orderId": "order-1791054737791",
     "source": "admin",
     "status": "shipped"
+  },
+  {
+    "id": "oman-luxury-wanderlust-1791054777880-0",
+    "perfumeId": "oman-luxury-wanderlust",
+    "size": 50,
+    "qty": 1,
+    "unitPrice": 50,
+    "customer": "الزعابي",
+    "date": "2026-10-03",
+    "country": "OM",
+    "countryLabel": "🇴🇲 عُمان",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1791054777880",
+    "source": "admin"
   }
 ]
