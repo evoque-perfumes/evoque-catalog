@@ -838,7 +838,8 @@
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "parfums-de-marly-delina-exclusif-1790879167565-1",
@@ -854,7 +855,8 @@
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "hind-al-oud-deep-masa-ey-1790879167565-2",
@@ -870,7 +872,8 @@
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "amouage-guidance-46-1790879167565-3",
@@ -886,7 +889,8 @@
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "oman-luxury-caden-1790879167565-4",
@@ -902,7 +906,8 @@
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "ysl-libre-intense-1790879167565-5",
@@ -918,7 +923,8 @@
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "creed-aventus-1791041481329-0",
