@@ -921,7 +921,7 @@
     "status": "shipped"
   },
   {
-    "id": "creed-aventus-1791041450215-0",
+    "id": "creed-aventus-1791041481329-0",
     "perfumeId": "creed-aventus",
     "size": 50,
     "qty": 2,
@@ -937,7 +937,7 @@
     "source": "admin"
   },
   {
-    "id": "amouage-purpose-50-1791041450215-1",
+    "id": "amouage-purpose-50-1791041481329-1",
     "perfumeId": "amouage-purpose-50",
     "size": 50,
     "qty": 1,
@@ -952,11 +952,28 @@
     "source": "admin"
   },
   {
-    "id": "oman-luxury-wanderlust-1791041450215-2",
+    "id": "oman-luxury-wanderlust-1791041481329-2",
     "perfumeId": "oman-luxury-wanderlust",
     "size": 50,
     "qty": 1,
     "unitPrice": 50,
+    "customer": "الزعابي",
+    "date": "2026-09-26",
+    "country": "AE",
+    "countryLabel": "🇦🇪 الإمارات",
+    "phone": "",
+    "address": "",
+    "orderId": "order-1790419478831",
+    "source": "admin"
+  },
+  {
+    "id": "gift-amouage-guidance-46-1791041481329-0",
+    "perfumeId": "amouage-guidance-46",
+    "size": "10",
+    "qty": 1,
+    "unitPrice": 0,
+    "isGift": true,
+    "giftReason": "هدية مجانية (عطر 10مل أو معطر سيارة)",
     "customer": "الزعابي",
     "date": "2026-09-26",
     "country": "AE",
