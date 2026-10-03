@@ -887,7 +887,8 @@
     "phone": "+968 92214555",
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "parfums-de-marly-delina-exclusif-1790879167565-1",
@@ -902,7 +903,8 @@
     "phone": "+968 92214555",
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "hind-al-oud-deep-masa-ey-1790879167565-2",
@@ -917,7 +919,8 @@
     "phone": "+968 92214555",
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "amouage-guidance-46-1790879167565-3",
@@ -932,7 +935,8 @@
     "phone": "+968 92214555",
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "oman-luxury-caden-1790879167565-4",
@@ -947,7 +951,8 @@
     "phone": "+968 92214555",
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "ysl-libre-intense-1790879167565-5",
@@ -962,6 +967,7 @@
     "phone": "+968 92214555",
     "address": "محافظة الشرقية/ ولاية بدية / الغبي",
     "orderId": "order-1790879167564",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   }
 ]
