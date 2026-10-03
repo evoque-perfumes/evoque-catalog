@@ -516,6 +516,13 @@
       <div class="row" style="justify-content:space-between; margin-top:10px;">
         <b>إجمالي السلة: <span id="sl_cartTotal">0</span> AED</b>
       </div>
+      <div class="field" style="margin-top:10px; max-width:240px;">
+        <label for="sl_discount">خصم على الطلب (AED) — اختياري</label>
+        <input type="number" id="sl_discount" min="0" step="0.01" placeholder="0">
+      </div>
+      <div class="row" id="sl_netTotalRow" style="justify-content:space-between; margin-top:6px; display:none;">
+        <b>الإجمالي بعد الخصم: <span id="sl_netTotal">0</span> AED</b>
+      </div>
     </div>
     <div id="sl_giftWrap"></div>
 
@@ -2368,6 +2375,7 @@ document.getElementById("rv_saveBtn").addEventListener("click", async () => {
 
 // ===== وضع "المبيعات" (تسجيل يدوي لطلب بيع واتساب — يدعم أكثر من عطر بنفس الطلب) =====
 let salesCart = []; // {perfumeId, brand, name, size, qty, unitPrice} — عناصر الطلب الحالي قبل الحفظ
+let slCartSubtotal = 0; // 3 أكتوبر 2026: مجموع السلة قبل الخصم — يُستخدم لمعاينة الإجمالي بعد الخصم لحظيًا
 let salesEditingOrderId = null; // لو مو null، معناها نعدّل طلب محفوظ سابقًا بدل ما نسجّل طلب جديد
 let salesEditingOriginalItems = []; // نسخة من عناصر الطلب الأصلية وقت بداية التعديل — تُستخدم لحساب فرق المخزون الصحيح عند الحفظ
 // 14 سبتمبر 2026: خيارات قائمة "sl_country" أكواد (AE/OM/...) بس الطلبات الجاية من
@@ -2498,6 +2506,8 @@ function slRenderCart(){
     cartWrap.style.display = "none";
     saveBtn.disabled = true;
     clearBtn.style.display = "none";
+    slCartSubtotal = 0;
+    slUpdateDiscountPreview();
     return;
   }
   cartWrap.style.display = "block";
@@ -2519,6 +2529,8 @@ function slRenderCart(){
     </div>`;
   }).join("");
   totalEl.textContent = fmtNum(total);
+  slCartSubtotal = total;
+  slUpdateDiscountPreview();
   listEl.querySelectorAll(".sl-cart-edit-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const idx = Number(e.target.closest(".sale-row").dataset.idx);
@@ -2540,6 +2552,20 @@ document.getElementById("sl_clearCartBtn").addEventListener("click", () => {
   slRenderCart();
 });
 
+// 3 أكتوبر 2026: معاينة لحظية للإجمالي بعد الخصم — ما يلمس سعر الوحدة لأي عنصر
+// بالسلة، فقط يعرض "كم المطلوب فعليًا من العميل" بعد طرح الخصم من مجموع السلة.
+function slUpdateDiscountPreview(){
+  const discount = Math.max(0, Number(document.getElementById("sl_discount").value) || 0);
+  const row = document.getElementById("sl_netTotalRow");
+  if(discount > 0 && slCartSubtotal > 0){
+    row.style.display = "flex";
+    document.getElementById("sl_netTotal").textContent = fmtNum(Math.max(0, slCartSubtotal - discount));
+  } else {
+    row.style.display = "none";
+  }
+}
+document.getElementById("sl_discount").addEventListener("input", slUpdateDiscountPreview);
+
 function slResetOrderFields(){
   document.getElementById("sl_customer").value = "";
   document.getElementById("sl_date").value = todayStr();
@@ -2547,6 +2573,8 @@ function slResetOrderFields(){
   document.getElementById("sl_phoneCode").textContent = "+___";
   document.getElementById("sl_phone").value = "";
   document.getElementById("sl_address").value = "";
+  document.getElementById("sl_discount").value = "";
+  slUpdateDiscountPreview();
   salesEditingOriginalCountry = null;
   sl_countryTouched = false;
 }
@@ -2743,6 +2771,8 @@ function slLoadOrderForEdit(key){
   if(code && phoneLocal.startsWith(code)) phoneLocal = phoneLocal.slice(code.length).trim();
   document.getElementById("sl_phone").value = phoneLocal;
   document.getElementById("sl_address").value = g.address || "";
+  const existingDiscount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
+  document.getElementById("sl_discount").value = existingDiscount > 0 ? existingDiscount : "";
 
   salesSelected = null;
   document.getElementById("selectedChipWrap").innerHTML = "";
@@ -2853,7 +2883,10 @@ function renderSalesHistory(){
   emptyHint.style.display = "none";
   wrap.style.display = "block";
   wrap.innerHTML = groups.slice(0, 15).map(g => {
-    const total = g.items.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
+    const subtotal = g.items.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
+    const discount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
+    const total = Math.max(0, subtotal - discount);
+    const discountTxt = discount > 0 ? ` (بعد خصم ${fmtNum(discount)} AED)` : "";
     const status = (g.items[0] && g.items[0].status) || "";
     const paid = !!(g.items[0] && g.items[0].paid);
     const itemsListHtml = g.items.map(o => {
@@ -2864,7 +2897,7 @@ function renderSalesHistory(){
     return `<div class="sale-row" data-key="${g.key}">
       <div class="sale-row-top">
         <span class="sale-row-name">${g.customer ? String(g.customer).replace(/</g,"&lt;") : "بدون اسم"}</span>
-        <span class="sale-row-amount">${fmtNum(total)} AED</span>
+        <span class="sale-row-amount">${fmtNum(total)} AED${discountTxt}</span>
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
       <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}</div>
@@ -2968,6 +3001,10 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   const phoneLocal = document.getElementById("sl_phone").value.trim();
   const phone = phoneLocal ? ((phoneCode && phoneCode !== "+___") ? phoneCode + " " + phoneLocal : phoneLocal) : "";
   const address = document.getElementById("sl_address").value.trim();
+  // 3 أكتوبر 2026: خصم اختياري على كامل الطلب — يُخزَّن مرة وحدة على أول عنصر
+  // بالطلب بس (عشان ما يتكرر/يتضاعف لو الطلب فيه أكثر من عطر)، وكل الحسابات
+  // اللي تجمع إيراد الطلب (سجل المبيعات + تقرير الأرباح) تطرحه تلقائيًا.
+  const discount = Math.max(0, Number(document.getElementById("sl_discount").value) || 0);
   const btn = document.getElementById("sl_saveBtn");
   const isEditing = !!salesEditingOrderId;
   const editingKey = salesEditingOrderId;
@@ -2984,6 +3021,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       size: item.size,
       qty: item.qty,
       unitPrice: item.unitPrice,
+      ...(i === 0 && discount > 0 ? { discount } : {}),
       customer, date,
       country, countryLabel, phone, address,
       orderId,
@@ -3299,6 +3337,21 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       const runs = Math.max(1, Math.ceil(qty / capacity));
       const themeSurcharge = runs * fee;
       return { base, themeSurcharge, total: base + themeSurcharge, runs };
+    }
+
+    // 3 أكتوبر 2026: رسوم الثيم مبلغ يُحصَّل من العميل ويُدفع كامل لمطبعة خارجية
+    // بدون أي هامش ربح للمتجر فيه — بطلب المستخدم، ما يُحتسب كإيراد ولا كربح
+    // بإحصائيات التوزيعات (لا بالنظرة العامة ولا بسجل المبيعات ولا بكل عملية
+    // لحالها)، رغم إنه يبقى محسوبًا ومطلوبًا من العميل وقت تسجيل الطلب (دالة
+    // distUpdateComputedPrice) لأنه فعليًا لازم يُدفع. نطرحه هنا بدل ما نغيّر
+    // طريقة تخزين total/netTotal/orderProfit بالسجل نفسه — عشان يبقى السجل
+    // يعكس المبلغ الحقيقي المُحصَّل من كل عميل، والتصحيح يصير بس بعرض الإحصائيات.
+    function distEffectiveRevenue(s){
+      const raw = Number(s.netTotal !== undefined ? s.netTotal : s.total) || 0;
+      return raw - (Number(s.themeSurcharge) || 0);
+    }
+    function distEffectiveProfit(s){
+      return (Number(s.orderProfit) || 0) - (Number(s.themeSurcharge) || 0);
     }
 
     // عدد الزجاجات (15مل) اللي تطلع من دفعة خلط واحدة (1000 جرام زيت + 2000 مل كحول = 3000مل)
@@ -3687,8 +3740,8 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
   const sales = distributionsData.sales || [];
   const activeSales = sales.filter(s => !s.cancelled);
   const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
-  const totalRevenue = activeSales.reduce((s,x) => s + (Number(x.netTotal !== undefined ? x.netTotal : x.total)||0), 0);
-  const totalProfit = activeSales.reduce((s,x) => s + (Number(x.orderProfit)||0), 0);
+  const totalRevenue = activeSales.reduce((s,x) => s + distEffectiveRevenue(x), 0);
+  const totalProfit = activeSales.reduce((s,x) => s + distEffectiveProfit(x), 0);
   document.getElementById("dist_ov_count").textContent = activeSales.length;
   document.getElementById("dist_ov_units").textContent = totalUnits;
   document.getElementById("dist_ov_revenue").textContent = totalRevenue.toFixed(2) + " AED";
@@ -3709,8 +3762,8 @@ function distRenderSalesLog(){
       const sales = distributionsData.sales || [];
       const activeSales = sales.filter(s => !s.cancelled);
       const totalUnits = activeSales.reduce((s,x) => s + (Number(x.qty)||0), 0);
-      const totalRevenue = activeSales.reduce((s,x) => s + (Number(x.netTotal !== undefined ? x.netTotal : x.total)||0), 0);
-      const totalProfit = activeSales.reduce((s,x) => s + (Number(x.orderProfit)||0), 0);
+      const totalRevenue = activeSales.reduce((s,x) => s + distEffectiveRevenue(x), 0);
+      const totalProfit = activeSales.reduce((s,x) => s + distEffectiveProfit(x), 0);
       document.getElementById("dist_totalUnitsSold").textContent = totalUnits;
       document.getElementById("dist_totalRevenue").textContent = totalRevenue.toFixed(2) + " AED";
       document.getElementById("dist_totalProfit").textContent = totalProfit.toFixed(2) + " AED";
@@ -3721,10 +3774,11 @@ function distRenderSalesLog(){
       }
       log.innerHTML = sales.slice().reverse().map(s => {
         const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).join(" — ");
-        const shownTotal = (s.netTotal !== undefined ? s.netTotal : s.total);
-        const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "");
+        const shownTotal = distEffectiveRevenue(s);
+        const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "")
+          + (s.themeSurcharge ? ` (ثيم ${Number(s.themeSurcharge).toFixed(2)} غير محتسب بالربح)` : "");
         const costVal = Number(s.orderCost) || 0;
-        const profitVal = Number(s.orderProfit) || 0;
+        const profitVal = distEffectiveProfit(s);
         const cancelledTxt = s.cancelled ? " — ⛔ ملغاة" : "";
         const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
         const status = s.status || "";
@@ -3824,10 +3878,13 @@ function distRenderSalesLog(){
         + (bagsPackagingUsed * (Number(costs.bagPackaging)||0))
         + (boxesUsed * (Number(costs.box)||0))
         + (qty * (Number(costs.handle)||0));
-      const orderProfit = netTotal - orderCost;
+      // رسوم الثيم (لو فيها) ما تُحتسب بالربح — مبلغ يُحصَّل من العميل ويُدفع كامل لمطبعة
+      // خارجية بدون أي هامش للمتجر (3 أكتوبر 2026). تبقى محسوبة بـ"الإجمالي المطلوب من
+      // العميل" أعلاه لأنها فعلاً لازم تُدفع، بس ما تدخل بالربح الصافي المعروض هنا.
+      const orderProfit = netTotal - orderCost - r.themeSurcharge;
       document.getElementById("dist_saleOrderCost").textContent = `تكلفة المواد لهالطلبية: ${orderCost.toFixed(2)} درهم (زجاجات ${bottlesUsed}×${readyBottleCost.toFixed(2)} + كيس عطر ${bagsPerfumeUsed}×${(Number(costs.bagPerfume)||0).toFixed(2)} + دبابيس ${pinsUsed}×${(Number(costs.pin)||0).toFixed(2)} + مسكة ${qty}×${(Number(costs.handle)||0).toFixed(2)} + كيس تغليف ${bagsPackagingUsed}×${(Number(costs.bagPackaging)||0).toFixed(2)} + بوكس ${boxesUsed}×${(Number(costs.box)||0).toFixed(2)})`;
       const profitEl = document.getElementById("dist_saleOrderProfit");
-      profitEl.textContent = `الربح الصافي لهالطلبية: ${orderProfit.toFixed(2)} درهم`;
+      profitEl.textContent = `الربح الصافي لهالطلبية: ${orderProfit.toFixed(2)} درهم` + (r.themeSurcharge > 0 ? ` (رسوم الثيم ${r.themeSurcharge.toFixed(2)} درهم غير محتسبة بالربح)` : "");
       profitEl.style.color = orderProfit >= 0 ? "#1F6B41" : "#963224";
     }
 
@@ -4656,7 +4713,10 @@ function computeProfitReport(){
   salesData.filter(o => !o.isGift).forEach(o => {
     const p = perfumes.find(x => x.id === o.perfumeId);
     const qty = Number(o.qty) || 0;
-    const revenue = qty * (Number(o.unitPrice) || 0);
+    // 3 أكتوبر 2026: الخصم المُعطى للعميل (لو فيه) يُخزَّن على سطر واحد من الطلب
+    // ويُطرح من إيراد ذاك السطر هنا، عشان الربح المحسوب يعكس المبلغ الفعلي
+    // المُحصَّل من العميل، لا سعر الوحدة الأصلي قبل الخصم.
+    const revenue = Math.max(0, qty * (Number(o.unitPrice) || 0) - (Number(o.discount) || 0));
     const cost = qty * perfumeUnitCost(p, o.size);
     if(p && !perfumeHasCostData(p)) missingCostIds.add(p.id);
     result.totalRevenue += revenue;
