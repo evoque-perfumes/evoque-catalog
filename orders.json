@@ -1026,7 +1026,8 @@
     "phone": "",
     "address": "عجمان",
     "orderId": "order-1791054737791",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   },
   {
     "id": "louis-vuitton-les-sables-roses-1791054737791-1",
@@ -1041,6 +1042,7 @@
     "phone": "",
     "address": "عجمان",
     "orderId": "order-1791054737791",
-    "source": "admin"
+    "source": "admin",
+    "status": "shipped"
   }
 ]
