@@ -6,13 +6,13 @@
     "costs": {}
   },
   "stock": {
-    "black": 287,
+    "black": 242,
     "white": 239,
     "bottlesEmpty": 80,
-    "bottlesReady": 726,
-    "bagsPerfume": 726,
+    "bottlesReady": 681,
+    "bagsPerfume": 681,
     "bagsPackaging": 0,
-    "pins": 726,
+    "pins": 681,
     "boxes": 0,
     "oilG": 0,
     "alcoholMl": 10000
@@ -329,6 +329,29 @@
       "customerPhone": "0568484255",
       "emirate": "Ajman",
       "status": "shipped"
+    },
+    {
+      "id": "dist_1791039442438",
+      "date": "2026-10-03",
+      "color": "black",
+      "qty": 45,
+      "withTheme": true,
+      "base": 540,
+      "themeSurcharge": 15,
+      "total": 555,
+      "discount": 10,
+      "netTotal": 545,
+      "bottlesUsed": 45,
+      "bagsPerfumeUsed": 45,
+      "pinsUsed": 45,
+      "bagsPackagingUsed": 0,
+      "boxesUsed": 0,
+      "orderCost": 235.125,
+      "orderProfit": 309.875,
+      "note": "",
+      "customerName": "محمد عبدالله",
+      "customerPhone": "0507555756",
+      "emirate": "الفجيرة"
     }
   ],
   "purchases": [
