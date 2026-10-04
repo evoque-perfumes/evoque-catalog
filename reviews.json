@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "lancome-idole-1791096408424",
+    "perfumeId": "lancome-idole",
+    "name": "فاطمة",
+    "rating": 5,
+    "comment": "ماشاء الله تطابق ١٠٠٪؜",
+    "date": "2026-08-25",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1787603350106"
+  }
+]
