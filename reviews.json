@@ -317,5 +317,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "order-1788290487145"
+  },
+  {
+    "id": "penhaligon-s-halfeti-1791097650880",
+    "perfumeId": "penhaligon-s-halfeti",
+    "name": "",
+    "rating": 5,
+    "comment": "الصراحة ما عندي شي سلبي أقوله، الريحة حلوة، الجودة ممتازة، والتجربة كلها كانت موفقة",
+    "date": "2026-09-02",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1788293211983"
   }
 ]
