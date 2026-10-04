@@ -207,5 +207,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "pend-1788203993054-3134"
+  },
+  {
+    "id": "nishane-hacivat-1791097389274",
+    "perfumeId": "nishane-hacivat",
+    "name": "Hakkim",
+    "rating": 5,
+    "comment": "اللي شدني فيه إن الريحة تظل موجودة بس بطريقة حلوة، وكل ما تحركت ترجع تشمها",
+    "date": "2026-08-31",
+    "visible": true,
+    "source": "admin",
+    "orderId": "pend-1788203993054-3134"
   }
 ]
