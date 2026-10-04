@@ -504,5 +504,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "pend-1790433015967-5118"
+  },
+  {
+    "id": "nishane-favonius-1791101092715",
+    "perfumeId": "nishane-favonius",
+    "name": "Ammar",
+    "rating": 5,
+    "comment": "عندي عطر أصلي من نفس الرائحة، وجربت الاثنين مع بعض. التشابه بصراحة قوي جداً",
+    "date": "2026-09-26",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1790421836429"
   }
 ]
