@@ -229,5 +229,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "order-1788290351109"
+  },
+  {
+    "id": "oman-luxury-wanderlust-1791097436152",
+    "perfumeId": "oman-luxury-wanderlust",
+    "name": "Dina",
+    "rating": 5,
+    "comment": "الصراحة ما توقعت النسخة تكون بهالقرب من الأصلي، حتى التفاصيل في الريحة قريبة بشكل واضح",
+    "date": "2026-09-01",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1788290351109"
   }
 ]
