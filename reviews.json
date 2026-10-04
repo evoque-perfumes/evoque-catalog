@@ -130,5 +130,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "pend-1788194047885-6607"
+  },
+  {
+    "id": "paco-rabanne-1-million-1791097110319",
+    "perfumeId": "paco-rabanne-1-million",
+    "name": "Bilal",
+    "rating": 5,
+    "comment": "فوحان قوي وريحة حلوة وثبات ممتاز، الصراحة ما عندي أي ملاحظة عليه",
+    "date": "2026-08-31",
+    "visible": true,
+    "source": "admin",
+    "orderId": "pend-1788194047885-6607"
   }
 ]
