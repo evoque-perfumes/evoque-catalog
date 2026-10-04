@@ -339,5 +339,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "order-1788293211983"
+  },
+  {
+    "id": "louis-vuitton-pacific-chill-1791097714056",
+    "perfumeId": "louis-vuitton-pacific-chill",
+    "name": "",
+    "rating": 5,
+    "comment": "Smells clean, elegant and very well blended. Easy 5 stars from me",
+    "date": "2026-09-02",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1788293337249"
   }
 ]
