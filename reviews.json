@@ -262,5 +262,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "order-1788290351109"
+  },
+  {
+    "id": "hermes-terre-d-harmes-1791097468479",
+    "perfumeId": "hermes-terre-d-harmes",
+    "name": "Dina",
+    "rating": 5,
+    "comment": "الصراحة ما توقعت النسخة تكون بهالقرب من الأصلي، حتى التفاصيل في الريحة قريبة بشكل واضح",
+    "date": "2026-09-01",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1788290351109"
   }
 ]
