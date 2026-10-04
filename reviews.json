@@ -218,5 +218,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "pend-1788203993054-3134"
+  },
+  {
+    "id": "givenchy-gentleman-reserve-privee-1791097420985",
+    "perfumeId": "givenchy-gentleman-reserve-privee",
+    "name": "Dina",
+    "rating": 5,
+    "comment": "الصراحة ما توقعت النسخة تكون بهالقرب من الأصلي، حتى التفاصيل في الريحة قريبة بشكل واضح",
+    "date": "2026-09-01",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1788290351109"
   }
 ]
