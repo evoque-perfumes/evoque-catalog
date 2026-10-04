@@ -240,5 +240,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "order-1788290351109"
+  },
+  {
+    "id": "giorgio-armani-si-passione-red-musk-1791097449713",
+    "perfumeId": "giorgio-armani-si-passione-red-musk",
+    "name": "Dina",
+    "rating": 5,
+    "comment": "الصراحة ما توقعت النسخة تكون بهالقرب من الأصلي، حتى التفاصيل في الريحة قريبة بشكل واضح",
+    "date": "2026-09-01",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1788290351109"
   }
 ]
