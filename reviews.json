@@ -119,5 +119,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "pend-1788194047885-6607"
+  },
+  {
+    "id": "valentino-uomo-1791097080326",
+    "perfumeId": "valentino-uomo",
+    "name": "Bilal",
+    "rating": 5,
+    "comment": "وايد عجبني، ريحته نفس الجو اللي كنت أدور عليه والثبات ممتاز جداً",
+    "date": "2026-08-31",
+    "visible": true,
+    "source": "admin",
+    "orderId": "pend-1788194047885-6607"
   }
 ]
