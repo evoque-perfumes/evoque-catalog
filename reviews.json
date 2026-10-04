@@ -328,5 +328,16 @@
     "visible": true,
     "source": "admin",
     "orderId": "order-1788293211983"
+  },
+  {
+    "id": "frederic-malle-promise-1791097675700",
+    "perfumeId": "frederic-malle-promise",
+    "name": "",
+    "rating": 5,
+    "comment": "طلبت أكثر من عطر من الموقع، وهذا واحد من أكثر العطور اللي عجبوني بينهم",
+    "date": "2026-09-02",
+    "visible": true,
+    "source": "admin",
+    "orderId": "order-1788293211983"
   }
 ]
