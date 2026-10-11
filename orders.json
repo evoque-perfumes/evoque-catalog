@@ -1027,7 +1027,8 @@
     "address": "عجمان",
     "orderId": "order-1791054737791",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "louis-vuitton-les-sables-roses-1791054737791-1",
@@ -1043,7 +1044,8 @@
     "address": "عجمان",
     "orderId": "order-1791054737791",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "oman-luxury-wanderlust-1791054777880-0",
