@@ -735,7 +735,7 @@
     "orderId": "order-1790418500144",
     "source": "admin",
     "paid": true,
-    "status": "shipped"
+    "status": "received"
   },
   {
     "id": "nishane-favonius-1790421836429-0",
