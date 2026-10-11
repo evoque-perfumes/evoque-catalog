@@ -1028,7 +1028,7 @@
     "address": "عجمان",
     "orderId": "order-1791054737791",
     "source": "admin",
-    "status": "shipped",
+    "status": "received",
     "paid": true
   },
   {
@@ -1045,7 +1045,7 @@
     "address": "عجمان",
     "orderId": "order-1791054737791",
     "source": "admin",
-    "status": "shipped",
+    "status": "received",
     "paid": true
   },
   {
