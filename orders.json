@@ -1011,7 +1011,8 @@
     "address": "مسقط الغبرة",
     "orderId": "order-1791041625617",
     "source": "admin",
-    "status": "shipped"
+    "status": "shipped",
+    "paid": true
   },
   {
     "id": "amouage-purpose-50-1791054737791-0",
