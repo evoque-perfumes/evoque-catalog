@@ -328,7 +328,8 @@
       "customerName": "جمال عبدالله",
       "customerPhone": "0568484255",
       "emirate": "Ajman",
-      "status": "shipped"
+      "status": "shipped",
+      "paid": true
     },
     {
       "id": "dist_1791039442438",
