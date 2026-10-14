@@ -505,6 +505,10 @@
         <div class="field"><label for="sl_qty">الكمية</label><input type="number" id="sl_qty" min="1" step="1" value="1"></div>
         <div class="field"><label for="sl_price">سعر الوحدة (AED)</label><input type="number" id="sl_price" min="0" step="0.01"></div>
       </div>
+      <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-top:8px; cursor:pointer; color:#8A6A1F; font-weight:600;">
+        <input type="checkbox" id="sl_isGift" style="width:auto; margin:0;">
+        🎁 هدية مجانية (يدوي) — ينقص من المخزون بس ما يُحتسب إيراد/ربح
+      </label>
       <div class="row">
         <button type="button" id="sl_addToCartBtn" class="secondary">➕ أضف للسلة</button>
       </div>
@@ -526,7 +530,6 @@
         <b>الإجمالي بعد الخصم: <span id="sl_netTotal">0</span> AED</b>
       </div>
     </div>
-    <div id="sl_giftWrap"></div>
 
     <div class="grid2" style="margin-top:16px;">
       <div class="field"><label for="sl_customer">اسم العميل — اختياري</label><input type="text" id="sl_customer" placeholder="مثال: أم محمد"></div>
@@ -2502,12 +2505,32 @@ function slShowSelectedChip(p){
   });
 }
 
+// 13 أكتوبر 2026: يبني خيارات <select> الحجم مع عرض المخزون المتوفر لكل حجم
+// مباشرة بنص الخيار (عشان الأدمن يختار على راحته بدون ما يحتاج يروح يتأكد من
+// المخزون بمكان ثاني — مفيد بالذات وقت اختيار عطر الهدية). يعطّل أي حجم مخزونه
+// صفر عشان ما يُختار بالغلط.
+function slSizeOptionsHtml(p, selectedSize){
+  const s50 = stockAsQty(p.stock50);
+  const s10 = stockAsQty(p.stock10);
+  const opt = (value, label, stock) => {
+    const disabled = stock <= 0 ? " disabled" : "";
+    const selected = String(selectedSize) === value ? " selected" : "";
+    return `<option value="${value}"${disabled}${selected}>${label} — متوفر: ${stock}</option>`;
+  };
+  return opt("50", "50مل", s50) + opt("10", "10مل", s10);
+}
+
 function selectPerfumeForSales(p){
   slShowSelectedChip(p);
   document.getElementById("searchInput").value = "";
-  document.getElementById("sl_size").value = "50";
+  const s50 = stockAsQty(p.stock50);
+  const s10 = stockAsQty(p.stock10);
+  const defaultSize = s50 > 0 ? "50" : (s10 > 0 ? "10" : "50");
+  document.getElementById("sl_size").innerHTML = slSizeOptionsHtml(p, defaultSize);
   document.getElementById("sl_qty").value = "1";
-  document.getElementById("sl_price").value = p.price50 != null ? p.price50 : "";
+  document.getElementById("sl_price").value = defaultSize === "50" ? (p.price50 != null ? p.price50 : "") : (p.price10 != null ? p.price10 : "");
+  document.getElementById("sl_isGift").checked = false;
+  document.getElementById("sl_price").disabled = false;
   document.getElementById("sl_addItemWrap").style.display = "block";
   document.getElementById("sl_pickHint").style.display = "none";
 }
@@ -2516,13 +2539,15 @@ function selectPerfumeForSales(p){
 function slEditCartItem(idx){
   const item = salesCart[idx];
   if(!item) return;
-  const p = perfumes.find(x => x.id === item.perfumeId) || { id: item.perfumeId, brand: item.brand, name: item.name, price10: null, price50: null };
+  const p = perfumes.find(x => x.id === item.perfumeId) || { id: item.perfumeId, brand: item.brand, name: item.name, price10: null, price50: null, stock10: 0, stock50: 0 };
   salesCart.splice(idx, 1);
   slShowSelectedChip(p);
   document.getElementById("searchInput").value = "";
-  document.getElementById("sl_size").value = String(item.size);
+  document.getElementById("sl_size").innerHTML = slSizeOptionsHtml(p, item.size);
   document.getElementById("sl_qty").value = item.qty;
   document.getElementById("sl_price").value = item.unitPrice;
+  document.getElementById("sl_isGift").checked = !!item.isGift;
+  document.getElementById("sl_price").disabled = !!item.isGift;
   document.getElementById("sl_addItemWrap").style.display = "block";
   document.getElementById("sl_pickHint").style.display = "none";
   slRenderCart();
@@ -2532,9 +2557,25 @@ function slEditCartItem(idx){
 
 document.getElementById("sl_size").addEventListener("change", () => {
   if(!salesSelected) return;
+  if(document.getElementById("sl_isGift").checked) return; // عطر مجاني — السعر يضل 0 بغض النظر عن الحجم
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
   document.getElementById("sl_price").value = size === "50" ? (p.price50 ?? "") : (p.price10 ?? "");
+});
+
+// 13 أكتوبر 2026: علامة "🎁 هدية مجانية" اليدوية — لما تتفعّل، نثبّت السعر على 0
+// ونعطّل حقل السعر (العطر ينقص من المخزون عادي بس ما يُحتسب إيراد/ربح — isGift:true)
+document.getElementById("sl_isGift").addEventListener("change", () => {
+  const chk = document.getElementById("sl_isGift");
+  const priceInput = document.getElementById("sl_price");
+  if(chk.checked){
+    priceInput.dataset.prevValue = priceInput.value;
+    priceInput.value = "0";
+    priceInput.disabled = true;
+  } else {
+    priceInput.disabled = false;
+    priceInput.value = priceInput.dataset.prevValue || "";
+  }
 });
 
 document.getElementById("sl_country").addEventListener("change", () => {
@@ -2563,10 +2604,11 @@ document.getElementById("sl_addToCartBtn").addEventListener("click", () => {
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
   const qty = Math.max(1, parseInt(document.getElementById("sl_qty").value, 10) || 1);
-  const unitPrice = Math.max(0, parseFloat(document.getElementById("sl_price").value) || 0);
-  salesCart.push({ perfumeId: p.id, brand: p.brand, name: p.name, size: Number(size), qty, unitPrice });
+  const isGift = document.getElementById("sl_isGift").checked;
+  const unitPrice = isGift ? 0 : Math.max(0, parseFloat(document.getElementById("sl_price").value) || 0);
+  salesCart.push({ perfumeId: p.id, brand: p.brand, name: p.name, size: Number(size), qty, unitPrice, isGift });
   slRenderCart();
-  slShowStatus(`تمت إضافة ${p.brand} — ${p.name} للسلة. ابحث عن العطر التالي أو اضغط "سجّل الطلب" لو خلصت.`, "info");
+  slShowStatus(`تمت إضافة ${p.brand} — ${p.name} للسلة${isGift ? " (🎁 هدية مجانية)" : ""}. ابحث عن العطر التالي أو اضغط "سجّل الطلب" لو خلصت.`, "info");
   // نفضي الاختيار الحالي عشان يبحث عن العطر التالي
   salesSelected = null;
   document.getElementById("selectedChipWrap").innerHTML = "";
@@ -2579,16 +2621,6 @@ function slUpdateSaveBtnLabel(){
   document.getElementById("sl_saveBtn").textContent = salesEditingOrderId ? "💾 حفظ التعديلات" : "✅ سجّل الطلب";
 }
 
-// يعيد بناء صندوق "هدايا العروض" حسب محتوى سلة الطلب الحالي — يُستدعى مع كل
-// تغيير بالسلة (إضافة/تعديل/حذف) عشان يطلع/يختفي تلقائيًا لحظة يستحق الطلب هدية
-function slUpdateGiftPicker(){
-  const wrap = document.getElementById("sl_giftWrap");
-  if(!wrap) return;
-  const giftOffers = computeGiftOffers(salesCart.map(item => ({ size: item.size, qty: item.qty })));
-  wrap.innerHTML = renderGiftPickerHtml(giftOffers);
-  wireGiftPickerSkipCheckboxes(wrap.querySelector(".gift-picker-wrap"));
-}
-
 function slRenderCart(){
   const cartWrap = document.getElementById("sl_cartWrap");
   const listEl = document.getElementById("sl_cartList");
@@ -2596,7 +2628,6 @@ function slRenderCart(){
   const saveBtn = document.getElementById("sl_saveBtn");
   const clearBtn = document.getElementById("sl_clearCartBtn");
   slUpdateSaveBtnLabel();
-  slUpdateGiftPicker();
   if(salesCart.length === 0){
     cartWrap.style.display = "none";
     saveBtn.disabled = true;
@@ -2614,8 +2645,8 @@ function slRenderCart(){
     total += sub;
     return `<div class="sale-row" data-idx="${idx}">
       <div class="sale-row-top">
-        <span class="sale-row-name">${item.brand} — ${item.name} (${item.size}مل × ${item.qty})</span>
-        <span class="sale-row-amount">${fmtNum(sub)} AED</span>
+        <span class="sale-row-name">${item.brand} — ${item.name} (${item.size}مل × ${item.qty})${item.isGift ? ` <span style="color:#8A6A1F; font-weight:700;">🎁 هدية</span>` : ""}</span>
+        <span class="sale-row-amount">${item.isGift ? "مجاني" : fmtNum(sub) + " AED"}</span>
       </div>
       <div class="sale-row-actions">
         <button type="button" class="secondary sl-cart-edit-btn">✏️ تعديل</button>
@@ -2682,121 +2713,20 @@ function slExitEditMode(){
   slUpdateSaveBtnLabel();
 }
 
-// ===================================================================
-// نظام "هدايا العروض" (28 أغسطس 2026) — نفس عروض الموقع (OFFERS_CONFIG بملف
-// assets/catalog.js) لكن بمعلومات إضافية: هل هذي الهدية تتضمّن عطر فعلي لازم
-// يُختار من المخزون؟ (بعكس التوصيل المجاني أو معطر السيارة اللي ما يحتاج
-// اختيار). يُستخدم قبل اعتماد طلب من "🧾 الطلبات الجديدة" وقبل تسجيل طلب يدوي
-// من "💰 المبيعات" — لو الطلب يستحق هدية عطر، نطلب من صاحب المتجر يختار العطر
-// (مع عرض الكمية المتوفرة بالمخزون)، وبعد الاختيار: يُخصم تلقائيًا من المخزون
-// مع باقي عناصر الطلب بنفس الكوميت، ويُسجّل بالمبيعات كسطر منفصل بسعر 0
-// (مجاني تمامًا) وعلامة isGift:true — عشان ما يُحتسب كربح أو أداء بيع فعلي.
-//
-// ⚠️ لو تغيّرت شروط العروض بالموقع (OFFERS_CONFIG بـ catalog.js)، لازم تحدّث
-// هذي القائمة يدويًا بنفس الوقت عشان تضل متطابقة.
-// ===================================================================
+// 13 أكتوبر 2026: شلنا نظام "هدايا العروض" التلقائي بالكامل (كان يفرض على صاحب
+// المتجر يختار عطر هدية إجباريًا كل ما يستحق الطلب عرض كمية، بالطلبات الجديدة
+// وبالتسجيل اليدوي سوا) بطلب صريح من صاحب المتجر — الهدية صارت قرار يدوي بالكامل:
+// يختارها بنفسه من تبويب "💰 المبيعات" بعلامة "🎁 هدية" على أي عنصر وقت الإضافة
+// (شوف sl_isGift تحت)، بدل ما تُفرض تلقائيًا حسب الكمية. التوصيل المجاني التلقائي
+// (5 قطع 50مل فأكثر) ضل زي ما هو بالضبط — ما تغيّر شي فيه.
 
 // 3 أكتوبر 2026: شارة "🚚 توصيل مجاني" بسجل المبيعات — orders.json ما يخزّن حالة
 // التوصيل المجاني أصلاً (هذا الحقل موجود بس بـpending-orders.json قبل الاعتماد
 // وينضاع بعد كذا)، فنحسبها هنا مباشرة من كمية عطور 50مل بالطلب (نفس حد OFFERS_CONFIG
-// بملف catalog.js: 5 قطع 50مل فأكثر = توصيل مجاني، بغض النظر لو استحق هدية عطر
-// فعلية مع كذا أو لا — شوف GIFT_OFFERS_CONFIG فوق).
+// بملف catalog.js: 5 قطع 50مل فأكثر = توصيل مجاني).
 function hasFreeShippingForItems(items){
   const qty50 = (items || []).reduce((s, it) => s + (String(it.size) === "50" ? (Number(it.qty) || 0) : 0), 0);
   return qty50 >= 5;
-}
-const GIFT_OFFERS_CONFIG = [
-  { size:"50", minQty:10, label:"توصيل مجاني + عطرين 10مل ومعطر سيارة مجانًا", giftSize:"10", giftQty:2, optional:false },
-  { size:"50", minQty:5,  label:"توصيل مجاني (بدون هدية عطر)",                  giftSize:null,  giftQty:0, optional:false },
-  { size:"50", minQty:3,  label:"هدية مجانية (عطر 10مل أو معطر سيارة)",         giftSize:"10",  giftQty:1, optional:true  },
-  { size:"10", minQty:10, label:"عطر 10مل مجاني ومعطر سيارة مجانًا",            giftSize:"10",  giftQty:1, optional:false },
-  { size:"10", minQty:5,  label:"معطر سيارة مجاني (بدون هدية عطر)",            giftSize:null,  giftQty:0, optional:false }
-];
-
-// items: [{size, qty}] — يرجع بس العروض المستحقة اللي فيها هدية عطر فعلية
-// تحتاج اختيار (يتجاهل تلقائيًا عروض التوصيل المجاني/معطر السيارة بس)
-function computeGiftOffers(items){
-  const qtyBySize = {};
-  (items || []).forEach(it => {
-    const s = String(it.size);
-    qtyBySize[s] = (qtyBySize[s] || 0) + (Number(it.qty) || 0);
-  });
-  const sizes = Array.from(new Set(GIFT_OFFERS_CONFIG.map(o => o.size)));
-  const result = [];
-  sizes.forEach(size => {
-    const qty = qtyBySize[size] || 0;
-    const matches = GIFT_OFFERS_CONFIG.filter(o => o.size === size && qty >= o.minQty).sort((a,b) => b.minQty - a.minQty);
-    if(matches.length && matches[0].giftQty > 0) result.push(matches[0]);
-  });
-  return result;
-}
-
-// يبني خيارات <select> لعطور حجم معيّن عندها مخزون متوفر (الأحدث أعلى مخزونًا أول)
-function giftPerfumeOptionsHtml(giftSize){
-  const field = giftSize === "50" ? "stock50" : "stock10";
-  const list = perfumes.filter(p => stockAsQty(p[field]) > 0)
-    .slice()
-    .sort((a,b) => (a.brand+a.name).localeCompare(b.brand+b.name, "en", {sensitivity:"base"}));
-  if(!list.length) return `<option value="">— ما فيه عطور ${giftSize}مل متوفرة بالمخزون —</option>`;
-  return `<option value="">— اختر عطر الهدية —</option>` +
-    list.map(p => `<option value="${p.id}">${p.brand} — ${p.name} (متوفر: ${stockAsQty(p[field])})</option>`).join("");
-}
-
-// يبني HTML كامل لصندوق اختيار هدايا العروض لطلب معيّن (يُستخدم بالطلبات
-// الجديدة وبالتسجيل اليدوي بنفس الدالة بالضبط)
-function renderGiftPickerHtml(giftOffers){
-  if(!giftOffers.length) return "";
-  return `<div class="gift-picker-wrap" style="margin-top:12px; border:1px solid #E5C15C; background:#FFF9E8; border-radius:10px; padding:12px;">
-    <div style="font-weight:700; color:#8A6A1F; margin-bottom:8px;">🎁 هذا الطلب يستحق هدية — حدد قبل الاعتماد/الحفظ</div>
-    ${giftOffers.map((o, oi) => `
-      <div class="gift-offer-box" data-gift-size="${o.giftSize}" data-gift-qty="${o.giftQty}" data-optional="${o.optional}" data-label="${o.label.replace(/"/g,"&quot;")}" style="margin-bottom:10px;">
-        <div style="font-size:13px; margin-bottom:6px;">${o.label}</div>
-        ${o.optional ? `<label style="display:flex; align-items:center; gap:6px; font-size:12.5px; margin-bottom:6px; cursor:pointer;">
-          <input type="checkbox" class="gift-skip-checkbox" style="width:auto; margin:0;"> أعطيت معطر سيارة بدل العطر (تجاوز اختيار عطر لهذي الهدية)
-        </label>` : ""}
-        <div class="gift-selects-wrap">
-          ${Array.from({length:o.giftQty}).map((_, gi) => `
-            <select class="gift-perfume-select" data-oi="${oi}" data-gi="${gi}" style="margin-bottom:6px;">
-              ${giftPerfumeOptionsHtml(o.giftSize)}
-            </select>
-          `).join("")}
-        </div>
-      </div>
-    `).join("")}
-  </div>`;
-}
-
-// يربط checkbox "تجاوز" بكل صندوق هدية اختيارية — لما يتفعّل، يعطّل الـselects جواه
-function wireGiftPickerSkipCheckboxes(containerEl){
-  if(!containerEl) return;
-  containerEl.querySelectorAll(".gift-offer-box").forEach(box => {
-    const chk = box.querySelector(".gift-skip-checkbox");
-    if(!chk) return;
-    const selects = box.querySelectorAll(".gift-perfume-select");
-    chk.addEventListener("change", () => {
-      selects.forEach(sel => { sel.disabled = chk.checked; if(chk.checked) sel.value = ""; });
-    });
-  });
-}
-
-// يقرأ اختيارات صندوق الهدايا بعد ما صاحب المتجر يعبّيها — يرجع
-// {valid, message, giftItems:[{perfumeId,size,qty:1,offerLabel}]}
-function readGiftSelections(containerEl){
-  if(!containerEl) return { valid:true, message:"", giftItems:[] };
-  const boxes = containerEl.querySelectorAll(".gift-offer-box");
-  const giftItems = [];
-  for(const box of boxes){
-    const skipChk = box.querySelector(".gift-skip-checkbox");
-    if(skipChk && skipChk.checked) continue; // تجاوز هالهدية (مثلًا أعطى معطر سيارة بدل العطر)
-    const selects = box.querySelectorAll(".gift-perfume-select");
-    for(const sel of selects){
-      if(!sel.value){
-        return { valid:false, message:"لازم تختار عطر لكل هدية مستحقة بهذا الطلب (أو تعلّم \"أعطيت معطر سيارة بدل العطر\" لو ينطبق).", giftItems:[] };
-      }
-      giftItems.push({ perfumeId: sel.value, size: box.dataset.giftSize, qty: 1, offerLabel: box.dataset.label });
-    }
-  }
-  return { valid:true, message:"", giftItems };
 }
 
 // ===== خصم/إرجاع المخزون تلقائيًا مع كل عملية بيع (تسجيل جديد / تعديل / حذف) =====
@@ -2858,6 +2788,7 @@ function slLoadOrderForEdit(key){
       size: Number(o.size),
       qty: Number(o.qty) || 1,
       unitPrice: Number(o.unitPrice) || 0,
+      isGift: !!o.isGift, // 13 أكتوبر 2026: نحافظ على علامة "هدية مجانية" اليدوية لو الطلب يتعدّل لاحقًا
     };
   });
   salesEditingOrderId = key;
@@ -3106,10 +3037,6 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   const token = getToken();
   if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
   if(!salesCart.length){ slShowStatus("السلة فاضية — أضف عطر وحد على الأقل قبل الحفظ.", "err"); return; }
-  // لو هذا الطلب يستحق هدية عطر (حسب كمية 10مل/50مل بالسلة)، لازم تُختار قبل الحفظ
-  const giftCheck = readGiftSelections(document.querySelector("#sl_giftWrap .gift-picker-wrap"));
-  if(!giftCheck.valid){ slShowStatus(giftCheck.message, "err"); return; }
-  const giftItems = giftCheck.giftItems;
   const customer = document.getElementById("sl_customer").value.trim();
   const date = document.getElementById("sl_date").value.trim() || todayStr();
   const countrySel = document.getElementById("sl_country");
@@ -3147,27 +3074,15 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       perfumeId: item.perfumeId,
       size: item.size,
       qty: item.qty,
-      unitPrice: item.unitPrice,
+      unitPrice: item.isGift ? 0 : item.unitPrice,
+      ...(item.isGift ? { isGift: true } : {}),
       ...(i === 0 && discount > 0 ? { discount } : {}),
       customer, date,
       country, countryLabel, phone, address,
       orderId,
       source: "admin"
     }));
-    // عناصر هدايا العروض المختارة (لو فيه) — سعرها 0 دائمًا وعلامة isGift:true
-    const giftEntries = giftItems.map((it, i) => ({
-      id: `gift-${it.perfumeId}-${Date.now()}-${i}`,
-      perfumeId: it.perfumeId,
-      size: it.size,
-      qty: it.qty,
-      unitPrice: 0,
-      isGift: true,
-      giftReason: it.offerLabel,
-      customer, date,
-      country, countryLabel, phone, address,
-      orderId,
-      source: "admin"
-    }));
+    const giftCount = cartSnapshot.filter(item => item.isGift).length;
     const label = isEditing
       ? `Edit order: ${editingKey}`
       : (cartSnapshot.length === 1
@@ -3176,19 +3091,18 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
     const updatedList = await updateOrdersJsonWithRetry(token, (list) => {
       const base = isEditing ? list.filter(x => (x.orderId || x.id) !== editingKey) : list;
       newEntries.forEach(e => base.push(e));
-      giftEntries.forEach(e => base.push(e));
       return base;
     }, label);
     salesData = updatedList;
 
-    // خصم/إرجاع المخزون تلقائيًا حسب الفرق بين عناصر الطلب الأصلية (لو تعديل) والعناصر الجديدة (المدفوعة + هدايا العروض سوا)
+    // خصم/إرجاع المخزون تلقائيًا حسب الفرق بين عناصر الطلب الأصلية (لو تعديل) والعناصر الجديدة
+    // (عناصر الهدية اليدوية تُحتسب بالمخزون زي أي عنصر عادي — بس بدون إيراد/ربح)
     let stockNote = "";
     try{
-      const newItemsForStock = cartSnapshot.map(item => ({ perfumeId: item.perfumeId, size: item.size, qty: item.qty }))
-        .concat(giftItems.map(it => ({ perfumeId: it.perfumeId, size: it.size, qty: it.qty })));
+      const newItemsForStock = cartSnapshot.map(item => ({ perfumeId: item.perfumeId, size: item.size, qty: item.qty }));
       const delta = computeStockDelta(originalItemsSnapshot, newItemsForStock);
       const { changes, notFound } = await applySalesStockDelta(token, delta);
-      if(changes.length) stockNote = ` تم تحديث المخزون تلقائيًا لـ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"}${giftItems.length ? ` (منها ${giftItems.length} هدية مجانية)` : ""}.`;
+      if(changes.length) stockNote = ` تم تحديث المخزون تلقائيًا لـ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"}${giftCount ? ` (منها ${giftCount} هدية مجانية)` : ""}.`;
       if(notFound.length) stockNote += ` (تنبيه: ${notFound.length} عطر بالطلب ما انلقى بالكتالوج — راجع مخزونه يدويًا.)`;
       updateStockCounts();
     }catch(stockErr){
@@ -6278,14 +6192,13 @@ function renderOrdersQueueList(){
       <div style="margin-top:6px; font-size:13px;">
         المجموع الفرعي: ${fmtNum(o.subtotal||0)} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${o.currency||""}</b>
       </div>
-      ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#8A6A1F; font-weight:700;">🎁 العرض المستحق: ${String(o.offers).replace(/</g,"&lt;")}</div>` : ""}
+      ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#1F6B41; font-weight:700;">🚚 ${String(o.offers).replace(/</g,"&lt;")}</div>` : ""}
       ${metaParts ? `<div style="margin-top:6px; font-size:12px; color:var(--muted);">${metaParts}</div>` : ""}
       <div class="grid2" style="margin-top:12px;">
         <div class="field" style="margin-bottom:0;"><label>اسم العميل</label><input type="text" class="oq-name-input" value="${name.replace(/"/g,"&quot;")}" placeholder="اسم العميل"></div>
         <div class="field" style="margin-bottom:0;"><label>الهاتف</label><input type="text" class="oq-phone-input" value="${phone.replace(/"/g,"&quot;")}" placeholder="رقم الهاتف"></div>
       </div>
       <div class="field" style="margin-top:10px; margin-bottom:0;"><label>العنوان</label><input type="text" class="oq-address-input" value="${address.replace(/"/g,"&quot;")}" placeholder="العنوان التفصيلي"></div>
-      ${renderGiftPickerHtml(computeGiftOffers(o.items || []))}
       <div class="row" style="margin-top:12px; gap:8px;">
         <button type="button" class="oq-approve-btn" style="flex:1;">✅ اعتماد</button>
         <button type="button" class="secondary oq-reject-btn" style="flex:1;">❌ رفض</button>
@@ -6298,7 +6211,6 @@ function renderOrdersQueueList(){
     const nameInput = card.querySelector(".oq-name-input");
     const phoneInput = card.querySelector(".oq-phone-input");
     const addressInput = card.querySelector(".oq-address-input");
-    wireGiftPickerSkipCheckboxes(card.querySelector(".gift-picker-wrap"));
     function syncEdits(){
       oqEdits[orderId] = { name: nameInput.value, phone: phoneInput.value, address: addressInput.value };
     }
@@ -6335,11 +6247,6 @@ function renderOrdersQueueList(){
         if(!confirm(msg)) return;
       }
 
-      // لو الطلب يستحق هدية عطر، لازم تُختار قبل الاعتماد
-      const giftCheck = readGiftSelections(card.querySelector(".gift-picker-wrap"));
-      if(!giftCheck.valid){ oqShowStatus(giftCheck.message, "err"); return; }
-      const giftItems = giftCheck.giftItems;
-
       const approveBtn = card.querySelector(".oq-approve-btn");
       const rejectBtn = card.querySelector(".oq-reject-btn");
       approveBtn.disabled = true; rejectBtn.disabled = true;
@@ -6365,42 +6272,20 @@ function renderOrdersQueueList(){
           orderId: orderKey,
           source: order.source === "quick-whatsapp" ? "quick-whatsapp" : "website"
         }));
-        // عناصر هدايا العروض المختارة (لو فيه) — سعرها 0 دائمًا وعلامة isGift:true
-        // عشان تنكتب بالمبيعات كـ"هدية مجانية" وما تُحتسب كربح أو أداء بيع فعلي
-        const giftSalesEntries = giftItems.map((it, i) => ({
-          id: `gift-${it.perfumeId}-${Date.now()}-${i}`,
-          perfumeId: it.perfumeId,
-          size: it.size,
-          qty: it.qty,
-          unitPrice: 0,
-          isGift: true,
-          giftReason: it.offerLabel,
-          customer: finalName,
-          date: nowDate,
-          country: order.country || "",
-          countryLabel: order.country || "",
-          phone: finalPhone,
-          address: finalAddress,
-          orderId: orderKey,
-          source: order.source === "quick-whatsapp" ? "quick-whatsapp" : "website"
-        }));
-
         // 1) نضيف الطلب لسجل المبيعات (orders.json) — نفس شكل التسجيل اليدوي بالضبط
         const updatedSales = await updateOrdersJsonWithRetry(token, (list) => {
           newSalesEntries.forEach(e => list.push(e));
-          giftSalesEntries.forEach(e => list.push(e));
           return list;
         }, `Approve order: ${orderKey}`);
         salesData = updatedSales;
 
-        // 2) نخصم المخزون تلقائيًا (عناصر الطلب المدفوعة + عطور الهدية سوا بكوميت وحد)
+        // 2) نخصم المخزون تلقائيًا
         let stockNote = "";
         try{
-          const stockItems = items.map(it => ({ perfumeId: it.perfumeId, size: it.size, qty: it.qty }))
-            .concat(giftItems.map(it => ({ perfumeId: it.perfumeId, size: it.size, qty: it.qty })));
+          const stockItems = items.map(it => ({ perfumeId: it.perfumeId, size: it.size, qty: it.qty }));
           const delta = computeStockDelta([], stockItems);
           const { changes, notFound } = await applySalesStockDelta(token, delta);
-          if(changes.length) stockNote = ` وتم خصم ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"} من المخزون تلقائيًا${giftItems.length ? ` (منها ${giftItems.length} هدية مجانية)` : ""}.`;
+          if(changes.length) stockNote = ` وتم خصم ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"} من المخزون تلقائيًا.`;
           if(notFound.length) stockNote += ` (تنبيه: ${notFound.length} عطر بالطلب ما انلقى بالكتالوج — راجع مخزونه يدويًا.)`;
           updateStockCounts();
         }catch(stockErr){
