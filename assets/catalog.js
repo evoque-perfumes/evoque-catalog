@@ -258,14 +258,6 @@ const I18N = {
       {icon:"ic-shield", text:"ضمان استرجاع المبلغ"},
       {icon:"ic-sparkle", text:"بديل فاخر للعطور الأصلية"},
       {icon:"ic-whatsapp", text:"اطلب مباشرة عبر واتساب"},
-      {icon:"ic-gift", text:"عروض وهدايا حصرية"},
-    ],
-    offers:[
-      "اشترِ 3 عطور 50مل واحصل على هدية مجانية",
-      "اشترِ 5 عطور 50مل واحصل على شحن مجاني",
-      "اشترِ 5 عطور 10مل واحصل على معطر سيارة مجاني",
-      "اشترِ 10 عطور 10مل واحصل على عطر 10مل مجاني + معطر سيارة",
-      "اشترِ 10 عطور 50مل واحصل على شحن مجاني + عطرين 10مل ومعطر سيارة",
     ],
     guarantee:"كل عطر عليه ضمان استرجاع المبلغ في حال عدم المصداقية.",
     noMatch: "ما فيه عطور مطابقة لهذا الفلتر حاليًا",
@@ -431,14 +423,6 @@ const I18N = {
       {icon:"ic-shield", text:"Money-back guarantee"},
       {icon:"ic-sparkle", text:"Premium alternative to originals"},
       {icon:"ic-whatsapp", text:"Order directly on WhatsApp"},
-      {icon:"ic-gift", text:"Exclusive offers & gifts"},
-    ],
-    offers:[
-      "Buy 3 perfumes (50ml) and get a free gift",
-      "Buy 5 perfumes (50ml) and get free shipping",
-      "Buy 5 perfumes (10ml) and get a free car diffuser",
-      "Buy 10 perfumes (10ml) and get a free 10ml perfume + car diffuser",
-      "Buy 10 perfumes (50ml) and get free shipping + 2 free 10ml perfumes + a car diffuser",
     ],
     guarantee:"Every fragrance is covered by a money-back guarantee if it doesn't match the description.",
     noMatch: "No perfumes match this filter right now",
@@ -573,12 +557,12 @@ const I18N = {
    كل عرض له: الحجم اللي يُحتسب عليه (50 أو 10)، أقل كمية مطلوبة، ونص الهدية
    بالعربي والإنجليزي. الترتيب من الأكبر للأصغر مو مهم — الكود يرتبها تلقائيًا.
    ====================================================================== */
+// 13 أكتوبر 2026: شلنا كل هدايا العروض التلقائية (عطر/معطر سيارة مجاني) بطلب صاحب
+// المتجر — صار يختار الهدية يدويًا بنفسه من لوحة التحكم (تبويب "💰 المبيعات") بدل
+// ما تُحسب تلقائيًا هنا. أبقينا فقط على التوصيل المجاني التلقائي زي ما هو بالضبط
+// (5 قطع 50مل فأكثر = توصيل مجاني)، لأنه طلب صريح يبقى كما هو.
 const OFFERS_CONFIG = [
-  { size:"50", minQty:10, freeShipping:true, reward:{ ar:"توصيل مجاني + عطرين 10مل + معطر سيارة مجانًا", en:"Free delivery + 2 free 10ml perfumes + free car diffuser" } },
-  { size:"50", minQty:5,  freeShipping:true, reward:{ ar:"توصيل مجاني", en:"Free delivery" } },
-  { size:"50", minQty:3,  reward:{ ar:"هدية مجانية (عطر 10مل أو معطر سيارة)", en:"Free gift (10ml perfume or car diffuser)" } },
-  { size:"10", minQty:10, reward:{ ar:"عطر 10مل مجاني + معطر سيارة مجانًا", en:"Free 10ml perfume + free car diffuser" } },
-  { size:"10", minQty:5,  reward:{ ar:"معطر سيارة مجاني", en:"Free car diffuser" } },
+  { size:"50", minQty:5, freeShipping:true, reward:{ ar:"توصيل مجاني", en:"Free delivery" } },
 ];
 
 function hasFreeShipping(offerStatus){
@@ -1335,37 +1319,6 @@ let showMoreObserver = null; // يراقب عنصر التحميل التلقا�
 let cart = {}; // { perfumeId: {size, qty} } — نجيب البراند/الاسم/السعر وقت العرض من مصفوفة perfumes نفسها. تُحفظ فعليًا بالـ localStorage (شوف persistCartState/restoreCartState تحت) عشان تضل موجودة حتى لو سكر الزائر المتصفح.
 let paymentMethod = "cod"; // "cod" | "tabby" | "bank"
 
-/* ===== Offers banner (نصوص العروض ثابتة ومطابقة لتعليمات المتجر — تُحدَّث يدويًا هنا لو تغيّرت العروض) ===== */
-let offerIndex = 0;
-let offerTimer = null;
-const OFFER_INTERVAL_MS = 5000;
-
-function renderOffers(){
-  const t = I18N[lang];
-  const track = document.getElementById("offersTrack");
-  const dotsWrap = document.getElementById("offersDots");
-  track.querySelectorAll(".offer-slide").forEach(n=>n.remove());
-  dotsWrap.innerHTML = "";
-  t.offers.forEach((text,i)=>{
-    const slide = document.createElement("div");
-    slide.className = "offer-slide" + (i===offerIndex ? " active" : "");
-    slide.innerHTML = svgIcon("ic-gift") + `<span>${text}</span>`;
-    track.insertBefore(slide, dotsWrap);
-    const dot = document.createElement("button");
-    dot.type = "button";
-    dot.className = i===offerIndex ? "active" : "";
-    dot.onclick = ()=>{ offerIndex = i; resetOfferTimer(); renderOffers(); };
-    dotsWrap.appendChild(dot);
-  });
-}
-function resetOfferTimer(){
-  if(offerTimer) clearInterval(offerTimer);
-  offerTimer = setInterval(()=>{
-    offerIndex = (offerIndex+1) % I18N[lang].offers.length;
-    renderOffers();
-  }, OFFER_INTERVAL_MS);
-}
-
 function renderTrust(){
   const t = I18N[lang];
   document.getElementById("trustBar").innerHTML = t.trust.map(item =>
@@ -1488,7 +1441,6 @@ function renderAll(){
 
   renderSiteNav();
 
-  renderOffers();
   renderTrust();
   renderHero();
   renderCountrySelect();
@@ -2283,7 +2235,7 @@ function renderCart(){
   const totalQty = items.reduce((sum,i)=> sum + i.qty, 0);
   const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
   const offerStatus = computeOffersStatus(items);
-  const offerBadge = offerStatus.unlocked.length ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🎁</span>` : "";
+  const offerBadge = offerStatus.unlocked.length ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🚚</span>` : "";
   cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${totalQty}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}${offerBadge}</span>`;
   checkoutBtn.style.opacity = "1"; checkoutBtn.style.pointerEvents = "auto";
   orderFormBtn.disabled = false;
@@ -2770,8 +2722,6 @@ wireOrderForm();
 
 document.getElementById("btnAr").onclick = ()=> chooseLang("ar");
 document.getElementById("btnEn").onclick = ()=> chooseLang("en");
-document.querySelector(".offers-banner").addEventListener("mouseenter", ()=> clearInterval(offerTimer));
-document.querySelector(".offers-banner").addEventListener("mouseleave", resetOfferTimer);
 
 document.getElementById("langModalAr").onclick = ()=> chooseLang("ar");
 document.getElementById("langModalEn").onclick = ()=> chooseLang("en");
@@ -2813,7 +2763,6 @@ try{ savedLang = localStorage.getItem(LANG_STORAGE_KEY); }catch(e){}
 setLang(savedLang === "en" ? "en" : "ar");
 if(!savedLang){ openLangModal(); }
 
-resetOfferTimer();
 loadPerfumesFromSheet();
 loadSaleNotifications();
 
