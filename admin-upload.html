@@ -1083,6 +1083,49 @@
       <div class="static-list" id="mat_historyList"></div>
     </div>
 
+    <div class="ov-section-title" style="margin-top:26px;">💵 المصاريف الشهرية العامة</div>
+    <small class="hint" style="margin-top:0;">
+      لتسجيل أي مصروف عام للمشروع بدون تتبع كمية أو مخزون (مثل: أدوات ومستلزمات، شحن طلبات من مواقع تسوّق، تسويق
+      وإعلانات...). فقط التاريخ والوصف والمبلغ — بدون حسابات متوسط سعر وحدة أو مخزون متبقي (هذي خاصة بقسم المواد
+      الخام فوق).
+    </small>
+    <div class="kpi-grid" id="exp_kpiGrid"></div>
+
+    <div class="row" style="margin-top:16px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="flex:2; min-width:200px;">
+        <label for="exp_description">وصف المصروف</label>
+        <input type="text" id="exp_description" placeholder="مثال: قمعات بلاستيك لصناعة العطور">
+      </div>
+      <div class="field" style="min-width:130px;">
+        <label for="exp_amount">المبلغ الإجمالي (AED)</label>
+        <input type="number" id="exp_amount" min="0" step="0.01">
+      </div>
+      <div class="field" style="min-width:150px;">
+        <label for="exp_date">التاريخ</label>
+        <input type="date" id="exp_date">
+      </div>
+      <div class="field" style="min-width:180px;">
+        <label for="exp_category">التصنيف</label>
+        <select id="exp_category">
+          <option value="manufacturing_supplies">مستلزمات تصنيع (أدوات/قمعات...)</option>
+          <option value="marketing">تسويق وإعلانات</option>
+          <option value="shipping">شحن وتوصيل</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2; min-width:180px;">
+        <label for="exp_note">ملاحظة (اختياري)</label>
+        <input type="text" id="exp_note" placeholder="مثال: رقم الطلب أو اسم الموقع">
+      </div>
+      <button type="button" id="exp_addBtn">➕ سجّل المصروف</button>
+    </div>
+    <div class="status" id="exp_statusBox"></div>
+
+    <div style="margin-top:14px;">
+      <small class="hint" style="margin-top:0;">سجل آخر المصاريف (الأحدث أول):</small>
+      <div class="static-list" id="exp_historyList"></div>
+    </div>
+
     <div class="ov-section-title" style="margin-top:26px;">نظرة عامة على الأرباح</div>
     <div id="cost_empty" class="ov-empty-note" style="display:none;">
       ما فيه طلبات محتسبة بعد. لما تُعتمد أول طلبية من تبويب "🧾 الطلبات الجديدة"، الأرقام هنا بتظهر تلقائيًا.
@@ -1325,6 +1368,7 @@ const PENDING_ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/
 const DISTRIBUTIONS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/distributions.json?t=` + Date.now();
 const SHIPPING_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/shipping-rates.json?t=` + Date.now();
 const MATERIALS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/materials.json?t=` + Date.now();
+const EXPENSES_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/expenses.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
@@ -1335,6 +1379,7 @@ const PENDING_ORDERS_JSON_PATH = "pending-orders.json";
 const DISTRIBUTIONS_JSON_PATH = "distributions.json";
 const SHIPPING_JSON_PATH = "shipping-rates.json";
 const MATERIALS_JSON_PATH = "materials.json";
+const EXPENSES_JSON_PATH = "expenses.json";
 
 let perfumes = [];           // آخر نسخة معروفة (للعرض/البحث فقط)
 let brandFilterValue = "all"; // فلتر البراند المختار من القائمة المنسدلة (يشترك فيه البحث + المخزون)
@@ -1536,6 +1581,7 @@ let reviewsOrdersExpandedKey = null; // رقم الطلب المفتوح حال�
 let reviewsOrdersShowAll = false; // false = نخفي الطلبات اللي كل عطورها اتقيّمت
 let salesData = [];          // آخر نسخة معروفة من orders.json (مبيعات واتساب المسجّلة يدويًا)
 let materialsData = { purchases: [] }; // آخر نسخة معروفة من materials.json (مشتريات المواد الخام)
+let expensesData = { expenses: [] }; // آخر نسخة معروفة من expenses.json (مصاريف شهرية عامة بدون تتبع كمية/مخزون — 13 أكتوبر 2026)
 let salesSelected = null;    // العطر المختار حاليًا بوضع "المبيعات"
 let siteOrders = null;       // طلبات نموذج الموقع (Google Sheet) — null لين يتحدّث أول مرة
 let bankInfoData = { AE:{}, OM:{} }; // آخر نسخة معروفة من bank-info.json
@@ -1633,6 +1679,19 @@ async function loadMaterials(){
     materialsData = (obj && Array.isArray(obj.purchases)) ? obj : { purchases: [] };
   }catch(e){
     materialsData = { purchases: [] }; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
+  }
+  renderOverview();
+}
+
+// ===== تحميل المصاريف الشهرية العامة (expenses.json) — 13 أكتوبر 2026 — نفس منطق loadMaterials بالضبط =====
+async function loadExpenses(){
+  try{
+    const res = await fetch(EXPENSES_JSON_RAW_URL, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const obj = await res.json();
+    expensesData = (obj && Array.isArray(obj.expenses)) ? obj : { expenses: [] };
+  }catch(e){
+    expensesData = { expenses: [] }; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
   }
   renderOverview();
 }
@@ -4935,6 +4994,112 @@ function materialCurrentStock(material){
   return materialTotalPurchased(material) - materialTotalUsed(material);
 }
 
+// ===================================================================
+// 💵 المصاريف الشهرية العامة (13 أكتوبر 2026)
+// سجل مصاريف بسيط بدون تتبع كمية/مخزون — لأشياء مثل مستلزمات صناعة العطور
+// (قمعات، أدوات...)، شحن، تسويق، وغيرها — عكس نظام المواد الخام أعلاه اللي
+// يحسب متوسط سعر الوحدة والمخزون المتبقي. هنا فقط: تاريخ + وصف + مبلغ.
+// ===================================================================
+const EXPENSE_CATEGORIES = {
+  manufacturing_supplies: "مستلزمات تصنيع (أدوات/قمعات...)",
+  marketing: "تسويق وإعلانات",
+  shipping: "شحن وتوصيل",
+  other: "أخرى",
+};
+
+function expensesInMonth(yyyyMm){
+  return (expensesData.expenses || []).filter(e => String(e.date || "").slice(0,7) === yyyyMm);
+}
+function expensesTotal(list){
+  return (list || []).reduce((s,e) => s + (Number(e.amount) || 0), 0);
+}
+
+function renderExpensesSection(){
+  const grid = document.getElementById("exp_kpiGrid");
+  if(!grid) return;
+  const thisMonth = todayStr().slice(0,7);
+  const monthList = expensesInMonth(thisMonth);
+  const monthTotal = expensesTotal(monthList);
+  const allTotal = expensesTotal(expensesData.expenses || []);
+  grid.innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-label">مصاريف هذا الشهر (AED)</div>
+      <div class="kpi-value">${fmtNum(monthTotal)}</div>
+      <div class="kpi-sub">${fmtNum(monthList.length)} عملية</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">إجمالي المصاريف المسجّلة (كل الوقت، AED)</div>
+      <div class="kpi-value">${fmtNum(allTotal)}</div>
+      <div class="kpi-sub">${fmtNum((expensesData.expenses || []).length)} عملية</div>
+    </div>`;
+
+  const hist = (expensesData.expenses || []).slice().sort((a,b) => (b.date||"").localeCompare(a.date||"") || (b.id||"").localeCompare(a.id||""));
+  const histBox = document.getElementById("exp_historyList");
+  if(!hist.length){
+    histBox.innerHTML = `<div class="ov-empty-note">ما فيه أي مصروف مسجّل بعد — سجّلي أول مصروف من الفورم فوق.</div>`;
+  } else {
+    histBox.innerHTML = hist.map(e => `
+      <div class="sale-row">
+        <div class="sale-row-top">
+          <span class="sale-row-name">${e.date} — ${String(e.description || "").replace(/</g,"&lt;")}</span>
+          <span class="sale-row-amount">${fmtNum(e.amount)} AED</span>
+        </div>
+        <div class="sale-row-meta">
+          ${EXPENSE_CATEGORIES[e.category] || "أخرى"}${e.note ? " — " + String(e.note).replace(/</g,"&lt;") : ""}
+          <button type="button" class="secondary exp-delete-btn" data-id="${e.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+        </div>
+      </div>`).join("");
+    histBox.querySelectorAll(".exp-delete-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if(!confirm("تأكيد حذف هذا المصروف؟")) return;
+        const token = getToken();
+        if(!token){ document.getElementById("exp_statusBox").className = "status show err"; document.getElementById("exp_statusBox").textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+        try{
+          expensesData = await updateExpensesJsonWithRetry(token, (obj) => {
+            return { ...obj, expenses: obj.expenses.filter(x => x.id !== btn.dataset.id) };
+          }, "Delete monthly expense entry");
+          renderCostPanel();
+        }catch(e){
+          const box = document.getElementById("exp_statusBox");
+          box.className = "status show err";
+          box.textContent = "صار خطأ أثناء الحذف: " + e.message;
+        }
+      });
+    });
+  }
+}
+
+document.getElementById("exp_addBtn").addEventListener("click", async () => {
+  const token = getToken();
+  const box = document.getElementById("exp_statusBox");
+  if(!token){ box.className = "status show err"; box.textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+  const description = document.getElementById("exp_description").value.trim();
+  const amount = parseFloat(document.getElementById("exp_amount").value);
+  const date = document.getElementById("exp_date").value || todayStr();
+  const category = document.getElementById("exp_category").value;
+  const note = document.getElementById("exp_note").value.trim();
+  if(!description){ box.className = "status show err"; box.textContent = "اكتبي وصف المصروف أول."; return; }
+  if(!amount || amount <= 0){ box.className = "status show err"; box.textContent = "اكتبي المبلغ أول."; return; }
+  const btn = document.getElementById("exp_addBtn");
+  btn.disabled = true;
+  try{
+    box.className = "status show info"; box.textContent = "جارِ الحفظ...";
+    const entry = { id: "exp_" + Date.now(), date, description, amount, category, note };
+    expensesData = await updateExpensesJsonWithRetry(token, (obj) => {
+      return { ...obj, expenses: [...obj.expenses, entry] };
+    }, `Log monthly expense: ${description}`);
+    document.getElementById("exp_description").value = "";
+    document.getElementById("exp_amount").value = "";
+    document.getElementById("exp_note").value = "";
+    box.className = "status show ok"; box.textContent = "تم تسجيل المصروف بنجاح.";
+    renderCostPanel();
+  }catch(e){
+    box.className = "status show err"; box.textContent = "صار خطأ: " + e.message;
+  }finally{
+    btn.disabled = false;
+  }
+});
+
 function renderMaterialsSection(){
   const grid = document.getElementById("mat_kpiGrid");
   if(!grid) return;
@@ -5020,6 +5185,7 @@ document.getElementById("mat_addBtn").addEventListener("click", async () => {
 function renderCostPanel(){
   if(!document.getElementById("cost_units")) return; // الصفحة لسا ما خلصت تحميل
   renderMaterialsSection();
+  renderExpensesSection();
   const report = computeProfitReport();
   document.getElementById("cost_empty").style.display = report.unitsCount ? "none" : "block";
   document.getElementById("cost_kpiGrid").style.display = report.unitsCount ? "grid" : "none";
@@ -5487,6 +5653,59 @@ async function updateMaterialsJsonWithRetry(token, mutateFn, commitMsg, attempt)
   }catch(e){
     if(String(e.message).includes("تعديل ثاني") && attempt < 2){
       return updateMaterialsJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
+    }
+    throw e;
+  }
+  return newObj;
+}
+
+// ===== قراءة/كتابة expenses.json (مصاريف شهرية عامة بدون تتبع كمية/مخزون — 13 أكتوبر 2026) =====
+// نفس منطق materials.json بالضبط، بس المحتوى كائن {expenses:[...]}.
+async function getExpensesJsonWithSha(token){
+  const res = await fetch(`${API_BASE}/${EXPENSES_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if(res.status === 404) return { obj: { expenses: [] }, sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error("تعذّر قراءة expenses.json الحالي: " + (err.message || res.status));
+  }
+  const info = await res.json();
+  let obj;
+  try{ obj = JSON.parse(base64ToUtf8(info.content)); }catch(e){ obj = { expenses: [] }; }
+  if(!obj || !Array.isArray(obj.expenses)) obj = { expenses: [] };
+  return { obj, sha: info.sha };
+}
+
+async function putExpensesJson(obj, sha, token, commitMsg){
+  const body = {
+    message: commitMsg,
+    content: utf8ToBase64(JSON.stringify(obj, null, 2)),
+    branch: BRANCH
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${EXPENSES_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+}
+
+async function updateExpensesJsonWithRetry(token, mutateFn, commitMsg, attempt){
+  attempt = attempt || 0;
+  const { obj, sha } = await getExpensesJsonWithSha(token);
+  const newObj = mutateFn(obj);
+  try{
+    await putExpensesJson(newObj, sha, token, commitMsg);
+  }catch(e){
+    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
+      return updateExpensesJsonWithRetry(token, mutateFn, commitMsg, attempt + 1);
     }
     throw e;
   }
@@ -6934,6 +7153,7 @@ loadData();
 loadReviews();
 loadOrders();
 loadMaterials();
+loadExpenses();
 loadPendingOrdersIntoPanel(); // تحميل مبكر بس عشان يظهر رقم الطلبات الجديدة بالتبويب فورًا من غير ما ينتظر المستخدم يضغطه
 loadAppsScriptSettings();
 if(document.getElementById("ov_appsUrl").value.trim()){
