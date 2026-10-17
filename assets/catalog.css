@@ -697,3 +697,27 @@
   }
   @media(max-width:480px){ .sale-toast{ left:10px; bottom:96px; width:calc(100vw - 20px); } }
 
+
+/* ===== أضيفت مع صفحة الدفع الجديدة (كاش عند الاستلام، ضمان إيفوك، شريط آخر الطلبات) ===== */
+.stock-note{ font-size:10px; margin-top:2px; }
+.stock-note.low{ color:var(--gold-deep); font-weight:700; }
+.stock-note.out{ color:var(--muted); }
+.inspired-line{ font-size:11px; color:var(--muted); margin-top:2px; }
+.verified-badge{
+  display:inline-block; font-size:10px; font-weight:600; color:var(--gold-deep); background:var(--gold-pale);
+  border-radius:999px; padding:1px 8px; margin-inline-start:6px; vertical-align:middle;
+}
+.lb-disclaimer{ font-size:11.5px; color:var(--muted); }
+.of-hint{ font-size:11px; color:var(--muted); margin-top:5px; }
+.of-codnote{ margin-top:14px; padding:10px 12px; border-radius:10px; background:var(--bg-soft); font-size:12.5px; font-weight:600; }
+.of-consent{ display:flex; align-items:flex-start; gap:8px; margin-top:14px; font-size:12.5px; line-height:1.7; cursor:pointer; }
+.of-consent input{ width:auto; margin-top:4px; flex:none; }
+.of-warranty{ margin-top:14px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:12px; line-height:1.8; color:var(--muted); }
+.of-warranty b{ color:var(--ink); display:block; margin-bottom:2px; }
+.of-warranty p{ margin:0; }
+.of-warranty .of-disclaimer{ margin-top:6px; }
+.of-error{ margin-top:12px; padding:10px 12px; border-radius:10px; background:#fdecea; color:#8a1c14; font-size:13px; font-weight:600; }
+.order-modal input[aria-invalid="true"], .order-modal textarea[aria-invalid="true"]{ border-color:#c0392b; }
+@media (prefers-reduced-motion: reduce){
+  .sale-toast, .sale-toast.show{ transition:none !important; animation:none !important; }
+}
