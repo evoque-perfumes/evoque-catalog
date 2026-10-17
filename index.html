@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Tajawal:wght@400;500;700&family=Cormorant+Garamond:wght@600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/catalog.css?v=20261017a">
+<link rel="stylesheet" href="assets/home-motion.css?v=20261017a">
 <!-- ===== إضافات SEO ===== -->
 <meta name="description" content="إيفوك للعطور — انطباعات عطرية فاخرة مستوحاة من أشهر العطور، في الإمارات وعُمان. اختر عطرك واطلبه أونلاين أو عبر واتساب. الدفع عند الاستلام وضمان إيفوك.">
 <link rel="canonical" href="https://evoqueperfumes.com/">
@@ -108,39 +109,99 @@
   </div>
 </div>
 
-<header>
-  <div class="top-row">
-    <div class="lang-switch" id="langSwitch">
-      <button id="btnAr" type="button"><svg class="icon"><use href="#ic-globe"/></svg> العربية</button>
-      <button id="btnEn" type="button">English</button>
-    </div>
-    <div style="display:flex; align-items:center; gap:8px;">
+<div class="scroll-progress" aria-hidden="true"><i></i></div>
+<header class="hdr">
+  <!-- h1 مخفي بصريًا عمدًا — موجود بس عشان محركات البحث (Google) تقرأ اسم المتجر ووصفه نصيًا. لا تحذفه. -->
+  <h1 style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;">إيفوك للعطور — انطباعات عطرية فاخرة في الإمارات وعُمان</h1>
+  <div class="hdr-bar">
+    <a href="./" class="hdr-logo" aria-label="إيفوك"><img id="logoImg" class="logo-img" alt="إيفوك للعطور" src="assets/evoque-logo.png"></a>
+    <nav class="site-nav" id="siteNav"></nav>
+    <div class="hdr-actions">
+      <div class="lang-switch" id="langSwitch">
+        <button id="btnAr" type="button"><svg class="icon"><use href="#ic-globe"/></svg> العربية</button>
+        <button id="btnEn" type="button">English</button>
+      </div>
       <select class="header-country-select" id="countrySelectHeader"></select>
-      <a class="icon-btn" id="igHeaderBtn" href="https://www.instagram.com/evoqueperfumess/" target="_blank" title="Instagram"><svg class="icon" style="width:16px;height:16px"><use href="#ic-instagram"/></svg></a>
-      <a class="icon-btn" id="waHeaderBtn" target="_blank" title="WhatsApp"><svg class="icon" style="width:16px;height:16px"><use href="#ic-whatsapp"/></svg></a>
+      <a class="icon-btn" id="igHeaderBtn" href="https://www.instagram.com/evoqueperfumess/" target="_blank" rel="noopener" title="Instagram"><svg class="icon" style="width:16px;height:16px"><use href="#ic-instagram"/></svg></a>
+      <a class="icon-btn" id="waHeaderBtn" target="_blank" rel="noopener" title="WhatsApp"><svg class="icon" style="width:16px;height:16px"><use href="#ic-whatsapp"/></svg></a>
     </div>
   </div>
-  <!-- h1 مخفي بصريًا عمدًا — موجود بس عشان محركات البحث (Google) تقرأ اسم المتجر ووصفه نصيًا، لأن اللوقو فوق صورة وما تقدر تقرأ منها نص مباشرة. لا تحذفه، فقط أخفيه إذا لزم. -->
-  <h1 style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;">إيفوك للعطور — انطباعات عطرية فاخرة في الإمارات وعُمان</h1>
-  <img id="logoImg" class="logo-img" alt="إيفوك للعطور" src="assets/evoque-logo.png">
-  <div class="header-divider"></div>
   <p class="tagline" id="headerSub"></p>
-  <nav class="site-nav" id="siteNav"></nav>
 </header>
 
-<section class="hero" id="hero">
-  <div class="hero-inner">
-    <div class="hero-eyebrow"><span class="hr"></span><span id="heroEyebrow"></span><span class="hr"></span></div>
-    <h2 id="heroTitle"></h2>
-    <p id="heroSubtitle"></p>
+<section class="hero hero-x" id="hero">
+  <div class="hx-mark" aria-hidden="true"><img src="assets/brand/evoque-icon-512.svg" alt=""></div>
+  <div class="hx-grain" aria-hidden="true"></div>
+  <div class="hx-wrap">
+    <div class="hx-copy">
+      <div class="hero-eyebrow" style="--i:0"><span class="hr"></span><span id="heroEyebrow"></span><span class="hr"></span></div>
+      <h2 id="heroTitle" style="--i:1"></h2>
+      <p id="heroSubtitle" style="--i:2"></p>
+      <div class="hx-ctas" style="--i:3">
+        <a class="hx-btn primary" href="#shopStart" data-t="shop"></a>
+        <a class="hx-btn ghost" id="hxWa" href="#" target="_blank" rel="noopener"><svg class="icon"><use href="#ic-whatsapp"/></svg><span data-t="wa"></span></a>
+      </div>
+    </div>
+    <div class="hx-stage" aria-hidden="true">
+      <div class="hx-glow"></div>
+      <div class="hx-card a" id="hxCardA"></div>
+      <div class="bottle" id="hxBottle"></div>
+      <div class="hx-card b" id="hxCardB"></div>
+    </div>
+  </div>
+  <div class="hx-scroll" aria-hidden="true"><span><em data-t="scroll" style="font-style:normal"></em><i></i></span></div>
+</section>
+<div class="trust-bar" id="trustBar"></div>
+
+<section class="story" id="story" data-ch="1" aria-label="إيفوك">
+  <div class="story-stage">
+    <div class="story-in">
+      <div class="story-txt">
+        <div class="ch on"><span class="num">01</span><h3 data-t="c1t"></h3><p data-t="c1p"></p></div>
+        <div class="ch"><span class="num">02</span><h3 data-t="c2t"></h3><p data-t="c2p"></p></div>
+        <div class="ch"><span class="num">03</span><h3 data-t="c3t"></h3><p><span data-t="c3p"></span> <a href="terms.html" data-t="c3a"></a></p></div>
+      </div>
+      <div class="story-vis" id="storyVis" aria-hidden="true"></div>
+    </div>
+    <div class="story-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   </div>
 </section>
 
-<div class="trust-bar" id="trustBar"></div>
+<section class="rail-sec" id="railSec">
+  <div class="rail-head" data-reveal>
+    <div class="eyebrow" data-t="railEy"></div>
+    <h2 data-t="railT"></h2>
+    <p data-t="railP"></p>
+  </div>
+  <div class="rail" id="rail1"></div>
+  <div class="rail" id="rail2"></div>
+</section>
+
+<section class="stats" aria-label="Evoque">
+  <div class="stats-in">
+    <div class="stat" data-reveal style="--d:0s"><span class="n" id="stat1">0</span><span class="l" data-t="s1"></span></div>
+    <div class="stat" data-reveal style="--d:.1s"><span class="n" id="stat2">0</span><span class="l" data-t="s2"></span></div>
+    <div class="stat" data-reveal style="--d:.2s"><span class="n" id="stat3">0<small id="stat3Cur"></small></span><span class="l" id="stat3Label"></span></div>
+    <div class="stat" data-reveal style="--d:.3s"><span class="n" id="stat4">0</span><span class="l" data-t="s4"></span></div>
+  </div>
+</section>
+
+<section class="warr">
+  <div class="warr-in">
+    <h2 data-reveal data-t="wT"></h2>
+    <div class="warr-steps">
+      <div class="wstep" data-reveal="zoom" style="--d:0s"><b data-t="w1n"></b><span data-t="w1"></span></div>
+      <div class="wstep" data-reveal="zoom" style="--d:.12s"><b data-t="w2n"></b><span data-t="w2"></span></div>
+      <div class="wstep" data-reveal="zoom" style="--d:.24s"><b data-t="w3n"></b><span data-t="w3"></span></div>
+    </div>
+    <p class="warr-full" data-reveal id="warrFull"></p>
+  </div>
+</section>
 
 
 <section class="teaser" aria-labelledby="teaserTitle">
-  <div class="teaser-inner">
+  <div class="teaser-bg" aria-hidden="true"></div>
+  <div class="teaser-inner" data-reveal>
     <span class="teaser-tag" id="teaserTag"></span>
     <h2 id="teaserTitle"></h2>
     <p id="teaserText"></p>
@@ -162,6 +223,11 @@
 
 <!-- مربع بحث الصفحة الرئيسية (27 أغسطس 2026) — يبحث بكل العطور (كل الأجناس) بالاسم أو
      البراند مباشرة من غير ما الزائر يحتاج يفتح تصنيف رجالي/نسائي أول -->
+<div class="shop-intro" id="shopStart" data-reveal>
+  <div class="eyebrow" data-t="shopEy"></div>
+  <h2 data-t="shopT"></h2>
+  <p data-t="shopP"></p>
+</div>
 <div class="search-controls">
   <div class="search-field">
     <svg class="icon"><use href="#ic-search"/></svg>
@@ -340,6 +406,7 @@
   window.EVOQUE_PAGE = { mode: "home" };
 </script>
 <script src="assets/catalog.js?v=20260926a"></script>
+<script src="assets/home-motion.js?v=20261017a" defer></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>
