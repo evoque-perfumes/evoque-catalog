@@ -6,7 +6,7 @@
  * - الدولة توحَّد إلى AE أو OM (كانت: AE / UAE / OM / الإمارات).
  * - الجوال يتحول لصيغة E.164 لو أمكن (phone)، والأصل يتحفظ في phoneRaw. لو ما أمكن: phoneInvalid=true.
  * - الحالات: received→delivered، prep→confirmed، shipped→dispatched، "" أو غير موجودة→new.
- *   needs_oil→confirmed + needsOil:true (وسم داخلي، مو حالة للعميل).
+ *   needs_oil→confirmed (حالة "يحتاج زيت" ألغيت بقرار المالك).
  * - deliveredAt يُترك null للطلبات القديمة (تاريخ التسليم الفعلي غير معروف — ما نخترعه).
  * - ما يطبع بيانات عملاء: فقط أعداد.
  */
@@ -51,7 +51,6 @@ const out = rows.map(r => {
     else { o.phoneInvalid = true; stats.phoneInvalid++; }
   }
   const st = STATUS[String(r.status == null ? "" : r.status)] || "new";
-  if (String(r.status) === "needs_oil" || String(r.status) === "needsOil") o.needsOil = true;
   o.status = st;
   if (st === "new") stats.statusNew++;
   if (!("deliveredAt" in o)) o.deliveredAt = null;
