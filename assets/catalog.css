@@ -718,3 +718,12 @@
 /* ===== Hero title: Arabic display face (logo/hero only) ===== */
 html[lang="ar"] .hero h2{ font-family:'Aref Ruqaa','Tajawal',serif; font-weight:700; }
 html[lang="en"] .hero h2{ font-family:'Cormorant Garamond','Jost',serif; font-weight:600; }
+
+/* ===== شريط الموافقة على التتبع (غير حاجب) ===== */
+.consent-bar{ display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; padding:8px 14px; background:var(--rose-soft); border-bottom:1px solid var(--rose); color:var(--ink); font-size:12.5px; line-height:1.6; text-align:center; }
+.consent-bar p{ margin:0; }
+.consent-bar a{ color:var(--wine); text-decoration:underline; }
+.consent-actions{ display:flex; gap:8px; }
+.consent-bar button{ font-family:inherit; font-size:12.5px; border-radius:999px; padding:5px 16px; cursor:pointer; border:1px solid var(--wine); }
+.consent-yes{ background:var(--wine); color:#fff; }
+.consent-no{ background:transparent; color:var(--wine); }
