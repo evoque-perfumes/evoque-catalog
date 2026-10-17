@@ -1929,7 +1929,7 @@ function renderGrid(explicitList){
             <div class="qty-mid">${svgIcon("ic-check")}<span>${entry.qty} ${t.inCartLabel}</span></div>
             <button type="button" class="qty-plus" aria-label="+" ${atMax ? "disabled" : ""}>+</button>
           </div>
-          ${atMax ? `<div style="font-size:9px;color:#c0475a;font-weight:700;margin-top:2px;">${t.maxStockNote.replace("{n}", maxQty)}</div>` : ""}`;
+          ${atMax ? `<div style="font-size:9px;color:var(--wine);font-weight:700;margin-top:2px;">${t.maxStockNote.replace("{n}", maxQty)}</div>` : ""}`;
         actionArea.querySelector(".qty-minus").onclick = ()=>{
           if(entry.qty > 1){ entry.qty -= 1; }
           else { delete cart[p.id]; }
@@ -2254,7 +2254,7 @@ function renderCartModal(){
         <div class="ci-brand">${toTitleCase(i.p.brand)}</div>
         <div class="ci-name">${toTitleCase(i.p.name)}</div>
         <div class="ci-meta">${i.size}ml · ${i.unitPrice != null ? `${i.unitPrice} ${cur}` : t.askPrice}${i.lineTotal != null ? ` = <b>${i.lineTotal} ${cur}</b>` : ""}</div>
-        ${atMax ? `<div style="font-size:9px;color:#c0475a;font-weight:700;">${t.maxStockNote.replace("{n}", maxQty)}</div>` : ""}
+        ${atMax ? `<div style="font-size:9px;color:var(--wine);font-weight:700;">${t.maxStockNote.replace("{n}", maxQty)}</div>` : ""}
       </div>
       <div class="ci-actions">
         <div class="qty-stepper">
