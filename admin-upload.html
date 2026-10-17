@@ -407,7 +407,7 @@
             <button type="button" class="secondary" id="sq_stock50Plus" style="padding:10px 16px;">+</button>
           </div>
         </div>
-        <div class="field">
+        <div style="display:none" class="field">
           <label for="sq_stock10">10مل</label>
           <div class="row" style="gap:6px; flex-wrap:nowrap; margin-bottom:14px;">
             <button type="button" class="secondary" id="sq_stock10Minus" style="padding:10px 16px;">−</button>
@@ -1152,14 +1152,8 @@
 
     <label for="bp_field">أي سعر تبي تعدّل؟</label>
     <select id="bp_field">
-      <option value="price10">10مل (درهم)</option>
       <option value="price50">50مل (درهم)</option>
-      <option value="price10Before">10مل قبل الخصم (درهم)</option>
-      <option value="price50Before">50مل قبل الخصم (درهم)</option>
-      <option value="price10Om">10مل (ريال عُماني)</option>
       <option value="price50Om">50مل (ريال عُماني)</option>
-      <option value="price10OmBefore">10مل قبل الخصم (ريال عُماني)</option>
-      <option value="price50OmBefore">50مل قبل الخصم (ريال عُماني)</option>
     </select>
 
     <label>على أي عطور؟</label>
@@ -1222,6 +1216,14 @@
       <div class="field"><label for="f_brand">البراند</label><input type="text" id="f_brand" placeholder="مثال: GUCCI"></div>
       <div class="field"><label for="f_name">اسم العطر</label><input type="text" id="f_name" placeholder="مثال: INTENSE OUD"></div>
     </div>
+    <div class="grid2">
+      <div class="field"><label for="f_displayName">اسم إيفوك للعطر (يظهر للعميل) — اختياري</label><input type="text" id="f_displayName" maxlength="80" placeholder="اتركه فاضي لحد ما تحدد الاسم"></div>
+      <div class="field"><label for="f_inspiredBy">مستوحى من (نص السطر الصغير) — اختياري</label><input type="text" id="f_inspiredBy" maxlength="120" placeholder="مثال: Gucci Intense Oud — الفاضي = البراند + الاسم"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label for="f_photo">صورة إيفوك الخاصة للعطر (رابط داخل الموقع) — اختياري</label><input type="text" id="f_photo" maxlength="200" placeholder="assets/photos/xxx.webp — الفاضي = بطاقة المكونات"></div>
+      <div class="field"><label for="f_collection">التشكيلة — اختياري</label><input type="text" id="f_collection" maxlength="60" placeholder="مثال: قلعة الحمراء"></div>
+    </div>
 
     <label for="f_gender">الجنس</label>
     <select id="f_gender">
@@ -1243,9 +1245,9 @@
       <legend>الأسعار — الإمارات (AED)</legend>
       <div class="grid4">
         <div class="field"><label for="f_price50">50مل</label><input type="number" id="f_price50" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price10">10مل</label><input type="number" id="f_price10" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price50Before">50مل قبل الخصم</label><input type="number" id="f_price50Before" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price10Before">10مل قبل الخصم</label><input type="number" id="f_price10Before" min="0" step="0.01"></div>
+        <div class="field" style="display:none"><label for="f_price10">10مل</label><input type="number" id="f_price10" min="0" step="0.01"></div>
+        <div class="field" style="display:none"><label for="f_price50Before">50مل قبل الخصم</label><input type="number" id="f_price50Before" min="0" step="0.01"></div>
+        <div class="field" style="display:none"><label for="f_price10Before">10مل قبل الخصم</label><input type="number" id="f_price10Before" min="0" step="0.01"></div>
       </div>
       <small class="hint">خانات "قبل الخصم" اختيارية — عبّيها بس لو تبا يظهر شريط خصم على العطر. خليها فاضية إذا ما فيه خصم.</small>
     </fieldset>
@@ -1254,9 +1256,9 @@
       <legend>الأسعار — عُمان (OMR) — اختياري</legend>
       <div class="grid4">
         <div class="field"><label for="f_price50Om">50مل</label><input type="number" id="f_price50Om" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price10Om">10مل</label><input type="number" id="f_price10Om" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price50OmBefore">50مل قبل الخصم</label><input type="number" id="f_price50OmBefore" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price10OmBefore">10مل قبل الخصم</label><input type="number" id="f_price10OmBefore" min="0" step="0.01"></div>
+        <div class="field" style="display:none"><label for="f_price10Om">10مل</label><input type="number" id="f_price10Om" min="0" step="0.01"></div>
+        <div class="field" style="display:none"><label for="f_price50OmBefore">50مل قبل الخصم</label><input type="number" id="f_price50OmBefore" min="0" step="0.01"></div>
+        <div class="field" style="display:none"><label for="f_price10OmBefore">10مل قبل الخصم</label><input type="number" id="f_price10OmBefore" min="0" step="0.01"></div>
       </div>
     </fieldset>
 
@@ -1264,7 +1266,7 @@
       <legend>المخزون (الكمية المتوفرة)</legend>
       <div class="grid2">
         <div class="field"><label for="f_stock50">50مل — الكمية</label><input type="number" id="f_stock50" min="0" step="1" value="1"></div>
-        <div class="field"><label for="f_stock10">10مل — الكمية</label><input type="number" id="f_stock10" min="0" step="1" value="1"></div>
+        <div class="field" style="display:none"><label for="f_stock10">10مل — الكمية</label><input type="number" id="f_stock10" min="0" step="1" value="1"></div>
       </div>
       <small class="hint" style="margin-top:0;">0 = نفدت الكمية (الموقع يعرض "نفدت الكمية" تلقائيًا). أي رقم أكبر من صفر = متوفر.</small>
     </fieldset>
@@ -2200,10 +2202,10 @@ function renderStockCategoryList(cat){
       badgeText = "ناقص: " + getMissingFields(p).map(f => STOCK_FIELD_LABELS[f]).join("، ");
       badgeClass = "pending";
     } else if(cat === "low"){
-      badgeText = `10مل: ${stockAsQty(p.stock10)} — 50مل: ${stockAsQty(p.stock50)}`;
+      badgeText = `50مل: ${stockAsQty(p.stock50)}`;
       badgeClass = "pending";
     } else {
-      badgeText = `10مل: ${stockAsQty(p.stock10)} — 50مل: ${stockAsQty(p.stock50)}`;
+      badgeText = `50مل: ${stockAsQty(p.stock50)}`;
       badgeClass = isOutOfStock(p) ? "pending" : "done";
     }
     const lastUpdateHtml = latestStockUpdateLabel(p);
@@ -4831,10 +4833,10 @@ function renderDropdown(query){
     // رمادية وما يُختار (العكس بوضع "📦 المخزون" نفسه اللي هدفه أصلًا تعديل الكمية،
     // فما نعطّله هناك). نفحص الحجمين الاثنين هنا (مو بس 50مل زي isOutOfStock) لأنه
     // ممكن يكون 10مل لسا متوفر حتى لو 50مل خلص، فتبقى قابلة للبيع.
-    const soldOutBothSizes = mode === "sales" && stockAsQty(p.stock10) <= 0 && stockAsQty(p.stock50) <= 0;
+    const soldOutBothSizes = mode === "sales" && stockAsQty(p.stock50) <= 0;
     if(mode === "stock"){
       const out = isOutOfStock(p);
-      badgeHtml = `<span class="badge ${out ? "pending" : "done"}">10مل:${stockAsQty(p.stock10)} 50مل:${stockAsQty(p.stock50)}</span>`;
+      badgeHtml = `<span class="badge ${out ? "pending" : "done"}">50مل:${stockAsQty(p.stock50)}</span>`;
     } else if(mode === "reviews"){
       const n = reviewsForPerfume(p.id).length;
       badgeHtml = `<span class="badge ${n > 0 ? "done" : "pending"}">${n > 0 ? n + " تقييم" : "بدون تقييم"}</span>`;
@@ -5021,6 +5023,10 @@ function selectPerfumeForEdit(p){
 function fillForm(p){
   document.getElementById("f_brand").value = p.brand || "";
   document.getElementById("f_name").value = p.name || "";
+  document.getElementById("f_displayName").value = p.displayName || "";
+  document.getElementById("f_inspiredBy").value = p.inspiredBy || "";
+  document.getElementById("f_photo").value = p.photo || "";
+  document.getElementById("f_collection").value = p.collection || "";
   document.getElementById("f_gender").value = p.gender || "unisex";
   document.querySelectorAll(".f_season").forEach(cb => cb.checked = (p.seasons||[]).includes(cb.value));
   document.getElementById("f_price50").value = p.price50 ?? "";
@@ -5064,12 +5070,13 @@ function fillForm(p){
 function resetForm(){
   document.getElementById("f_brand").value = "";
   document.getElementById("f_name").value = "";
+  ["f_displayName","f_inspiredBy","f_photo","f_collection"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("f_gender").value = "unisex";
   document.querySelectorAll(".f_season").forEach(cb => cb.checked = (cb.value === "winter"));
   ["f_price50","f_price10","f_price50Om","f_price10Om","f_price50Before","f_price10Before","f_price50OmBefore","f_price10OmBefore"]
     .forEach(id => document.getElementById(id).value = "");
   document.getElementById("f_stock50").value = 1;
-  document.getElementById("f_stock10").value = 1;
+  document.getElementById("f_stock10").value = 0;
   document.getElementById("f_accords").value = "";
   document.getElementById("f_accordsAR").value = "";
   document.getElementById("f_notesTop").value = "";
@@ -5745,6 +5752,10 @@ function readFormAsPerfume(existingImage){
     // بأكثر من صيغة (زي "Matiere Premiere" و"MATIERE PREMIERE") ويتفرّق بفلتر البراند.
     brand: document.getElementById("f_brand").value.trim().toUpperCase(),
     name: document.getElementById("f_name").value.trim(),
+    ...(document.getElementById("f_displayName").value.trim() ? { displayName: document.getElementById("f_displayName").value.trim() } : {}),
+    ...(document.getElementById("f_inspiredBy").value.trim() ? { inspiredBy: document.getElementById("f_inspiredBy").value.trim() } : {}),
+    ...(document.getElementById("f_photo").value.trim() ? { photo: document.getElementById("f_photo").value.trim() } : {}),
+    ...(document.getElementById("f_collection").value.trim() ? { collection: document.getElementById("f_collection").value.trim() } : {}),
     image: existingImage || "",
     seasons: Array.from(document.querySelectorAll(".f_season:checked")).map(cb => cb.value),
     gender: document.getElementById("f_gender").value,
