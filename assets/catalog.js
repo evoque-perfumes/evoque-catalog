@@ -13,6 +13,7 @@ const COMING_SOON_IMAGE = "assets/coming-soon.jpg"; // صورة "الصور قي
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbxz93KyzZTa0Y4_HNaGZfK1wh-i4a6bLhH9koUAHnUSn2Ged0PC110kIMuAOqVCDeyM/exec";
 // رابط Google Apps Script Web App منفصل لاستقبال تقييمات العملاء — انشره حسب
 // دليل reviews-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
+const REVIEWS_FORM_ENABLED = false; // true = يرجّع فورم تقييم العميل (يحتاج سكربت تقييمات آمن)
 const REVIEWS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxwC7mC6JegXo-XZ-TryKrdyf3CP-K2i_zRIHAMh0EDBkriLBaJ1JYtP2lgMevkd5JHAA/exec";
 // رابط Google Apps Script Web App منفصل ثالث (25 أغسطس 2026) لاستقبال إشارات
 // "المفضلة" (❤️ Wishlist) — كل ضغطة قلب على عطر تحدّث عداده بملف wishlist.json
@@ -348,6 +349,9 @@ const I18N = {
     waFallbackLabel: "تواصل عبر واتساب",
     footer: "© 2026 إيفوك للعطور — جميع الحقوق محفوظة",
     heroEyebrow: "عطور فاخرة، هوية تعرف اسمك",
+    teaserTag: "قريبًا",
+    teaserTitle: "تشكيلة «قلعة الحمراء»",
+    teaserText: "عطور بقصة من قلب الأندلس.",
     heroTitle: "وقّع حضورك بعطر يشبهك",
     heroSubtitle: "انطباعات عطرية فاخرة بأسعار تناسب الجميع — اختر عطرك، اقرأ تفاصيله ومكوناته، وأكمل طلبك أونلاين أو عبر واتساب.",
     heroCtaShop: "تصفح العطور",
@@ -511,6 +515,9 @@ const I18N = {
     waFallbackLabel: "Contact via WhatsApp",
     footer: "© 2026 Evoque Perfumes — All rights reserved",
     heroEyebrow: "Luxury fragrances, made for you",
+    teaserTag: "Coming soon",
+    teaserTitle: "The Alhambra Collection",
+    teaserText: "Fragrances with a story from the heart of Andalusia.",
     heroTitle: "Sign your presence with a scent that's yours",
     heroSubtitle: "Premium fragrance impressions at prices to suit everyone — pick your scent, read its full profile and ingredients, and order online or on WhatsApp.",
     heroCtaShop: "Browse fragrances",
@@ -1013,7 +1020,8 @@ function renderReviewsSection(p){
 
   html += `<div id="reviewsCarouselWrap"></div>`;
 
-  // ----- فورم إضافة تقييم جديد من العميل مباشرة -----
+  // ----- فورم إضافة تقييم من العميل: موقوف مؤقتًا (REVIEWS_FORM_ENABLED) حتى نراجع سكربت التقييمات القديم. التقييمات المعروضة كلها موثّقة ومن لوحة التحكم -----
+  if(REVIEWS_FORM_ENABLED){
   html += `
     <div class="review-form-wrap">
       <h4>${t.reviewFormTitle}</h4>
@@ -1027,6 +1035,7 @@ function renderReviewsSection(p){
       <div class="review-form-msg" id="reviewFormMsg"></div>
     </div>
   `;
+  }
 
   wrap.innerHTML = html;
   renderReviewCarousel(p, list);
@@ -1101,6 +1110,7 @@ function stopReviewCarouselTimer(){
 }
 
 function wireReviewForm(p){
+  if(!document.getElementById("reviewSubmitBtn")) return;
   selectedReviewRating = 0;
   const picker = document.getElementById("reviewStarPicker");
   if(!picker) return;
@@ -1290,6 +1300,7 @@ function renderTrust(){
 function renderHero(){
   const t = I18N[lang];
   document.getElementById("heroEyebrow").textContent = t.heroEyebrow;
+  const _tt = document.getElementById("teaserTag"); if(_tt){ _tt.textContent = t.teaserTag; document.getElementById("teaserTitle").textContent = t.teaserTitle; document.getElementById("teaserText").textContent = t.teaserText; }
   document.getElementById("heroTitle").textContent = t.heroTitle;
   document.getElementById("heroSubtitle").textContent = t.heroSubtitle;
   // 14 سبتمبر 2026: شلنا زرّي "تصفح العطور" و"راسلنا على واتساب" من قسم البطل —
