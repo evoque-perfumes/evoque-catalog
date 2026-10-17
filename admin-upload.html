@@ -15,12 +15,12 @@
 <title>لوحة تحكم Evoque Perfumes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#FAF6EF; --panel:#FFFFFF; --panel-2:#F1E9DC; --line:#E4D9C5; --ink:#221F1C; --muted:#7A7168;
-    --gold:#C6AB8B; --gold-deep:#A9835C; --gold-soft:rgba(198,171,139,.16); --gold-ink:#6B4F2E;
-    --emerald:#2F4A3D; --emerald-deep:#213830;
+    --bg:#F6EAE4; --panel:#FDF8F5; --panel-2:#F1E0DA; --line:#E3CBC4; --ink:#2A1216; --muted:#7A5A58;
+    --gold:#5B1F2B; --gold-deep:#451620; --gold-soft:#E9C9C5; --gold-ink:#5B1F2B;
+    --emerald:#5B1F2B; --emerald-deep:#451620;
     --red:#B23A2E; --red-deep:#8E2C22; --green:#1F6B41; --amber:#8A6A1F;
     --radius:14px;
   }
@@ -28,27 +28,27 @@
   body{
     margin:0; font-family:'Tajawal','Segoe UI', Tahoma, Arial, sans-serif; background:var(--bg); color:var(--ink);
     min-height:100vh; padding:24px 16px 80px;
-    background-image:radial-gradient(circle at 15% -10%, rgba(198,171,139,.16), transparent 45%);
+    background-image:radial-gradient(circle at 15% -10%, rgba(201,139,134,.18), transparent 45%);
   }
   .wrap{max-width:960px; margin:0 auto;}
   .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
   .brandmark{display:flex; align-items:center; gap:10px;}
-  .brandmark .dot{width:9px; height:9px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px rgba(47,74,61,.4);}
-  h1{font-family:'Markazi Text', 'Tajawal', serif; font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; color:var(--ink);}
+  .brandmark .dot{width:9px; height:9px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px rgba(91,31,43,.4);}
+  h1{font-family:'Tajawal', sans-serif; font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; color:var(--ink);}
   .sub{color:var(--muted); font-size:13.5px; margin:2px 0 0; line-height:1.7;}
   .livepill{font-size:11.5px; color:var(--muted); border:1px solid var(--line); background:var(--panel); border-radius:20px; padding:5px 12px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
   .livepill .dot2{width:7px; height:7px; border-radius:50%; background:var(--green);}
 
-  nav.tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:6px; box-shadow:0 1px 2px rgba(34,31,28,.04);}
+  nav.tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:6px; box-shadow:0 1px 2px rgba(42,18,22,.04);}
   nav.tabs button{
     background:transparent; color:var(--muted); border:none; border-radius:9px; padding:9px 14px;
     font-size:13.5px; font-weight:700; cursor:pointer; font-family:inherit;
   }
   nav.tabs button:hover{color:var(--ink); background:var(--panel-2);}
-  nav.tabs button.active{background:var(--gold-soft); color:var(--gold-ink); box-shadow:inset 0 0 0 1px rgba(198,171,139,.5);}
+  nav.tabs button.active{background:var(--gold-soft); color:var(--gold-ink); box-shadow:inset 0 0 0 1px #C98B86;}
 
-  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px; box-shadow:0 1px 2px rgba(34,31,28,.04);}
-  .panel h2{font-family:'Markazi Text','Tajawal',serif; font-size:19px; margin:0 0 12px; color:var(--ink); font-weight:700;}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px; box-shadow:0 1px 2px rgba(42,18,22,.04);}
+  .panel h2{font-family:'Tajawal',sans-serif; font-size:19px; margin:0 0 12px; color:var(--ink); font-weight:700;}
   label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
   input[type=text], input[type=password], input[type=number], select, textarea{
     width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
@@ -99,7 +99,7 @@
   .status.show{display:block;}
   .status.ok{background:rgba(31,107,65,.10); border:1px solid rgba(31,107,65,.3); color:#1F6B41;}
   .status.err{background:rgba(178,58,46,.10); border:1px solid rgba(178,58,46,.3); color:#963224;}
-  .status.info{background:var(--gold-soft); border:1px solid rgba(198,171,139,.5); color:var(--gold-ink);}
+  .status.info{background:var(--gold-soft); border:1px solid #C98B86; color:var(--gold-ink);}
   .preview{display:flex; align-items:center; gap:14px; margin-bottom:14px;}
   .preview img{width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:#fff;}
   .preview .meta{font-size:12.5px; color:var(--muted); line-height:1.8;}
@@ -109,7 +109,7 @@
   .dropdown{
     position:absolute; top:100%; right:0; left:0; background:var(--panel); border:1px solid var(--line);
     border-radius:8px; max-height:260px; overflow-y:auto; z-index:10; display:none; margin-top:-10px;
-    box-shadow:0 8px 20px rgba(34,31,28,.08);
+    box-shadow:0 8px 20px rgba(42,18,22,.08);
   }
   .dropdown.show{display:block;}
   .dropdown-item{padding:10px 12px; cursor:pointer; font-size:13.5px; border-bottom:1px solid var(--line);}
@@ -131,7 +131,7 @@
   .stats{display:flex; gap:16px; margin-bottom:6px;}
   .stat{font-size:13px;}
   .stat b{font-size:18px; display:block;}
-  .banner{background:var(--gold-soft); border:1px solid rgba(198,171,139,.5); color:var(--gold-ink); padding:12px 14px; border-radius:8px; font-size:13px; line-height:1.8; margin-bottom:16px;}
+  .banner{background:var(--gold-soft); border:1px solid #C98B86; color:var(--gold-ink); padding:12px 14px; border-radius:8px; font-size:13px; line-height:1.8; margin-bottom:16px;}
   .static-list{background:var(--panel-2); border:1px solid var(--line); border-radius:8px; max-height:320px; overflow-y:auto; margin:10px 0;}
   .stat-clickable{cursor:pointer; padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); transition:border-color .15s; flex:1;}
   .stat-clickable:hover{border-color:#B8A87E;}
@@ -145,12 +145,12 @@
   .kpi-card.clickable{cursor:pointer;}
   .kpi-card.clickable:hover{border-color:var(--gold-ink); transform:translateY(-1px);}
   .kpi-card .kpi-label{color:var(--muted); font-size:12.5px; line-height:1.5;}
-  .kpi-card .kpi-value{font-family:'Markazi Text','Tajawal',serif; font-size:28px; font-weight:700; color:var(--ink); margin-top:4px;}
+  .kpi-card .kpi-value{font-family:'Tajawal',sans-serif; font-size:28px; font-weight:700; color:var(--ink); margin-top:4px;}
   .kpi-card.alert .kpi-value{color:#9C6B1F;}
   .kpi-card.alert-red .kpi-value{color:#B23A2E;}
   .kpi-card.good .kpi-value{color:#1F6B41;}
   .kpi-card .kpi-sub{color:#93897A; font-size:11.5px; margin-top:2px;}
-  .ov-section-title{font-family:'Markazi Text','Tajawal',serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
+  .ov-section-title{font-family:'Tajawal',sans-serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
   .ov-section-title:first-child{margin-top:0;}
   .ov-empty-note{color:var(--muted); font-size:12.5px; background:var(--panel-2); border:1px dashed var(--line); border-radius:8px; padding:12px 14px; line-height:1.8;}
 </style>
@@ -185,8 +185,8 @@
     <button type="button" id="modeCostBtn">🧮 التكلفة والأرباح</button>
     <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
-    <button type="button" id="modeBankBtn">🏦 بيانات البنك</button>
     <button type="button" id="modeShippingBtn">🚚 رسوم التوصيل</button>
+    <button type="button" id="modeCustomersBtn">👥 العملاء</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
     <button type="button" id="modeDistBtn">🎁 توزيعات المناسبات</button>
     <button type="button" id="modeOrdersQueueBtn">🧾 الطلبات الجديدة<span class="badge pending" id="oqNavBadge" style="display:none; margin-inline-start:6px;"></span></button>
@@ -522,36 +522,44 @@
     </div>
 
     <div class="grid2" style="margin-top:16px;">
-      <div class="field"><label for="sl_customer">اسم العميل — اختياري</label><input type="text" id="sl_customer" placeholder="مثال: أم محمد"></div>
+      <div class="field"><label for="sl_customer">الاسم الكامل للعميل *</label><input type="text" id="sl_customer" maxlength="80" autocomplete="off" placeholder="مثال: محمد أحمد"></div>
       <div class="field"><label for="sl_date">التاريخ</label><input type="date" id="sl_date"></div>
     </div>
 
     <div class="grid2" style="margin-top:10px;">
       <div class="field">
-        <label for="sl_country">الدولة — اختياري</label>
+        <label for="sl_country">الدولة *</label>
         <select id="sl_country">
           <option value="">— اختر —</option>
           <option value="AE" data-code="+971">🇦🇪 الإمارات</option>
           <option value="OM" data-code="+968">🇴🇲 عُمان</option>
-          <option value="SA" data-code="+966">🇸🇦 السعودية</option>
-          <option value="KW" data-code="+965">🇰🇼 الكويت</option>
-          <option value="QA" data-code="+974">🇶🇦 قطر</option>
-          <option value="BH" data-code="+973">🇧🇭 البحرين</option>
-          <option value="OTHER" data-code="">🌍 دولة ثانية</option>
         </select>
       </div>
       <div class="field">
-        <label for="sl_phone">رقم الهاتف — اختياري</label>
+        <label for="sl_phone">رقم الهاتف *</label>
         <div style="display:flex; gap:6px;">
           <span id="sl_phoneCode" style="display:flex; align-items:center; padding:0 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2); color:var(--muted); white-space:nowrap;">+___</span>
-          <input type="tel" id="sl_phone" placeholder="501234567" style="flex:1;">
+          <input type="tel" id="sl_phone" placeholder="501234567" style="flex:1;" inputmode="tel" autocomplete="off">
         </div>
       </div>
     </div>
+    <div id="sl_custWarn"></div>
 
+    <div class="grid2" style="margin-top:10px;">
+      <div class="field"><label for="sl_email">البريد الإلكتروني *</label><input type="email" id="sl_email" maxlength="120" autocomplete="off" placeholder="name@example.com"></div>
+      <div class="field"><label for="sl_region">الإمارة (الإمارات) / المحافظة أو الولاية (عُمان) *</label><input type="text" id="sl_region" maxlength="60" list="sl_regionList" autocomplete="off"><datalist id="sl_regionList"></datalist></div>
+    </div>
+    <div class="grid2" style="margin-top:10px;">
+      <div class="field"><label for="sl_city">المدينة / المنطقة *</label><input type="text" id="sl_city" maxlength="60" autocomplete="off"></div>
+      <div class="field"><label for="sl_delivery">نوع التوصيل *</label><select id="sl_delivery"><option value="">— اختر الدولة أول —</option></select></div>
+    </div>
     <div class="field" style="margin-top:10px;">
-      <label for="sl_address">العنوان — اختياري</label>
-      <input type="text" id="sl_address" placeholder="مثال: دبي، الإمارات — أو تفاصيل التوصيل">
+      <label for="sl_address">العنوان التفصيلي *</label>
+      <input type="text" id="sl_address" maxlength="300" autocomplete="off" placeholder="الشارع، البناية، أقرب معلم">
+    </div>
+    <div class="grid2" style="margin-top:10px;">
+      <div class="field"><label for="sl_status">حالة الطلب</label><select id="sl_status"></select></div>
+      <div class="field"><label style="display:flex; align-items:center; gap:6px; margin-top:26px; cursor:pointer;"><input type="checkbox" id="sl_recentConsent" style="width:auto; margin:0;"> العميل وافق يظهر اسمه الأول ومدينته بشريط "آخر الطلبات"</label></div>
     </div>
 
     <div class="row">
@@ -561,25 +569,48 @@
     </div>
     <div class="status" id="sl_statusBox"></div>
 
+    <div class="panel" id="sl_refundPanel" style="display:none; margin-top:14px;">
+      <h2>↩️ تسجيل استرجاع</h2>
+      <small class="hint" style="margin-top:0;" id="sl_refundOrderLabel"></small>
+      <div class="grid2" style="margin-top:10px;">
+        <div class="field"><label for="sl_refundAmount">مبلغ الاسترداد (بدون التوصيل) *</label><input type="number" id="sl_refundAmount" min="0" step="0.5"></div>
+        <div class="field"><label for="sl_refundDate">تاريخ الاسترداد</label><input type="date" id="sl_refundDate"></div>
+      </div>
+      <label>العطور المُرجَعة</label>
+      <div id="sl_refundItems"></div>
+      <div class="row" style="margin-top:10px;">
+        <button type="button" id="sl_refundSaveBtn">💸 احفظ الاسترداد</button>
+        <button type="button" class="secondary" id="sl_refundCancelBtn">إلغاء</button>
+      </div>
+      <div class="status" id="sl_refundStatus"></div>
+    </div>
+
     <div class="ov-section-title" style="margin-top:26px;">📊 حالة الطلبات</div>
     <div class="stats" id="sl_statusStats">
-      <div class="stat">🆕 طلبات جديدة<b id="sl_stat_new">—</b></div>
-      <div class="stat">🔧 قيد التجهيز<b id="sl_stat_prep">—</b></div>
-      <div class="stat">🛢️ يحتاج زيت<b id="sl_stat_needsOil">—</b></div>
-      <div class="stat">🚚 تم الشحن<b id="sl_stat_shipped">—</b></div>
-      <div class="stat">📦 تم الاستلام<b id="sl_stat_received">—</b></div>
+<div class="stat">🆕 جديد<b id="sl_stat_new">—</b></div>
+      <div class="stat">✅ مؤكد<b id="sl_stat_confirmed">—</b></div>
+      <div class="stat">🚚 تم الشحن<b id="sl_stat_dispatched">—</b></div>
+      <div class="stat">📦 تم التسليم<b id="sl_stat_delivered">—</b></div>
+      <div class="stat">↩️ طلب إرجاع<b id="sl_stat_return_requested">—</b></div>
+      <div class="stat">📥 مرتجع<b id="sl_stat_returned">—</b></div>
+      <div class="stat">💸 مسترد<b id="sl_stat_refunded">—</b></div>
+      <div class="stat">⛔ ملغي<b id="sl_stat_cancelled">—</b></div>
       <div class="stat">💰 باقي استلام المبلغ<b id="sl_stat_unpaid">—</b></div>
     </div>
 
     <div class="ov-section-title" style="margin-top:26px;">آخر الطلبات المسجّلة</div>
+    <div class="row" style="margin-bottom:8px;"><button type="button" class="secondary" id="sl_syncRecentBtn">🔄 حدّث شريط «آخر الطلبات» بالموقع</button></div>
     <div class="row" style="gap:8px; flex-wrap:wrap; margin-bottom:10px;">
       <select id="sl_filterStatus" style="width:auto;">
         <option value="all">كل الحالات</option>
-        <option value="">🆕 جديد</option>
-        <option value="prep">🔧 قيد التجهيز</option>
-        <option value="needs_oil">🛢️ يحتاج زيت</option>
-        <option value="shipped">🚚 تم الشحن</option>
-        <option value="received">📦 تم الاستلام</option>
+        <option value="new">🆕 جديد</option>
+        <option value="confirmed">✅ مؤكد</option>
+        <option value="dispatched">🚚 تم الشحن</option>
+        <option value="delivered">📦 تم التسليم</option>
+        <option value="return_requested">↩️ طلب إرجاع</option>
+        <option value="returned">📥 مرتجع</option>
+        <option value="refunded">💸 تم الاسترداد</option>
+        <option value="cancelled">⛔ ملغي</option>
       </select>
       <select id="sl_filterPaid" style="width:auto;">
         <option value="all">كل حالات الدفع</option>
@@ -591,47 +622,15 @@
     <small class="hint" id="sl_historyEmptyHint" style="margin-top:0;">ما فيه مبيعات مسجّلة بعد.</small>
   </div>
 
-  <div class="panel" id="bankInfoPanel" style="display:none;">
-    <h2>بيانات الحساب البنكي</h2>
-    <small class="hint" style="margin-top:0;">
-      هذي البيانات تظهر للعميل بالموقع مباشرة لما يختار "تحويل بنكي" بنموذج الطلب — منفصلة للإمارات
-      وعُمان. اترك أي حقل فاضي لو ما تبا يظهر (مثلًا لو ما عندك سويفت كود). اضغط "تحميل آخر نسخة" لو
-      فتحت هذا الوضع بعد فترة طويلة، عشان تتأكد إنك تعدّل على أحدث بيانات محفوظة.
-    </small>
-    <div class="row" style="margin-bottom:6px;">
-      <button type="button" id="bank_reloadBtn" class="secondary">تحميل آخر نسخة</button>
+  <div class="panel" id="customersPanel" style="display:none;">
+    <h2>👥 العملاء</h2>
+    <small class="hint" style="margin-top:0;">العملاء مرتّبين حسب رقم الهاتف الموحّد. بياناتهم وعلامة «لا يُباع له» محفوظة بالمستودع الخاص فقط، وما تظهر للعامة.</small>
+    <div class="row" style="margin:10px 0;">
+      <input type="search" id="cust_search" placeholder="ابحث بالاسم أو الرقم..." style="flex:1; margin:0;">
+      <span class="sub" id="cust_count" style="align-self:center;"></span>
     </div>
-
-    <fieldset>
-      <legend>🇦🇪 الإمارات</legend>
-      <div class="grid2">
-        <div class="field"><label for="bank_ae_bankName">اسم البنك</label><input type="text" id="bank_ae_bankName" placeholder="مثال: بنك الإمارات دبي الوطني"></div>
-        <div class="field"><label for="bank_ae_accountName">اسم صاحب الحساب</label><input type="text" id="bank_ae_accountName"></div>
-      </div>
-      <div class="grid2">
-        <div class="field"><label for="bank_ae_accountNumber">رقم الحساب</label><input type="text" id="bank_ae_accountNumber"></div>
-        <div class="field"><label for="bank_ae_iban">رقم الآيبان (IBAN)</label><input type="text" id="bank_ae_iban"></div>
-      </div>
-      <div class="field"><label for="bank_ae_swift">رمز السويفت (SWIFT) — اختياري</label><input type="text" id="bank_ae_swift"></div>
-    </fieldset>
-
-    <fieldset style="margin-top:16px;">
-      <legend>🇴🇲 عُمان</legend>
-      <div class="grid2">
-        <div class="field"><label for="bank_om_bankName">اسم البنك</label><input type="text" id="bank_om_bankName" placeholder="مثال: بنك مسقط"></div>
-        <div class="field"><label for="bank_om_accountName">اسم صاحب الحساب</label><input type="text" id="bank_om_accountName"></div>
-      </div>
-      <div class="grid2">
-        <div class="field"><label for="bank_om_accountNumber">رقم الحساب</label><input type="text" id="bank_om_accountNumber"></div>
-        <div class="field"><label for="bank_om_iban">رقم الآيبان (IBAN)</label><input type="text" id="bank_om_iban"></div>
-      </div>
-      <div class="field"><label for="bank_om_swift">رمز السويفت (SWIFT) — اختياري</label><input type="text" id="bank_om_swift"></div>
-    </fieldset>
-
-    <div class="row">
-      <button type="button" id="bank_saveBtn">احفظ بيانات البنك</button>
-    </div>
-    <div class="status" id="bank_statusBox"></div>
+    <div class="status" id="cust_statusBox"></div>
+    <div id="cust_list" class="static-list"></div>
   </div>
 
   <div class="panel" id="shippingPanel" style="display:none;">
@@ -659,12 +658,6 @@
         <div class="field"><label for="ship_om_door">توصيل للمنزل</label><input type="number" id="ship_om_door" min="0" step="0.1"></div>
         <div class="field"><label for="ship_om_nool">استلام من مكتب NOOL</label><input type="number" id="ship_om_nool" min="0" step="0.1"></div>
       </div>
-    </fieldset>
-
-    <fieldset style="margin-top:16px;">
-      <legend>💳 عمولة تابي (Tabby)</legend>
-      <small class="hint" style="margin-top:0;">تُضاف تلقائيًا على إجمالي الطلب فقط لما العميل يختار الدفع عبر تابي (الإمارات حاليًا).</small>
-      <div class="field"><label for="ship_tabbyPercent">نسبة العمولة (%)</label><input type="number" id="ship_tabbyPercent" min="0" step="0.1"></div>
     </fieldset>
 
     <div class="row">
@@ -707,11 +700,14 @@
         <div class="stat">إجمالي الإيراد (بعد الخصومات)<b id="dist_ov_revenue">—</b></div>
         <div class="stat">إجمالي الربح الصافي<b id="dist_ov_profit">—</b></div>
         <div class="stat">آخر عملية بيع<b id="dist_ov_latest">—</b></div>
-        <div class="stat">🆕 طلبات جديدة<b id="dist_ov_new">—</b></div>
-        <div class="stat">🔧 قيد التجهيز<b id="dist_ov_prep">—</b></div>
-        <div class="stat">🛢️ يحتاج زيت<b id="dist_ov_needsOil">—</b></div>
-        <div class="stat">🚚 تم الشحن<b id="dist_ov_shipped">—</b></div>
-        <div class="stat">📦 تم الاستلام<b id="dist_ov_received">—</b></div>
+<div class="stat">🆕 جديد<b id="dist_ov_new">—</b></div>
+        <div class="stat">✅ مؤكد<b id="dist_ov_confirmed">—</b></div>
+        <div class="stat">🚚 تم الشحن<b id="dist_ov_dispatched">—</b></div>
+        <div class="stat">📦 تم التسليم<b id="dist_ov_delivered">—</b></div>
+        <div class="stat">↩️ طلب إرجاع<b id="dist_ov_return_requested">—</b></div>
+        <div class="stat">📥 مرتجع<b id="dist_ov_returned">—</b></div>
+        <div class="stat">💸 مسترد<b id="dist_ov_refunded">—</b></div>
+        <div class="stat">⛔ ملغي<b id="dist_ov_cancelled">—</b></div>
         <div class="stat">💰 باقي استلام المبلغ<b id="dist_ov_unpaid">—</b></div>
       </div>
     </fieldset>
@@ -927,12 +923,15 @@
       </div>
       <div class="row" style="gap:8px; flex-wrap:wrap; margin-top:10px;">
         <select id="dist_filterStatus" style="width:auto;">
-          <option value="all">كل الحالات</option>
-          <option value="">🆕 جديد</option>
-          <option value="prep">🔧 قيد التجهيز</option>
-          <option value="needs_oil">🛢️ يحتاج زيت</option>
-          <option value="shipped">🚚 تم الشحن</option>
-          <option value="received">📦 تم الاستلام</option>
+        <option value="all">كل الحالات</option>
+        <option value="new">🆕 جديد</option>
+        <option value="confirmed">✅ مؤكد</option>
+        <option value="dispatched">🚚 تم الشحن</option>
+        <option value="delivered">📦 تم التسليم</option>
+        <option value="return_requested">↩️ طلب إرجاع</option>
+        <option value="returned">📥 مرتجع</option>
+        <option value="refunded">💸 تم الاسترداد</option>
+        <option value="cancelled">⛔ ملغي</option>
         </select>
         <select id="dist_filterPaid" style="width:auto;">
           <option value="all">كل حالات الدفع</option>
@@ -1381,7 +1380,6 @@ function privFetch(path){
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
 const ORDERS_JSON_PATH = "orders.json";
-const BANK_JSON_PATH = "bank-info.json";
 const WISHLIST_JSON_PATH = "wishlist.json";
 const PENDING_ORDERS_JSON_PATH = "pending-orders.json";
 const DISTRIBUTIONS_JSON_PATH = "distributions.json";
@@ -1592,7 +1590,6 @@ let materialsData = { purchases: [] }; // آخر نسخة معروفة من mate
 let expensesData = { expenses: [] }; // آخر نسخة معروفة من expenses.json (مصاريف شهرية عامة بدون تتبع كمية/مخزون — 13 أكتوبر 2026)
 let salesSelected = null;    // العطر المختار حاليًا بوضع "المبيعات"
 let siteOrders = null;       // طلبات نموذج الموقع (Google Sheet) — null لين يتحدّث أول مرة
-let bankInfoData = { AE:{}, OM:{} }; // آخر نسخة معروفة من bank-info.json
 let wishlistData = {}; // آخر نسخة معروفة من wishlist.json — { perfumeId: {count, brand, name, lastAt} }
 let pendingOrders = []; // آخر نسخة معروفة من pending-orders.json — طلبات الموقع بانتظار الاعتماد
 let oqEdits = {}; // تعديلات اسم/هاتف/عنوان يدخلها المستخدم بالفورم قبل الاعتماد (orderId -> {name,phone,address}) — تبقى بالذاكرة لين الاعتماد/إعادة التحميل
@@ -1675,6 +1672,7 @@ async function loadOrders(){
   }catch(e){
     salesData = []; // الملف يمكن ما انضاف بعد بالريبو (أول مرة) — نكمل بقائمة فاضية بهدوء
   }
+  await loadCustomersQuiet();
   renderOverview();
 }
 
@@ -1868,7 +1866,7 @@ function renderOverview(){
   // المبيعات المسجّلة يدويًا — نستبعد سطور "هدايا العروض" (isGift:true) من كل
   // مقاييس الأداء الفعلي (الإيرادات/الأكثر مبيعًا/إجمالي القطع المباعة) عشان
   // ما تنحسب كربح أو طلب حقيقي، ونعرضها كرقم منفصل بس (ov_giftUnits)
-  const paidSales = salesData.filter(o => !o.isGift);
+  const paidSales = salesData.filter(isRevenueRow);
   const giftSales = salesData.filter(o => o.isGift);
   el("ov_giftUnits").textContent = giftSales.length ? fmtNum(giftSales.reduce((s,o) => s + (Number(o.qty)||0), 0)) : "0";
   if(salesData.length){
@@ -1915,7 +1913,7 @@ function buildSalesPeriodStats(){
   const monthMap = new Map(); // "YYYY-MM" -> {orderIds:Set, units, revenue}
   const yearMap = new Map();  // "YYYY" -> {orderIds:Set, units, revenue}
   let skippedInvalidDate = 0;
-  salesData.filter(o => !o.isGift).forEach(o => { // نستبعد هدايا العروض من إحصائيات الأداء الشهرية/السنوية
+  salesData.filter(isRevenueRow).forEach(o => { // نستبعد هدايا العروض من إحصائيات الأداء الشهرية/السنوية
     const date = String(o.date || "");
     if(!/^\d{4}-\d{2}-\d{2}/.test(date)){ skippedInvalidDate++; return; }
     const ym = date.slice(0, 7);
@@ -2000,7 +1998,7 @@ function buildSalesCountryStats(){
     OM: { orderIds: new Set(), units: 0, revenue: 0 },
     other: { orderIds: new Set(), units: 0, revenue: 0 }
   };
-  salesData.filter(o => !o.isGift).forEach(o => {
+  salesData.filter(isRevenueRow).forEach(o => {
     const bucket = countrySalesBucket(o.country);
     const b = buckets[bucket];
     const orderKey = o.orderId || o.id;
@@ -2478,7 +2476,7 @@ let slCartSubtotal = 0; // 3 أكتوبر 2026: مجموع السلة قبل ا�
 let salesEditingOrderId = null; // لو مو null، معناها نعدّل طلب محفوظ سابقًا بدل ما نسجّل طلب جديد
 // 11 أكتوبر 2026: فلتر سجل المبيعات — بطلب المستخدم، عشان يقدر يحدد بسرعة مين باقي
 // له الدفع، أو مين تم شحن طلبه وما استلمه بعد، بدل ما يمرر على كل الطلبات يدويًا.
-let slFilterStatus = "all"; // "all" أو قيمة status (فاضي = جديد، prep، needs_oil، shipped، received)
+let slFilterStatus = "all"; // "all" أو قيمة status (new، confirmed، dispatched، delivered، …)
 let slFilterPaid = "all";   // "all" | "unpaid" | "paid"
 let salesEditingOriginalItems = []; // نسخة من عناصر الطلب الأصلية وقت بداية التعديل — تُستخدم لحساب فرق المخزون الصحيح عند الحفظ
 // 14 سبتمبر 2026: خيارات قائمة "sl_country" أكواد (AE/OM/...) بس الطلبات الجاية من
@@ -2522,7 +2520,7 @@ function slSizeOptionsHtml(p, selectedSize){
     const selected = String(selectedSize) === value ? " selected" : "";
     return `<option value="${value}"${disabled}${selected}>${label} — متوفر: ${stock}</option>`;
   };
-  return opt("50", "50مل", s50) + opt("10", "10مل", s10);
+  return opt("50", "50مل", s50);
 }
 
 function selectPerfumeForSales(p){
@@ -2530,7 +2528,7 @@ function selectPerfumeForSales(p){
   document.getElementById("searchInput").value = "";
   const s50 = stockAsQty(p.stock50);
   const s10 = stockAsQty(p.stock10);
-  const defaultSize = s50 > 0 ? "50" : (s10 > 0 ? "10" : "50");
+  const defaultSize = "50";
   document.getElementById("sl_size").innerHTML = slSizeOptionsHtml(p, defaultSize);
   document.getElementById("sl_qty").value = "1";
   document.getElementById("sl_price").value = defaultSize === "50" ? (p.price50 != null ? p.price50 : "") : (p.price10 != null ? p.price10 : "");
@@ -2589,6 +2587,9 @@ document.getElementById("sl_country").addEventListener("change", () => {
   const code = opt ? (opt.dataset.code || "") : "";
   document.getElementById("sl_phoneCode").textContent = code || "+___";
   sl_countryTouched = true; // الأدمن غيّر حقل الدولة يدويًا — التغيير هذا مقصود، نطبّقه بالحفظ
+  slFillDeliveryOptions(sel.value, "");
+  slFillRegionList(sel.value);
+  slRefreshCustWarn();
 });
 
 // يطابق قيمة دولة مخزّنة (كود زي "AE"، أو نص كامل زي "الإمارات"/"UAE" من الموقع
@@ -2704,6 +2705,14 @@ function slResetOrderFields(){
   document.getElementById("sl_phoneCode").textContent = "+___";
   document.getElementById("sl_phone").value = "";
   document.getElementById("sl_address").value = "";
+  document.getElementById("sl_email").value = "";
+  document.getElementById("sl_region").value = "";
+  document.getElementById("sl_city").value = "";
+  slFillDeliveryOptions("", "");
+  slFillRegionList("");
+  document.getElementById("sl_status").innerHTML = statusOptionsHtml("new");
+  document.getElementById("sl_recentConsent").checked = false;
+  document.getElementById("sl_custWarn").innerHTML = "";
   document.getElementById("sl_discount").value = "";
   slUpdateDiscountPreview();
   salesEditingOriginalCountry = null;
@@ -2812,6 +2821,14 @@ function slLoadOrderForEdit(key){
   if(code && phoneLocal.startsWith(code)) phoneLocal = phoneLocal.slice(code.length).trim();
   document.getElementById("sl_phone").value = phoneLocal;
   document.getElementById("sl_address").value = g.address || "";
+  document.getElementById("sl_email").value = g.email || "";
+  document.getElementById("sl_region").value = g.region || "";
+  document.getElementById("sl_city").value = g.city || "";
+  slFillDeliveryOptions(document.getElementById("sl_country").value, g.deliveryType || "");
+  slFillRegionList(document.getElementById("sl_country").value);
+  document.getElementById("sl_status").innerHTML = statusOptionsHtml(g.items[0] && g.items[0].status);
+  document.getElementById("sl_recentConsent").checked = !!g.recentConsent;
+  slRefreshCustWarn();
   const existingDiscount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
   document.getElementById("sl_discount").value = existingDiscount > 0 ? existingDiscount : "";
 
@@ -2849,51 +2866,369 @@ function groupSalesData(){
   const map = new Map();
   salesData.forEach(o => {
     const key = o.orderId || o.id;
-    if(!map.has(key)) map.set(key, { key, date: o.date, customer: o.customer, country: o.country, countryLabel: o.countryLabel, phone: o.phone, address: o.address, items: [] });
+    if(!map.has(key)) map.set(key, { key, date: o.date, customer: o.customer, country: o.country, countryLabel: o.countryLabel, phone: o.phone, address: o.address, email: o.email || "", region: o.emirateOrWilayat || "", city: o.city || "", deliveryType: o.deliveryType || "", recentConsent: !!o.recentConsent, items: [] });
     map.get(key).items.push(o);
   });
   return Array.from(map.values()).reverse(); // الأحدث أول
 }
 
-// عدّاد عام لحالات الطلبات (جديد/قيد التجهيز/يحتاج زيت/تم الشحن/تم الاستلام) + عدد الطلبات اللي لسا ما استلمنا مبلغها —
-// نفس المنطق يُستخدم لمبيعات العطور (مجموعة حسب الطلب) ومبيعات التوزيعات (كل عملية بيع طلب لحاله)
+// ===== العملاء + الأرقام + تحذيرات + آخر الطلبات (المرحلة 3) =====
+const RECENT_JSON_PATH = "recent-orders.json";
+let customersData = {}; // { "+9715...": { notes, doNotSell, reason, updatedAt } } — بالمستودع الخاص فقط
+
+// يحوّل أي رقم إلى صيغة دولية E.164 (+9715XXXXXXXX). dial = رمز الدولة المختار (مثل +971) أو "".
+function normPhone(raw, dial){
+  let d = String(raw || "").replace(/[^\d+]/g, "");
+  if(!d) return "";
+  if(d.charAt(0) === "+") return "+" + d.slice(1).replace(/\D/g, "");
+  if(d.indexOf("00") === 0) return "+" + d.slice(2);
+  const dc = String(dial || "").replace(/\D/g, "");
+  if(dc){
+    if(d.indexOf(dc) === 0 && d.length >= dc.length + 8) return "+" + d;
+    return "+" + dc + d.replace(/^0+/, "");
+  }
+  if(/^(971|968)/.test(d) && d.length >= 11) return "+" + d;
+  return "+" + d.replace(/^0+/, "");
+}
+
+// إحصائيات عميل (حسب الرقم الموحّد) من سجل الطلبات. excludeKey = طلب نعدّله حاليًا (ما نحسبه على نفسه)
+function customerInfoFor(phone, excludeKey){
+  const info = { orders: 0, delivered: 0, returned: 0, refunded: 0, last: "", name: "", flag: false, reason: "", notes: "" };
+  if(!phone) return info;
+  groupSalesData().forEach(g => {
+    if(excludeKey && g.key === excludeKey) return;
+    if(normPhone(g.phone, "") !== phone) return;
+    const f = g.items[0] || {};
+    const st = normStatus(f.status);
+    if(st === "cancelled") return;
+    info.orders++;
+    if(st === "delivered") info.delivered++;
+    if(st === "return_requested" || st === "returned" || st === "refunded") info.returned++;
+    info.refunded += g.items.reduce((a, o) => a + (Number(o.refundAmount) || 0), 0);
+    if((g.date || "") > info.last){ info.last = g.date || ""; info.name = g.customer || info.name; }
+  });
+  const c = customersData[phone];
+  if(c){ info.flag = !!c.doNotSell; info.reason = c.reason || ""; info.notes = c.notes || ""; }
+  return info;
+}
+function custWarnHtml(phone, excludeKey){
+  if(!phone) return "";
+  const i = customerInfoFor(phone, excludeKey);
+  if(i.flag){
+    return `<div class="banner" style="background:#fdecea; border-color:#c0392b; color:#8a1c14; margin:8px 0;">⛔ <b>لا يُباع لهذا العميل</b>${i.reason ? " — " + esc(i.reason) : ""}${i.notes ? "<br>📝 " + esc(i.notes) : ""}</div>`;
+  }
+  if(i.orders > 0){
+    const warn = i.returned > 0;
+    const txt = `عميل سابق — ${esc(i.orders)} ${i.orders === 1 ? "طلب" : "طلبات"} سابقة${i.returned ? "، " + esc(i.returned) + " إرجاع" : ""}${i.refunded ? "، مسترد " + esc(fmtNum(i.refunded)) + " AED" : ""}${i.last ? "، آخر طلب " + esc(i.last) : ""}`;
+    return `<div class="banner" style="${warn ? "background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;" : ""} margin:8px 0;">${warn ? "⚠️" : "🔁"} <b>${txt}</b>${i.notes ? "<br>📝 " + esc(i.notes) : ""}</div>`;
+  }
+  return "";
+}
+function slRefreshCustWarn(){
+  const box = document.getElementById("sl_custWarn");
+  if(!box) return;
+  const code = document.getElementById("sl_phoneCode").textContent.trim();
+  const local = document.getElementById("sl_phone").value.trim();
+  const phone = local ? normPhone(local, code === "+___" ? "" : code) : "";
+  box.innerHTML = /^\+\d{8,15}$/.test(phone) ? custWarnHtml(phone, salesEditingOrderId) : "";
+}
+document.getElementById("sl_phone").addEventListener("input", slRefreshCustWarn);
+
+// خيارات نوع التوصيل والإمارات/المحافظات حسب الدولة
+const SL_DELIVERY = {
+  AE: [["standard", "توصيل عادي — الإمارات"], ["western", "المنطقة الغربية (أبوظبي)"]],
+  OM: [["door", "توصيل للباب — عُمان"], ["nool", "استلام من مكتب NOOL"]]
+};
+const SL_REGIONS = {
+  AE: ["أبوظبي", "دبي", "الشارقة", "عجمان", "أم القيوين", "رأس الخيمة", "الفجيرة"],
+  OM: ["مسقط", "ظفار", "مسندم", "البريمي", "الداخلية", "شمال الباطنة", "جنوب الباطنة", "شمال الشرقية", "جنوب الشرقية", "الظاهرة", "الوسطى"]
+};
+function slFillDeliveryOptions(country, selected){
+  const sel = document.getElementById("sl_delivery");
+  const list = SL_DELIVERY[country] || [];
+  sel.innerHTML = list.length
+    ? `<option value="">— اختر —</option>` + list.map(x => `<option value="${esc(x[0])}" ${x[0] === selected ? "selected" : ""}>${esc(x[1])}</option>`).join("")
+    : `<option value="">— اختر الدولة أول —</option>`;
+}
+function slFillRegionList(country){
+  document.getElementById("sl_regionList").innerHTML = (SL_REGIONS[country] || []).map(r => `<option value="${esc(r)}"></option>`).join("");
+}
+function slInitFormExtras(){
+  const st = document.getElementById("sl_status");
+  if(!st.options.length) st.innerHTML = statusOptionsHtml("new");
+}
+
+// ===== قراءة/كتابة عامة لملفات JSON (خاص أو عام) =====
+async function getJsonWithSha(base, path, def, token){
+  const res = await fetch(`${base}/${path}?ref=${BRANCH}`, { cache: "no-store", headers: { "Authorization": `Bearer ${token}` } });
+  if(res.status === 404) return { obj: def, sha: null };
+  if(!res.ok){
+    const err = await res.json().catch(() => ({}));
+    throw new Error("تعذّر قراءة " + path + ": " + (err.message || res.status));
+  }
+  const info = await res.json();
+  let obj; try{ obj = JSON.parse(base64ToUtf8(info.content)); }catch(e){ obj = def; }
+  return { obj: (obj && typeof obj === "object") ? obj : def, sha: info.sha };
+}
+async function updateJsonWithRetry(base, token, path, def, mutateFn, msg, attempt){
+  attempt = attempt || 0;
+  const { obj, sha } = await getJsonWithSha(base, path, def, token);
+  const before = JSON.stringify(obj);
+  const next = mutateFn(obj);
+  if(JSON.stringify(next) === before) return next; // ما تغيّر شي — ما نسوي commit
+  const body = { message: msg, content: utf8ToBase64(JSON.stringify(next, null, 2) + "\n"), branch: BRANCH };
+  if(sha) body.sha = sha;
+  const res = await fetch(`${base}/${path}`, { method: "PUT", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if(!res.ok){
+    if(res.status === 409 && attempt < 2) return updateJsonWithRetry(base, token, path, def, mutateFn, msg, attempt + 1);
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || ("HTTP " + res.status));
+  }
+  return next;
+}
+
+async function loadCustomersQuiet(){
+  try{
+    const res = await privFetch(CUSTOMERS_JSON_PATH);
+    if(res.ok){ const o = await res.json(); customersData = (o && typeof o === "object" && !Array.isArray(o)) ? o : {}; }
+    else customersData = {};
+  }catch(e){ customersData = {}; }
+}
+
+// ===== شريط "آخر الطلبات" (recent-orders.json العام) — من طلبات وافق أصحابها فقط =====
+function buildRecentOrders(){
+  const out = [];
+  const groups = groupSalesData(); // الأحدث أول
+  for(const g of groups){
+    const f = g.items[0] || {};
+    if(!f.recentConsent) continue;
+    const st = normStatus(f.status);
+    if(st !== "confirmed" && st !== "dispatched" && st !== "delivered") continue;
+    const firstName = String(g.customer || "").trim().split(/\s+/)[0];
+    const city = String(g.city || "").trim();
+    if(!firstName || !city) continue;
+    const names = [];
+    g.items.forEach(o => {
+      if(o.isGift) return;
+      const pf = perfumes.find(x => x.id === o.perfumeId);
+      const nm = pf ? (pf.displayName || (pf.brand + " " + pf.name)) : "";
+      if(nm && names.indexOf(nm) === -1) names.push(nm);
+    });
+    if(!names.length) continue;
+    out.push({ firstName, city, perfumes: names.slice(0, 2) });
+    if(out.length >= 5) break;
+  }
+  return out;
+}
+let recentSyncTimer = null;
+function syncRecentOrders(){
+  clearTimeout(recentSyncTimer);
+  recentSyncTimer = setTimeout(async () => {
+    const token = getToken();
+    if(!token) return;
+    try{
+      const list = buildRecentOrders();
+      await updateJsonWithRetry(API_BASE, token, RECENT_JSON_PATH, [], () => list, "Update recent orders strip");
+    }catch(e){ console.warn("recent-orders sync failed", e); slShowStatus("تحذير: ما قدرت أحدّث شريط آخر الطلبات (" + e.message + ")", "err"); }
+  }, 1200);
+}
+
+// ===== تبويب العملاء =====
+function allCustomerRows(){
+  const byPhone = new Map();
+  groupSalesData().forEach(g => {
+    const ph = normPhone(g.phone, "");
+    if(ph && !byPhone.has(ph)) byPhone.set(ph, true);
+  });
+  Object.keys(customersData).forEach(ph => byPhone.set(ph, true));
+  return Array.from(byPhone.keys()).map(ph => Object.assign({ phone: ph }, customerInfoFor(ph)))
+    .sort((a, b) => (b.last || "").localeCompare(a.last || ""));
+}
+let custFilterText = "";
+function renderCustomersPanel(){
+  const wrap = document.getElementById("cust_list");
+  const q = custFilterText.trim().toLowerCase();
+  let rows = allCustomerRows();
+  if(q) rows = rows.filter(r => (r.name || "").toLowerCase().indexOf(q) !== -1 || r.phone.indexOf(q) !== -1);
+  document.getElementById("cust_count").textContent = rows.length + " عميل";
+  if(!rows.length){ wrap.innerHTML = `<div class="hint">ما فيه عملاء مطابقين.</div>`; return; }
+  wrap.innerHTML = rows.slice(0, 200).map(r => `<div class="sale-row" data-phone="${esc(r.phone)}">
+      <div class="sale-row-top">
+        <span class="sale-row-name">${esc(r.name || "بدون اسم")} ${r.flag ? "⛔" : ""}</span>
+        <span class="sale-row-amount" dir="ltr">${esc(r.phone)}</span>
+      </div>
+      <div class="sale-row-meta">📦 ${esc(r.orders)} طلب — ✅ ${esc(r.delivered)} تم التسليم — ↩️ ${esc(r.returned)} إرجاع — 💸 مسترد ${esc(fmtNum(r.refunded))} AED${r.last ? " — آخر طلب " + esc(r.last) : ""}</div>
+      <div class="grid2" style="margin-top:8px;">
+        <div class="field" style="margin-bottom:0;"><label>ملاحظات</label><input type="text" class="cust-notes" maxlength="300" value="${esc(r.notes)}"></div>
+        <div class="field" style="margin-bottom:0;"><label>سبب المنع (اختياري)</label><input type="text" class="cust-reason" maxlength="200" value="${esc(r.reason)}"></div>
+      </div>
+      <div class="sale-row-actions" style="margin-top:8px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;"><input type="checkbox" class="cust-flag" style="width:auto; margin:0;" ${r.flag ? "checked" : ""}> ⛔ لا يُباع له</label>
+        <button type="button" class="secondary cust-save-btn">💾 حفظ</button>
+      </div>
+    </div>`).join("");
+}
+document.getElementById("cust_list").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".cust-save-btn");
+  if(!btn) return;
+  const row = btn.closest(".sale-row");
+  const phone = row.dataset.phone;
+  const token = getToken();
+  const box = document.getElementById("cust_statusBox");
+  if(!token){ box.textContent = "لازم تدخل بحساب Google أول."; box.className = "status err"; return; }
+  const entry = {
+    notes: row.querySelector(".cust-notes").value.trim().slice(0, 300),
+    doNotSell: row.querySelector(".cust-flag").checked,
+    reason: row.querySelector(".cust-reason").value.trim().slice(0, 200),
+    updatedAt: todayStr()
+  };
+  btn.disabled = true;
+  try{
+    box.textContent = "جارِ الحفظ..."; box.className = "status info";
+    customersData = await updateJsonWithRetry(API_BASE_PRIV, token, CUSTOMERS_JSON_PATH, {}, (obj) => {
+      if(!entry.notes && !entry.doNotSell && !entry.reason) delete obj[phone]; else obj[phone] = entry;
+      return obj;
+    }, "Update customer record");
+    box.textContent = "تم الحفظ."; box.className = "status ok";
+    renderCustomersPanel();
+  }catch(err){ box.textContent = "صار خطأ: " + err.message; box.className = "status err"; btn.disabled = false; }
+});
+document.getElementById("cust_search").addEventListener("input", (e) => { custFilterText = e.target.value; renderCustomersPanel(); });
+document.getElementById("modeCustomersBtn").addEventListener("click", async () => { setMode("customers"); await loadCustomersQuiet(); renderCustomersPanel(); });
+
+// ===== تفاصيل إضافية بصف الطلب + الاسترجاع =====
+function saleRowExtraHtml(g){
+  const f = g.items[0] || {};
+  const parts = [];
+  if(g.email) parts.push("✉️ " + esc(g.email));
+  if(g.region || g.city) parts.push("🏙️ " + esc([g.region, g.city].filter(Boolean).join(" — ")));
+  if(normStatus(f.status) === "delivered" && f.deliveredAt){
+    const days = 2 - Math.floor((Date.now() - new Date(f.deliveredAt + "T00:00:00").getTime()) / 86400000);
+    parts.push(days > 0 ? `⏳ نافذة الإرجاع: باقي ${esc(days)} ${days === 1 ? "يوم" : "أيام"}` : (days === 0 ? "⏳ نافذة الإرجاع: آخر يوم" : "⌛ انتهت نافذة الإرجاع (يومين)"));
+  }
+  const refund = g.items.reduce((a, o) => a + (Number(o.refundAmount) || 0), 0);
+  if(refund > 0) parts.push(`💸 مسترد ${esc(fmtNum(refund))} AED${f.refundDate ? " بتاريخ " + esc(f.refundDate) : ""}`);
+  return parts.length ? `<div class="sale-row-meta" style="margin-top:4px;">${parts.join(" — ")}</div>` : "";
+}
+let slRefundKey = null;
+function slOpenRefund(key){
+  const g = groupSalesData().find(x => x.key === key);
+  if(!g) return;
+  slRefundKey = key;
+  document.getElementById("sl_refundOrderLabel").textContent = (g.customer || "بدون اسم") + " — " + (g.date || "");
+  document.getElementById("sl_refundAmount").value = "";
+  document.getElementById("sl_refundDate").value = todayStr();
+  document.getElementById("sl_refundItems").innerHTML = g.items.map((o, i) => {
+    const pf = perfumes.find(x => x.id === o.perfumeId);
+    return `<label style="display:flex; align-items:center; gap:6px; margin:4px 0; cursor:pointer;"><input type="checkbox" class="sl-refund-item" data-pid="${esc(o.perfumeId)}" style="width:auto; margin:0;" checked> ${esc(pf ? pf.brand + " — " + pf.name : o.perfumeId)} (${esc(o.qty)}×)</label>`;
+  }).join("");
+  document.getElementById("sl_refundStatus").className = "status";
+  const panel = document.getElementById("sl_refundPanel");
+  panel.style.display = "block";
+  panel.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+document.getElementById("sl_history").addEventListener("click", (e) => {
+  const b = e.target.closest(".sl-history-refund-btn");
+  if(b) slOpenRefund(b.closest(".sale-row").dataset.key);
+});
+document.getElementById("sl_refundCancelBtn").addEventListener("click", () => { document.getElementById("sl_refundPanel").style.display = "none"; slRefundKey = null; });
+document.getElementById("sl_refundSaveBtn").addEventListener("click", async () => {
+  const box = document.getElementById("sl_refundStatus");
+  const token = getToken();
+  if(!token){ box.textContent = "لازم تدخل بحساب Google أول."; box.className = "status err"; return; }
+  const amount = Number(document.getElementById("sl_refundAmount").value) || 0;
+  const date = document.getElementById("sl_refundDate").value || todayStr();
+  const chosen = Array.from(document.querySelectorAll(".sl-refund-item")).filter(c => c.checked).map(c => c.dataset.pid);
+  if(amount <= 0){ box.textContent = "اكتب مبلغ الاسترداد."; box.className = "status err"; return; }
+  if(!chosen.length){ box.textContent = "اختر عطر وحد على الأقل."; box.className = "status err"; return; }
+  const key = slRefundKey;
+  const g = groupSalesData().find(x => x.key === key);
+  if(!g) return;
+  const full = new Set(g.items.map(o => o.perfumeId)).size === new Set(chosen).size;
+  const btn = document.getElementById("sl_refundSaveBtn");
+  btn.disabled = true;
+  try{
+    box.textContent = "جارِ الحفظ..."; box.className = "status info";
+    const updated = await updateOrdersJsonWithRetry(token, (list) => {
+      let first = true;
+      return list.map(o => {
+        if((o.orderId || o.id) !== key) return o;
+        const n = Object.assign({}, o);
+        if(first){
+          first = false;
+          n.refundAmount = (Number(o.refundAmount) || 0) + amount;
+          n.refundDate = date;
+          n.refundItems = Array.from(new Set((o.refundItems || []).concat(chosen)));
+        }
+        if(full) n.status = "refunded";
+        return n;
+      });
+    }, `Record refund: ${key}`);
+    salesData = updated;
+    document.getElementById("sl_refundPanel").style.display = "none";
+    slRefundKey = null;
+    renderSalesHistory(); renderOverview(); syncRecentOrders();
+    slShowStatus("تم تسجيل الاسترداد" + (full ? " وتحديث حالة الطلب إلى «تم الاسترداد»." : "."), "ok");
+  }catch(err){ box.textContent = "صار خطأ: " + err.message; box.className = "status err"; }
+  finally{ btn.disabled = false; }
+});
+document.getElementById("sl_syncRecentBtn").addEventListener("click", () => { syncRecentOrders(); slShowStatus("جارِ تحديث شريط آخر الطلبات...", "info"); });
+
+// طلبات تُحتسب بالإيراد: مو هدية، ومو ملغاة/مرتجعة/مستردة بالكامل
+function isRevenueRow(o){ return !o.isGift && ['cancelled','returned','refunded'].indexOf(normStatus(o.status)) === -1; }
+// ===== حالات الطلب (enum موحّد) =====
+const ORDER_STATUSES = [
+  ["new","🆕 جديد","var(--muted)"],
+  ["confirmed","✅ مؤكد","#8a6d1f"],
+  ["dispatched","🚚 تم الشحن","#1F6B41"],
+  ["delivered","📦 تم التسليم","#2f5fa8"],
+  ["return_requested","↩️ طلب إرجاع","#963224"],
+  ["returned","📥 مرتجع","#963224"],
+  ["refunded","💸 تم الاسترداد","#963224"],
+  ["cancelled","⛔ ملغي","#963224"]
+];
+const LEGACY_STATUS_MAP = { "": "new", prep: "confirmed", needs_oil: "confirmed", shipped: "dispatched", received: "delivered" };
+function normStatus(s){
+  s = s || "";
+  if(Object.prototype.hasOwnProperty.call(LEGACY_STATUS_MAP, s)) return LEGACY_STATUS_MAP[s];
+  return ORDER_STATUSES.some(x => x[0] === s) ? s : "new";
+}
+function statusOptionsHtml(current){
+  const cur = normStatus(current);
+  return ORDER_STATUSES.map(x => `<option value="${x[0]}" ${x[0] === cur ? "selected" : ""}>${x[1]}</option>`).join("");
+}
+function withStatus(o, status){
+  const out = Object.assign({}, o, { status });
+  if(status === "delivered" && !out.deliveredAt) out.deliveredAt = todayStr();
+  return out;
+}
 function countOrderStatuses(list, getStatus, getPaid){
-  const counts = { total: 0, new: 0, prep: 0, needs_oil: 0, shipped: 0, received: 0, unpaid: 0 };
+  const counts = { total: 0, unpaid: 0 };
+  ORDER_STATUSES.forEach(x => counts[x[0]] = 0);
   list.forEach(item => {
     counts.total++;
-    const s = getStatus(item) || "";
-    if(s === "prep") counts.prep++;
-    else if(s === "needs_oil") counts.needs_oil++;
-    else if(s === "shipped") counts.shipped++;
-    else if(s === "received") counts.received++;
-    else counts.new++;
+    counts[normStatus(getStatus(item))]++;
     if(!getPaid(item)) counts.unpaid++;
   });
   return counts;
 }
-
-function orderStatusLabel(s){
-  if(s === "prep") return "🔧 قيد التجهيز";
-  if(s === "needs_oil") return "🛢️ يحتاج زيت";
-  if(s === "shipped") return "🚚 تم الشحن";
-  if(s === "received") return "📦 تم الاستلام";
-  return "🆕 جديد";
-}
-function orderStatusColor(s){
-  if(s === "prep") return "#8a6d1f";
-  if(s === "needs_oil") return "#963224";
-  if(s === "shipped") return "#1F6B41";
-  if(s === "received") return "#2f5fa8";
-  return "var(--muted)";
+function orderStatusLabel(s){ const k = normStatus(s); return ORDER_STATUSES.find(x => x[0] === k)[1]; }
+function orderStatusColor(s){ const k = normStatus(s); return ORDER_STATUSES.find(x => x[0] === k)[2]; }
+function setStatusStats(prefix, counts){
+  ORDER_STATUSES.map(x => x[0]).concat(["unpaid"]).forEach(k => {
+    const el = document.getElementById(prefix + "_" + k);
+    if(el) el.textContent = counts[k];
+  });
 }
 async function slUpdateOrderStatus(orderId, status){
   const token = getToken();
   if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
   try{
-    const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.map(o => (o.orderId || o.id) === orderId ? Object.assign({}, o, { status }) : o), `Update order status: ${orderId} -> ${status || "جديد"}`);
+    const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.map(o => (o.orderId || o.id) === orderId ? withStatus(o, status) : o), `Update order status: ${orderId} -> ${status || "جديد"}`);
     salesData = updatedList;
     renderSalesHistory();
     slShowStatus("تم تحديث حالة الطلب.", "ok");
+    syncRecentOrders();
   }catch(err){
     slShowStatus("صار خطأ بتحديث حالة الطلب: " + err.message, "err");
   }
@@ -2912,12 +3247,7 @@ async function slUpdateOrderPaid(orderId, paid){
 }
 function renderSalesStatusOverview(){
   const counts = countOrderStatuses(groupSalesData(), g => (g.items[0] && g.items[0].status), g => !!(g.items[0] && g.items[0].paid));
-  document.getElementById("sl_stat_new").textContent = counts.new;
-  document.getElementById("sl_stat_prep").textContent = counts.prep;
-  document.getElementById("sl_stat_needsOil").textContent = counts.needs_oil;
-  document.getElementById("sl_stat_shipped").textContent = counts.shipped;
-  document.getElementById("sl_stat_received").textContent = counts.received;
-  document.getElementById("sl_stat_unpaid").textContent = counts.unpaid;
+  setStatusStats("sl_stat", counts);
 }
 
 function renderSalesHistory(){
@@ -2934,7 +3264,7 @@ function renderSalesHistory(){
   // 11 أكتوبر 2026: فلتر حالة الطلب/الدفع — نطبّقه قبل التقطيع لآخر 15 طلب عشان
   // الفلتر يشتغل صح حتى لو الطلب المطابق مو من ضمن أحدث 15 طلب مسجّل.
   let filtered = groups;
-  if(slFilterStatus !== "all") filtered = filtered.filter(g => ((g.items[0] && g.items[0].status) || "") === slFilterStatus);
+  if(slFilterStatus !== "all") filtered = filtered.filter(g => normStatus(g.items[0] && g.items[0].status) === slFilterStatus);
   if(slFilterPaid === "unpaid") filtered = filtered.filter(g => !(g.items[0] && g.items[0].paid));
   else if(slFilterPaid === "paid") filtered = filtered.filter(g => !!(g.items[0] && g.items[0].paid));
   if(filtered.length === 0){
@@ -2964,18 +3294,16 @@ function renderSalesHistory(){
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
       <div class="sale-row-meta">${esc(g.date || "")} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + esc(g.countryLabel) : ""}${g.phone ? " — 📞 " + esc(g.phone) : ""}${g.address ? " — 📍 " + esc(g.address) : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
+      ${saleRowExtraHtml(g)}
       <div class="sale-row-actions">
         <select class="sale-row-status-select" data-key="${esc(g.key)}" style="color:${orderStatusColor(status)};">
-          <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
-          <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
-          <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
-          <option value="shipped" ${status === "shipped" ? "selected" : ""}>🚚 تم الشحن</option>
-          <option value="received" ${status === "received" ? "selected" : ""}>📦 تم الاستلام</option>
+          ${statusOptionsHtml(status)}
         </select>
         <label class="sale-row-paid-label" style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
           <input type="checkbox" class="sale-row-paid-check" data-key="${esc(g.key)}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
         </label>
         <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
+        <button type="button" class="secondary sl-history-refund-btn">↩️ استرجاع</button>
         <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
       </div>
     </div>`;
@@ -3029,6 +3357,7 @@ function renderSalesHistory(){
           stockNote = ` — تحذير: الطلب انحذف بس صار خطأ برجّاع المخزون تلقائيًا (${stockErr.message}) — راجع المخزون يدويًا لهذا العطر.`;
         }
         renderOverview();
+        syncRecentOrders();
         slShowStatus("تم حذف الطلب." + stockNote, "ok");
       }catch(err){
         slShowStatus("صار خطأ: " + err.message, "err");
@@ -3058,8 +3387,26 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   }
   const phoneCode = document.getElementById("sl_phoneCode").textContent.trim();
   const phoneLocal = document.getElementById("sl_phone").value.trim();
-  const phone = phoneLocal ? ((phoneCode && phoneCode !== "+___") ? phoneCode + " " + phoneLocal : phoneLocal) : "";
+  const phone = normPhone(phoneLocal, phoneCode);
   const address = document.getElementById("sl_address").value.trim();
+  const email = document.getElementById("sl_email").value.trim().toLowerCase();
+  const region = document.getElementById("sl_region").value.trim();
+  const city = document.getElementById("sl_city").value.trim();
+  const deliveryType = document.getElementById("sl_delivery").value;
+  const newStatus = document.getElementById("sl_status").value || "new";
+  const recentConsent = document.getElementById("sl_recentConsent").checked;
+  const missing = [];
+  if(customer.length < 2) missing.push("الاسم الكامل");
+  if(!country) missing.push("الدولة");
+  if(!/^\+\d{8,15}$/.test(phone)) missing.push("رقم هاتف صحيح");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) missing.push("بريد إلكتروني صحيح");
+  if(!region) missing.push("الإمارة / المحافظة");
+  if(!city) missing.push("المدينة / المنطقة");
+  if(!deliveryType) missing.push("نوع التوصيل");
+  if(address.length < 5) missing.push("العنوان التفصيلي");
+  if(missing.length){ slShowStatus("أكمل الحقول الإلزامية: " + missing.join("، "), "err"); return; }
+  const custInfo = customerInfoFor(phone);
+  if(custInfo.flag && !confirm("⛔ هذا الرقم عليه علامة «لا يُباع له»" + (custInfo.reason ? " — السبب: " + custInfo.reason : "") + ".\nتبا تسجّل الطلب بكل الأحوال؟")) return;
   // 3 أكتوبر 2026: خصم اختياري على كامل الطلب — يُخزَّن مرة وحدة على أول عنصر
   // بالطلب بس (عشان ما يتكرر/يتضاعف لو الطلب فيه أكثر من عطر)، وكل الحسابات
   // اللي تجمع إيراد الطلب (سجل المبيعات + تقرير الأرباح) تطرحه تلقائيًا.
@@ -3073,6 +3420,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
     slShowStatus(isEditing ? "جارِ حفظ التعديلات..." : "جارِ الحفظ...", "info");
     // لو نعدّل طلب موجود، نستخدم نفس مفتاحه كـorderId عشان يبقى الطلب "نفسه" بعد التعديل (نفس منطق التجميع بـgroupSalesData)
     const orderId = isEditing ? editingKey : `order-${Date.now()}`;
+    const prevRow = isEditing ? (salesData.find(x => (x.orderId || x.id) === editingKey) || null) : null;
     const cartSnapshot = salesCart.slice();
     const newEntries = cartSnapshot.map((item, i) => ({
       id: `${item.perfumeId}-${Date.now()}-${i}`,
@@ -3084,8 +3432,14 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       ...(i === 0 && discount > 0 ? { discount } : {}),
       customer, date,
       country, countryLabel, phone, address,
+      email, emirateOrWilayat: region, city, deliveryType,
+      status: newStatus,
+      ...(newStatus === "delivered" ? { deliveredAt: (prevRow && prevRow.deliveredAt) || date } : {}),
+      ...(prevRow && prevRow.paid ? { paid: true } : {}),
+      ...(i === 0 && prevRow && prevRow.refundAmount ? { refundAmount: prevRow.refundAmount, refundDate: prevRow.refundDate, refundItems: prevRow.refundItems } : {}),
+      ...(recentConsent ? { recentConsent: true } : {}),
       orderId,
-      source: "admin"
+      source: (prevRow && prevRow.source) || "admin"
     }));
     const giftCount = cartSnapshot.filter(item => item.isGift).length;
     const label = isEditing
@@ -3120,6 +3474,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
     renderSalesHistory();
     renderOverview();
     slResetOrderFields();
+    syncRecentOrders();
     slShowStatus((isEditing
       ? `تم حفظ تعديلات الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`
       : `تم تسجيل الطلب (${newEntries.length} ${newEntries.length === 1 ? "عطر" : "عطور"})! يظهر بـ"نظرة عامة" فورًا.`) + stockNote, "ok");
@@ -3144,9 +3499,9 @@ function setMode(newMode){
   document.getElementById("modeCostBtn").classList.toggle("active", mode === "cost");
   document.getElementById("modeExcelBtn").classList.toggle("active", mode === "excel");
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
-  document.getElementById("modeBankBtn").classList.toggle("active", mode === "bank");
   document.getElementById("modeShippingBtn").classList.toggle("active", mode === "shipping");
   document.getElementById("modeWishlistBtn").classList.toggle("active", mode === "wishlist");
+  document.getElementById("modeCustomersBtn").classList.toggle("active", mode === "customers");
   document.getElementById("modeDistBtn").classList.toggle("active", mode === "dist");
   document.getElementById("modeOrdersQueueBtn").classList.toggle("active", mode === "ordersQueue");
   document.getElementById("overviewPanel").style.display = mode === "overview" ? "block" : "none";
@@ -3160,9 +3515,9 @@ function setMode(newMode){
   if(mode === "reviews") renderReviewsOrdersList();
   document.getElementById("salesQuickPanel").style.display = mode === "sales" ? "block" : "none";
   document.getElementById("costPanel").style.display = mode === "cost" ? "block" : "none";
-  document.getElementById("bankInfoPanel").style.display = mode === "bank" ? "block" : "none";
   document.getElementById("shippingPanel").style.display = mode === "shipping" ? "block" : "none";
   document.getElementById("wishlistPanel").style.display = mode === "wishlist" ? "block" : "none";
+  document.getElementById("customersPanel").style.display = mode === "customers" ? "block" : "none";
   document.getElementById("distPanel").style.display = mode === "dist" ? "block" : "none";
   document.getElementById("ordersQueuePanel").style.display = mode === "ordersQueue" ? "block" : "none";
   stockCategoryActive = null;
@@ -3212,6 +3567,7 @@ function setMode(newMode){
     document.getElementById("sl_addItemWrap").style.display = "none";
     document.getElementById("sl_pickHint").style.display = "block";
     if(!document.getElementById("sl_date").value) document.getElementById("sl_date").value = todayStr();
+    slInitFormExtras();
     slRenderCart();
     renderSalesHistory();
   }
@@ -3248,7 +3604,6 @@ document.getElementById("modeBulkPriceBtn").addEventListener("click", () => { se
 document.getElementById("modeSalesBtn").addEventListener("click", () => setMode("sales"));
 document.getElementById("modeExcelBtn").addEventListener("click", () => setMode("excel"));
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
-document.getElementById("modeBankBtn").addEventListener("click", () => { setMode("bank"); loadBankInfoIntoForm(); });
 document.getElementById("modeShippingBtn").addEventListener("click", () => { setMode("shipping"); loadShippingRatesIntoForm(); });
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
 document.getElementById("modeDistBtn").addEventListener("click", () => { setMode("dist"); loadDistributionsIntoPanel(); });
@@ -3277,7 +3632,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
     let distributionsData = distDefaultData();
     // 11 أكتوبر 2026: فلتر سجل مبيعات التوزيعات — نفس فكرة فلتر سجل المبيعات بوضع
     // "💰 المبيعات"، بطلب المستخدم.
-    let distFilterStatus = "all"; // "all" أو قيمة status (فاضي = جديد، prep، needs_oil، shipped، received)
+    let distFilterStatus = "all"; // "all" أو قيمة status (new، confirmed، dispatched، delivered، …)
     let distFilterPaid = "all";   // "all" | "unpaid" | "paid"
 
     function distShowStatus(msg, cls){
@@ -3757,7 +4112,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
         const updated = await updateDistributionsWithRetry(token, (obj) => {
           const idx = (obj.sales||[]).findIndex(s => s.id === saleId);
           if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
-          obj.sales[idx] = Object.assign({}, obj.sales[idx], { status });
+          obj.sales[idx] = withStatus(obj.sales[idx], status);
           return obj;
         }, "Update distribution sale status: " + saleId + " -> " + (status || "جديد"));
         distributionsData = updated;
@@ -3799,12 +4154,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
   const sorted = activeSales.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
   document.getElementById("dist_ov_latest").textContent = sorted[0] ? sorted[0].date : "—";
   const counts = countOrderStatuses(activeSales, s => s.status, s => !!s.paid);
-  document.getElementById("dist_ov_new").textContent = counts.new;
-  document.getElementById("dist_ov_prep").textContent = counts.prep;
-  document.getElementById("dist_ov_needsOil").textContent = counts.needs_oil;
-  document.getElementById("dist_ov_shipped").textContent = counts.shipped;
-  document.getElementById("dist_ov_received").textContent = counts.received;
-  document.getElementById("dist_ov_unpaid").textContent = counts.unpaid;
+  setStatusStats("dist_ov", counts);
 }
 
 function distRenderSalesLog(){
@@ -3825,7 +4175,7 @@ function distRenderSalesLog(){
       // 11 أكتوبر 2026: فلتر حالة الطلب/الدفع — الأرقام الإجمالية فوق (القطع/الإيراد/الربح)
       // تبقى على كل المبيعات دايمًا، الفلتر يأثر بس على القائمة المعروضة تحت.
       let filteredSales = sales.slice().reverse();
-      if(distFilterStatus !== "all") filteredSales = filteredSales.filter(s => (s.status || "") === distFilterStatus);
+      if(distFilterStatus !== "all") filteredSales = filteredSales.filter(s => normStatus(s.status) === distFilterStatus);
       if(distFilterPaid === "unpaid") filteredSales = filteredSales.filter(s => !s.paid);
       else if(distFilterPaid === "paid") filteredSales = filteredSales.filter(s => !!s.paid);
       if(filteredSales.length === 0){
@@ -3850,11 +4200,7 @@ function distRenderSalesLog(){
              <button type="button" class="secondary dist-cancel-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
         const statusPaidHtml = s.cancelled ? "" : `
             <select class="dist-sale-status-select" data-id="${esc(s.id)}" style="width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; color:${orderStatusColor(status)};">
-              <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
-              <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
-              <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
-              <option value="shipped" ${status === "shipped" ? "selected" : ""}>🚚 تم الشحن</option>
-              <option value="received" ${status === "received" ? "selected" : ""}>📦 تم الاستلام</option>
+              ${statusOptionsHtml(status)}
             </select>
             <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
               <input type="checkbox" class="dist-sale-paid-check" data-id="${esc(s.id)}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
@@ -4790,13 +5136,13 @@ function computeProfitReport(){
   if(!salesData || !salesData.length) return result;
   const missingCostIds = new Set();
   const byPerfume = {};
-  salesData.filter(o => !o.isGift).forEach(o => {
+  salesData.filter(isRevenueRow).forEach(o => {
     const p = perfumes.find(x => x.id === o.perfumeId);
     const qty = Number(o.qty) || 0;
     // 3 أكتوبر 2026: الخصم المُعطى للعميل (لو فيه) يُخزَّن على سطر واحد من الطلب
     // ويُطرح من إيراد ذاك السطر هنا، عشان الربح المحسوب يعكس المبلغ الفعلي
     // المُحصَّل من العميل، لا سعر الوحدة الأصلي قبل الخصم.
-    const revenue = Math.max(0, qty * (Number(o.unitPrice) || 0) - (Number(o.discount) || 0));
+    const revenue = Math.max(0, qty * (Number(o.unitPrice) || 0) - (Number(o.discount) || 0) - (Number(o.refundAmount) || 0));
     const cost = qty * perfumeUnitCost(p, o.size);
     if(p && !perfumeHasCostData(p)) missingCostIds.add(p.id);
     result.totalRevenue += revenue;
@@ -4902,7 +5248,7 @@ function materialTotalSpent(material){
 // كمية كل مادة استُهلكت فعليًا حسب الطلبات الحقيقية المعتمدة (نفس بيانات تبويب الأرباح،
 // بدون هدايا العروض المجانية) — تقدير: قطعة مباعة = زجاجة حجمها + تغليف + كحول بمقدار حجمها
 function materialTotalUsed(material){
-  const nonGift = (salesData||[]).filter(o => !o.isGift);
+  const nonGift = (salesData||[]).filter(isRevenueRow);
   if(material === "bottle50") return nonGift.filter(o => Number(o.size)===50).reduce((s,o)=>s+(Number(o.qty)||0),0);
   if(material === "bottle10") return nonGift.filter(o => Number(o.size)===10).reduce((s,o)=>s+(Number(o.qty)||0),0);
   if(material === "packaging") return nonGift.reduce((s,o)=>s+(Number(o.qty)||0),0);
@@ -5776,142 +6122,12 @@ async function updatePendingOrdersJsonWithRetry(token, mutateFn, commitMsg, atte
   return newList;
 }
 
-// ===== قراءة/كتابة bank-info.json — نفس منطق reviews.json/orders.json بالضبط، بس كائن وحد
-// (بيانات البنك للإمارات وعُمان) بدل قائمة =====
-function bankShowStatus(msg, type){
-  const box = document.getElementById("bank_statusBox");
-  box.textContent = msg;
-  box.className = "status show " + type;
-}
-
-async function getBankInfoWithSha(token){
-  const res = await fetch(`${API_BASE_PRIV}/${BANK_JSON_PATH}?ref=${BRANCH}`, {
-    cache: "no-store",
-    headers: { "Authorization": `Bearer ${token}` }
-  });
-  if(res.status === 404) return { obj: { AE:{}, OM:{} }, sha: null };
-  if(!res.ok){
-    const err = await res.json().catch(()=>({}));
-    throw new Error("تعذّر قراءة bank-info.json الحالي: " + (err.message || res.status));
-  }
-  const info = await res.json();
-  const obj = JSON.parse(base64ToUtf8(info.content));
-  return { obj: (obj && typeof obj === "object") ? obj : { AE:{}, OM:{} }, sha: info.sha };
-}
-
-async function putBankInfoJson(obj, sha, token, commitMsg){
-  const body = {
-    message: commitMsg,
-    content: utf8ToBase64(JSON.stringify(obj, null, 2)),
-    branch: BRANCH
-  };
-  if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE_PRIV}/${BANK_JSON_PATH}`, {
-    method: "PUT",
-    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  if(!res.ok){
-    const err = await res.json().catch(()=>({}));
-    if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. اضغط \"تحميل آخر نسخة\" وجرّب مرة ثانية.");
-    throw new Error(err.message || ("HTTP " + res.status));
-  }
-}
-
-async function updateBankInfoWithRetry(token, mutateFn, commitMsg, attempt){
-  attempt = attempt || 0;
-  const { obj, sha } = await getBankInfoWithSha(token);
-  const newObj = mutateFn(obj);
-  try{
-    await putBankInfoJson(newObj, sha, token, commitMsg);
-  }catch(e){
-    if(String(e.message).includes("تعديل ثاني") && attempt < 2){
-      return updateBankInfoWithRetry(token, mutateFn, commitMsg, attempt + 1);
-    }
-    throw e;
-  }
-  return newObj;
-}
-
-function fillBankForm(obj){
-  const ae = (obj && obj.AE) || {};
-  const om = (obj && obj.OM) || {};
-  document.getElementById("bank_ae_bankName").value = ae.bankName || "";
-  document.getElementById("bank_ae_accountName").value = ae.accountName || "";
-  document.getElementById("bank_ae_accountNumber").value = ae.accountNumber || "";
-  document.getElementById("bank_ae_iban").value = ae.iban || "";
-  document.getElementById("bank_ae_swift").value = ae.swift || "";
-  document.getElementById("bank_om_bankName").value = om.bankName || "";
-  document.getElementById("bank_om_accountName").value = om.accountName || "";
-  document.getElementById("bank_om_accountNumber").value = om.accountNumber || "";
-  document.getElementById("bank_om_iban").value = om.iban || "";
-  document.getElementById("bank_om_swift").value = om.swift || "";
-}
-
-function readBankForm(){
-  return {
-    AE: {
-      bankName: document.getElementById("bank_ae_bankName").value.trim(),
-      accountName: document.getElementById("bank_ae_accountName").value.trim(),
-      accountNumber: document.getElementById("bank_ae_accountNumber").value.trim(),
-      iban: document.getElementById("bank_ae_iban").value.trim(),
-      swift: document.getElementById("bank_ae_swift").value.trim()
-    },
-    OM: {
-      bankName: document.getElementById("bank_om_bankName").value.trim(),
-      accountName: document.getElementById("bank_om_accountName").value.trim(),
-      accountNumber: document.getElementById("bank_om_accountNumber").value.trim(),
-      iban: document.getElementById("bank_om_iban").value.trim(),
-      swift: document.getElementById("bank_om_swift").value.trim()
-    }
-  };
-}
-
-// تحميل أحدث نسخة معروفة (نستخدم رابط raw العام — ما يحتاج توكن — نفس أسلوب data.json/reviews.json)
-async function loadBankInfoIntoForm(){
-  try{
-    bankShowStatus("جارِ التحميل...", "info");
-    const res = await privFetch(BANK_JSON_PATH);
-    if(res.ok){
-      bankInfoData = await res.json();
-    } else if(res.status === 404){
-      bankInfoData = { AE:{}, OM:{} };
-    } else {
-      throw new Error("HTTP " + res.status);
-    }
-    fillBankForm(bankInfoData);
-    document.getElementById("bank_statusBox").className = "status";
-  }catch(e){
-    bankShowStatus("ما قدرت أجيب بيانات البنك الحالية. جرّب تحديث الصفحة. (" + e.message + ")", "err");
-  }
-}
-
-document.getElementById("bank_reloadBtn").addEventListener("click", loadBankInfoIntoForm);
-
-document.getElementById("bank_saveBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ bankShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
-  const btn = document.getElementById("bank_saveBtn");
-  btn.disabled = true;
-  try{
-    bankShowStatus("جارِ الحفظ والنشر...", "info");
-    const formData = readBankForm();
-    const updated = await updateBankInfoWithRetry(token, () => formData, "Update bank transfer details");
-    bankInfoData = updated;
-    bankShowStatus("تم الحفظ! بيانات البنك محدّثة على الموقع الحين.", "ok");
-  }catch(e){
-    bankShowStatus("صار خطأ: " + e.message, "err");
-  }finally{
-    btn.disabled = false;
-  }
-});
-
 // ===== وضع "🚚 رسوم التوصيل" — 30 أغسطس 2026 =====
 // نفس نمط bank-info.json بالضبط: كائن وحد (مو قائمة)، قراءة عامة برابط raw للعرض،
 // وكتابة عبر GitHub Contents API بتوكن المستخدم. الموقع (assets/catalog.js) يقرأ نفس
 // الملف مباشرة (loadShippingRatesFromJson) فيحدّث رسوم التوصيل وعمولة تابي فورًا
 // بدون أي تعديل كود — هذا كان طلب جاسم بالضبط: "أقدر أغيّر الرسوم أي وقت".
-const SHIPPING_DEFAULTS = { AE: { standard: 20, western: 50 }, OM: { door: 2, nool: 1 }, tabbyFeePercent: 5 };
+const SHIPPING_DEFAULTS = { AE: { standard: 25, western: 50 }, OM: { door: 2, nool: 1 } };
 let shippingRatesData = JSON.parse(JSON.stringify(SHIPPING_DEFAULTS));
 
 function shipShowStatus(msg, cls){
@@ -5976,7 +6192,6 @@ function fillShippingForm(obj){
   document.getElementById("ship_ae_western").value = (typeof ae.western === "number") ? ae.western : SHIPPING_DEFAULTS.AE.western;
   document.getElementById("ship_om_door").value = (typeof om.door === "number") ? om.door : SHIPPING_DEFAULTS.OM.door;
   document.getElementById("ship_om_nool").value = (typeof om.nool === "number") ? om.nool : SHIPPING_DEFAULTS.OM.nool;
-  document.getElementById("ship_tabbyPercent").value = (typeof obj.tabbyFeePercent === "number") ? obj.tabbyFeePercent : SHIPPING_DEFAULTS.tabbyFeePercent;
 }
 
 function readShippingForm(){
@@ -5988,8 +6203,7 @@ function readShippingForm(){
     OM: {
       door: Number(document.getElementById("ship_om_door").value) || 0,
       nool: Number(document.getElementById("ship_om_nool").value) || 0
-    },
-    tabbyFeePercent: Number(document.getElementById("ship_tabbyPercent").value) || 0
+    }
   };
 }
 
@@ -6022,7 +6236,7 @@ document.getElementById("ship_saveBtn").addEventListener("click", async () => {
   try{
     shipShowStatus("جارِ الحفظ والنشر...", "info");
     const formData = readShippingForm();
-    const updated = await updateShippingRatesWithRetry(token, () => formData, "Update shipping rates + Tabby fee");
+    const updated = await updateShippingRatesWithRetry(token, () => formData, "Update shipping rates");
     shippingRatesData = updated;
     shipShowStatus("تم الحفظ! رسوم التوصيل محدّثة على الموقع الحين.", "ok");
   }catch(e){
@@ -6229,8 +6443,10 @@ function renderOrdersQueueList(){
     }).join("");
     const metaParts = [
       o.country ? `📍 ${esc(o.country)}${o.emirateOrWilayat ? " — " + esc(o.emirateOrWilayat) : ""}` : "",
+      o.city ? `🏙️ ${esc(o.city)}` : "",
+      o.email ? `✉️ ${esc(o.email)}` : "",
       o.deliveryMethod ? `🚚 ${esc(o.deliveryMethod)}` : "",
-      o.paymentMethod ? `💳 ${esc(o.paymentMethod)}` : "",
+      o.recentConsent ? `📣 وافق على ظهور اسمه الأول ومدينته` : "",
       o.notes ? `📝 ${esc(o.notes)}` : ""
     ].filter(Boolean).join(" — ");
     return `<div class="dropdown-item" data-order-id="${esc(o.orderId)}" style="display:block; padding:14px;">
@@ -6244,6 +6460,7 @@ function renderOrdersQueueList(){
       </div>
       ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#1F6B41; font-weight:700;">🚚 ${esc(o.offers)}</div>` : ""}
       ${metaParts ? `<div style="margin-top:6px; font-size:12px; color:var(--muted);">${metaParts}</div>` : ""}
+      ${custWarnHtml(normPhone(phone, ""))}
       <div class="grid2" style="margin-top:12px;">
         <div class="field" style="margin-bottom:0;"><label>اسم العميل</label><input type="text" class="oq-name-input" value="${esc(name)}" placeholder="اسم العميل"></div>
         <div class="field" style="margin-bottom:0;"><label>الهاتف</label><input type="text" class="oq-phone-input" value="${esc(phone)}" placeholder="رقم الهاتف"></div>
@@ -6297,6 +6514,8 @@ function renderOrdersQueueList(){
         if(!confirm(msg)) return;
       }
 
+      const _ci = customerInfoFor(normPhone(phoneInput.value.trim(), ""));
+      if(_ci.flag && !confirm("⛔ هذا الرقم عليه علامة «لا يُباع له»" + (_ci.reason ? " — السبب: " + _ci.reason : "") + ".\nتبا تعتمد الطلب بكل الأحوال؟")) return;
       const approveBtn = card.querySelector(".oq-approve-btn");
       const rejectBtn = card.querySelector(".oq-reject-btn");
       approveBtn.disabled = true; rejectBtn.disabled = true;
@@ -6317,8 +6536,14 @@ function renderOrdersQueueList(){
           date: nowDate,
           country: order.country || "",
           countryLabel: order.country || "",
-          phone: finalPhone,
+          phone: normPhone(finalPhone, "") || finalPhone,
           address: finalAddress,
+          email: order.email || "",
+          emirateOrWilayat: order.emirateOrWilayat || "",
+          city: order.city || "",
+          deliveryType: order.deliveryMethod || "",
+          status: "confirmed",
+          ...(order.recentConsent === true ? { recentConsent: true } : {}),
           orderId: orderKey,
           source: order.source === "quick-whatsapp" ? "quick-whatsapp" : "website"
         }));
@@ -6350,6 +6575,7 @@ function renderOrdersQueueList(){
         renderOrdersQueueList();
         renderSalesHistory();
         renderOverview();
+        syncRecentOrders();
         oqShowStatus(`تم اعتماد الطلب وتسجيله بالمبيعات.${stockNote}`, "ok");
       }catch(e){
         oqShowStatus("صار خطأ: " + e.message, "err");
@@ -6391,6 +6617,7 @@ async function loadPendingOrdersIntoPanel(){
     } else {
       throw new Error("HTTP " + res.status);
     }
+    await loadCustomersQuiet();
     renderOrdersQueueList();
     oqShowStatus("", "");
   }catch(e){
