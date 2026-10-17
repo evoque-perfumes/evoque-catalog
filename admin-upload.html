@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; script-src-attr 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://drive.google.com https://*.googleusercontent.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://script.google.com https://script.googleusercontent.com https://docs.google.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <link rel="icon" href="admin-favicon.png">
 <link rel="apple-touch-icon" href="admin-apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -193,23 +194,12 @@
 
   <div class="panel" id="tokenPanel">
     <h2>تسجيل الدخول</h2>
-    <label for="adminPasswordInput">كلمة المرور</label>
-    <input type="password" id="adminPasswordInput" placeholder="كلمة المرور" autocomplete="current-password">
+    <p class="sub" style="margin:0 0 12px;">الدخول بحساب Google الخاص بصاحب المتجر فقط. ما فيه كلمة مرور تُرسل أو تُخمَّن.</p>
     <div class="row" style="margin-top:8px;">
-      <button type="button" id="adminLoginBtn">دخول</button>
+      <button type="button" id="adminLoginBtn">🔐 الدخول بحساب Google</button>
       <button type="button" id="adminLogoutBtn" style="display:none;">تسجيل خروج من هذا الجهاز</button>
     </div>
     <small class="hint" id="adminLoginStatus"></small>
-    <small class="hint">
-      أول مرة؟ لازم تضيف كلمة مرور قوية (تختارها انت بنفسك، بدون ما تشاركها مع
-      أي أحد) بمشروع
-      order-queue-apps-script
-      بجوجل (⚙️ Project Settings ← Script Properties ← أضف خاصية
-      ADMIN_PASSWORD)
-      قبل ما تقدر تسجّل دخول من هنا. هذا الرابط مفتوح لأي شخص بالإنترنت، فكلمة
-      المرور لازم تكون طويلة وصعبة التخمين فعليًا (مو تاريخ ميلاد أو اسم) —
-      فيه قفل تلقائي 24 ساعة بعد 5 محاولات خاطئة كحماية إضافية.
-    </small>
 
     <details style="margin-top:14px;">
       <summary style="cursor:pointer; color:#8B8073; font-size:13px;">خيارات متقدمة: إدخال مفتاح GitHub مباشرة</summary>
@@ -219,9 +209,9 @@
         <button type="button" class="toggle-token" id="toggleTokenBtn">إظهار المفتاح</button>
         <small class="hint">
           يبقى بمتصفحك فقط، ما يترسل لأي مكان غير GitHub مباشرة. تستخدم هذا الخيار بس لو
-          تسجيل الدخول بكلمة المرور ما اشتغل لأي سبب. ما عندك مفتاح؟ من حسابك بـ GitHub:
+          تسجيل الدخول بحساب Google ما اشتغل لأي سبب. ما عندك مفتاح؟ من حسابك بـ GitHub:
           Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token —
-          اختر ريبو evoque-catalog بس، وامنحه صلاحية "Contents: Read and write".
+          اختر الريبوهين evoque-catalog و evoque-private فقط، وامنحه صلاحية "Contents: Read and write"، وحدّد تاريخ انتهاء (90 يوم).
         </small>
         <div class="row">
           <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
@@ -1359,20 +1349,35 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 
 </script>
 <script>
+// ===== حماية XSS (أكتوبر 2026) =====
+// أي نص مصدره عميل أو ملف بيانات يُدخل بـinnerHTML لازم يمر عبر esc() — هذي الصفحة
+// تحمل مفتاح الكتابة على المستودع، فأي حقن كود هنا = سيطرة على الموقع.
+function esc(v){
+  return String(v == null ? "" : v)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/`/g,"&#96;");
+}
 const OWNER = "evoque-perfumes";
 const REPO = "evoque-catalog";
 const BRANCH = "main";
 const DATA_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data.json?t=` + Date.now();
-const REVIEWS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/reviews.json?t=` + Date.now();
-const ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/orders.json?t=` + Date.now();
-const BANK_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/bank-info.json?t=` + Date.now();
-const WISHLIST_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/wishlist.json?t=` + Date.now();
-const PENDING_ORDERS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/pending-orders.json?t=` + Date.now();
-const DISTRIBUTIONS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/distributions.json?t=` + Date.now();
 const SHIPPING_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/shipping-rates.json?t=` + Date.now();
-const MATERIALS_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/materials.json?t=` + Date.now();
-const EXPENSES_JSON_RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/expenses.json?t=` + Date.now();
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
+// ===== المستودع الخاص (أكتوبر 2026) =====
+// الطلبات والعملاء والمصاريف والمواد والتوزيعات والمفضلة الخام وبيانات البنك صارت بمستودع
+// خاص منفصل (evoque-private) — المستودع العام (GitHub Pages) ينشر كل ملف بجذره، فأي
+// ملف خاص هناك يكون مكشوف للعالم. المفتاح (fine-grained) محدد على المستودعين فقط.
+const PRIV_REPO = "evoque-private";
+const API_BASE_PRIV = `https://api.github.com/repos/${OWNER}/${PRIV_REPO}/contents`;
+const REVIEWS_PRIV_PATH = "reviews-private.json";   // التقييمات كاملة (فيها رقم الطلب) — الخاصة
+const CUSTOMERS_JSON_PATH = "customers.json";       // ملف العملاء (ملاحظات + علامة "لا يُباع له") — الخاص فقط
+// قراءة ملف من المستودع الخاص (يحتاج المفتاح — raw.githubusercontent ما يقرأ المستودعات الخاصة)
+function privFetch(path){
+  return fetch(`${API_BASE_PRIV}/${path}?ref=${BRANCH}&t=${Date.now()}`, {
+    cache: "no-store",
+    headers: { "Authorization": `Bearer ${getToken()}`, "Accept": "application/vnd.github.raw+json" }
+  });
+}
 const DATA_JSON_PATH = "data.json";
 const REVIEWS_JSON_PATH = "reviews.json";
 const ORDERS_JSON_PATH = "orders.json";
@@ -1396,7 +1401,7 @@ function populateBrandFilterOptions(){
   const brands = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
     .sort((a,b) => a.localeCompare(b, "en", {sensitivity:"base"}));
   sel.innerHTML = `<option value="all">كل البراندات</option>` +
-    brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${b}</option>`).join("");
+    brands.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("");
   brandFilterValue = brands.includes(prev) ? prev : "all";
   sel.value = brandFilterValue;
 }
@@ -1416,7 +1421,7 @@ function bpInitPanel(){
   const brandSel = document.getElementById("bp_brandSelect");
   const brands = Array.from(new Set(perfumes.map(p => p.brand).filter(Boolean)))
     .sort((a,b) => a.localeCompare(b, "en", {sensitivity:"base"}));
-  brandSel.innerHTML = brands.map(b => `<option value="${b.replace(/"/g,"&quot;")}">${b}</option>`).join("");
+  brandSel.innerHTML = brands.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("");
   bpRenderManualList("");
   document.getElementById("bp_previewWrap").style.display = "none";
   document.getElementById("bp_statusBox").className = "status";
@@ -1454,8 +1459,8 @@ function bpRenderManualList(query){
   } else {
     box.innerHTML = list.map(p => `
       <label class="dropdown-item" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-        <input type="checkbox" class="bp-manual-chk" data-id="${p.id}" ${bpManualSelected.has(p.id) ? "checked" : ""}>
-        <span class="name">${p.brand} — ${p.name}</span>
+        <input type="checkbox" class="bp-manual-chk" data-id="${esc(p.id)}" ${bpManualSelected.has(p.id) ? "checked" : ""}>
+        <span class="name">${esc(p.brand)} — ${esc(p.name)}</span>
       </label>`).join("");
     box.querySelectorAll(".bp-manual-chk").forEach(chk => {
       chk.addEventListener("change", () => {
@@ -1526,7 +1531,7 @@ document.getElementById("bp_previewBtn").addEventListener("click", () => {
   } else {
     listBox.innerHTML = rows.map(r => `
       <div class="dropdown-item">
-        <span class="name">${r.p.brand} — ${r.p.name}</span>
+        <span class="name">${esc(r.p.brand)} — ${esc(r.p.name)}</span>
         <span class="badge pending" style="margin-inline-start:8px;">${r.oldVal} ← ${r.newVal}</span>
       </div>`).join("");
   }
@@ -1650,7 +1655,7 @@ async function loadData(){
 // ===== تحميل قائمة التقييمات (للعرض والبحث فقط — نفس منطق loadData بالضبط) =====
 async function loadReviews(){
   try{
-    const res = await fetch(REVIEWS_JSON_RAW_URL, {cache:"no-store"});
+    const res = await privFetch(REVIEWS_PRIV_PATH);
     if(!res.ok) throw new Error("HTTP " + res.status);
     reviewsData = await res.json();
     if(!Array.isArray(reviewsData)) reviewsData = [];
@@ -1663,7 +1668,7 @@ async function loadReviews(){
 // ===== تحميل قائمة المبيعات المسجّلة (نفس منطق loadReviews بالضبط) =====
 async function loadOrders(){
   try{
-    const res = await fetch(ORDERS_JSON_RAW_URL, {cache:"no-store"});
+    const res = await privFetch(ORDERS_JSON_PATH);
     if(!res.ok) throw new Error("HTTP " + res.status);
     salesData = await res.json();
     if(!Array.isArray(salesData)) salesData = [];
@@ -1676,7 +1681,7 @@ async function loadOrders(){
 // ===== تحميل مشتريات المواد الخام (materials.json) — نفس منطق loadOrders بالضبط =====
 async function loadMaterials(){
   try{
-    const res = await fetch(MATERIALS_JSON_RAW_URL, {cache:"no-store"});
+    const res = await privFetch(MATERIALS_JSON_PATH);
     if(!res.ok) throw new Error("HTTP " + res.status);
     const obj = await res.json();
     materialsData = (obj && Array.isArray(obj.purchases)) ? obj : { purchases: [] };
@@ -1689,7 +1694,7 @@ async function loadMaterials(){
 // ===== تحميل المصاريف الشهرية العامة (expenses.json) — 13 أكتوبر 2026 — نفس منطق loadMaterials بالضبط =====
 async function loadExpenses(){
   try{
-    const res = await fetch(EXPENSES_JSON_RAW_URL, {cache:"no-store"});
+    const res = await privFetch(EXPENSES_JSON_PATH);
     if(!res.ok) throw new Error("HTTP " + res.status);
     const obj = await res.json();
     expensesData = (obj && Array.isArray(obj.expenses)) ? obj : { expenses: [] };
@@ -1745,22 +1750,22 @@ function renderReviewsOrdersList(){
     const isOpen = reviewsOrdersExpandedKey === g.key;
     const itemsHtml = g.items.map(o => {
       const p = perfumes.find(x => x.id === o.perfumeId);
-      const label = p ? `${p.brand} — ${p.name}` : o.perfumeId;
+      const label = p ? `${esc(p.brand)} — ${esc(p.name)}` : esc(o.perfumeId);
       const already = reviewsData.some(r => r.orderId === g.key && r.perfumeId === o.perfumeId);
       return `<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-top:1px dashed var(--line);">
-        <span style="font-size:12.5px;">${label.replace(/</g,"&lt;")} (${o.size}مل×${o.qty})</span>
+        <span style="font-size:12.5px;">${label} (${esc(o.size)}مل×${esc(o.qty)})</span>
         ${already
           ? '<span style="color:#1F6B41; font-size:12px; white-space:nowrap;">✅ تم التقييم</span>'
-          : `<button type="button" class="secondary rv-order-item-btn" data-order-key="${g.key}" data-perfume-id="${o.perfumeId}" style="white-space:nowrap;">➕ أضف تقييم</button>`
+          : `<button type="button" class="secondary rv-order-item-btn" data-order-key="${esc(g.key)}" data-perfume-id="${esc(o.perfumeId)}" style="white-space:nowrap;">➕ أضف تقييم</button>`
         }
       </div>`;
     }).join("");
-    return `<div class="review-row" data-order-key="${g.key}">
-      <div class="review-row-top" style="cursor:pointer;" data-order-toggle="${g.key}">
-        <span class="review-row-name">🧾 ${g.key} — ${(g.customer||"").replace(/</g,"&lt;") || "<i>بدون اسم</i>"}</span>
+    return `<div class="review-row" data-order-key="${esc(g.key)}">
+      <div class="review-row-top" style="cursor:pointer;" data-order-toggle="${esc(g.key)}">
+        <span class="review-row-name">🧾 ${esc(g.key)} — ${esc(g.customer) || "<i>بدون اسم</i>"}</span>
         <span class="review-row-stars" style="color:var(--ink);">${st.reviewed}/${st.total}</span>
       </div>
-      <div class="review-row-meta">${g.date || ""} ${isOpen ? "▲" : "▼"}</div>
+      <div class="review-row-meta">${esc(g.date || "")} ${isOpen ? "▲" : "▼"}</div>
       ${isOpen ? `<div style="margin-top:6px;">${itemsHtml}</div>` : ""}
     </div>`;
   }).join("");
@@ -2020,7 +2025,7 @@ function renderCountryStats(){
   document.getElementById("ov_countryStats").innerHTML = rows.map(r => `
     <div class="sale-row">
       <div class="sale-row-top">
-        <span class="sale-row-name">${r.label} — ${r.b.orderIds.size} ${r.b.orderIds.size === 1 ? "طلب" : "طلبات"}</span>
+        <span class="sale-row-name">${esc(r.label)} — ${r.b.orderIds.size} ${r.b.orderIds.size === 1 ? "طلب" : "طلبات"}</span>
         <span class="sale-row-amount">${fmtNum(r.b.revenue)} AED</span>
       </div>
       <div class="sale-row-meta">${fmtNum(r.b.units)} قطعة مباعة</div>
@@ -2204,8 +2209,8 @@ function renderStockCategoryList(cat){
       badgeClass = isOutOfStock(p) ? "pending" : "done";
     }
     const lastUpdateHtml = latestStockUpdateLabel(p);
-    return `<div class="dropdown-item" data-id="${p.id}">
-      <span class="name">${p.brand} — ${p.name}</span><br>
+    return `<div class="dropdown-item" data-id="${esc(p.id)}">
+      <span class="name">${esc(p.brand)} — ${esc(p.name)}</span><br>
       <span class="badge ${badgeClass}" style="margin-inline-start:0; margin-top:4px; display:inline-block;">${badgeText}</span>
       ${lastUpdateHtml}
     </div>`;
@@ -2227,7 +2232,7 @@ function selectPerfumeForStock(p){
   stockSelected = p;
   const wrap = document.getElementById("selectedChipWrap");
   wrap.innerHTML = `<div class="selected-chip">
-    <span>${p.brand} — ${p.name}</span>
+    <span>${esc(p.brand)} — ${esc(p.name)}</span>
     <button type="button" id="deselectBtn" title="إلغاء">×</button>
   </div>`;
   document.getElementById("deselectBtn").addEventListener("click", () => {
@@ -2328,13 +2333,13 @@ function renderReviewsList(){
   emptyHint.style.display = "none";
   wrap.style.display = "block";
   wrap.innerHTML = list.map(r => `
-    <div class="review-row" data-id="${r.id}">
+    <div class="review-row" data-id="${esc(r.id)}">
       <div class="review-row-top">
-        <span class="review-row-name">${(r.name||"").replace(/</g,"&lt;") || "<i>بدون اسم</i>"}</span>
+        <span class="review-row-name">${esc(r.name) || "<i>بدون اسم</i>"}</span>
         <span class="review-row-stars">${"★".repeat(Number(r.rating)||0)}${"☆".repeat(5-(Number(r.rating)||0))}</span>
       </div>
-      ${r.comment ? `<div class="review-row-comment">${r.comment.replace(/</g,"&lt;")}</div>` : (r.commentAr || r.commentEn) ? `<div class="review-row-comment">${(r.commentAr||r.commentEn).replace(/</g,"&lt;")}</div>` : ""}
-      <div class="review-row-meta">${r.source === "customer" ? "🌐 من العميل مباشرة عبر الموقع" : "🛠️ أضيف يدويًا"} — ${r.date || ""} ${r.visible === false ? "— (مخفي عن الموقع)" : ""}</div>
+      ${r.comment ? `<div class="review-row-comment">${esc(r.comment)}</div>` : (r.commentAr || r.commentEn) ? `<div class="review-row-comment">${esc(r.commentAr||r.commentEn)}</div>` : ""}
+      <div class="review-row-meta">${r.source === "customer" ? "🌐 من العميل مباشرة عبر الموقع" : "🛠️ أضيف يدويًا"} — ${esc(r.date || "")} ${r.visible === false ? "— (مخفي عن الموقع)" : ""}</div>
       <div class="review-row-actions">
         <button type="button" class="secondary rv-edit-btn">✏️ تعديل</button>
         <button type="button" class="secondary rv-delete-btn">🗑️ حذف</button>
@@ -2384,7 +2389,7 @@ function selectPerfumeForReviews(p, orderContext){
   reviewsOrderContext = orderContext || null;
   const wrap = document.getElementById("selectedChipWrap");
   wrap.innerHTML = `<div class="selected-chip">
-    <span>${p.brand} — ${p.name}</span>
+    <span>${esc(p.brand)} — ${esc(p.name)}</span>
     <button type="button" id="deselectBtn" title="إلغاء">×</button>
   </div>`;
   document.getElementById("deselectBtn").addEventListener("click", () => {
@@ -2494,7 +2499,7 @@ function slShowSelectedChip(p){
   salesSelected = p;
   const wrap = document.getElementById("selectedChipWrap");
   wrap.innerHTML = `<div class="selected-chip">
-    <span>${p.brand} — ${p.name}</span>
+    <span>${esc(p.brand)} — ${esc(p.name)}</span>
     <button type="button" id="deselectBtn" title="إلغاء">×</button>
   </div>`;
   document.getElementById("deselectBtn").addEventListener("click", () => {
@@ -2645,7 +2650,7 @@ function slRenderCart(){
     total += sub;
     return `<div class="sale-row" data-idx="${idx}">
       <div class="sale-row-top">
-        <span class="sale-row-name">${item.brand} — ${item.name} (${item.size}مل × ${item.qty})${item.isGift ? ` <span style="color:#8A6A1F; font-weight:700;">🎁 هدية</span>` : ""}</span>
+        <span class="sale-row-name">${esc(item.brand)} — ${esc(item.name)} (${esc(item.size)}مل × ${esc(item.qty)})${item.isGift ? ` <span style="color:#8A6A1F; font-weight:700;">🎁 هدية</span>` : ""}</span>
         <span class="sale-row-amount">${item.isGift ? "مجاني" : fmtNum(sub) + " AED"}</span>
       </div>
       <div class="sale-row-actions">
@@ -2949,18 +2954,18 @@ function renderSalesHistory(){
     const paid = !!(g.items[0] && g.items[0].paid);
     const itemsListHtml = g.items.map(o => {
       const p = perfumes.find(x => x.id === o.perfumeId);
-      const label = p ? `${p.brand} — ${p.name}` : o.perfumeId;
-      return `<div class="sale-row-item">• ${label} (${o.size}مل×${o.qty})${o.isGift ? " 🎁هدية" : ""}</div>`;
+      const label = p ? `${esc(p.brand)} — ${esc(p.name)}` : esc(o.perfumeId);
+      return `<div class="sale-row-item">• ${label} (${esc(o.size)}مل×${esc(o.qty)})${o.isGift ? " 🎁هدية" : ""}</div>`;
     }).join("");
-    return `<div class="sale-row" data-key="${g.key}">
+    return `<div class="sale-row" data-key="${esc(g.key)}">
       <div class="sale-row-top">
-        <span class="sale-row-name">${g.customer ? String(g.customer).replace(/</g,"&lt;") : "بدون اسم"}</span>
+        <span class="sale-row-name">${g.customer ? esc(g.customer) : "بدون اسم"}</span>
         <span class="sale-row-amount">${fmtNum(total)} AED${discountTxt}</span>
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
-      <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
+      <div class="sale-row-meta">${esc(g.date || "")} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + esc(g.countryLabel) : ""}${g.phone ? " — 📞 " + esc(g.phone) : ""}${g.address ? " — 📍 " + esc(g.address) : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
       <div class="sale-row-actions">
-        <select class="sale-row-status-select" data-key="${g.key}" style="color:${orderStatusColor(status)};">
+        <select class="sale-row-status-select" data-key="${esc(g.key)}" style="color:${orderStatusColor(status)};">
           <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
           <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
           <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
@@ -2968,7 +2973,7 @@ function renderSalesHistory(){
           <option value="received" ${status === "received" ? "selected" : ""}>📦 تم الاستلام</option>
         </select>
         <label class="sale-row-paid-label" style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
-          <input type="checkbox" class="sale-row-paid-check" data-key="${g.key}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
+          <input type="checkbox" class="sale-row-paid-check" data-key="${esc(g.key)}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
         </label>
         <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
         <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
@@ -3282,7 +3287,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
     }
 
     async function getDistributionsWithSha(token){
-      const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}?ref=${BRANCH}`, {
+      const res = await fetch(`${API_BASE_PRIV}/${DISTRIBUTIONS_JSON_PATH}?ref=${BRANCH}`, {
         cache: "no-store",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -3303,7 +3308,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
         branch: BRANCH
       };
       if(sha) body.sha = sha;
-      const res = await fetch(`${API_BASE}/${DISTRIBUTIONS_JSON_PATH}`, {
+      const res = await fetch(`${API_BASE_PRIV}/${DISTRIBUTIONS_JSON_PATH}`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(body)
@@ -3439,7 +3444,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
 
     function distMaterialNameAr(m){
       const map = { bagPerfume: "كيس للعطر", bagPackaging: "كيس للتغليف", bag: "كيس (قديم)", bottle: "زجاجة فارغة", box: "بوكس تغليف", handle: "مسكة", pin: "دبوس", alcohol: "كحول", oil: "زيت عطري" };
-      return map[m] || m;
+      return map[m] || esc(m);
     }
 
     function distHandleColorNameAr(c){ return c === "black" ? "أسود" : "بيج"; }
@@ -3573,11 +3578,11 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       }
       log.innerHTML = purchases.slice().reverse().map(p => `
         <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-          <span>${p.date} — ${distMaterialNameAr(p.material)}${p.material === "handle" && p.color ? " (" + distHandleColorNameAr(p.color) + ")" : ""} × ${p.qty} ${distMaterialUnitAr(p.material)} — سعر الوحدة ${Number(p.unitPrice).toFixed(3)}${p.note ? " — " + p.note : ""}</span>
+          <span>${esc(p.date)} — ${esc(distMaterialNameAr(p.material))}${p.material === "handle" && p.color ? " (" + distHandleColorNameAr(p.color) + ")" : ""} × ${esc(p.qty)} ${esc(distMaterialUnitAr(p.material))} — سعر الوحدة ${Number(p.unitPrice).toFixed(3)}${p.note ? " — " + esc(p.note) : ""}</span>
           <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
             <b>${Number(p.totalPrice).toFixed(2)} AED</b>
-            <button type="button" class="secondary dist-edit-purchase-btn" data-id="${p.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
-            <button type="button" class="secondary dist-delete-purchase-btn" data-id="${p.id}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑 حذف</button>
+            <button type="button" class="secondary dist-edit-purchase-btn" data-id="${esc(p.id)}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+            <button type="button" class="secondary dist-delete-purchase-btn" data-id="${esc(p.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑 حذف</button>
           </span>
         </div>
       `).join("");
@@ -3736,10 +3741,10 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
       }
       log.innerHTML = fills.slice().reverse().map(f => `
         <div style="border-bottom:1px solid var(--line); padding:6px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-          <span>${f.date} — تعبئة ${f.qty} زجاجة<br><span style="color:#666;">زيت ${Number(f.oilUsed).toFixed(1)} جرام + كحول ${Number(f.alcoholUsed).toFixed(1)} مل</span></span>
+          <span>${esc(f.date)} — تعبئة ${esc(f.qty)} زجاجة<br><span style="color:#666;">زيت ${Number(f.oilUsed).toFixed(1)} جرام + كحول ${Number(f.alcoholUsed).toFixed(1)} مل</span></span>
           <span style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
-            <button type="button" class="secondary dist-edit-fill-btn" data-id="${f.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
-            <button type="button" class="secondary dist-delete-fill-btn" data-id="${f.id}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑 حذف</button>
+            <button type="button" class="secondary dist-edit-fill-btn" data-id="${esc(f.id)}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+            <button type="button" class="secondary dist-delete-fill-btn" data-id="${esc(f.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑 حذف</button>
           </span>
         </div>
       `).join("");
@@ -3828,7 +3833,7 @@ function distRenderSalesLog(){
         return;
       }
       log.innerHTML = filteredSales.map(s => {
-        const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).join(" — ");
+        const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).map(esc).join(" — ");
         const shownTotal = distEffectiveRevenue(s);
         const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "")
           + (s.themeSurcharge ? ` (ثيم ${Number(s.themeSurcharge).toFixed(2)} غير محتسب بالربح)` : "");
@@ -3838,13 +3843,13 @@ function distRenderSalesLog(){
         const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
         const status = s.status || "";
         const paid = !!s.paid;
-        const deleteBtnHtml = `<button type="button" class="secondary dist-delete-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑️ حذف نهائي</button>`;
+        const deleteBtnHtml = `<button type="button" class="secondary dist-delete-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑️ حذف نهائي</button>`;
         const editCancelHtml = s.cancelled
           ? `<span style="font-size:12px; color:#963224; font-weight:700;">ملغاة</span>`
-          : `<button type="button" class="secondary dist-edit-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
-             <button type="button" class="secondary dist-cancel-sale-btn" data-id="${s.id}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
+          : `<button type="button" class="secondary dist-edit-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+             <button type="button" class="secondary dist-cancel-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
         const statusPaidHtml = s.cancelled ? "" : `
-            <select class="dist-sale-status-select" data-id="${s.id}" style="width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; color:${orderStatusColor(status)};">
+            <select class="dist-sale-status-select" data-id="${esc(s.id)}" style="width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; color:${orderStatusColor(status)};">
               <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
               <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
               <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
@@ -3852,15 +3857,15 @@ function distRenderSalesLog(){
               <option value="received" ${status === "received" ? "selected" : ""}>📦 تم الاستلام</option>
             </select>
             <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
-              <input type="checkbox" class="dist-sale-paid-check" data-id="${s.id}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
+              <input type="checkbox" class="dist-sale-paid-check" data-id="${esc(s.id)}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
             </label>`;
         return `
         <div style="border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; ${rowStyle}">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
             <div>
-              <div style="font-weight:600;">${s.date} — ${distSaleColorLabel(s)} × ${s.qty} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${cancelledTxt}</div>
-              ${who ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${who}</div>` : ""}
-              ${s.note ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${s.note}</div>` : ""}
+              <div style="font-weight:600;">${esc(s.date)} — ${distSaleColorLabel(s)} × ${esc(s.qty)} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${cancelledTxt}</div>
+              ${who ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${esc(who)}</div>` : ""}
+              ${s.note ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${esc(s.note)}</div>` : ""}
               <div style="margin-top:4px; font-size:12px;">الإيراد: <b>${Number(shownTotal).toFixed(2)}</b> AED${discountTxt} — التكلفة: <b>${costVal.toFixed(2)}</b> AED — الربح: <b style="color:${profitVal >= 0 ? "#1F6B41" : "#963224"};">${profitVal.toFixed(2)}</b> AED</div>
             </div>
           </div>
@@ -4001,7 +4006,7 @@ function distRenderSalesLog(){
     async function loadDistributionsIntoPanel(){
       try{
         distShowStatus("جارِ التحميل...", "info");
-        const res = await fetch(DISTRIBUTIONS_JSON_RAW_URL, { cache: "no-store" });
+        const res = await privFetch(DISTRIBUTIONS_JSON_PATH);
         if(res.ok){
           distributionsData = await res.json();
         } else if(res.status === 404){
@@ -4498,8 +4503,8 @@ function renderDropdown(query){
       const done = hasImage(p);
       badgeHtml = `<span class="badge ${done ? "done" : "pending"}">${done ? "له صورة" : "بدون صورة"}</span>`;
     }
-    return `<div class="dropdown-item${soldOutBothSizes ? " disabled" : ""}" data-id="${p.id}" ${soldOutBothSizes ? 'data-disabled="1"' : ""}>
-      <span class="name">${p.brand} — ${p.name}</span>
+    return `<div class="dropdown-item${soldOutBothSizes ? " disabled" : ""}" data-id="${esc(p.id)}" ${soldOutBothSizes ? 'data-disabled="1"' : ""}>
+      <span class="name">${esc(p.brand)} — ${esc(p.name)}</span>
       ${badgeHtml}
     </div>`;
   }).join("");
@@ -4536,7 +4541,7 @@ function selectPerfumeForPhotoOnly(p){
   editingOriginal = p;
   const wrap = document.getElementById("selectedChipWrap");
   wrap.innerHTML = `<div class="selected-chip">
-    <span>${p.brand} — ${p.name}</span>
+    <span>${esc(p.brand)} — ${esc(p.name)}</span>
     <button type="button" id="deselectBtn" title="إلغاء">×</button>
   </div>`;
   document.getElementById("deselectBtn").addEventListener("click", () => {
@@ -4647,7 +4652,7 @@ function selectPerfumeForEdit(p){
   editingOriginal = p;
   const wrap = document.getElementById("selectedChipWrap");
   wrap.innerHTML = `<div class="selected-chip">
-    <span>${p.brand} — ${p.name}</span>
+    <span>${esc(p.brand)} — ${esc(p.name)}</span>
     <button type="button" id="deselectBtn" title="إلغاء">×</button>
   </div>`;
   document.getElementById("deselectBtn").addEventListener("click", () => {
@@ -4826,7 +4831,7 @@ function renderCostByPerfumeList(rows){
   wrap.innerHTML = rows.map(r => `
     <div class="sale-row">
       <div class="sale-row-top">
-        <span class="sale-row-name">${r.brand} — ${r.name}</span>
+        <span class="sale-row-name">${esc(r.brand)} — ${esc(r.name)}</span>
         <span class="sale-row-amount">${fmtNum(r.profit)} AED ربح</span>
       </div>
       <div class="sale-row-meta">${fmtNum(r.units)} قطعة — إيرادات ${fmtNum(r.revenue)} AED — تكلفة ${fmtNum(r.cost)} AED</div>
@@ -4849,8 +4854,8 @@ function renderCostManageList(filterText){
     return `
     <div class="sale-row">
       <div class="sale-row-top">
-        <span class="sale-row-name">${has ? "" : "⚠️ "}${p.brand} — ${p.name}</span>
-        <button type="button" class="secondary cost-edit-btn" data-id="${p.id}" style="padding:4px 12px; font-size:12.5px;">✏️ تعديل</button>
+        <span class="sale-row-name">${has ? "" : "⚠️ "}${esc(p.brand)} — ${esc(p.name)}</span>
+        <button type="button" class="secondary cost-edit-btn" data-id="${esc(p.id)}" style="padding:4px 12px; font-size:12.5px;">✏️ تعديل</button>
       </div>
       <div class="sale-row-meta">${has ? `تكلفة الوحدة: 50مل = ${c50} AED — 10مل = ${c10} AED` : "ما فيها بيانات تكلفة بعد"}</div>
     </div>`;
@@ -4955,12 +4960,12 @@ function renderExpensesSection(){
     histBox.innerHTML = hist.map(e => `
       <div class="sale-row">
         <div class="sale-row-top">
-          <span class="sale-row-name">${e.date} — ${String(e.description || "").replace(/</g,"&lt;")}</span>
+          <span class="sale-row-name">${esc(e.date)} — ${esc(e.description || "")}</span>
           <span class="sale-row-amount">${fmtNum(e.amount)} AED</span>
         </div>
         <div class="sale-row-meta">
-          ${EXPENSE_CATEGORIES[e.category] || "أخرى"}${e.note ? " — " + String(e.note).replace(/</g,"&lt;") : ""}
-          <button type="button" class="secondary exp-delete-btn" data-id="${e.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+          ${EXPENSE_CATEGORIES[e.category] || "أخرى"}${e.note ? " — " + esc(e.note) : ""}
+          <button type="button" class="secondary exp-delete-btn" data-id="${esc(e.id)}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
         </div>
       </div>`).join("");
     histBox.querySelectorAll(".exp-delete-btn").forEach(btn => {
@@ -5037,12 +5042,12 @@ function renderMaterialsSection(){
     histBox.innerHTML = hist.map(p => `
       <div class="sale-row">
         <div class="sale-row-top">
-          <span class="sale-row-name">${p.date} — ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : p.material} × ${fmtNum(p.qty)} ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].unit : ""}</span>
+          <span class="sale-row-name">${esc(p.date)} — ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : esc(p.material)} × ${fmtNum(p.qty)} ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].unit : ""}</span>
           <span class="sale-row-amount">${fmtNum(p.totalPrice)} AED</span>
         </div>
         <div class="sale-row-meta">
-          سعر الوحدة: ${(Number(p.totalPrice)/Math.max(1,Number(p.qty))).toFixed(3)} AED${p.note ? " — " + p.note : ""}
-          <button type="button" class="secondary mat-delete-btn" data-id="${p.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+          سعر الوحدة: ${(Number(p.totalPrice)/Math.max(1,Number(p.qty))).toFixed(3)} AED${p.note ? " — " + esc(p.note) : ""}
+          <button type="button" class="secondary mat-delete-btn" data-id="${esc(p.id)}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
         </div>
       </div>`).join("");
     histBox.querySelectorAll(".mat-delete-btn").forEach(btn => {
@@ -5123,8 +5128,8 @@ document.getElementById("cost_missingCard").addEventListener("click", () => {
   wrap.innerHTML = list.map(p => `
     <div class="sale-row">
       <div class="sale-row-top">
-        <span class="sale-row-name">⚠️ ${p.brand} — ${p.name}</span>
-        <button type="button" class="secondary cost-edit-btn" data-id="${p.id}" style="padding:4px 12px; font-size:12.5px;">✏️ تعديل</button>
+        <span class="sale-row-name">⚠️ ${esc(p.brand)} — ${esc(p.name)}</span>
+        <button type="button" class="secondary cost-edit-btn" data-id="${esc(p.id)}" style="padding:4px 12px; font-size:12.5px;">✏️ تعديل</button>
       </div>
       <div class="sale-row-meta">ما فيها بيانات تكلفة بعد — بيعت ${report.rows.find(r => r.id === p.id) ? fmtNum(report.rows.find(r => r.id === p.id).units) : 0} قطعة لين الحين</div>
     </div>`).join("");
@@ -5281,33 +5286,33 @@ document.getElementById("toggleTokenBtn").addEventListener("click", () => {
   else { inp.type = "password"; btn.textContent = "إظهار المفتاح"; }
 });
 window.addEventListener("DOMContentLoaded", () => {
-  try{
-    const saved = localStorage.getItem("evoque_admin_token");
-    if(saved){
-      document.getElementById("tokenInput").value = saved;
-      document.getElementById("rememberToken").checked = true;
-      document.getElementById("adminLogoutBtn").style.display = "";
-      adminLoginStatus("✅ مسجّل دخول بهذا الجهاز", "ok");
-    }
-  }catch(e){}
+  const fromHash = consumeTokenFromHash();
+  const saved = fromHash || readStoredToken();
+  if(saved){
+    document.getElementById("tokenInput").value = saved;
+    if(fromHash) storeToken(fromHash, false);
+    document.getElementById("adminLogoutBtn").style.display = "";
+    adminLoginStatus("✅ مسجّل دخول", "ok");
+    try{ document.getElementById("rememberToken").checked = !!localStorage.getItem(TOKEN_KEY); }catch(e){}
+    refreshLoginPanelVisibility();
+    bootstrapPrivateData();
+  }
   setMode("overview");
 });
 document.getElementById("rememberToken").addEventListener("change", (e) => {
-  try{
-    if(e.target.checked) localStorage.setItem("evoque_admin_token", getToken());
-    else localStorage.removeItem("evoque_admin_token");
-  }catch(e){}
+  storeToken(getToken(), e.target.checked);
 });
 document.getElementById("tokenInput").addEventListener("change", () => {
-  try{ if(document.getElementById("rememberToken").checked) localStorage.setItem("evoque_admin_token", getToken()); }catch(e){}
+  if(getToken()){ storeToken(getToken(), document.getElementById("rememberToken").checked); bootstrapPrivateData(); }
 });
 
-// ===== تسجيل الدخول بكلمة مرور (17 سبتمبر 2026) =====
-// نفس رابط order-queue-apps-script الموجود أصلًا بـassets/catalog.js
-// (ORDER_QUEUE_ENDPOINT) — أضفنا لهذا السكربت بالذات doGet جديد يتحقق من كلمة
-// المرور ويرجّع GITHUB_TOKEN المخزّن بـScript Properties لو صحيحة. شوف الشرح
-// الكامل بأعلى ملف order-queue-apps-script/Code.gs.
-const ADMIN_LOGIN_ENDPOINT = "https://script.google.com/macros/s/AKfycbxXrXt26AgddAb5kGWzUtUM34CfM_SbMw6Q27SB2nAgRBmCztsB62IpISya-ird3o2I/exec";
+// ===== تسجيل الدخول بحساب Google (أكتوبر 2026) =====
+// بدل كلمة المرور القديمة (كانت ترجع مفتاح GitHub لأي شخص يخمّنها). الحين الدخول يمر
+// عبر مشروع Apps Script منفصل ينشر بخيار "Execute as me + Only myself": جوجل نفسها
+// تتحقق إن اللي دخل هو صاحب الحساب، وبعدها الصفحة تعطيك زر يفتح لوحة التحكم ومعه
+// المفتاح داخل الجزء بعد # (ما يُرسل لأي سيرفر). شوف apps-script/admin-auth/Code.gs
+const ADMIN_AUTH_URL = "PASTE_ADMIN_AUTH_WEBAPP_URL"; // يُستبدل بعد نشر apps-script/admin-auth (خطوات النشر بالملف)
+const TOKEN_KEY = "evoque_admin_token";
 
 function adminLoginStatus(msg, type){
   const el = document.getElementById("adminLoginStatus");
@@ -5315,44 +5320,57 @@ function adminLoginStatus(msg, type){
   el.style.color = type === "ok" ? "#1F6B41" : (type === "err" ? "#B3261E" : "");
 }
 
-async function doAdminLogin(){
-  const pwInput = document.getElementById("adminPasswordInput");
-  const password = pwInput.value;
-  if(!password){ adminLoginStatus("اكتب كلمة المرور أول.", "err"); return; }
-  const btn = document.getElementById("adminLoginBtn");
-  btn.disabled = true;
-  adminLoginStatus("جارِ تسجيل الدخول...", "");
+function storeToken(token, remember){
+  try{ sessionStorage.setItem(TOKEN_KEY, token); }catch(e){}
   try{
-    const url = `${ADMIN_LOGIN_ENDPOINT}?action=adminLogin&password=${encodeURIComponent(password)}`;
-    const res = await fetch(url, {cache:"no-store"});
-    if(!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    if(!data.token) throw new Error("رد غير متوقع من السكربت");
-
-    const tokenInput = document.getElementById("tokenInput");
-    tokenInput.value = data.token;
-    tokenInput.dispatchEvent(new Event("input"));
-    tokenInput.dispatchEvent(new Event("change"));
-    document.getElementById("rememberToken").checked = true;
-    try{ localStorage.setItem("evoque_admin_token", data.token); }catch(e){}
-
-    pwInput.value = "";
-    document.getElementById("adminLogoutBtn").style.display = "";
-    adminLoginStatus("✅ تم تسجيل الدخول", "ok");
-    refreshLoginPanelVisibility();
-  }catch(e){
-    adminLoginStatus("ما قدرت أسجّل الدخول: " + e.message + " — تأكد من كلمة المرور، أو استخدم خيار المفتاح المباشر تحت للطوارئ.", "err");
-  }finally{
-    btn.disabled = false;
-  }
+    if(remember) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  }catch(e){}
 }
-document.getElementById("adminLoginBtn").addEventListener("click", doAdminLogin);
-document.getElementById("adminPasswordInput").addEventListener("keydown", (e) => {
-  if(e.key === "Enter") doAdminLogin();
-});
+function readStoredToken(){
+  try{ const t = sessionStorage.getItem(TOKEN_KEY); if(t) return t; }catch(e){}
+  try{ return localStorage.getItem(TOKEN_KEY) || ""; }catch(e){}
+  return "";
+}
+
+// المفتاح يجي بالرابط بعد # مرة وحدة، نقرأه ونمسحه من شريط العنوان فورًا
+function consumeTokenFromHash(){
+  try{
+    const m = location.hash.match(/(?:^#|&)gh=([^&]+)/);
+    if(!m) return "";
+    const token = decodeURIComponent(m[1]);
+    history.replaceState(null, "", location.pathname + location.search);
+    return token;
+  }catch(e){ return ""; }
+}
+
+function startGoogleLogin(){
+  if(!ADMIN_AUTH_URL || ADMIN_AUTH_URL.indexOf("PASTE_") === 0){
+    adminLoginStatus("رابط الدخول بحساب Google ما انضبط بعد. اتبع خطوات النشر بملف apps-script/admin-auth/Code.gs أو استخدم الخيار المتقدم تحت.", "err");
+    return;
+  }
+  location.href = ADMIN_AUTH_URL;
+}
+document.getElementById("adminLoginBtn").addEventListener("click", startGoogleLogin);
+
+// لو GitHub رفض المفتاح (انتهت صلاحيته مثلًا) نطلّع المستخدم لتسجيل الدخول من جديد برسالة واضحة
+const _origFetch = window.fetch.bind(window);
+let _tokenExpiredShown = false;
+window.fetch = async function(input, init){
+  const res = await _origFetch(input, init);
+  try{
+    const u = typeof input === "string" ? input : (input && input.url) || "";
+    if(res.status === 401 && u.indexOf("https://api.github.com/") === 0 && !_tokenExpiredShown){
+      _tokenExpiredShown = true;
+      adminDoLogout();
+      adminLoginStatus("انتهت صلاحية مفتاح الدخول أو انسحبت. سجّل دخول من جديد بحساب Google.", "err");
+    }
+  }catch(e){}
+  return res;
+};
+
 function adminDoLogout(){
-  try{ localStorage.removeItem("evoque_admin_token"); }catch(e){}
+  try{ localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); }catch(e){}
   document.getElementById("tokenInput").value = "";
   document.getElementById("rememberToken").checked = false;
   document.getElementById("adminLogoutBtn").style.display = "none";
@@ -5472,28 +5490,41 @@ async function updateDataJsonWithRetry(token, mutateFn, commitMsg, attempt){
 // ملاحظة: لو الملف ما موجود بعد بالريبو (404)، نتعامل معه كقائمة فاضية بلا sha
 // (أول حفظ ينشئ الملف تلقائيًا عبر GitHub API بدون ما نحتاج نرفعه يدويًا أول مرة).
 async function getReviewsJsonWithSha(token){
-  const res = await fetch(`${API_BASE}/${REVIEWS_JSON_PATH}?ref=${BRANCH}`, {
+  // المصدر الكامل (فيه orderId) بالمستودع الخاص
+  const res = await fetch(`${API_BASE_PRIV}/${REVIEWS_PRIV_PATH}?ref=${BRANCH}`, {
     cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
   if(res.status === 404) return { list: [], sha: null };
   if(!res.ok){
     const err = await res.json().catch(()=>({}));
-    throw new Error("تعذّر قراءة reviews.json الحالي: " + (err.message || res.status));
+    throw new Error("تعذّر قراءة التقييمات الحالية: " + (err.message || res.status));
   }
   const info = await res.json();
   const list = JSON.parse(base64ToUtf8(info.content));
   return { list: Array.isArray(list) ? list : [], sha: info.sha };
 }
 
+// النسخة العامة من التقييمات: بدون رقم الطلب — بس علامة verified (عميل موثّق)
+function publicReviewsView(list){
+  return list.map(r => {
+    const o = Object.assign({}, r);
+    o.verified = !!(r.orderId);
+    delete o.orderId;
+    o.name = String(r.name || "").trim().split(/\s+/)[0] || ""; // الاسم الأول فقط بالنسخة العامة
+    return o;
+  });
+}
+
 async function putReviewsJson(list, sha, token, commitMsg){
+  // 1) الخاص أولًا (المصدر)
   const body = {
     message: commitMsg,
     content: utf8ToBase64(JSON.stringify(list, null, 2)),
     branch: BRANCH
   };
   if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${REVIEWS_JSON_PATH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${REVIEWS_PRIV_PATH}`, {
     method: "PUT",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body)
@@ -5502,6 +5533,25 @@ async function putReviewsJson(list, sha, token, commitMsg){
     const err = await res.json().catch(()=>({}));
     if(res.status === 409) throw new Error("فيه تعديل ثاني صار بنفس اللحظة. حدّث الصفحة وجرّب التعديل مرة ثانية.");
     throw new Error(err.message || ("HTTP " + res.status));
+  }
+  // 2) ثم النسخة العامة المقصوصة (reviews.json) اللي يقرأها الموقع
+  const pubInfoRes = await fetch(`${API_BASE}/${REVIEWS_JSON_PATH}?ref=${BRANCH}`, {
+    cache: "no-store", headers: { "Authorization": `Bearer ${token}` }
+  });
+  const pubBody = {
+    message: commitMsg + " (public view)",
+    content: utf8ToBase64(JSON.stringify(publicReviewsView(list), null, 2)),
+    branch: BRANCH
+  };
+  if(pubInfoRes.ok){ pubBody.sha = (await pubInfoRes.json()).sha; }
+  const pubRes = await fetch(`${API_BASE}/${REVIEWS_JSON_PATH}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(pubBody)
+  });
+  if(!pubRes.ok){
+    const err = await pubRes.json().catch(()=>({}));
+    throw new Error("انحفظت التقييمات بالخاص لكن فشل تحديث النسخة العامة: " + (err.message || pubRes.status));
   }
 }
 
@@ -5523,7 +5573,7 @@ async function updateReviewsJsonWithRetry(token, mutateFn, commitMsg, attempt){
 // ===== قراءة/كتابة materials.json (مشتريات المواد الخام: زجاجات/كحول/تغليف — 26 سبتمبر 2026) =====
 // نفس منطق reviews.json بالضبط، بس المحتوى كائن {purchases:[...]} مو مصفوفة مباشرة.
 async function getMaterialsJsonWithSha(token){
-  const res = await fetch(`${API_BASE}/${MATERIALS_JSON_PATH}?ref=${BRANCH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${MATERIALS_JSON_PATH}?ref=${BRANCH}`, {
     cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -5546,7 +5596,7 @@ async function putMaterialsJson(obj, sha, token, commitMsg){
     branch: BRANCH
   };
   if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${MATERIALS_JSON_PATH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${MATERIALS_JSON_PATH}`, {
     method: "PUT",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body)
@@ -5576,7 +5626,7 @@ async function updateMaterialsJsonWithRetry(token, mutateFn, commitMsg, attempt)
 // ===== قراءة/كتابة expenses.json (مصاريف شهرية عامة بدون تتبع كمية/مخزون — 13 أكتوبر 2026) =====
 // نفس منطق materials.json بالضبط، بس المحتوى كائن {expenses:[...]}.
 async function getExpensesJsonWithSha(token){
-  const res = await fetch(`${API_BASE}/${EXPENSES_JSON_PATH}?ref=${BRANCH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${EXPENSES_JSON_PATH}?ref=${BRANCH}`, {
     cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -5599,7 +5649,7 @@ async function putExpensesJson(obj, sha, token, commitMsg){
     branch: BRANCH
   };
   if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${EXPENSES_JSON_PATH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${EXPENSES_JSON_PATH}`, {
     method: "PUT",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body)
@@ -5628,7 +5678,7 @@ async function updateExpensesJsonWithRetry(token, mutateFn, commitMsg, attempt){
 
 // ===== قراءة/كتابة orders.json (مبيعات واتساب المسجّلة يدويًا) — نفس منطق reviews.json بالضبط =====
 async function getOrdersJsonWithSha(token){
-  const res = await fetch(`${API_BASE}/${ORDERS_JSON_PATH}?ref=${BRANCH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${ORDERS_JSON_PATH}?ref=${BRANCH}`, {
     cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -5649,7 +5699,7 @@ async function putOrdersJson(list, sha, token, commitMsg){
     branch: BRANCH
   };
   if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${ORDERS_JSON_PATH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${ORDERS_JSON_PATH}`, {
     method: "PUT",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body)
@@ -5678,7 +5728,7 @@ async function updateOrdersJsonWithRetry(token, mutateFn, commitMsg, attempt){
 
 // ===== قراءة/كتابة pending-orders.json (طلبات الموقع بانتظار الاعتماد) — نفس منطق orders.json بالضبط =====
 async function getPendingOrdersWithSha(token){
-  const res = await fetch(`${API_BASE}/${PENDING_ORDERS_JSON_PATH}?ref=${BRANCH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${PENDING_ORDERS_JSON_PATH}?ref=${BRANCH}`, {
     cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -5699,7 +5749,7 @@ async function putPendingOrdersJson(list, sha, token, commitMsg){
     branch: BRANCH
   };
   if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${PENDING_ORDERS_JSON_PATH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${PENDING_ORDERS_JSON_PATH}`, {
     method: "PUT",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body)
@@ -5735,7 +5785,7 @@ function bankShowStatus(msg, type){
 }
 
 async function getBankInfoWithSha(token){
-  const res = await fetch(`${API_BASE}/${BANK_JSON_PATH}?ref=${BRANCH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${BANK_JSON_PATH}?ref=${BRANCH}`, {
     cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -5756,7 +5806,7 @@ async function putBankInfoJson(obj, sha, token, commitMsg){
     branch: BRANCH
   };
   if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${BANK_JSON_PATH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${BANK_JSON_PATH}`, {
     method: "PUT",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body)
@@ -5821,7 +5871,7 @@ function readBankForm(){
 async function loadBankInfoIntoForm(){
   try{
     bankShowStatus("جارِ التحميل...", "info");
-    const res = await fetch(BANK_JSON_RAW_URL, { cache: "no-store" });
+    const res = await privFetch(BANK_JSON_PATH);
     if(res.ok){
       bankInfoData = await res.json();
     } else if(res.status === 404){
@@ -5994,7 +6044,7 @@ function wlShowStatus(msg, cls){
 }
 
 async function getWishlistWithSha(token){
-  const res = await fetch(`${API_BASE}/${WISHLIST_JSON_PATH}?ref=${BRANCH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${WISHLIST_JSON_PATH}?ref=${BRANCH}`, {
     cache: "no-store",
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -6015,7 +6065,7 @@ async function putWishlistJson(obj, sha, token, commitMsg){
     branch: BRANCH
   };
   if(sha) body.sha = sha;
-  const res = await fetch(`${API_BASE}/${WISHLIST_JSON_PATH}`, {
+  const res = await fetch(`${API_BASE_PRIV}/${WISHLIST_JSON_PATH}`, {
     method: "PUT",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body)
@@ -6064,15 +6114,15 @@ function renderWishlistList(){
     // نفضّل بيانات العطر الحية (لو لسا موجود بالكتالوج) على الاسم/البراند
     // المخزّن وقت الضغطة (يحتمل يكون العطر انعدّل اسمه بعدين)
     const live = perfumes.find(p => p.id === e.id);
-    const label = live ? `${live.brand} — ${live.name}` : `${e.brand || "?"} — ${e.name || e.id}`;
+    const label = live ? `${esc(live.brand)} — ${esc(live.name)}` : `${esc(e.brand || "?")} — ${esc(e.name || e.id)}`;
     const outOfStockBadge = live && isOutOfStock(live)
       ? `<span class="badge pending" style="margin-inline-start:6px;">نفدت الكمية 📊</span>` : "";
-    return `<div class="dropdown-item" data-id="${e.id}" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+    return `<div class="dropdown-item" data-id="${esc(e.id)}" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
       <div>
         <span class="name">${label}</span>${outOfStockBadge}<br>
-        <span class="badge done" style="margin-inline-start:0; margin-top:4px; display:inline-block;">❤️ × ${e.count}</span>
+        <span class="badge done" style="margin-inline-start:0; margin-top:4px; display:inline-block;">❤️ × ${esc(Number(e.count)||0)}</span>
       </div>
-      <button type="button" class="secondary wl-reset-btn" data-id="${e.id}" style="width:auto; padding:6px 12px; font-size:12px;">صفّر</button>
+      <button type="button" class="secondary wl-reset-btn" data-id="${esc(e.id)}" style="width:auto; padding:6px 12px; font-size:12px;">صفّر</button>
     </div>`;
   }).join("");
 
@@ -6102,7 +6152,7 @@ function renderWishlistList(){
 async function loadWishlistIntoPanel(){
   try{
     wlShowStatus("جارِ التحميل...", "info");
-    const res = await fetch(WISHLIST_JSON_RAW_URL, { cache: "no-store" });
+    const res = await privFetch(WISHLIST_JSON_PATH);
     if(res.ok){
       wishlistData = await res.json();
     } else if(res.status === 404){
@@ -6130,7 +6180,7 @@ function oqShowStatus(msg, cls){
 function fmtOqDate(iso){
   if(!iso) return "";
   try{ return new Date(iso).toLocaleString("ar", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }); }
-  catch(e){ return iso; }
+  catch(e){ return esc(iso); }
 }
 
 function updateOrdersQueueBadge(){
@@ -6165,7 +6215,7 @@ function renderOrdersQueueList(){
     // أي طلب بكمية أكبر من المتوفر فعليًا قبل ما تضغط اعتماد (هذا سبب حادثة تجاوز المخزون سابقًا)
     const itemsHtml = (o.items || []).map(it => {
       const live = perfumes.find(p => p.id === it.perfumeId);
-      const label = live ? `${live.brand} — ${live.name}` : `${it.brand || "?"} — ${it.name || it.perfumeId || "?"}`;
+      const label = live ? `${esc(live.brand)} — ${esc(live.name)}` : `${esc(it.brand || "?")} — ${esc(it.name || it.perfumeId || "?")}`;
       const notFoundNote = it.perfumeId && !live ? ` <span style="color:#c0475a;">(ما انلقى بالكتالوج — ما راح يتخصم مخزونه تلقائيًا)</span>` : "";
       let stockBadge = "";
       if(live){
@@ -6175,30 +6225,30 @@ function renderOrdersQueueList(){
         const short = qtyRequested > curStock;
         stockBadge = ` <span style="color:${short ? "#c0475a" : "var(--muted)"}; font-weight:${short ? "700" : "400"};">(المخزون الحالي: ${curStock}${short ? " ⚠️ أقل من الكمية المطلوبة!" : ""})</span>`;
       }
-      return `<div>• ${label} (${it.size}مل × ${it.qty}) — ${fmtNum(it.lineTotal || (it.unitPrice*it.qty) || 0)} ${o.currency || ""}${notFoundNote}${stockBadge}</div>`;
+      return `<div>• ${label} (${esc(it.size)}مل × ${esc(it.qty)}) — ${fmtNum(it.lineTotal || (it.unitPrice*it.qty) || 0)} ${esc(o.currency || "")}${notFoundNote}${stockBadge}</div>`;
     }).join("");
     const metaParts = [
-      o.country ? `📍 ${o.country}${o.emirateOrWilayat ? " — " + o.emirateOrWilayat : ""}` : "",
-      o.deliveryMethod ? `🚚 ${o.deliveryMethod}` : "",
-      o.paymentMethod ? `💳 ${o.paymentMethod}` : "",
-      o.notes ? `📝 ${String(o.notes).replace(/</g,"&lt;")}` : ""
+      o.country ? `📍 ${esc(o.country)}${o.emirateOrWilayat ? " — " + esc(o.emirateOrWilayat) : ""}` : "",
+      o.deliveryMethod ? `🚚 ${esc(o.deliveryMethod)}` : "",
+      o.paymentMethod ? `💳 ${esc(o.paymentMethod)}` : "",
+      o.notes ? `📝 ${esc(o.notes)}` : ""
     ].filter(Boolean).join(" — ");
-    return `<div class="dropdown-item" data-order-id="${o.orderId}" style="display:block; padding:14px;">
+    return `<div class="dropdown-item" data-order-id="${esc(o.orderId)}" style="display:block; padding:14px;">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
         <span class="badge ${o.source === "quick-whatsapp" ? "pending" : "done"}">${sourceLabel}</span>
-        <span style="font-size:12px;color:var(--muted);">🕒 ${fmtOqDate(o.receivedAt)}</span>
+        <span style="font-size:12px;color:var(--muted);">🕒 ${esc(fmtOqDate(o.receivedAt))}</span>
       </div>
       <div style="margin-top:10px; font-size:13px; line-height:1.9;">${itemsHtml || "<em>ما فيه عناصر</em>"}</div>
       <div style="margin-top:6px; font-size:13px;">
-        المجموع الفرعي: ${fmtNum(o.subtotal||0)} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${o.currency||""}</b>
+        المجموع الفرعي: ${fmtNum(o.subtotal||0)} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${esc(o.currency||"")}</b>
       </div>
-      ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#1F6B41; font-weight:700;">🚚 ${String(o.offers).replace(/</g,"&lt;")}</div>` : ""}
+      ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#1F6B41; font-weight:700;">🚚 ${esc(o.offers)}</div>` : ""}
       ${metaParts ? `<div style="margin-top:6px; font-size:12px; color:var(--muted);">${metaParts}</div>` : ""}
       <div class="grid2" style="margin-top:12px;">
-        <div class="field" style="margin-bottom:0;"><label>اسم العميل</label><input type="text" class="oq-name-input" value="${name.replace(/"/g,"&quot;")}" placeholder="اسم العميل"></div>
-        <div class="field" style="margin-bottom:0;"><label>الهاتف</label><input type="text" class="oq-phone-input" value="${phone.replace(/"/g,"&quot;")}" placeholder="رقم الهاتف"></div>
+        <div class="field" style="margin-bottom:0;"><label>اسم العميل</label><input type="text" class="oq-name-input" value="${esc(name)}" placeholder="اسم العميل"></div>
+        <div class="field" style="margin-bottom:0;"><label>الهاتف</label><input type="text" class="oq-phone-input" value="${esc(phone)}" placeholder="رقم الهاتف"></div>
       </div>
-      <div class="field" style="margin-top:10px; margin-bottom:0;"><label>العنوان</label><input type="text" class="oq-address-input" value="${address.replace(/"/g,"&quot;")}" placeholder="العنوان التفصيلي"></div>
+      <div class="field" style="margin-top:10px; margin-bottom:0;"><label>العنوان</label><input type="text" class="oq-address-input" value="${esc(address)}" placeholder="العنوان التفصيلي"></div>
       <div class="row" style="margin-top:12px; gap:8px;">
         <button type="button" class="oq-approve-btn" style="flex:1;">✅ اعتماد</button>
         <button type="button" class="secondary oq-reject-btn" style="flex:1;">❌ رفض</button>
@@ -6332,7 +6382,7 @@ function renderOrdersQueueList(){
 async function loadPendingOrdersIntoPanel(){
   try{
     oqShowStatus("جارِ التحميل...", "info");
-    const res = await fetch(`${PENDING_ORDERS_JSON_RAW_URL}&r=${Math.random()}`, { cache: "no-store" });
+    const res = await privFetch(PENDING_ORDERS_JSON_PATH);
     if(res.ok){
       pendingOrders = await res.json();
       if(!Array.isArray(pendingOrders)) pendingOrders = [];
@@ -6430,14 +6480,14 @@ function renderBulkPreview(){
   if(bulkUnmatchedFiles.length > 0){
     issuesHtml += `<div class="status show err" style="margin-top:10px;">
       ${bulkUnmatchedFiles.length} ملف ما قدرنا نطابقه مع أي عطر بالقائمة (راجع الاسم يدويًا، ما راح ينرفع تلقائيًا):<br>
-      ${bulkUnmatchedFiles.slice(0,20).map(u => `— ${u.file.name}`).join("<br>")}
+      ${bulkUnmatchedFiles.slice(0,20).map(u => `— ${esc(u.file.name)}`).join("<br>")}
       ${bulkUnmatchedFiles.length > 20 ? `<br>... و${bulkUnmatchedFiles.length-20} ملف ثاني` : ""}
     </div>`;
   }
   if(perfumesWithoutFile.length > 0){
     issuesHtml += `<div class="status show info" style="margin-top:10px;">
       ${perfumesWithoutFile.length} عطر بالقائمة ما فيه له ملف صورة بهالمجلد:<br>
-      ${perfumesWithoutFile.slice(0,20).map(p => `— ${p.brand} — ${p.name}`).join("<br>")}
+      ${perfumesWithoutFile.slice(0,20).map(p => `— ${esc(p.brand)} — ${esc(p.name)}`).join("<br>")}
       ${perfumesWithoutFile.length > 20 ? `<br>... و${perfumesWithoutFile.length-20} عطر ثاني` : ""}
     </div>`;
   }
@@ -6455,7 +6505,7 @@ document.getElementById("bulk_forceChk").addEventListener("change", renderBulkPr
 function bulkLog(msg){
   const box = document.getElementById("bulk_log");
   box.style.display = "block";
-  box.innerHTML += msg + "<br>";
+  box.insertAdjacentHTML("beforeend", esc(msg) + "<br>");
   box.scrollTop = box.scrollHeight;
 }
 function bulkShowStatus(msg, type){
@@ -6645,7 +6695,7 @@ function renderXlsxPreview(){
   const listBox = document.getElementById("xlsx_previewList");
   if(valid.length > 0){
     listBox.style.display = "block";
-    listBox.innerHTML = valid.map(r => `<div class="dropdown-item"><span class="name">${r.record.brand} — ${r.record.name}</span></div>`).join("");
+    listBox.innerHTML = valid.map(r => `<div class="dropdown-item"><span class="name">${esc(r.record.brand)} — ${esc(r.record.name)}</span></div>`).join("");
   } else {
     listBox.style.display = "none";
     listBox.innerHTML = "";
@@ -6655,7 +6705,7 @@ function renderXlsxPreview(){
   if(skipped.length > 0){
     issuesBox.innerHTML = `<div class="status show err" style="margin-top:10px;">
       ${skipped.length} صف اتجاوزناه:<br>
-      ${skipped.slice(0,20).map(r => `— صف ${r.rowNum}: ${r.brand||"؟"} — ${r.name||"؟"} (${r.reason})`).join("<br>")}
+      ${skipped.slice(0,20).map(r => `— صف ${esc(r.rowNum)}: ${esc(r.brand||"؟")} — ${esc(r.name||"؟")} (${esc(r.reason)})`).join("<br>")}
       ${skipped.length > 20 ? `<br>... و${skipped.length-20} صف ثاني` : ""}
     </div>`;
   } else {
@@ -6801,7 +6851,7 @@ function renderXlsxUpdPreview(){
     const SEASON_LABEL = { summer:"صيفي", winter:"شتوي" };
     listBox.innerHTML = valid.map(r => {
       const fieldsTxt = Object.keys(r.patch).map(k => k === "seasons" ? `الموسم (${r.patch.seasons.map(s=>SEASON_LABEL[s]||s).join("+")})` : FIELD_LABELS_AR[k] || k).join("، ");
-      return `<div class="dropdown-item"><span class="name">${r.brand} — ${r.name} — سيحدّث: ${fieldsTxt}</span></div>`;
+      return `<div class="dropdown-item"><span class="name">${esc(r.brand)} — ${esc(r.name)} — سيحدّث: ${fieldsTxt}</span></div>`;
     }).join("");
   } else {
     listBox.style.display = "none";
@@ -6812,7 +6862,7 @@ function renderXlsxUpdPreview(){
   if(skipped.length > 0){
     issuesBox.innerHTML = `<div class="status show err" style="margin-top:10px;">
       ${skipped.length} صف اتجاوزناه:<br>
-      ${skipped.slice(0,20).map(r => `— صف ${r.rowNum}: ${r.brand||"؟"} — ${r.name||"؟"} (${r.reason})`).join("<br>")}
+      ${skipped.slice(0,20).map(r => `— صف ${esc(r.rowNum)}: ${esc(r.brand||"؟")} — ${esc(r.name||"؟")} (${esc(r.reason)})`).join("<br>")}
       ${skipped.length > 20 ? `<br>... و${skipped.length-20} صف ثاني` : ""}
     </div>`;
   } else {
@@ -7034,12 +7084,19 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
   }
 });
 
-loadData();
-loadReviews();
-loadOrders();
-loadMaterials();
-loadExpenses();
-loadPendingOrdersIntoPanel(); // تحميل مبكر بس عشان يظهر رقم الطلبات الجديدة بالتبويب فورًا من غير ما ينتظر المستخدم يضغطه
+loadData(); // الكتالوج العام — ما يحتاج دخول
+
+// الملفات الخاصة تنقرأ من المستودع الخاص وتحتاج مفتاح — تتحمل بعد تسجيل الدخول
+let _privateBootstrapped = false;
+function bootstrapPrivateData(){
+  if(!getToken() || _privateBootstrapped) return;
+  _privateBootstrapped = true;
+  loadReviews();
+  loadOrders();
+  loadMaterials();
+  loadExpenses();
+  loadPendingOrdersIntoPanel(); // تحميل مبكر بس عشان يظهر رقم الطلبات الجديدة بالتبويب فورًا
+}
 loadAppsScriptSettings();
 if(document.getElementById("ov_appsUrl").value.trim()){
   document.getElementById("ov_appsFetchBtn").click();

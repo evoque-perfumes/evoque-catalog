@@ -1,0 +1,11 @@
+# ملفات خاصة — مكانها المستودع الخاص evoque-private، مو هنا (GitHub Pages ينشر كل ملف بجذر هذا المستودع)
+/orders.json
+/pending-orders.json
+/customers.json
+/expenses.json
+/materials.json
+/distributions.json
+/wishlist.json
+/bank-info.json
+/reviews-private.json
+node_modules/
