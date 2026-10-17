@@ -1,0 +1,17 @@
+# حارس: يفشل أي push يرجّع ملفات خاصة لجذر الموقع العام (GitHub Pages ينشر كل ملف بالجذر).
+name: Guard private files
+on:
+  push:
+  pull_request:
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail if private data files are present
+        run: |
+          bad=0
+          for f in orders.json pending-orders.json customers.json expenses.json materials.json distributions.json wishlist.json bank-info.json reviews-private.json; do
+            if [ -e "$f" ]; then echo "::error::Private file $f must live in the private repo (evoque-private), not here."; bad=1; fi
+          done
+          exit $bad
