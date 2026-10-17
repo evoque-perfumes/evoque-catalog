@@ -5,6 +5,9 @@
 // ما يُشارك أبدًا مع أي أحد — العميل ما يقدر يوصله من هذي الصفحة إطلاقًا.
 // ------------------------------------------------------------------
 const WHATSAPP_NUMBER = "971522275255";
+// صورة المنتج: صورة إيفوك الخاصة (photo) إن وُجدت، وإلا بطاقة المكونات assets/cards/<id>.webp
+// (لا نستخدم صور زجاجات أي علامة تجارية أخرى — حقل image القديم مهمل)
+function productImage(p){ return p.photo ? p.photo : "assets/cards/" + encodeURIComponent(p.id) + ".webp"; }
 const COMING_SOON_IMAGE = "assets/coming-soon.jpg"; // صورة "الصور قيد التجهيز" الموحدة — 29 أغسطس 2026
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbxz93KyzZTa0Y4_HNaGZfK1wh-i4a6bLhH9koUAHnUSn2Ged0PC110kIMuAOqVCDeyM/exec";
@@ -1311,14 +1314,14 @@ function chooseLang(newLang){
    =================================================================== */
 function openLightbox(p){
   const t = I18N[lang];
-  if(!p.image) return;
   const accordsDisplay = accordsDisplayFor(p);
   const notesTopDisplay = notesDisplayFor(p);
   const longevityDisplay = translateForDisplay(p.longevity);
   const sillageDisplay = translateForDisplay(p.sillage);
   const lbImg = document.getElementById("lightboxImg");
   lbImg.style.opacity = "1";
-  lbImg.src = p.image;
+  lbImg.src = productImage(p);
+  lbImg.onerror = function(){ lbImg.onerror = null; lbImg.src = COMING_SOON_IMAGE; };
   lbImg.alt = t.imgAlt; // بدون أسماء علامات تجارية بنص الصورة البديل
   document.getElementById("lightboxBrand").textContent = toTitleCase(p.brand);
   document.getElementById("lightboxName").textContent = toTitleCase(p.name);
@@ -1813,8 +1816,8 @@ function renderGrid(explicitList){
 
     const imgWrap = document.createElement("div");
     imgWrap.className = "imgwrap";
-    if(p.image){
-      imgWrap.innerHTML = `<img src="${p.image}" alt="${t.imgAlt}" loading="lazy" onerror="this.onerror=null; this.src='${COMING_SOON_IMAGE}';">`;
+    if(true){
+      imgWrap.innerHTML = `<img src="${escapeHtml(productImage(p))}" alt="${t.imgAlt}" loading="lazy" onerror="this.onerror=null; this.src='${COMING_SOON_IMAGE}';">`;
       // تكبير الصورة عند الضغط عليها — لقراءة تفاصيل العطر والمكونات بوضوح
       imgWrap.addEventListener("click", ()=> openLightbox(p));
     } else {
@@ -1849,7 +1852,7 @@ function renderGrid(explicitList){
         <div class="brand" title="${lang==="ar" ? "عرض كل عطور هذا البراند" : "Show all perfumes from this brand"}">${toTitleCase(p.brand)}</div>
       </div>`}
       <div class="name">${p.displayName ? escapeHtml(p.displayName) : toTitleCase(p.name)}</div>
-      ${p.displayName ? `<div class="inspired-line">${t.inspiredBy} ${escapeHtml(toTitleCase(p.brand))} ${escapeHtml(toTitleCase(p.name))}</div>` : ""}
+      ${p.displayName ? `<div class="inspired-line">${t.inspiredBy} ${p.inspiredBy ? escapeHtml(p.inspiredBy) : escapeHtml(toTitleCase(p.brand)) + " " + escapeHtml(toTitleCase(p.name))}</div>` : ""}
       ${cardRating ? `<div class="card-rating">${starsHtml(cardRating.avg)}<span>${cardRating.avg.toFixed(1)} (${cardRating.count})</span></div>` : ""}
       ${genderLabel ? `<div class="badge-row"><span class="badge badge-gender">${svgIcon(ICONS[p.gender])}${genderLabel}</span></div>` : ""}
       <button class="notes-toggle" type="button"><span>${t.notesToggleOpen}</span>${svgIcon("ic-chevron","chev")}</button>
@@ -2249,7 +2252,7 @@ function renderCartModal(){
     const atMax = i.qty >= maxQty;
     return `
     <div class="cart-modal-item" data-id="${i.id}">
-      ${i.p.image ? `<img src="${i.p.image}" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:var(--bg-soft);flex:none;"></div>`}
+      ${true ? `<img src="${escapeHtml(productImage(i.p))}" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:var(--bg-soft);flex:none;"></div>`}
       <div class="ci-info">
         <div class="ci-brand">${toTitleCase(i.p.brand)}</div>
         <div class="ci-name">${toTitleCase(i.p.name)}</div>
