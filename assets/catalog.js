@@ -71,48 +71,59 @@ const BEST_SELLER_POOL_SIZE = 8;       // حجم مجموعة المرشحين (
 const BEST_SELLER_PICK_PER_GENDER = 3; // كم عطر يُختار من كل جنس
 
 function bsStockScore(p){
-  return (Number(p.stock10) || 0) + (Number(p.stock50) || 0);
+  return Number(p.stock50) || 0; // الـ10مل غير معروض للبيع
 }
 
 // ===================================================================
-// إشعار المبيعات المنبثق (3 سبتمبر 2026، مُعدَّل 14 سبتمبر 2026) — يقرأ من
-// assets/sale-notifications.json (ملف قابل للتعديل يدويًا، مو بيانات ثابتة
-// بالكود) ويدور بينها بشكل عشوائي كل فترة. هذي أمثلة عامة فقط — مو مرتبطة
-// بسجل طلبات فعلي، ولذلك ما تتغير أو تتحدث لما يوصل طلب حقيقي جديد. تعمّدنا
-// عدم ذكر رقم دقايق محدد أو أي ادّعاء "موثّق" (شيلنا علامة ✔ من الواجهة)
-// عشان ما نوهم العميل بدقة/واقعية غير موجودة فعليًا.
+// شريط "آخر الطلبات" — بيانات حقيقية فقط. يقرأ recent-orders.json (يولّده الأدمن من
+// الطلبات المؤكدة/المستلمة اللي وافق أصحابها صراحة على ظهور اسمهم الأول ومدينتهم).
+// ما فيه تواريخ ولا "منذ X دقيقة" ولا أي بيانات تعريفية. لو العدد أقل من 5 ما نعرض شي.
+// عرض واحد بكل مرة، تبديل كل ~8 ثواني، وقابل للإغلاق (يتذكر الإغلاق بالجلسة).
 // ===================================================================
-let saleNotifData = [];
-let saleToastIdx = 0;
-async function loadSaleNotifications(){
+const RECENT_ORDERS_COUNT = 5;
+const RECENT_ORDERS_ROTATE_MS = 8000;
+let recentOrdersData = [];
+let recentToastIdx = 0;
+let recentToastTimer = null;
+function recentToastDismissed(){
+  try{ return sessionStorage.getItem("evoque_recent_dismissed") === "1"; }catch(e){ return false; }
+}
+async function loadRecentOrders(){
   try{
-    const res = await fetch("assets/sale-notifications.json?t=" + Date.now(), { cache: "no-store" });
-    if(res.ok){
-      const data = await res.json();
-      if(Array.isArray(data) && data.length) saleNotifData = data;
-    }
+    if(recentToastDismissed()) return;
+    const res = await fetch("recent-orders.json?t=" + Math.floor(Date.now() / 600000), { cache: "no-store" });
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!Array.isArray(data)) return;
+    const clean = data.filter(o => o && typeof o.firstName === "string" && o.firstName.trim() &&
+        typeof o.city === "string" && o.city.trim() && Array.isArray(o.perfumes) && o.perfumes.length)
+      .slice(0, RECENT_ORDERS_COUNT);
+    if(clean.length < RECENT_ORDERS_COUNT) return; // أقل من 5 طلبات حقيقية موافَق عليها = ما نعرض شي
+    recentOrdersData = clean;
+    setTimeout(function(){
+      showRecentToast();
+      recentToastTimer = setInterval(showRecentToast, RECENT_ORDERS_ROTATE_MS);
+    }, 4000);
   }catch(e){}
-  if(saleNotifData.length) startSaleToastLoop();
 }
-function showSaleToastOnce(){
+function showRecentToast(){
   const el = document.getElementById("saleToast");
-  if(!el || !saleNotifData.length) return;
+  if(!el || !recentOrdersData.length) return;
   const t = I18N[lang];
-  const item = saleNotifData[saleToastIdx % saleNotifData.length];
-  saleToastIdx++;
-  const cityEl = document.getElementById("saleToastCity");
-  const prodEl = document.getElementById("saleToastProduct");
-  const timeEl = document.getElementById("saleToastTime");
-  if(cityEl) cityEl.textContent = item.city || "";
-  if(prodEl) prodEl.textContent = (t.saleToastBought || "") + " " + (item.product || "");
-  if(timeEl) timeEl.textContent = t.saleToastAgo || "";
+  const o = recentOrdersData[recentToastIdx % recentOrdersData.length];
+  recentToastIdx++;
+  const names = o.perfumes.slice(0, 2).map(String).join(lang === "ar" ? " و " : " & ");
+  // textContent فقط (ما نستخدم innerHTML أبدًا مع بيانات الطلبات)
+  document.getElementById("saleToastCity").textContent = o.firstName + " — " + o.city;
+  document.getElementById("saleToastProduct").textContent = names;
+  document.getElementById("saleToastTime").textContent = t.recentOrdersLabel;
   el.classList.add("show");
-  clearTimeout(el._hideTimer);
-  el._hideTimer = setTimeout(()=> el.classList.remove("show"), 6000);
 }
-function startSaleToastLoop(){
-  setTimeout(showSaleToastOnce, 4000);
-  setInterval(showSaleToastOnce, 14000);
+function dismissRecentToast(){
+  const el = document.getElementById("saleToast");
+  if(el) el.classList.remove("show");
+  if(recentToastTimer){ clearInterval(recentToastTimer); recentToastTimer = null; }
+  try{ sessionStorage.setItem("evoque_recent_dismissed", "1"); }catch(e){}
 }
 
 // PRNG بسيط وثابت (mulberry32) — نفس seed يعطي نفس الترتيب دائمًا، عشان كل
@@ -166,13 +177,12 @@ function pickAutoBestSellers(){
 
 let perfumes = [];
 let reviews = []; // reviews.json — تقييمات العملاء: [{id, perfumeId, name, rating, comment, date, visible, source}]
-let bankInfo = {}; // bank-info.json — بيانات الحساب البنكي لكل دولة، تُدار من لوحة التحكم (وضع "🏦 بيانات البنك")
 let lang = "ar";
-let country = "AE"; // "AE" (الإمارات، AED) | "OM" (عُمان، OMR) — يحدد أي أعمدة أسعار نقرأ ومين خيارات الدفع المتاحة
+let country = "AE"; // "AE" (الإمارات، AED) | "OM" (عُمان، OMR) — يحدد أي أعمدة أسعار نقرأ
 
 const COUNTRIES = {
-  AE: { currencyAr:"د.إ", currencyEn:"AED", labelAr:"الإمارات", labelEn:"UAE", tabby:true },
-  OM: { currencyAr:"ر.ع", currencyEn:"OMR", labelAr:"عُمان", labelEn:"Oman", tabby:false }
+  AE: { currencyAr:"د.إ", currencyEn:"AED", labelAr:"الإمارات", labelEn:"UAE" },
+  OM: { currencyAr:"ر.ع", currencyEn:"OMR", labelAr:"عُمان", labelEn:"Oman" }
 };
 
 const ICONS = {
@@ -181,27 +191,10 @@ const ICONS = {
   day:"ic-sun", night:"ic-moon", all:"ic-sparkle"
 };
 
-// يرجع سعر الحجم المطلوب حسب الدولة المختارة حاليًا (null لو ما فيه سعر لهذي الدولة بعد)
+// الحجم الوحيد المعروض للبيع هو 50مل (الـ10مل أُوقف بقرار المالك؛ حقوله تبقى بالبيانات
+// مخفية فقط). السعر يُقرأ من data.json حسب الدولة المختارة (null = ما فيه سعر بعد).
 function priceFor(p, size){
-  if(country === "OM") return size==="50" ? p.price50Om : p.price10Om;
-  return size==="50" ? p.price50 : p.price10;
-}
-// السعر قبل الخصم (لو موجود ومكتوب بالشيت) — يُعرض مشطوب فوق السعر الحالي
-function priceBeforeFor(p, size){
-  if(country === "OM") return size==="50" ? p.price50OmBefore : p.price10OmBefore;
-  return size==="50" ? p.price50Before : p.price10Before;
-}
-// نسبة الخصم % لأعلى خصم متاح على أي حجم — تُستخدم لشارة الخصم على الصورة
-function bestDiscountPct(p){
-  let best = 0;
-  ["50","10"].forEach(sz=>{
-    const now = priceFor(p, sz), before = priceBeforeFor(p, sz);
-    if(now && before && before > now){
-      const pct = Math.round((1 - now/before) * 100);
-      if(pct > best) best = pct;
-    }
-  });
-  return best;
+  return country === "OM" ? p.price50Om : p.price50;
 }
 function currencyLabel(){
   return lang==="ar" ? COUNTRIES[country].currencyAr : COUNTRIES[country].currencyEn;
@@ -222,12 +215,30 @@ function svgIcon(id, cls){ return `<svg class="icon ${cls||''}"><use href="#${id
 const I18N = {
   ar: {
     dir: "rtl",
-    sub: "عطور فاخرة بديلة للأصلي — اختار، شوف التفاصيل، وأكمل طلبك عبر واتساب",
+    impressionTag: "انطباع عطري",
+    inspiredBy: "مستوحى من",
+    imgAlt: "عطر من إيفوك — انطباع عطري",
+    disclaimer: "إيفوك تقدّم انطباعات عطرية مستوحاة من عطور عالمية. هي ليست العطور الأصلية، وإيفوك غير تابعة ولا مرتبطة بأي علامة تجارية.",
+    warranty: "ضمان إيفوك إذا ما ناسبك العطر من ناحية الثبات أو الفوحان، ترجع لنا العطر خلال يومين من الاستلام، وتسترد قيمة العطر كاملة. الشروط: يبقى في العطر ٨٥٪ أو أكثر. رسوم التوصيل غير مستردة، وشحن الإرجاع على العميل. نرجع المبلغ خلال ٣ أيام عمل بعد استلام العطر وفحصه.",
+    warrantyTitle: "ضمان إيفوك",
+    paymentCOD: "الدفع عند الاستلام",
+    codNote: "الدفع نقدًا عند الاستلام، ورسوم التوصيل تُدفع عند الاستلام.",
+    lblCity: "المدينة / المنطقة",
+    lblRecentConsent: "أوافق أن يظهر اسمي الأول ومدينتي في شريط الطلبات الأخيرة",
+    phoneHint: "اكتب الرقم مع رمز الدولة، مثال: ‎+9715XXXXXXXX",
+    recentOrdersLabel: "آخر الطلبات",
+    verifiedBadge: "عميل موثّق",
+    errRequired: "الرجاء تعبئة كل الحقول المطلوبة.",
+    errPhone: "رقم الهاتف غير صحيح. اكتبه مع رمز الدولة، مثال: ‎+9715XXXXXXXX",
+    errEmail: "البريد الإلكتروني غير صحيح.",
+    errAddress: "اكتب العنوان بالتفصيل (الشارع، البناية، أقرب معلم).",
+    errWilayat: "اكتب اسم الولاية.",
+    sub: "انطباعات عطرية فاخرة مستوحاة من أشهر العطور — اختر عطرك وأكمل طلبك أونلاين أو عبر واتساب",
     notfound: 'ما لقيت العطر اللي تبيه؟ <a id="notfoundLink" href="#">اكتب لنا اسمه عبر واتساب</a> ونتأكد لك منه.',
     loading: "جارِ تحميل العطور...",
     errorPrefix: "حدث خطأ مؤقت بتحميل العطور",
     errorHint: "جرّب تحديث الصفحة، ولو استمرت المشكلة تواصل وياك عبر واتساب.",
-    pageTitle: "Evoque Perfume",
+    pageTitle: "إيفوك للعطور | انطباعات عطرية فاخرة في الإمارات وعُمان",
     searchPlaceholder: "ابحث باسم العطر أو البراند...",
     allBrands: "كل البراندات",
     brandsMenuLabel: "البراندات",
@@ -236,14 +247,7 @@ const I18N = {
     sidebarAvailabilityTitle: "التوفر",
     availabilityIn: "متوفر بالمخزون",
     availabilityOut: "غير متوفر حاليًا",
-    saleToastBought: "اشترى",
-    saleToastAgo: "مؤخرًا",
     countryLabel: "الدولة",
-    paymentTitle: "طريقة الدفع المفضلة",
-    paymentCOD: "الدفع عند الاستلام",
-    paymentTabby: "تابي (ادفع لاحقًا)",
-    paymentBank: "تحويل بنكي",
-    tabbyNote: "متاح لعملاء الإمارات حاليًا",
     genderMen: "رجالي", genderWomen: "نسائي", genderUnisex: "للجنسين",
     filters: [
       {key:"all", label:"الكل", icon:"all"},
@@ -254,12 +258,11 @@ const I18N = {
       {key:"winter", label:"شتوي", icon:"winter"},
     ],
     trust:[
-      {icon:"ic-check", text:"منشأة مرخصة رسميًا"},
-      {icon:"ic-shield", text:"ضمان استرجاع المبلغ"},
-      {icon:"ic-sparkle", text:"بديل فاخر للعطور الأصلية"},
-      {icon:"ic-whatsapp", text:"اطلب مباشرة عبر واتساب"},
+      {icon:"ic-check", text:"رخصة تجارية — عجمان"},
+      {icon:"ic-shield", text:"ضمان إيفوك — استرجاع خلال يومين"},
+      {icon:"ic-sparkle", text:"انطباعات عطرية مستوحاة من أشهر العطور"},
+      {icon:"ic-truck", text:"الدفع عند الاستلام"},
     ],
-    guarantee:"كل عطر عليه ضمان استرجاع المبلغ في حال عدم المصداقية.",
     noMatch: "ما فيه عطور مطابقة لهذا الفلتر حاليًا",
     resultsCount: (shown, total) => `عرض ${shown} من أصل ${total} عطر`,
     showMore: "عرض المزيد",
@@ -271,7 +274,7 @@ const I18N = {
     reviewsTitle: "آراء عملائنا",
     reviewsEmpty: "ما فيه تقييمات لهذا العطر بعد — كن أول من يقيّمه بعد تجربته!",
     reviewsCount: (n) => n === 1 ? "تقييم واحد" : n === 2 ? "تقييمان" : `${n} تقييمات`,
-    reviewAnon: "عميل Evoque",
+    reviewAnon: "عميل إيفوك",
     reviewFormTitle: "شاركنا رأيك بهذا العطر",
     reviewNamePlaceholder: "اسمك (اختياري)",
     reviewCommentPlaceholder: "شو رأيك بالعطر؟ (اختياري)",
@@ -288,7 +291,7 @@ const I18N = {
     askPrice: "اسأل عن السعر",
     outOfStock: "نفذ",
     allOutOfStock: "نفذت الكمية",
-    lowStockNote: "🔥 باقي {n} فقط!",
+    lowStockNote: "باقي {n}",
     maxStockNote: "وصلت للحد الأقصى المتوفر ({n})",
     wishlistAddTitle: "أضف للمفضلة",
     wishlistRemoveTitle: "إزالة من المفضلة",
@@ -303,35 +306,23 @@ const I18N = {
     cartModalEmpty: "سلتك فارغة حاليًا",
     cartModalTotalLabel: "الإجمالي",
     removeItem: "حذف",
-    orderMsgIntro: "أبي أطلب من Evoque Perfume:\n\n",
+    orderMsgIntro: "أبي أطلب من إيفوك:\n\n",
     orderMsgPayment: "طريقة الدفع المفضلة",
     orderMsgAskPrice: "استفسار عن السعر",
     orderMsgTotal: "المجموع التقريبي",
     offerUnlockedTitle: "🎉 مبروك! حصلت على:",
     offerNextPrefix: "ضيف",
-    offerNextMid50: "عطر 50مل كمان واحصل على:",
-    offerNextMid10: "عطر 10مل كمان واحصل على:",
+    offerNextMid50: "عطر كمان واحصل على:",
     orderMsgOfferLine: "🎁 العرض المستحق",
     orderFormBtnLabel: "اطلب أونلاين",
     orderModalTitle: "تفاصيل الطلب",
     lblName: "الاسم الكامل",
-    lblPhone: "رقم الهاتف",
+    lblPhone: "رقم الهاتف (مع رمز الدولة)",
     lblEmail: "البريد الإلكتروني",
-    emailOptionalHint: "اختياري — إذا تركته فاضي، ما راح يوصلك إيميل تأكيد الطلب.",
     lblAddress: "العنوان التفصيلي (الشارع، البناية، أقرب معلم)",
     lblNotes: "ملاحظات (اختياري)",
     lblCountry: "الدولة",
     ofCountryHint: "تقدر تغيّر دولتك من هنا أي وقت — الأسعار والعملة ورسوم التوصيل تتحدث تلقائيًا.",
-    bankDetailsTitle: "بيانات الحساب البنكي",
-    bankFieldBankName: "اسم البنك",
-    bankFieldAccountName: "اسم صاحب الحساب",
-    bankFieldAccountNumber: "رقم الحساب",
-    bankFieldIban: "رقم الآيبان (IBAN)",
-    bankFieldSwift: "رمز السويفت (SWIFT)",
-    bankInfoUnavailable: "بيانات الحساب البنكي غير متوفرة حاليًا، تواصل معنا عبر واتساب وبنرسلها لك.",
-    bankReceiptHint: "بعد إتمام التحويل، أرسل لنا صورة الإيصال عبر واتساب عشان نعتمد طلبك.",
-    sendReceiptBtn: "أرسل إيصال التحويل عبر واتساب",
-    tabbyFeeLabel: "رسوم تابي",
     lblEmirate: "الإمارة",
     lblWilayat: "الولاية",
     wilayatOtherOption: "أخرى (اكتبها)",
@@ -346,16 +337,16 @@ const I18N = {
     shipEstimateNote: "(الرسوم النهائية تتأكد حسب موقعك بالضبط)",
     orderSubmitBtn: "إرسال الطلب",
     orderSubmitting: "جاري الإرسال...",
-    orderFormNote: "عبّي بياناتك واطلب مباشرة أونلاين — يوصلك تأكيد الطلب على إيميلك فورًا، بدون ما تحتاج واتساب.",
+    orderFormNote: "عبّي بياناتك واطلب أونلاين، وبنتواصل معك على واتساب لتأكيد الطلب. الدفع عند الاستلام.",
     orderSuccessTitle: "🎉 تم استلام طلبك!",
     orderSuccessMsgPrefix: "رقم طلبك",
-    orderSuccessMsg: "شكرًا لطلبك من Evoque Perfume. رقم طلبك الرسمي وكل التفاصيل بانتظارك بالإيميل. طلبك الحين قيد التجهيز 📦",
+    orderSuccessMsg: "شكرًا لطلبك من إيفوك. بنتواصل معك على واتساب لتأكيد الطلب والتوصيل. الدفع عند الاستلام.",
     orderErrorMsg: "حدث خطأ بإرسال الطلب. تقدر تكمل الطلب مباشرة عبر واتساب:",
     waFallbackLabel: "تواصل عبر واتساب",
-    footer: "© 2026 Evoque Perfume — جميع الحقوق محفوظة",
+    footer: "© 2026 إيفوك للعطور — جميع الحقوق محفوظة",
     heroEyebrow: "عطور فاخرة، هوية تعرف اسمك",
     heroTitle: "وقّع حضورك بعطر يشبهك",
-    heroSubtitle: "أكثر من 1500 عطر بديل فاخر بجودة عالية وأسعار تناسب الجميع — اختار عطرك، اقرأ تفاصيله ومكوناته، وأكمل طلبك مباشرة عبر واتساب.",
+    heroSubtitle: "انطباعات عطرية فاخرة بأسعار تناسب الجميع — اختر عطرك، اقرأ تفاصيله ومكوناته، وأكمل طلبك أونلاين أو عبر واتساب.",
     heroCtaShop: "تصفح العطور",
     heroCtaWhatsapp: "راسلنا على واتساب",
     langModalTitle: "اختر لغتك",
@@ -387,12 +378,30 @@ const I18N = {
   },
   en: {
     dir: "ltr",
-    sub: "Luxury inspired fragrances — pick one, see the details, and finish your order on WhatsApp",
+    impressionTag: "Fragrance impression",
+    inspiredBy: "Inspired by",
+    imgAlt: "Evoque fragrance — inspired impression",
+    disclaimer: "Evoque offers fragrance impressions inspired by well-known perfumes. They are not the original perfumes, and Evoque is not affiliated with or connected to any brand.",
+    warranty: "Evoque Guarantee: if the fragrance doesn't suit you in terms of longevity or projection, return it within 2 days of receiving it and get the full price of the fragrance back. Conditions: 85% or more of the fragrance must remain. Delivery fees are non-refundable, and return shipping is paid by the customer. We refund the amount within 3 working days after receiving and inspecting the fragrance.",
+    warrantyTitle: "Evoque Guarantee",
+    paymentCOD: "Cash on delivery",
+    codNote: "Pay in cash on delivery. Delivery fees are paid on delivery.",
+    lblCity: "City / Area",
+    lblRecentConsent: "I agree that my first name and city may appear in the recent orders strip",
+    phoneHint: "Include the country code, e.g. +9715XXXXXXXX",
+    recentOrdersLabel: "Recent orders",
+    verifiedBadge: "Verified customer",
+    errRequired: "Please fill in all required fields.",
+    errPhone: "The phone number is not valid. Include the country code, e.g. +9715XXXXXXXX",
+    errEmail: "The email address is not valid.",
+    errAddress: "Please enter the full address (street, building, nearest landmark).",
+    errWilayat: "Please type the wilayat name.",
+    sub: "Premium fragrance impressions inspired by famous perfumes — pick one and order online or on WhatsApp",
     notfound: 'Couldn\'t find the perfume you want? <a id="notfoundLink" href="#">Message us its name on WhatsApp</a> and we\'ll check for you.',
     loading: "Loading perfumes...",
     errorPrefix: "There was a temporary error loading perfumes",
     errorHint: "Try refreshing the page, or contact us on WhatsApp if the issue continues.",
-    pageTitle: "Evoque Perfume",
+    pageTitle: "Evoque Perfumes | Premium inspired fragrances in the UAE & Oman",
     searchPlaceholder: "Search by perfume or brand...",
     allBrands: "All brands",
     brandsMenuLabel: "Brands",
@@ -401,14 +410,7 @@ const I18N = {
     sidebarAvailabilityTitle: "Availability",
     availabilityIn: "In stock",
     availabilityOut: "Out of stock",
-    saleToastBought: "bought",
-    saleToastAgo: "Recently",
     countryLabel: "Country",
-    paymentTitle: "Preferred payment method",
-    paymentCOD: "Cash on delivery",
-    paymentTabby: "Tabby (pay later)",
-    paymentBank: "Bank transfer",
-    tabbyNote: "Available for UAE customers for now",
     genderMen: "Men", genderWomen: "Women", genderUnisex: "Unisex",
     filters: [
       {key:"all", label:"All", icon:"all"},
@@ -419,12 +421,11 @@ const I18N = {
       {key:"winter", label:"Winter", icon:"winter"},
     ],
     trust:[
-      {icon:"ic-check", text:"Officially licensed business"},
-      {icon:"ic-shield", text:"Money-back guarantee"},
-      {icon:"ic-sparkle", text:"Premium alternative to originals"},
-      {icon:"ic-whatsapp", text:"Order directly on WhatsApp"},
+      {icon:"ic-check", text:"Licensed business — Ajman"},
+      {icon:"ic-shield", text:"Evoque Guarantee — 2-day returns"},
+      {icon:"ic-sparkle", text:"Impressions inspired by famous perfumes"},
+      {icon:"ic-truck", text:"Cash on delivery"},
     ],
-    guarantee:"Every fragrance is covered by a money-back guarantee if it doesn't match the description.",
     noMatch: "No perfumes match this filter right now",
     resultsCount: (shown, total) => `Showing ${shown} of ${total} perfumes`,
     showMore: "Show more",
@@ -453,7 +454,7 @@ const I18N = {
     askPrice: "Ask for price",
     outOfStock: "out of stock",
     allOutOfStock: "Out of stock",
-    lowStockNote: "🔥 Only {n} left!",
+    lowStockNote: "{n} left",
     maxStockNote: "Reached maximum available stock ({n})",
     wishlistAddTitle: "Add to wishlist",
     wishlistRemoveTitle: "Remove from wishlist",
@@ -468,35 +469,23 @@ const I18N = {
     removeItem: "Remove",
     withoutDelivery: "(excl. delivery)",
     checkout: "Checkout via WhatsApp",
-    orderMsgIntro: "I'd like to order from Evoque Perfume:\n\n",
+    orderMsgIntro: "I'd like to order from Evoque:\n\n",
     orderMsgPayment: "Preferred payment method",
     orderMsgAskPrice: "price on request",
     orderMsgTotal: "Approximate total",
     offerUnlockedTitle: "🎉 Congrats! You've unlocked:",
     offerNextPrefix: "Add",
-    offerNextMid50: "more 50ml perfume to unlock:",
-    offerNextMid10: "more 10ml perfume to unlock:",
+    offerNextMid50: "more perfume to unlock:",
     orderMsgOfferLine: "🎁 Offer earned",
     orderFormBtnLabel: "Order Online",
     orderModalTitle: "Order Details",
     lblName: "Full Name",
-    lblPhone: "Phone Number",
+    lblPhone: "Phone number (with country code)",
     lblEmail: "Email Address",
-    emailOptionalHint: "Optional — if left empty, you won't receive an order confirmation email.",
     lblAddress: "Detailed Address (Street, Building, Nearest Landmark)",
     lblNotes: "Notes (optional)",
     lblCountry: "Country",
     ofCountryHint: "You can change your country here anytime — prices, currency and delivery fees update automatically.",
-    bankDetailsTitle: "Bank account details",
-    bankFieldBankName: "Bank name",
-    bankFieldAccountName: "Account holder name",
-    bankFieldAccountNumber: "Account number",
-    bankFieldIban: "IBAN",
-    bankFieldSwift: "SWIFT code",
-    bankInfoUnavailable: "Bank details aren't available right now — contact us on WhatsApp and we'll send them to you.",
-    bankReceiptHint: "After completing the transfer, please send us a photo of the receipt on WhatsApp so we can approve your order.",
-    sendReceiptBtn: "Send transfer receipt on WhatsApp",
-    tabbyFeeLabel: "Tabby fee",
     lblEmirate: "Emirate",
     lblWilayat: "Wilayat",
     wilayatOtherOption: "Other (type it)",
@@ -511,16 +500,16 @@ const I18N = {
     shipEstimateNote: "(Final fee confirmed based on your exact location)",
     orderSubmitBtn: "Submit Order",
     orderSubmitting: "Submitting...",
-    orderFormNote: "Fill in your details and order directly online — your confirmation lands in your inbox right away, no WhatsApp needed.",
+    orderFormNote: "Fill in your details and order online — we will contact you on WhatsApp to confirm. Cash on delivery.",
     orderSuccessTitle: "🎉 Your order has been received!",
     orderSuccessMsgPrefix: "Order number",
-    orderSuccessMsg: "Thank you for ordering from Evoque Perfume. Your official order number and full details are on their way to your email. Your order is now being prepared 📦",
+    orderSuccessMsg: "Thank you for ordering from Evoque. We will contact you on WhatsApp to confirm your order and delivery. Cash on delivery.",
     orderErrorMsg: "There was an error submitting your order. You can complete it directly via WhatsApp:",
     waFallbackLabel: "Contact via WhatsApp",
-    footer: "© 2026 Evoque Perfume — All rights reserved",
+    footer: "© 2026 Evoque Perfumes — All rights reserved",
     heroEyebrow: "Luxury fragrances, made for you",
     heroTitle: "Sign your presence with a scent that's yours",
-    heroSubtitle: "Over 1,500 premium inspired fragrances with prices to suit everyone — pick your scent, read its full profile and ingredients, and finish your order directly on WhatsApp.",
+    heroSubtitle: "Premium fragrance impressions at prices to suit everyone — pick your scent, read its full profile and ingredients, and order online or on WhatsApp.",
     heroCtaShop: "Browse fragrances",
     heroCtaWhatsapp: "Message us on WhatsApp",
     langModalTitle: "Choose your language",
@@ -574,18 +563,9 @@ function hasFreeShipping(offerStatus){
    شوف loadShippingRatesFromJson() تحت. هذي القيم تُستخدم فقط لو shipping-rates.json
    غير موجود أو فيه خطأ مؤقت، عشان الموقع ما ينكسر أبدًا). ===== */
 let SHIPPING_RATES = {
-  AE: { standard: 20, western: 50 },
+  AE: { standard: 25, western: 50 },
   OM: { door: 2, nool: 1 }
 };
-
-/* ===== عمولة تابي — تُضاف تلقائيًا على السعر النهائي فقط لما العميل يختار الدفع عبر تابي
-   (متاح بالإمارات حاليًا فقط، شوف COUNTRIES.AE.tabby). قيمة افتراضية احتياطية —
-   تُدار فعليًا من نفس تبويب "🚚 رسوم التوصيل" ونفس shipping-rates.json. ===== */
-let TABBY_FEE_PERCENT = 5;
-function tabbyFeeFor(amount){
-  if(paymentMethod !== "tabby" || !COUNTRIES[country].tabby) return 0;
-  return Math.round(amount * TABBY_FEE_PERCENT / 100);
-}
 
 // كل إمارة عندها اسم عربي وإنجليزي — عشان لما اللغة تكون إنجليزي تظهر القائمة
 // بالإنجليزي بدل ما تضل عربي دايمًا (كانت هذي مشكلة قبل 25 أغسطس 2026).
@@ -658,14 +638,10 @@ function getNextOffer(size, qty){
   return upcoming[0] || null;
 }
 function computeOffersStatus(items){
-  const qty50 = items.filter(i=>i.size==="50").reduce((s,i)=>s+i.qty,0);
-  const qty10 = items.filter(i=>i.size==="10").reduce((s,i)=>s+i.qty,0);
-  const unlocked = [getBestOffer("50",qty50), getBestOffer("10",qty10)].filter(Boolean);
+  const qty50 = items.reduce((s,i)=>s+i.qty,0);
+  const unlocked = [getBestOffer("50",qty50)].filter(Boolean);
   const next50 = getNextOffer("50",qty50);
-  const next10 = getNextOffer("10",qty10);
-  let nextHint = null;
-  if(next50 && (!next10 || (next50.minQty-qty50) <= (next10.minQty-qty10))) nextHint = {...next50, remaining: next50.minQty-qty50, sizeKey:"50"};
-  else if(next10) nextHint = {...next10, remaining: next10.minQty-qty10, sizeKey:"10"};
+  const nextHint = next50 ? {...next50, remaining: next50.minQty-qty50, sizeKey:"50"} : null;
   return { unlocked, nextHint };
 }
 
@@ -764,17 +740,17 @@ const TERM_AR = {
   "not verified (new release 2025)":"غير مؤكد (إصدار جديد 2025)",
   "not verified (new release)":"غير مؤكد (إصدار جديد)",
   "not verified numerically (parfum concentration suggests very long lasting)":"غير مؤكد رقميًا (تركيز Parfum يوحي بثبات طويل جدًا)",
-  "not verified numerically (known as very strong/long lasting, intensified version of delina)":"غير مؤكد رقميًا (معروف بأنه قوي جدًا/ثبات طويل، نسخة مكثّفة من Delina)",
+  "not verified numerically (known as very strong/long lasting, intensified version of delina)":"غير مؤكد رقميًا (معروف بأنه قوي جدًا/ثبات طويل، إصدار مكثّف من Delina)",
   "not verified numerically":"غير مؤكد رقميًا","not verified":"غير مؤكد","not officially published by brand":"لم يُنشر رسميًا من قبل البراند",
   "treat any note list found online as unconfirmed":"أي قائمة مكونات على الإنترنت تُعتبر غير مؤكدة",
   "strong, long lasting":"قوي، ثبات طويل","strong/long lasting":"قوي/ثبات طويل",
   "weak/short (~3 hours - known criticism)":"ضعيف/قصير (~3 ساعات - انتقاد معروف)",
   "known criticism":"انتقاد معروف","new release":"إصدار جديد","retailer claim":"ادعاء البائع",
   "independently verified":"مؤكد بشكل مستقل","independently":"بشكل مستقل","numerically":"رقميًا",
-  "intensified version of":"نسخة مكثّفة من","concentration suggests":"التركيز يوحي بـ",
+  "intensified version of":"إصدار مكثّف من","concentration suggests":"التركيز يوحي بـ",
   "suggests good longevity":"يوحي بثبات جيد","suggests":"يوحي بـ","concentration":"تركيز",
   "known as":"معروف بأنه","known":"معروف","criticism":"انتقاد","claim":"ادعاء","weak":"ضعيف","short":"قصير",
-  "all-day":"طوال اليوم","extrait":"تركيز Extrait","parfum":"برفان (Parfum)","version":"نسخة",
+  "all-day":"طوال اليوم","extrait":"تركيز Extrait","parfum":"برفان (Parfum)","version":"إصدار",
 
   // الانتشار / الحضور (Sillage)
   "light-moderate":"خفيف-متوسط","moderate-strong":"متوسط-قوي",
@@ -956,26 +932,10 @@ async function loadReviewsFromJson(){
 }
 
 // ------------------------------------------------------------------
-// بيانات الحساب البنكي — ملف bank-info.json (تُدار من لوحة التحكم admin-upload.html،
-// وضع "🏦 بيانات البنك"). لو الملف غير موجود أو فيه خطأ مؤقت، نكمل ببيانات فاضية
-// (يظهر للعميل بنفس المكان تنبيه "تواصل معنا عبر واتساب" بدل ما نكسر نموذج الطلب).
-// ------------------------------------------------------------------
-async function loadBankInfoFromJson(){
-  try{
-    const res = await fetch("./bank-info.json");
-    if(!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    bankInfo = (data && typeof data === "object" && !Array.isArray(data)) ? data : {};
-  }catch(e){
-    bankInfo = {};
-  }
-}
-
-// ------------------------------------------------------------------
-// رسوم التوصيل + عمولة تابي — ملف shipping-rates.json (تُدار من لوحة التحكم
+// رسوم التوصيل — ملف shipping-rates.json (المصدر الوحيد للأرقام بكل الموقع) (تُدار من لوحة التحكم
 // admin-upload.html، وضع "🚚 رسوم التوصيل" — 30 أغسطس 2026). لو الملف غير موجود
-// أو فيه خطأ مؤقت أو شكله غلط، نكمل بالقيم الافتراضية الثابتة (SHIPPING_RATES/
-// TABBY_FEE_PERCENT كما عرّفناها أعلى الملف) — الموقع ما ينكسر أبدًا.
+// أو فيه خطأ مؤقت أو شكله غلط، نكمل بالقيم الافتراضية الثابتة (SHIPPING_RATES
+// كما عرّفناها أعلى الملف) — الموقع ما ينكسر أبدًا.
 // ------------------------------------------------------------------
 async function loadShippingRatesFromJson(){
   try{
@@ -987,9 +947,6 @@ async function loadShippingRatesFromJson(){
     if(ae && typeof ae.standard === "number" && typeof ae.western === "number" &&
        om && typeof om.door === "number" && typeof om.nool === "number"){
       SHIPPING_RATES = { AE: { standard: ae.standard, western: ae.western }, OM: { door: om.door, nool: om.nool } };
-    }
-    if(typeof data.tabbyFeePercent === "number"){
-      TABBY_FEE_PERCENT = data.tabbyFeePercent;
     }
   }catch(e){
     // نكمل بالقيم الافتراضية بصمت — مو ميزة أساسية توقف الموقع
@@ -1100,7 +1057,7 @@ function renderReviewCarousel(p, list){
       <div class="review-carousel-track">
         <div class="review-card">
           <div class="review-top">
-            <span class="review-name">${escapeHtml(r.name) || t.reviewAnon}</span>
+            <span class="review-name">${escapeHtml(r.name) || t.reviewAnon}${r.verified === true ? ` <span class="verified-badge">${t.verifiedBadge}</span>` : ""}</span>
             ${starsHtml(r.rating)}
           </div>
           ${commentText ? `<p class="review-comment">${escapeHtml(commentText)}</p>` : ""}
@@ -1292,7 +1249,6 @@ async function loadPerfumesFromSheet(){
     }
   }
   await loadReviewsFromJson();
-  await loadBankInfoFromJson();
   await loadShippingRatesFromJson();
   renderAll();
 }
@@ -1317,7 +1273,6 @@ const PAGE_SIZE = 12;
 let visibleCount = PAGE_SIZE;
 let showMoreObserver = null; // يراقب عنصر التحميل التلقائي أثناء التمرير (Infinite Scroll)
 let cart = {}; // { perfumeId: {size, qty} } — نجيب البراند/الاسم/السعر وقت العرض من مصفوفة perfumes نفسها. تُحفظ فعليًا بالـ localStorage (شوف persistCartState/restoreCartState تحت) عشان تضل موجودة حتى لو سكر الزائر المتصفح.
-let paymentMethod = "cod"; // "cod" | "tabby" | "bank"
 
 function renderTrust(){
   const t = I18N[lang];
@@ -1364,7 +1319,7 @@ function openLightbox(p){
   const lbImg = document.getElementById("lightboxImg");
   lbImg.style.opacity = "1";
   lbImg.src = p.image;
-  lbImg.alt = `${p.brand} ${p.name}`;
+  lbImg.alt = t.imgAlt; // بدون أسماء علامات تجارية بنص الصورة البديل
   document.getElementById("lightboxBrand").textContent = toTitleCase(p.brand);
   document.getElementById("lightboxName").textContent = toTitleCase(p.name);
   const rows = [];
@@ -1372,6 +1327,8 @@ function openLightbox(p){
   if(notesTopDisplay) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.top}:</b> ${notesTopDisplay}</div></div>`);
   if(longevityDisplay) rows.push(`<div class="row">${svgIcon("ic-clock")}<div><b>${t.longevity}:</b> ${longevityDisplay}</div></div>`);
   if(sillageDisplay) rows.push(`<div class="row">${svgIcon("ic-wind")}<div><b>${t.sillage}:</b> ${sillageDisplay}</div></div>`);
+  rows.push(`<div class="row">${svgIcon("ic-shield")}<div><b>${t.warrantyTitle}:</b> ${t.warranty}</div></div>`);
+  rows.push(`<div class="row lb-disclaimer"><div>${t.disclaimer}</div></div>`);
   document.getElementById("lightboxDetails").innerHTML = rows.join("");
   renderReviewsSection(p);
   document.getElementById("lightboxOverlay").classList.add("open");
@@ -1411,7 +1368,6 @@ function renderCountrySelect(){
     country = e.target.value;
     // ما نمزج عملتين بسلة وحدة — نمسح السلة عند تبديل الدولة تفاديًا لأي التباس بالسعر
     cart = {};
-    if(!COUNTRIES[country].tabby && paymentMethod==="tabby") paymentMethod = "cod";
     renderAll();
   };
   selects.forEach(sel=>{
@@ -1425,7 +1381,9 @@ function renderAll(){
   const t = I18N[lang];
   document.getElementById("headerSub").textContent = t.sub;
   document.getElementById("footerText").textContent = t.footer;
-  document.getElementById("footerGuarantee").textContent = t.guarantee;
+  document.getElementById("footerGuarantee").textContent = t.warranty;
+  const footerDisc = document.getElementById("footerDisclaimer");
+  if(footerDisc) footerDisc.textContent = t.disclaimer;
   document.getElementById("checkoutLabel").textContent = t.checkout;
   document.getElementById("waHeaderBtn").href = `https://wa.me/${WHATSAPP_NUMBER}`;
 
@@ -1790,6 +1748,13 @@ function matchesExceptGender(p, genderKey){
 // عرّفنا list (اختياري) عشان الصفحة الرئيسية تقدر تستخدم نفس بطاقة العرض لعرض
 // قائمة "الأكثر مبيعًا" المختارة يدويًا (BEST_SELLER_IDS) بدون فلاتر/بحث/ترقيم صفحات.
 // لو ما انمرر شي، السلوك القديم بالضبط: perfumes.filter(matches) + الترقيم المعتاد.
+// نرتّب بحيث المتوفر أولاً والنافذ بعده (ترتيب ثابت — ما نغيّر الترتيب الداخلي). النافذ يبقى ظاهراً.
+function sortInStockFirst(list){
+  const inStock = [], out = [];
+  list.forEach(p => ((Number(p.stock50) || 0) > 0 ? inStock : out).push(p));
+  return inStock.concat(out);
+}
+
 function renderGrid(explicitList){
   const t = I18N[lang];
   const grid = document.getElementById("grid");
@@ -1810,7 +1775,7 @@ function renderGrid(explicitList){
   }
 
   const isExplicit = Array.isArray(explicitList);
-  const fullList = isExplicit ? explicitList : perfumes.filter(matches);
+  const fullList = isExplicit ? explicitList : sortInStockFirst(perfumes.filter(matches));
   if(fullList.length===0){
     grid.innerHTML = `<div class="empty">${t.noMatch}</div>`;
     return;
@@ -1849,18 +1814,17 @@ function renderGrid(explicitList){
     const imgWrap = document.createElement("div");
     imgWrap.className = "imgwrap";
     if(p.image){
-      imgWrap.innerHTML = `<img src="${p.image}" alt="${p.brand} ${p.name}" loading="lazy" onerror="this.onerror=null; this.src='${COMING_SOON_IMAGE}';">`;
+      imgWrap.innerHTML = `<img src="${p.image}" alt="${t.imgAlt}" loading="lazy" onerror="this.onerror=null; this.src='${COMING_SOON_IMAGE}';">`;
       // تكبير الصورة عند الضغط عليها — لقراءة تفاصيل العطر والمكونات بوضوح
       imgWrap.addEventListener("click", ()=> openLightbox(p));
     } else {
-      imgWrap.innerHTML = `<img src="${COMING_SOON_IMAGE}" alt="${p.brand} ${p.name}" loading="lazy">`;
+      imgWrap.innerHTML = `<img src="${COMING_SOON_IMAGE}" alt="${t.imgAlt}" loading="lazy">`;
     }
     // ملاحظة مهمة: ولا شارة (خصم/جنس) تنحط فوق الصورة (overlay) عشان صور العطور
     // نفسها تصاميم كانفا فيها ألوان وأحيانًا نصوص/عناوين مدمجة بالصورة نفسها —
     // أي شارة فوقها ممكن تغطي جزء منها بشكل غير متوقع حسب كل صورة. فبدالها نعرض
     // كل الشارات داخل بطاقة المعلومات تحت الصورة (منطقة بيضاء ثابتة) عشان تكون
     // واضحة دايمًا ومضمونة إنها ما تغطي شي أبدًا، بغض النظر عن تصميم أي صورة.
-    const discountPct = bestDiscountPct(p);
 
     const info = document.createElement("div");
     info.className = "info";
@@ -1878,14 +1842,14 @@ function renderGrid(explicitList){
     // يغطي جزء منها بشكل غير متوقع. صف صغير أعلى بطاقة المعلومات، جنب "Impressions".
     info.innerHTML = `
       <div class="card-top-row">
-        <div class="impressions-tag">Impressions</div>
+        <div class="impressions-tag">${t.impressionTag}</div>
         <button type="button" class="wishlist-heart-btn${myWishlist.has(p.id) ? " active" : ""}" aria-label="${myWishlist.has(p.id) ? t.wishlistRemoveTitle : t.wishlistAddTitle}" title="${myWishlist.has(p.id) ? t.wishlistRemoveTitle : t.wishlistAddTitle}">${svgIcon("ic-heart")}</button>
       </div>
-      <div class="name-row">
+      ${p.displayName ? "" : `<div class="name-row">
         <div class="brand" title="${lang==="ar" ? "عرض كل عطور هذا البراند" : "Show all perfumes from this brand"}">${toTitleCase(p.brand)}</div>
-        ${discountPct > 0 ? `<div class="discount-tag">${svgIcon("ic-sparkle")}<span>${lang==="ar" ? `خصم ${discountPct}٪` : `-${discountPct}%`}</span></div>` : ""}
-      </div>
-      <div class="name">${toTitleCase(p.name)}</div>
+      </div>`}
+      <div class="name">${p.displayName ? escapeHtml(p.displayName) : toTitleCase(p.name)}</div>
+      ${p.displayName ? `<div class="inspired-line">${t.inspiredBy} ${escapeHtml(toTitleCase(p.brand))} ${escapeHtml(toTitleCase(p.name))}</div>` : ""}
       ${cardRating ? `<div class="card-rating">${starsHtml(cardRating.avg)}<span>${cardRating.avg.toFixed(1)} (${cardRating.count})</span></div>` : ""}
       ${genderLabel ? `<div class="badge-row"><span class="badge badge-gender">${svgIcon(ICONS[p.gender])}${genderLabel}</span></div>` : ""}
       <button class="notes-toggle" type="button"><span>${t.notesToggleOpen}</span>${svgIcon("ic-chevron","chev")}</button>
@@ -1910,7 +1874,7 @@ function renderGrid(explicitList){
     };
 
     const brandEl = info.querySelector(".brand");
-    brandEl.onclick = ()=>{
+    if(brandEl) brandEl.onclick = ()=>{
       selectedBrand = p.brand;
       const brandSelect = document.getElementById("brandSelect");
       if(brandSelect) brandSelect.value = p.brand;
@@ -1933,28 +1897,19 @@ function renderGrid(explicitList){
 
     const bottom = document.createElement("div");
     bottom.className = "card-bottom";
-    // وجود الحجم أصلاً يُحدَّد من سعر الإمارات (المرجع الأساسي) — سعر عُمان قد يكون فاضي مؤقتًا وهذا لا يخفي الحجم، بس يعرض "اسأل عن السعر"
-    let selectedSize = (p.price50 && p.stock50) ? "50" : ((p.price10 && p.stock10) ? "10" : null);
+    // حجم واحد فقط للبيع: 50مل. "باقي N" تظهر فقط لما المخزون الحقيقي (من الأدمن) 5 أو أقل — بدون أي تضخيم.
+    let selectedSize = (p.price50 && Number(p.stock50) > 0) ? "50" : null;
 
     function sizeRowHtml(){
-      const parts = [];
-      [["50", p.price50, p.stock50], ["10", p.price10, p.stock10]].forEach(([sz, existsPrice, inStock])=>{
-        if(!existsPrice) return;
-        const shownPrice = priceFor(p, sz);
-        const beforePrice = priceBeforeFor(p, sz);
-        const hasDiscount = shownPrice != null && beforePrice != null && beforePrice > shownPrice;
-        const oldPriceHtml = hasDiscount ? `<s class="old-price">${beforePrice} ${currencyLabel()}</s>` : "";
-        const priceHtml = shownPrice != null ? `${oldPriceHtml}${shownPrice} ${currencyLabel()}` : t.askPrice;
-        // 27 أغسطس 2026: لما تبقى كمية بسيطة (1 أو 2) من هذا الحجم، نعرض تنبيه
-        // "باقي X فقط" بدل ما نسكت — يشجّع العميل يقرر بسرعة قبل ما تخلص الكمية.
-        const qtyNum = Number(inStock) || 0;
-        const isLow = inStock && qtyNum > 0 && qtyNum < 3;
-        const stockNoteHtml = !inStock
-          ? `<div style="font-size:9px;color:var(--muted);">${t.outOfStock}</div>`
-          : (isLow ? `<div style="font-size:9px;color:#c0475a;font-weight:700;">${t.lowStockNote.replace("{n}", qtyNum)}</div>` : "");
-        parts.push(`<div class="size-pill ${selectedSize===sz?"active":""} ${!inStock?"disabled":""}" data-size="${sz}">${sz}ml<b>${priceHtml}</b>${stockNoteHtml}</div>`);
-      });
-      return parts.length ? `<div class="size-row">${parts.join("")}</div>` : `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${t.askPrice}</div>`;
+      if(!p.price50) return `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${t.askPrice}</div>`;
+      const shownPrice = priceFor(p, "50");
+      const priceHtml = shownPrice != null ? `${shownPrice} ${currencyLabel()}` : t.askPrice;
+      const qtyNum = Number(p.stock50) || 0;
+      const inStock = qtyNum > 0;
+      const stockNoteHtml = !inStock
+        ? `<div class="stock-note out">${t.outOfStock}</div>`
+        : (qtyNum <= 5 ? `<div class="stock-note low">${t.lowStockNote.replace("{n}", qtyNum)}</div>` : "");
+      return `<div class="size-row"><div class="size-pill active ${!inStock ? "disabled" : ""}" data-size="50">50ml<b>${priceHtml}</b>${stockNoteHtml}</div></div>`;
     }
 
     const actionArea = document.createElement("div");
@@ -2040,64 +1995,24 @@ function renderGrid(explicitList){
   });
 }
 
-function paymentLabel(t, method){
-  return method==="tabby" ? t.paymentTabby : method==="bank" ? t.paymentBank : t.paymentCOD;
-}
+// الدفع عند الاستلام فقط (لا تابي ولا تحويل بنكي)
+function paymentLabel(t){ return t.paymentCOD; }
 
 // ------------------------------------------------------------------
-// اختيار طريقة الدفع — انتقل من شريط السلة السفلي لداخل نموذج الطلب نفسه
-// (23 أغسطس 2026)، يظهر مباشرة بعد اختيار الدولة، لأن الطرق المتاحة (تابي
-// مثلًا) تعتمد عليها. #ofPaymentRow و#ofBankDetails موجودين بنموذج الطلب فقط.
+// رقم الهاتف → صيغة E.164 (+9715XXXXXXXX). يرجّع "" لو الرقم غير صالح.
 // ------------------------------------------------------------------
-function renderOrderPaymentSection(){
-  const t = I18N[lang];
-  const wrap = document.getElementById("ofPaymentRow");
-  if(!wrap) return;
-  const methods = [["cod", "ic-truck"], ["tabby", "ic-sparkle"], ["bank", "ic-shield"]]
-    .filter(([key])=> key!=="tabby" || COUNTRIES[country].tabby);
-  wrap.style.display = "flex";
-  wrap.innerHTML = methods.map(([key, icon])=>
-    `<button type="button" class="payment-pill ${paymentMethod===key?"active":""}" data-method="${key}">${svgIcon(icon)}<span>${paymentLabel(t,key)}</span></button>`
-  ).join("");
-  wrap.querySelectorAll(".payment-pill").forEach(btn=>{
-    btn.onclick = ()=>{
-      paymentMethod = btn.dataset.method;
-      renderOrderPaymentSection();
-      renderBankDetailsBlock();
-      renderShippingSummary();
-      renderCart();
-    };
-  });
-}
-
-// حقول بيانات الحساب البنكي المعبّأة فعليًا (من bank-info.json) لدولة معيّنة — نتجاهل الحقول الفاضية
-function bankDetailsFieldsFor(countryCode){
-  const t = I18N[lang];
-  const b = bankInfo[countryCode] || {};
-  const fields = [];
-  if(b.bankName) fields.push([t.bankFieldBankName, b.bankName]);
-  if(b.accountName) fields.push([t.bankFieldAccountName, b.accountName]);
-  if(b.accountNumber) fields.push([t.bankFieldAccountNumber, b.accountNumber]);
-  if(b.iban) fields.push([t.bankFieldIban, b.iban]);
-  if(b.swift) fields.push([t.bankFieldSwift, b.swift]);
-  return fields;
-}
-
-function renderBankDetailsBlock(){
-  const t = I18N[lang];
-  const box = document.getElementById("ofBankDetails");
-  if(!box) return;
-  if(paymentMethod !== "bank"){ box.style.display = "none"; box.innerHTML = ""; return; }
-  const fields = bankDetailsFieldsFor(country);
-  const rowsHtml = fields.length
-    ? fields.map(([label,val])=>`<div class="bd-row"><span>${label}</span><b>${val}</b></div>`).join("")
-    : `<div class="bd-row">${t.bankInfoUnavailable}</div>`;
-  box.style.display = "block";
-  box.innerHTML = `
-    <div class="bd-title">${t.bankDetailsTitle}</div>
-    ${rowsHtml}
-    <div class="bd-hint">${t.bankReceiptHint}</div>
-  `;
+function normalizePhoneE164(raw, countryCode){
+  let v = String(raw || "").replace(/[\s\-().]/g, "");
+  v = v.replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+  if(v.indexOf("00") === 0) v = "+" + v.slice(2);
+  if(v.charAt(0) !== "+"){
+    if(countryCode === "AE") v = "+971" + v.replace(/^0/, "");
+    else if(countryCode === "OM") v = "+968" + v.replace(/^0/, "");
+  }
+  if(!/^\+[1-9]\d{7,14}$/.test(v)) return "";
+  if(v.indexOf("+971") === 0 && !/^\+971\d{8,9}$/.test(v)) return "";
+  if(v.indexOf("+968") === 0 && !/^\+968\d{8}$/.test(v)) return "";
+  return v;
 }
 
 function cartItemsList(){
@@ -2125,7 +2040,6 @@ function cartItemsList(){
 const CART_STORAGE_KEY = "evoque_cart_v1";
 const CART_SAVED_AT_KEY = "evoque_cart_saved_at_v1";
 const COUNTRY_STORAGE_KEY = "evoque_country_v1";
-const PAYMENT_STORAGE_KEY = "evoque_payment_v1";
 const CART_EXPIRY_MS = 24 * 60 * 60 * 1000; // ٢٤ ساعة من آخر تعديل بالسلة
 
 function persistCartState(){
@@ -2133,7 +2047,6 @@ function persistCartState(){
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
     localStorage.setItem(CART_SAVED_AT_KEY, String(Date.now()));
     localStorage.setItem(COUNTRY_STORAGE_KEY, country);
-    localStorage.setItem(PAYMENT_STORAGE_KEY, paymentMethod);
   }catch(e){ /* localStorage غير متاح — نتجاهل بصمت، السلة تشتغل بالذاكرة بس لهذي الزيارة */ }
 }
 
@@ -2144,15 +2057,17 @@ function restoreCartState(){
     const savedCart = localStorage.getItem(CART_STORAGE_KEY);
     if(isFresh && savedCart){
       const parsed = JSON.parse(savedCart);
-      if(parsed && typeof parsed === "object") cart = parsed;
+      if(parsed && typeof parsed === "object"){
+        // الـ10مل أُوقف: أي عنصر قديم بحجم غير 50 نشيله من السلة
+        Object.keys(parsed).forEach(id => { if(!parsed[id] || parsed[id].size !== "50") delete parsed[id]; });
+        cart = parsed;
+      }
     } else if(savedCart){
       // سلة قديمة عمرها أكثر من CART_EXPIRY_MS — نمسحها ونبدأ بسلة فاضية بدل ما نعرض عطور قديمة ممكن تكون تغيّر سعرها أو ماعادت متوفرة
       try{ localStorage.removeItem(CART_STORAGE_KEY); localStorage.removeItem(CART_SAVED_AT_KEY); }catch(e2){}
     }
     const savedCountry = localStorage.getItem(COUNTRY_STORAGE_KEY);
     if(savedCountry && COUNTRIES[savedCountry]) country = savedCountry;
-    const savedPayment = localStorage.getItem(PAYMENT_STORAGE_KEY);
-    if(savedPayment === "cod" || savedPayment === "tabby" || savedPayment === "bank") paymentMethod = savedPayment;
   }catch(e){ /* أول زيارة أو localStorage غير متاح — نبدأ بسلة فاضية عادي */ }
 }
 
@@ -2255,7 +2170,7 @@ function renderCart(){
   msg += `\n${t.shipSubtotal}: ${total} ${cur}`;
   msg += `\n${t.shipFee}: ${freeShip ? t.shipFree : estFee + " " + cur}`;
   msg += `\n${t.shipGrandTotal}: ${estGrandTotal} ${cur} ${t.shipEstimateNote}`;
-  msg += `\n${t.orderMsgPayment}: ${paymentLabel(t, paymentMethod)}`;
+  msg += `\n${t.orderMsgPayment}: ${paymentLabel(t)}`;
   if(offerStatus.unlocked.length){
     offerStatus.unlocked.forEach(o=>{ msg += `\n${t.orderMsgOfferLine}: ${o.reward[lang]}`; });
   }
@@ -2275,11 +2190,10 @@ function renderCart(){
       country: lang==="ar" ? (COUNTRIES[country] ? COUNTRIES[country].labelAr : country) : (COUNTRIES[country] ? COUNTRIES[country].labelEn : country),
       emirateOrWilayat: "", deliveryMethod: "", address: "", notes: "",
       currency: cur,
-      paymentMethod: paymentLabel(t, paymentMethod),
+      paymentMethod: paymentLabel(t),
       subtotal: total,
       shippingFee: shippingCharged,
       shippingFree: freeShip,
-      tabbyFee: 0,
       total: estGrandTotal,
       offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
       items: items.map(i => ({
@@ -2324,7 +2238,7 @@ function renderCartModal(){
     </div>`;
   } else if(offerStatus.nextHint){
     const h = offerStatus.nextHint;
-    const mid = h.sizeKey === "50" ? t.offerNextMid50 : t.offerNextMid10;
+    const mid = t.offerNextMid50;
     offerBannerHtml = `<div class="offer-banner offer-banner-progress">
       ${t.offerNextPrefix} <b>${h.remaining}</b> ${mid} <b>${h.reward[lang]}</b>
     </div>`;
@@ -2425,15 +2339,11 @@ function populateWilayatSelect(){
 
 // العميل يقدر يغيّر الدولة من نفس نموذج الطلب (23 أغسطس 2026) — مفيد خصوصًا لعميل
 // عُماني يبا يتأكد أو يبدّل لعنوان إماراتي أو العكس. تغييرها يحدّث فورًا: العملة/الأسعار
-// (priceFor يقرأ متغيّر country مباشرة)، رسوم التوصيل، طرق الدفع المتاحة (تابي بس بالإمارات)،
-// وبيانات التحويل البنكي المعروضة. ما نفرّغ السلة — نفس العطور تضل بالسلة وبس سعرها يتحدث.
+// (priceFor يقرأ متغيّر country مباشرة) ورسوم التوصيل. ما نفرّغ السلة — نفس العطور تضل بالسلة وبس سعرها يتحدث.
 function onOrderCountryChange(e){
   country = e.target.value;
-  if(!COUNTRIES[country].tabby && paymentMethod === "tabby") paymentMethod = "cod";
   updateAddressBlocksVisibility();
   renderShippingSummary();
-  renderOrderPaymentSection();
-  renderBankDetailsBlock();
   renderCountrySelect(); // نزامن قائمة الدولة بأعلى الصفحة مع نفس الاختيار
   renderCart(); // يحدّث سلة السفلي والتخزين (localStorage) بنفس الدولة الجديدة
 }
@@ -2470,6 +2380,17 @@ function currentShippingFee(){
   }
 }
 
+// رمز نوع التوصيل (يُرسل للسيرفر): AE → standard | western ، OM → door | nool
+function currentDeliveryCode(){
+  if(country === "AE"){
+    const emirateSel = document.getElementById("ofEmirate");
+    const opt = emirateSel && emirateSel.selectedOptions ? emirateSel.selectedOptions[0] : null;
+    return (opt && opt.dataset.western === "1") ? "western" : "standard";
+  }
+  const doorRadio = document.querySelector('input[name="ofOmDelivery"]:checked');
+  return (doorRadio ? doorRadio.value : "door") === "nool" ? "nool" : "door";
+}
+
 function renderShippingSummary(){
   const t = I18N[lang];
   const items = cartItemsList();
@@ -2479,15 +2400,10 @@ function renderShippingSummary(){
   const freeShip = hasFreeShipping(offerStatus);
   const fee = currentShippingFee();
   const shippingCharged = freeShip ? 0 : fee;
-  const preTabbyTotal = subtotal + shippingCharged;
-  const tabbyFee = tabbyFeeFor(preTabbyTotal);
-  const grand = preTabbyTotal + tabbyFee;
+  const grand = subtotal + shippingCharged;
   const feeHtml = freeShip
     ? `<s>${fee} ${cur}</s> <span class="os-free">${t.shipFree}</span>`
     : `${fee} ${cur}`;
-  const tabbyRowHtml = tabbyFee > 0
-    ? `<div class="os-row"><span>${t.tabbyFeeLabel}</span><span>${tabbyFee} ${cur}</span></div>`
-    : "";
   // 1 سبتمبر 2026: نعرض تفاصيل كل عطر بالسلة (الاسم + الحجم + الكمية + السعر) قبل
   // المجموع الفرعي، عشان العميل يشوف طلبه كامل وواضح قبل ما يضغط إرسال — بدل ما
   // يوصله بس رقم إجمالي بدون تفاصيل.
@@ -2498,37 +2414,37 @@ function renderShippingSummary(){
     ${itemsHtml}
     <div class="os-row"><span>${t.shipSubtotal}</span><span>${subtotal} ${cur}</span></div>
     <div class="os-row"><span>${t.shipFee}</span><span>${feeHtml}</span></div>
-    ${tabbyRowHtml}
     <div class="os-row os-total"><span>${t.shipGrandTotal}</span><span>${grand} ${cur}</span></div>
   `;
 }
 
 function applyOrderFormLabels(){
   const t = I18N[lang];
-  document.getElementById("lblName").textContent = t.lblName;
-  document.getElementById("lblPhone").textContent = t.lblPhone;
-  document.getElementById("lblEmail").textContent = t.lblEmail;
-  document.getElementById("ofEmailHint").textContent = t.emailOptionalHint;
-  document.getElementById("lblCountry").textContent = t.lblCountry;
-  document.getElementById("ofCountryHint").textContent = t.ofCountryHint;
-  document.getElementById("lblPaymentMethodModal").textContent = t.paymentTitle;
-  document.getElementById("lblEmirate").textContent = t.lblEmirate;
-  document.getElementById("lblWilayat").textContent = t.lblWilayat;
-  document.getElementById("lblDeliveryMethod").textContent = t.lblDeliveryMethod;
-  document.getElementById("lblDeliveryDoor").textContent = t.lblDeliveryDoor;
-  document.getElementById("lblDeliveryNool").textContent = t.lblDeliveryNool;
-  document.getElementById("ofWilayatOther").placeholder = t.wilayatOtherPlaceholder;
-  document.getElementById("lblAddress").textContent = t.lblAddress;
-  document.getElementById("lblNotes").textContent = t.lblNotes;
-  document.getElementById("orderSubmitBtn").textContent = t.orderSubmitBtn;
-  document.getElementById("orderFormNote").textContent = t.orderFormNote;
+  // بعد نجاح الطلب نافذة الطلب تعرض رسالة الشكر بدل النموذج — ما فيه شي نعبّيه
+  if(!document.getElementById("ofCountrySelect")) return;
+  const set = (id, txt)=>{ const el = document.getElementById(id); if(el) el.textContent = txt; };
+  set("lblName", t.lblName); set("lblPhone", t.lblPhone); set("ofPhoneHint", t.phoneHint);
+  set("lblEmail", t.lblEmail); set("lblCountry", t.lblCountry); set("ofCountryHint", t.ofCountryHint);
+  set("lblEmirate", t.lblEmirate); set("lblWilayat", t.lblWilayat); set("lblDeliveryMethod", t.lblDeliveryMethod);
+  set("lblDeliveryDoor", t.lblDeliveryDoor); set("lblDeliveryNool", t.lblDeliveryNool);
+  const wo = document.getElementById("ofWilayatOther"); if(wo) wo.placeholder = t.wilayatOtherPlaceholder;
+  set("lblCity", t.lblCity); set("lblAddress", t.lblAddress); set("lblNotes", t.lblNotes);
+  set("ofCodNote", t.codNote); set("lblRecentConsent", t.lblRecentConsent);
+  const w = document.getElementById("ofWarranty");
+  if(w){
+    w.textContent = "";
+    const h = document.createElement("b"); h.textContent = t.warrantyTitle;
+    const p1 = document.createElement("p"); p1.textContent = t.warranty;
+    const p2 = document.createElement("p"); p2.className = "of-disclaimer"; p2.textContent = t.disclaimer;
+    w.appendChild(h); w.appendChild(p1); w.appendChild(p2);
+  }
+  set("orderModalTitle", t.orderModalTitle);
+  set("orderSubmitBtn", t.orderSubmitBtn); set("orderFormNote", t.orderFormNote);
 
   populateOrderCountrySelect();
   populateEmirateSelect();
   populateWilayatSelect();
   updateAddressBlocksVisibility();
-  renderOrderPaymentSection();
-  renderBankDetailsBlock();
   renderShippingSummary();
 
   document.getElementById("ofEmirate").onchange = renderShippingSummary;
@@ -2547,45 +2463,66 @@ function buildOrderPayload(){
   const freeShip = hasFreeShipping(offerStatus);
   const shippingFee = currentShippingFee();
   const shippingCharged = freeShip ? 0 : shippingFee;
-  const preTabbyTotal = subtotal + shippingCharged;
-  const tabbyFee = tabbyFeeFor(preTabbyTotal);
-  const grandTotal = preTabbyTotal + tabbyFee;
+  const grandTotal = subtotal + shippingCharged;
 
   const isAe = country === "AE";
-  let emirateOrWilayat = "", deliveryMethod = "";
+  const deliveryCode = currentDeliveryCode();
+  let emirateOrWilayat = "", deliveryMethod = t.lblDeliveryDoor;
   if(isAe){
     emirateOrWilayat = document.getElementById("ofEmirate").value;
   } else {
     const wSel = document.getElementById("ofWilayat").value;
     emirateOrWilayat = wSel === "__other__" ? document.getElementById("ofWilayatOther").value.trim() : wSel;
-    const doorRadio = document.querySelector('input[name="ofOmDelivery"]:checked');
-    deliveryMethod = (doorRadio ? doorRadio.value : "door") === "nool" ? t.lblDeliveryNool : t.lblDeliveryDoor;
+    deliveryMethod = deliveryCode === "nool" ? t.lblDeliveryNool : t.lblDeliveryDoor;
   }
 
   return {
     dateISO: new Date().toISOString(),
     lang,
     name: document.getElementById("ofName").value.trim(),
-    phone: document.getElementById("ofPhone").value.trim(),
+    phone: normalizePhoneE164(document.getElementById("ofPhone").value, country),
     email: document.getElementById("ofEmail").value.trim(),
     country: lang==="ar" ? COUNTRIES[country].labelAr : COUNTRIES[country].labelEn,
     emirateOrWilayat,
+    city: document.getElementById("ofCity").value.trim(),
     deliveryMethod,
+    deliveryCode,
     address: document.getElementById("ofAddress").value.trim(),
     notes: document.getElementById("ofNotes").value.trim(),
+    recentConsent: !!document.getElementById("ofRecentConsent").checked,
     currency: cur,
-    paymentMethod: paymentLabel(t, paymentMethod),
+    paymentMethod: paymentLabel(t),
     subtotal,
     shippingFee: shippingCharged,
     shippingFree: freeShip,
-    tabbyFee,
     total: grandTotal,
     offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
     items: items.map(i => ({
-      perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: i.size, qty: i.qty,
+      perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: "50", qty: i.qty,
       unitPrice: i.unitPrice || 0, lineTotal: i.lineTotal
     }))
   };
+}
+
+// تحقق من كل الحقول الإلزامية. يرجّع null لو كله تمام، أو { el, msg } لأول حقل ناقص/خاطئ.
+function validateOrderForm(){
+  const t = I18N[lang];
+  const g = id => document.getElementById(id);
+  if(g("ofName").value.trim().length < 2) return { el: g("ofName"), msg: t.errRequired };
+  if(!normalizePhoneE164(g("ofPhone").value, country)) return { el: g("ofPhone"), msg: t.errPhone };
+  const email = g("ofEmail").value.trim();
+  if(!email) return { el: g("ofEmail"), msg: t.errRequired };
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return { el: g("ofEmail"), msg: t.errEmail };
+  if(country === "AE"){
+    if(!g("ofEmirate").value) return { el: g("ofEmirate"), msg: t.errRequired };
+  } else {
+    const wSel = g("ofWilayat");
+    if(!wSel.value) return { el: wSel, msg: t.errRequired };
+    if(wSel.value === "__other__" && !g("ofWilayatOther").value.trim()) return { el: g("ofWilayatOther"), msg: t.errWilayat };
+  }
+  if(g("ofCity").value.trim().length < 2) return { el: g("ofCity"), msg: t.errRequired };
+  if(g("ofAddress").value.trim().length < 5) return { el: g("ofAddress"), msg: t.errAddress };
+  return null;
 }
 
 const ORDER_MODAL_BODY_DEFAULT_HTML = document.getElementById("orderModalBody").innerHTML;
@@ -2622,15 +2559,16 @@ function wireOrderForm(){
 document.getElementById("orderForm").addEventListener("submit", function(e){
   e.preventDefault();
   const t = I18N[lang];
+  const errBox = document.getElementById("ofError");
 
-  if(country !== "AE"){
-    const wSel = document.getElementById("ofWilayat");
-    const wOther = document.getElementById("ofWilayatOther");
-    if(wSel.value === "__other__" && !wOther.value.trim()){
-      wOther.focus();
-      return;
-    }
+  const problem = validateOrderForm();
+  if(problem){
+    errBox.textContent = problem.msg;
+    errBox.style.display = "block";
+    problem.el.focus();
+    return;
   }
+  errBox.style.display = "none";
 
   const submitBtn = document.getElementById("orderSubmitBtn");
   submitBtn.disabled = true;
@@ -2644,25 +2582,15 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
   const waMsgLines = [
     lang==="ar" ? `طلب جديد` : `New order`,
     `${payload.name} — ${payload.phone}`,
-    `${payload.country} — ${payload.emirateOrWilayat}${payload.deliveryMethod ? " — " + payload.deliveryMethod : ""}`,
+    `${payload.country} — ${payload.emirateOrWilayat} — ${payload.city}${payload.deliveryMethod ? " — " + payload.deliveryMethod : ""}`,
     payload.address
   ];
   payload.items.forEach((i,idx)=>{
     waMsgLines.push(`${idx+1}. ${i.brand} - ${i.name} (${i.size}ml) x${i.qty}`);
   });
-  if(payload.tabbyFee > 0) waMsgLines.push(`${t.tabbyFeeLabel}: ${payload.tabbyFee} ${payload.currency}`);
   waMsgLines.push(`${t.shipGrandTotal}: ${payload.total} ${payload.currency}`);
   waMsgLines.push(`${t.orderMsgPayment}: ${payload.paymentMethod}`);
   const waFallbackHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsgLines.join("\n"))}`;
-
-  // لما الدفع تحويل بنكي، بعد نجاح الطلب نعرض زر جاهز يفتح واتساب برسالة معبّأة
-  // مسبقًا (اسم/هاتف/الإجمالي) عشان العميل يرفق صورة الإيصال ونعتمد الطلب — سواء
-  // إمارات أو عُمان، نفس الآلية بالضبط (الاعتماد يصير يدويًا عبر واتساب زي باقي المبيعات).
-  const bankReceiptMsg = lang === "ar"
-    ? `مرفق إيصال التحويل البنكي لطلبي من Evoque Perfume.\nالاسم: ${payload.name}\nالهاتف: ${payload.phone}\nالإجمالي: ${payload.total} ${payload.currency}`
-    : `Here's my bank transfer receipt for my Evoque Perfume order.\nName: ${payload.name}\nPhone: ${payload.phone}\nTotal: ${payload.total} ${payload.currency}`;
-  const bankReceiptHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(bankReceiptMsg)}`;
-  const isBankPayment = paymentMethod === "bank";
 
   function showSuccess(){
     document.getElementById("orderModalBody").innerHTML = `
@@ -2670,7 +2598,6 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
         <div class="oc-icon">🎉</div>
         <h4>${t.orderSuccessTitle}</h4>
         <p>${t.orderSuccessMsg}</p>
-        ${isBankPayment ? `<a class="order-wa-fallback" href="${bankReceiptHref}" target="_blank">${t.sendReceiptBtn}</a>` : ""}
       </div>`;
     document.querySelector(".order-modal-foot").style.display = "none";
     cart = {}; renderAll();
@@ -2692,10 +2619,9 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
     return;
   }
 
-  // نرسل عبر نموذج (Form) + iframe مخفي بدل fetch — هذي طريقة تصفّح حقيقية (Navigation)
-  // ما تخضع لقيود CORS إطلاقًا، وما توقفها إضافات حجب الإعلانات اللي ممكن توقف طلبات fetch/XHR.
-  // ما نقدر نقرأ رد السيرفر (لأنه Cross-Origin)، فنعتبر أي وصول لحدث "تحميل" الـ iframe = نجاح،
-  // ومعه مؤقّت احتياطي 6 ثواني لو ما انطلق حدث التحميل لأي سبب.
+  // نرسل عبر نموذج (Form) + iframe مخفي بدل fetch — طريقة تصفّح حقيقية (Navigation) ما تخضع
+  // لقيود CORS وما توقفها إضافات حجب الإعلانات. ما نقدر نقرأ رد السيرفر (Cross-Origin)، فنعتبر
+  // أي حدث "تحميل" للـ iframe = نجاح، ومعه مؤقّت احتياطي 6 ثواني.
   try {
     const form = document.getElementById("orderHiddenForm");
     const iframe = document.getElementById("orderHiddenFrame");
@@ -2713,7 +2639,7 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
     setTimeout(()=> finishSubmit(true), 6000);
     form.submit();
   } catch(err){
-    console.error("Evoque order form error:", err); // افتح أدوات المطور (F12) بالمتصفح وشوف تبويب Console لهذا السطر لو ظهرت رسالة خطأ
+    console.error("Evoque order form error:", err);
     showError();
   }
 });
@@ -2749,9 +2675,9 @@ const bsArrowLeft = document.getElementById("bsArrowLeft");
 if(bsArrowRight) bsArrowRight.onclick = ()=>{ const g = document.getElementById("grid"); if(g) g.scrollBy({left:260, behavior:"smooth"}); };
 if(bsArrowLeft) bsArrowLeft.onclick = ()=>{ const g = document.getElementById("grid"); if(g) g.scrollBy({left:-260, behavior:"smooth"}); };
 
-// زر إغلاق إشعار المبيعات المنبثق
+// زر إغلاق شريط "آخر الطلبات"
 const saleToastCloseBtn = document.getElementById("saleToastClose");
-if(saleToastCloseBtn) saleToastCloseBtn.onclick = ()=>{ const el = document.getElementById("saleToast"); if(el) el.classList.remove("show"); };
+if(saleToastCloseBtn) saleToastCloseBtn.onclick = dismissRecentToast;
 
 // نرجع السلة/الدولة/طريقة الدفع المحفوظة (لو الزائر انتقل من صفحة ثانية بنفس الجلسة) قبل أول رسم للصفحة
 restoreCartState();
@@ -2764,5 +2690,5 @@ setLang(savedLang === "en" ? "en" : "ar");
 if(!savedLang){ openLangModal(); }
 
 loadPerfumesFromSheet();
-loadSaleNotifications();
+loadRecentOrders();
 

@@ -196,7 +196,7 @@ function buildOrder_(d) {
 
   // رسوم التوصيل: تنقرأ من shipping-rates.json (مصدر واحد)، والتوصيل المجاني من 5 عطور
   var shipping = loadShipping_();
-  var method = clean_(d.deliveryMethod, 20);
+  var method = clean_(d.deliveryCode || d.deliveryMethod, 20);
   var fee = 0;
   if (shipping) {
     if (country === "AE") fee = method === "western" ? shipping.AE.western : shipping.AE.standard;
