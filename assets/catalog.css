@@ -727,3 +727,14 @@ html[lang="en"] .hero h2{ font-family:'Cormorant Garamond','Jost',serif; font-we
 .consent-bar button{ font-family:inherit; font-size:12.5px; border-radius:999px; padding:5px 16px; cursor:pointer; border:1px solid var(--wine); }
 .consent-yes{ background:var(--wine); color:#fff; }
 .consent-no{ background:transparent; color:var(--wine); }
+
+/* ===== تيزر تشكيلة «قلعة الحمراء» — ألوان التشكيلة تُستخدم هنا فقط ===== */
+.teaser{ max-width:760px; margin:18px auto 6px; padding:0 16px; }
+.teaser-inner{ position:relative; background:#F5EEE2; border:1px solid #A3472F; border-radius:var(--radius); padding:22px 20px 26px; text-align:center; overflow:hidden; }
+.teaser-tag{ display:inline-block; background:#A3472F; color:#fff; font-size:12px; font-weight:700; padding:3px 14px; border-radius:999px; letter-spacing:.3px; }
+.teaser h2{ margin:12px 0 6px; font-size:26px; color:#1D4E7A; }
+html[lang="ar"] .teaser h2{ font-family:'Aref Ruqaa','Tajawal',serif; font-weight:700; }
+.teaser p{ margin:0; color:#3E5A47; font-size:14.5px; font-weight:500; }
+.teaser-tiles{ display:flex; justify-content:center; gap:8px; margin-top:16px; }
+.teaser-tiles i{ width:22px; height:22px; border-radius:4px; background:#1D4E7A; }
+.teaser-tiles i:nth-child(2){ background:#A3472F; } .teaser-tiles i:nth-child(3){ background:#3E5A47; } .teaser-tiles i:nth-child(4){ background:#C98B86; }
