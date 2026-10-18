@@ -1044,39 +1044,34 @@
       (نفس منطق "الأكثر مبيعًا فعليًا") لكن تكلفتها معروضة لحالها تحت.
     </small>
 
-    <div class="ov-section-title">⚙️ إعدادات الحساب التلقائي (نسبة الخلط والكحول)</div>
+    <div class="ov-section-title">⚙️ إعدادات الحساب (مرة وحدة للكل)</div>
     <small class="hint" style="margin-top:0;">
-      النظام يحسب تكلفة عطر 50مل من نسبة الزيت: مثلاً 33% = 16.5 جرام زيت + 33.5 مل كحول في الزجاجة. غيّر النسبة متى ما بغيت.
-      سعر الكحول: اكتب كم دفعت وكم لتر (مثلاً 300 درهم لـ 20 لتر) والنظام يطلّع سعر المل. ولو سجّلت مشتريات كحول تحت، يعتمد عليها بدل هذا.
+      هذي القيم تنكتب مرة وحدة وتنطبق على كل العطور. زجاجة 50مل بنسبة زيت 33% = 16.5 جرام زيت + 33.5 مل كحول.
+      الكحول: اكتب كم دفعت وكم لتر (مثلاً 300 درهم لـ 20 لتر). الزجاجة والتغليف: سعر الحبة الوحدة. لو سجّلت مشتريات لهذي المواد تحت، النظام يعتمد على متوسط مشترياتك بدل الرقم المكتوب هنا.
     </small>
     <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
-      <div class="field" style="min-width:130px;"><label for="cs_oilPct">نسبة الزيت (%)</label><input type="number" id="cs_oilPct" min="1" max="100" step="0.1"></div>
-      <div class="field" style="min-width:130px;"><label for="cs_alcPrice">سعر الكحول (AED)</label><input type="number" id="cs_alcPrice" min="0" step="0.01"></div>
-      <div class="field" style="min-width:110px;"><label for="cs_alcLiters">لكم لتر</label><input type="number" id="cs_alcLiters" min="0" step="0.1"></div>
-      <label style="display:flex; align-items:center; gap:6px; padding-bottom:12px; cursor:pointer;"><input type="checkbox" id="cs_alcVat" style="width:auto; margin:0;"> أضف 5% ضريبة</label>
+      <div class="field" style="min-width:110px;"><label for="cs_oilPct">نسبة الزيت (%)</label><input type="number" id="cs_oilPct" min="1" max="100" step="0.1"></div>
+      <div class="field" style="min-width:110px;"><label for="cs_alcPrice">سعر الكحول (AED)</label><input type="number" id="cs_alcPrice" min="0" step="0.01"></div>
+      <div class="field" style="min-width:90px;"><label for="cs_alcLiters">لكم لتر</label><input type="number" id="cs_alcLiters" min="0" step="0.1"></div>
+      <label style="display:flex; align-items:center; gap:6px; padding-bottom:12px; cursor:pointer;"><input type="checkbox" id="cs_alcVat" style="width:auto; margin:0;"> +5% ضريبة</label>
+    </div>
+    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="min-width:130px;"><label for="cs_bottle">زجاجة 50مل (AED/حبة)</label><input type="number" id="cs_bottle" min="0" step="0.01"></div>
+      <div class="field" style="min-width:130px;"><label for="cs_pack">التغليف (AED/قطعة)</label><input type="number" id="cs_pack" min="0" step="0.01"></div>
+      <div class="field" style="min-width:130px;"><label for="cs_manuf">أجرة تصنيع (AED/زجاجة)</label><input type="number" id="cs_manuf" min="0" step="0.01"></div>
       <button type="button" id="cs_saveBtn">💾 احفظ الإعدادات</button>
     </div>
     <div class="status show info" id="cs_summary" style="margin-top:8px;"></div>
     <div class="status" id="cs_statusBox"></div>
 
-    <div class="ov-section-title" style="margin-top:22px;">🛢️ سعر زيت كل عطر</div>
+    <div class="ov-section-title" style="margin-top:22px;">🛢️ زيوت العطور وتكلفة كل عطر</div>
     <small class="hint" style="margin-top:0;">
-      اكتب سعر الزيت اللي دفعته (مثلاً سعر الـ100 جرام كامل، مو سعر الجرام) وكم جرام اشتريت — والنظام يحسب سعر الجرام وتكلفة الزجاجة لوحده.
-      الأسعار هذي تنحفظ في ملف المواد (materials.json) مو في بيانات العطور اللي يشوفها الزوار.
+      كل عطر في صف: اكتب <b>السعر اللي دفعته للزيت</b> (مثلاً سعر الـ100 جرام كامل، مو سعر الجرام) والجرامات، واضغط 💾 في نفس الصف. النظام يحسب سعر الجرام وتكلفة زجاجة 50مل كاملة. الأسعار تنحفظ في ملف المواد (materials.json) مو في بيانات العطور اللي يشوفها الزوار.
     </small>
-    <div class="field"><label for="oc_perfume">العطر</label>
-      <input type="text" id="oc_perfume" list="oc_dl" placeholder="ابحث باسم العطر أو البراند واختر من القائمة" autocomplete="off">
-      <datalist id="oc_dl"></datalist>
-    </div>
-    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
-      <div class="field" style="min-width:150px;"><label for="oc_price">السعر المدفوع (AED)</label><input type="number" id="oc_price" min="0" step="0.01"></div>
-      <div class="field" style="min-width:130px;"><label for="oc_grams">الكمية (جرام)</label><input type="number" id="oc_grams" min="1" step="1" value="100"></div>
-      <label style="display:flex; align-items:center; gap:6px; padding-bottom:12px; cursor:pointer;"><input type="checkbox" id="oc_vat" checked style="width:auto; margin:0;"> أضف 5% ضريبة</label>
-      <button type="button" id="oc_saveBtn">💾 احفظ سعر الزيت</button>
-    </div>
-    <div class="status show info" id="oc_preview" style="margin-top:8px;">اختر عطر واكتب السعر عشان تشوف الحساب.</div>
+    <input type="text" id="oc_search" placeholder="ابحث باسم البراند أو العطر...">
     <div class="status" id="oc_statusBox"></div>
-    <div class="static-list" id="oc_list" style="margin-top:10px;"></div>
+    <div class="static-list" id="oc_rows" style="margin-top:10px; max-height:640px;"></div>
+    <small class="hint" id="oc_more" style="margin-top:6px;"></small>
 
     <div class="ov-section-title" style="margin-top:26px;">📦 مشتريات المواد الخام والمخزون</div>
     <small class="hint" style="margin-top:0;">
@@ -1184,10 +1179,12 @@
     <div id="cost_byPerfumeEmpty" class="ov-empty-note" style="display:none;">ما فيه بيانات كافية بعد.</div>
     <div class="static-list" id="cost_byPerfumeList"></div>
 
+    <div style="display:none;">
     <div class="ov-section-title" style="margin-top:22px;">إدارة تكلفة كل عطور الكتالوج</div>
     <small class="hint" style="margin-top:0;">ابحث عن عطر عشان تشوف تكلفته الحالية المحسوبة، واضغط "تعديل" عشان تعبّي أو تغيّر أرقامه.</small>
     <input type="text" id="cost_manageSearch" placeholder="ابحث باسم البراند أو العطر...">
     <div class="static-list" id="cost_manageList" style="max-height:420px;"></div>
+    </div>
   </div>
 
   <div class="panel" id="bulkPricePanel" style="display:none;">
@@ -1317,8 +1314,9 @@
       <small class="hint" style="margin-top:0;">0 = نفدت الكمية (الموقع يعرض "نفدت الكمية" تلقائيًا). أي رقم أكبر من صفر = متوفر.</small>
     </fieldset>
 
-    <fieldset>
-      <legend>🧮 تكلفة التصنيع (اختياري — لحساب الأرباح تلقائيًا)</legend>
+    <small class="hint" style="margin-top:0;">🧮 التكلفة (الزيت والكحول والزجاجة) تنضبط كلها من تبويب "🧮 التكلفة والأرباح" — مو من هنا.</small>
+    <fieldset style="display:none;">
+      <legend>🧮 تكلفة التصنيع (قديم — مخفي)</legend>
       <small class="hint" style="margin-top:0;">
         عبّي هالحقول مرة وحدة لكل عطر، والنظام يحسب تكلفة القطعة الواحدة تلقائيًا، ولما توصل طلبية فعلية من الموقع
         يحسب رأس المال والربح الصافي وحده من تبويب "🧮 التكلفة والأرباح" — بدون أي إدخال يدوي إضافي منك.
@@ -4832,7 +4830,7 @@ const COST_FIELD_KEYS = ["costOilPerMl","costAlcoholPerMl","costBottle50","costB
 // 18 أكتوبر 2026: الحساب صار على نسبة الخلط. زجاجة 50مل بنسبة زيت 33% = 16.5 جرام زيت (1 جرام = 1 مل تقريبًا)
 // + 33.5 مل كحول. سعر الزيت لكل عطر يجي من materials.json (oilCosts)، وسعر الكحول من مشترياتك المسجّلة
 // أو من السعر الافتراضي بالإعدادات. الحقول القديمة (تكلفة الزيت/الكحول لكل مل بنموذج العطر) تبقى كخيار يدوي احتياطي.
-const COST_DEFAULTS = { oilPct: 33, alcPrice: 300, alcLiters: 20, alcVat: false, vatPct: 5 };
+const COST_DEFAULTS = { oilPct: 33, alcPrice: 300, alcLiters: 20, alcVat: false, vatPct: 5, bottle: 0, pack: 0, manuf: 0 };
 const OIL_G_PER_ML = 1;
 function costSettings(){
   const st = (materialsData && materialsData.settings) || {};
@@ -4846,6 +4844,13 @@ function alcoholPerMlInfo(){
   const base = ml > 0 ? (Number(st.alcPrice) || 0) / ml : 0;
   return { value: base * (st.alcVat ? 1 + (Number(st.vatPct) || 0) / 100 : 1), source: "default" };
 }
+// زجاجة + تغليف + تصنيع: من متوسط المشتريات المسجّلة لو موجود، وإلا من الإعدادات
+function extraUnitCosts(ml){
+  const st = costSettings();
+  const bottle = ml === 50 ? (materialWeightedAvgCost("bottle50") || Number(st.bottle) || 0) : (materialWeightedAvgCost("bottle10") || 0);
+  const pack = materialWeightedAvgCost("packaging") || Number(st.pack) || 0;
+  return { bottle, pack, manuf: Number(st.manuf) || 0 };
+}
 function oilEntryFor(id){
   return (id && materialsData && materialsData.oilCosts && materialsData.oilCosts[id]) || null;
 }
@@ -4856,46 +4861,33 @@ function oilPerGramOfEntry(e){
   const vat = e.vat ? 1 + (Number(costSettings().vatPct) || 0) / 100 : 1;
   return (Number(e.price) || 0) * vat / g;
 }
-// يقسم زجاجة بحجم ml إلى جرامات زيت ومل كحول حسب النسبة
 function mixSplit(ml){
   const pct = Math.min(100, Math.max(0, Number(costSettings().oilPct) || 0)) / 100;
   const oilMl = ml * pct;
   return { oilMl, oilG: oilMl * OIL_G_PER_ML, alcMl: ml - oilMl };
 }
+// تفصيل التكلفة لزجاجة بحجم ml لو سعر الجرام معروف
+function costBreakdown(ml, oilPerG){
+  const m = mixSplit(ml), ex = extraUnitCosts(ml), alc = alcoholPerMlInfo().value;
+  const oil = m.oilG * oilPerG, alcohol = m.alcMl * alc;
+  return { oil, alcohol, bottle: ex.bottle, pack: ex.pack, manuf: ex.manuf, total: oil + alcohol + ex.bottle + ex.pack + ex.manuf, m };
+}
 
 function perfumeUnitCost(p, size){
   if(!p) return 0;
   const ml = Number(size) === 50 ? 50 : 10;
-  const bottle = Number(ml === 50 ? p.costBottle50 : p.costBottle10) || 0;
-  const packaging = Number(ml === 50 ? p.costPackaging50 : p.costPackaging10) || 0;
-  const manuf = Number(ml === 50 ? p.costManufacturing50 : p.costManufacturing10) || 0;
   const entry = oilEntryFor(p.id);
-  const legacyOil = Number(p.costOilPerMl) || 0;
-  if(!entry && !legacyOil && !bottle && !packaging && !manuf) return 0; // ما فيها بيانات تكلفة = تبقى "ناقصة"
-  const mix = mixSplit(ml);
-  const oilPerG = entry ? oilPerGramOfEntry(entry) : legacyOil; // القديم كان لكل مل (= جرام)
-  const alcPerMl = Number(p.costAlcoholPerMl) > 0 ? Number(p.costAlcoholPerMl) : alcoholPerMlInfo().value;
-  return mix.oilG * oilPerG + mix.alcMl * alcPerMl + bottle + packaging + manuf;
+  const legacyOil = Number(p.costOilPerMl) || 0; // قديم: كان لكل مل (= جرام)
+  if(!entry && !legacyOil) return 0; // ما فيها سعر زيت = تبقى "ناقصة" بالأرباح
+  return costBreakdown(ml, entry ? oilPerGramOfEntry(entry) : legacyOil).total;
 }
 
 function perfumeHasCostData(p){
   if(!p) return false;
-  if(oilEntryFor(p.id)) return true;
-  return COST_FIELD_KEYS.some(k => Number(p[k]) > 0);
+  return !!oilEntryFor(p.id) || Number(p.costOilPerMl) > 0;
 }
 
-function updateFormCostPreview(){
-  const val = id => parseFloat(document.getElementById(id).value) || 0;
-  const pseudo = {
-    id: (typeof editingOriginal !== "undefined" && editingOriginal) ? editingOriginal.id : null,
-    costOilPerMl: val("f_costOilPerMl"), costAlcoholPerMl: val("f_costAlcoholPerMl"),
-    costBottle50: val("f_costBottle50"), costBottle10: val("f_costBottle10"),
-    costPackaging50: val("f_costPackaging50"), costPackaging10: val("f_costPackaging10"),
-    costManufacturing50: val("f_costManufacturing50"), costManufacturing10: val("f_costManufacturing10")
-  };
-  const box = document.getElementById("f_costPreview");
-  if(box) box.textContent = `تكلفة الوحدة المقدّرة: 50مل = ${perfumeUnitCost(pseudo, 50).toFixed(2)} AED (سعر الزيت يجي من تبويب "🧮 التكلفة والأرباح" → "🛢️ سعر زيت كل عطر")`;
-}
+function updateFormCostPreview(){ /* الحقول القديمة مخفية — التكلفة تنضبط من تبويب التكلفة */ }
 COST_FIELD_KEYS.forEach(k => {
   const el = document.getElementById("f_" + k);
   if(el) el.addEventListener("input", updateFormCostPreview);
@@ -5221,148 +5213,146 @@ document.getElementById("mat_addBtn").addEventListener("click", async () => {
 });
 
 // ===================================================================
-// ⚙️ إعدادات الحساب التلقائي + 🛢️ سعر زيت كل عطر (18 أكتوبر 2026)
-// تنحفظ بـmaterials.json: settings (نسبة الزيت/الكحول) و oilCosts[perfumeId] = {price, grams, vat}
+// ⚙️ إعدادات الحساب + 🛢️ جدول زيوت العطور (18 أكتوبر 2026) — مكان واحد لكل شي
+// materials.json: settings (نسبة الزيت/الكحول/الزجاجة/التغليف/التصنيع) و oilCosts[perfumeId] = {price, grams, vat}
 // ===================================================================
 function csBox(id, cls, msg){ const b = document.getElementById(id); b.className = "status show " + cls; b.textContent = msg; }
-function ocPerfumeLabel(p){ return `${p.brand} — ${p.name}`; }
-function ocSelectedPerfume(){
-  const v = document.getElementById("oc_perfume").value.trim();
-  if(!v) return null;
-  return perfumes.find(p => ocPerfumeLabel(p) === v) || null;
-}
-function ocEntryFromForm(){
-  return { price: parseFloat(document.getElementById("oc_price").value) || 0,
-           grams: parseFloat(document.getElementById("oc_grams").value) || 0,
-           vat: document.getElementById("oc_vat").checked };
-}
+function fmt2(n){ return (Number(n) || 0).toFixed(2); }
+function ocLabel(p){ return `${p.brand} — ${p.name}`; }
+function escHtml(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
 function renderCostSettingsPreview(){
   const st = costSettings();
-  const pct = parseFloat(document.getElementById("cs_oilPct").value);
-  const mix = (function(){ const x = Math.min(100, Math.max(0, isNaN(pct) ? Number(st.oilPct) : pct)) / 100; return { oilG: 50 * x * OIL_G_PER_ML, alc: 50 - 50 * x }; })();
+  const pctIn = parseFloat(document.getElementById("cs_oilPct").value);
+  const x = Math.min(100, Math.max(0, isNaN(pctIn) ? Number(st.oilPct) : pctIn)) / 100;
   const alc = alcoholPerMlInfo();
   const price = parseFloat(document.getElementById("cs_alcPrice").value) || 0;
   const liters = parseFloat(document.getElementById("cs_alcLiters").value) || 0;
   const vat = document.getElementById("cs_alcVat").checked;
   const formPerMl = liters > 0 ? price / (liters * 1000) * (vat ? 1 + (Number(st.vatPct) || 0) / 100 : 1) : 0;
-  const src = alc.source === "purchases"
-    ? `سعر مل الكحول المعتمد الحين: ${alc.value.toFixed(4)} AED (من متوسط مشترياتك المسجّلة تحت). السعر الافتراضي المكتوب فوق: ${formPerMl.toFixed(4)} AED/مل.`
-    : `سعر مل الكحول: ${formPerMl.toFixed(4)} AED.`;
-  document.getElementById("cs_summary").textContent = `زجاجة 50مل = ${mix.oilG.toFixed(1)} جرام زيت + ${mix.alc.toFixed(1)} مل كحول. ${src}`;
+  let t = `زجاجة 50مل = ${(50 * x).toFixed(1)} جرام زيت + ${(50 - 50 * x).toFixed(1)} مل كحول. سعر مل الكحول: ${formPerMl.toFixed(4)} AED.`;
+  if(alc.source === "purchases") t += ` (الحين معتمد متوسط مشترياتك المسجّلة: ${alc.value.toFixed(4)} AED/مل)`;
+  document.getElementById("cs_summary").textContent = t;
 }
-function renderOilPreview(){
-  const box = document.getElementById("oc_preview");
-  const e = ocEntryFromForm();
-  const p = ocSelectedPerfume();
-  if(!(e.price > 0) || !(e.grams > 0)){ box.textContent = "اكتب السعر والكمية عشان تشوف الحساب."; return; }
-  const perG = oilPerGramOfEntry(e);
-  const m = mixSplit(50);
-  const alc = alcoholPerMlInfo().value;
-  const oilCost = m.oilG * perG, alcCost = m.alcMl * alc;
-  let t = `سعر الجرام${e.vat ? " (مع الضريبة)" : ""}: ${perG.toFixed(3)} AED — زجاجة 50مل: ${m.oilG.toFixed(1)} جرام زيت = ${oilCost.toFixed(2)} + ${m.alcMl.toFixed(1)} مل كحول = ${alcCost.toFixed(2)} → ${(oilCost + alcCost).toFixed(2)} AED (بدون الزجاجة والتغليف والتصنيع)`;
-  if(p){
-    const full = perfumeUnitCost(Object.assign({}, p, {}), 50); // التكلفة الحالية المحفوظة
-    if(full > 0) t += ` — التكلفة الكاملة المحفوظة حالياً لهذا العطر: ${full.toFixed(2)} AED`;
-  }
-  box.textContent = t;
+
+function ocRowCostText(price, grams, vat){
+  if(!(price > 0) || !(grams > 0)) return "";
+  const perG = oilPerGramOfEntry({ price, grams, vat });
+  const c = costBreakdown(50, perG);
+  return `الجرام ${perG.toFixed(3)} — زيت ${fmt2(c.oil)} + كحول ${fmt2(c.alcohol)} + زجاجة ${fmt2(c.bottle)} + تغليف ${fmt2(c.pack)} + تصنيع ${fmt2(c.manuf)} = ${fmt2(c.total)} AED`;
 }
+
+function renderOilTable(){
+  const wrap = document.getElementById("oc_rows");
+  if(!wrap) return;
+  if(wrap.contains(document.activeElement)) return; // لا نمسح اللي تكتبه الحين
+  const q = (document.getElementById("oc_search").value || "").trim().toLowerCase();
+  const all = sortPerfumes(perfumes);
+  const withData = all.filter(p => perfumeHasCostData(p));
+  const without = all.filter(p => !perfumeHasCostData(p));
+  let shown;
+  if(q) shown = all.filter(p => (p.brand + " " + p.name).toLowerCase().includes(q)).slice(0, 40);
+  else shown = withData.concat(without.slice(0, 12));
+  document.getElementById("oc_more").textContent = q
+    ? (shown.length ? `${shown.length} نتيجة` : "ما فيه نتائج.")
+    : `معروض ${shown.length} من ${all.length} عطر — اكتب في البحث عشان تلقى أي عطر. (⚠️ = ما انكتب له سعر زيت بعد)`;
+  wrap.innerHTML = shown.map(p => {
+    const e = oilEntryFor(p.id);
+    const legacy = !e && Number(p.costOilPerMl) > 0;
+    const price = e ? e.price : "", grams = e ? e.grams : 100, vat = e ? !!e.vat : true;
+    const cost = e ? ocRowCostText(e.price, e.grams, e.vat) : (legacy ? `سعر قديم: ${p.costOilPerMl} AED لكل جرام (من النموذج القديم) — اكتب السعر الجديد يحل محله` : "");
+    const total = perfumeHasCostData(p) ? `<span class="sale-row-amount">${fmt2(perfumeUnitCost(p, 50))} AED</span>` : "";
+    return `<div class="sale-row oc-row" data-id="${escHtml(p.id)}">
+      <div class="sale-row-top"><span class="sale-row-name">${perfumeHasCostData(p) ? "" : "⚠️ "}${escHtml(ocLabel(p))}</span>${total}</div>
+      <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:8px; margin-top:6px;">
+        <div class="field" style="flex:1; min-width:110px; margin:0;"><label>السعر المدفوع (AED)</label><input type="number" class="oc-price" min="0" step="0.01" value="${price}"></div>
+        <div class="field" style="flex:1; min-width:90px; margin:0;"><label>جرام</label><input type="number" class="oc-grams" min="1" step="1" value="${grams}"></div>
+        <label style="display:flex; align-items:center; gap:5px; padding-bottom:10px; cursor:pointer; font-size:13px;"><input type="checkbox" class="oc-vat" style="width:auto; margin:0;" ${vat ? "checked" : ""}> +5%</label>
+        <button type="button" class="oc-save-btn" style="padding:8px 14px;">💾</button>
+        ${e ? `<button type="button" class="secondary oc-del-btn" style="padding:8px 12px;">🗑️</button>` : ""}
+      </div>
+      <div class="sale-row-meta oc-calc" style="margin-top:4px;">${escHtml(cost)}</div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".oc-row").forEach(row => {
+    const calc = () => {
+      const pr = parseFloat(row.querySelector(".oc-price").value) || 0, gr = parseFloat(row.querySelector(".oc-grams").value) || 0;
+      row.querySelector(".oc-calc").textContent = ocRowCostText(pr, gr, row.querySelector(".oc-vat").checked);
+    };
+    row.querySelectorAll("input").forEach(i => i.addEventListener("input", calc));
+    row.querySelector(".oc-save-btn").addEventListener("click", () => ocSaveRow(row));
+    const d = row.querySelector(".oc-del-btn");
+    if(d) d.addEventListener("click", () => ocDeleteRow(row));
+  });
+}
+
+async function ocSaveRow(row){
+  const token = getToken();
+  if(!token){ csBox("oc_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
+  const id = row.dataset.id, p = perfumes.find(x => x.id === id);
+  const price = parseFloat(row.querySelector(".oc-price").value) || 0;
+  const grams = parseFloat(row.querySelector(".oc-grams").value) || 0;
+  const vat = row.querySelector(".oc-vat").checked;
+  if(!(price > 0)){ csBox("oc_statusBox", "err", "اكتب السعر المدفوع للزيت."); return; }
+  if(!(grams > 0)){ csBox("oc_statusBox", "err", "اكتب الجرامات."); return; }
+  const btn = row.querySelector(".oc-save-btn"); btn.disabled = true;
+  try{
+    csBox("oc_statusBox", "info", "جارِ الحفظ...");
+    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, oilCosts: Object.assign({}, obj.oilCosts || {}, { [id]: { price, grams, vat, updatedAt: todayStr() } }) }), `Set oil price: ${id}`);
+    csBox("oc_statusBox", "ok", `تم حفظ زيت ${p ? ocLabel(p) : id}.`);
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    renderCostPanel();
+  }catch(err){ csBox("oc_statusBox", "err", "صار خطأ: " + err.message); }
+  finally{ btn.disabled = false; }
+}
+async function ocDeleteRow(row){
+  const id = row.dataset.id;
+  if(!confirm("تأكيد حذف سعر الزيت لهذا العطر؟")) return;
+  const token = getToken();
+  if(!token){ csBox("oc_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
+  try{
+    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => { const oc = Object.assign({}, obj.oilCosts || {}); delete oc[id]; return { ...obj, oilCosts: oc }; }, "Delete perfume oil price");
+    csBox("oc_statusBox", "ok", "انحذف.");
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    renderCostPanel();
+  }catch(err){ csBox("oc_statusBox", "err", "صار خطأ: " + err.message); }
+}
+
 function renderCostSettingsAndOil(){
   if(!document.getElementById("cs_oilPct")) return;
   const st = costSettings();
   const ae = document.activeElement;
-  if(!ae || !["cs_oilPct","cs_alcPrice","cs_alcLiters"].includes(ae.id)){
+  if(!ae || !String(ae.id).startsWith("cs_")){
     document.getElementById("cs_oilPct").value = st.oilPct;
     document.getElementById("cs_alcPrice").value = st.alcPrice;
     document.getElementById("cs_alcLiters").value = st.alcLiters;
     document.getElementById("cs_alcVat").checked = !!st.alcVat;
+    document.getElementById("cs_bottle").value = st.bottle || "";
+    document.getElementById("cs_pack").value = st.pack || "";
+    document.getElementById("cs_manuf").value = st.manuf || "";
   }
   renderCostSettingsPreview();
-  const dl = document.getElementById("oc_dl");
-  if(dl && !dl.children.length){
-    dl.innerHTML = sortPerfumes(perfumes).map(p => `<option value="${String(ocPerfumeLabel(p)).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}"></option>`).join("");
-  }
-  const list = document.getElementById("oc_list");
-  const costs = (materialsData && materialsData.oilCosts) || {};
-  const ids = Object.keys(costs);
-  if(!ids.length){ list.innerHTML = `<div class="ov-empty-note">ما سجّلت سعر زيت لأي عطر بعد.</div>`; }
-  else {
-    list.innerHTML = ids.map(id => {
-      const p = perfumes.find(x => x.id === id);
-      const e = costs[id];
-      const label = p ? ocPerfumeLabel(p) : id;
-      const m = mixSplit(50), perG = oilPerGramOfEntry(e);
-      return `<div class="sale-row" data-id="${String(id).replace(/"/g,"&quot;")}">
-        <div class="sale-row-top"><span class="sale-row-name">${String(label).replace(/</g,"&lt;")}</span><span class="sale-row-amount">${fmtNum(e.price)} AED / ${fmtNum(e.grams)} جم</span></div>
-        <div class="sale-row-meta">سعر الجرام ${perG.toFixed(3)} AED${e.vat ? " (مع ضريبة 5%)" : ""} — الزيت في زجاجة 50مل: ${(m.oilG * perG).toFixed(2)} AED
-          <button type="button" class="secondary oc-edit-btn" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">✏️ تعديل</button>
-          <button type="button" class="secondary oc-del-btn" style="padding:2px 10px; font-size:11.5px;">🗑️ حذف</button></div>
-      </div>`;
-    }).join("");
-    list.querySelectorAll(".oc-edit-btn").forEach(b => b.addEventListener("click", () => {
-      const id = b.closest(".sale-row").dataset.id, e = costs[id], p = perfumes.find(x => x.id === id);
-      document.getElementById("oc_perfume").value = p ? ocPerfumeLabel(p) : id;
-      document.getElementById("oc_price").value = e.price; document.getElementById("oc_grams").value = e.grams;
-      document.getElementById("oc_vat").checked = !!e.vat; renderOilPreview();
-      document.getElementById("oc_perfume").scrollIntoView({ behavior: "smooth", block: "center" });
-    }));
-    list.querySelectorAll(".oc-del-btn").forEach(b => b.addEventListener("click", async () => {
-      const id = b.closest(".sale-row").dataset.id;
-      if(!confirm("تأكيد حذف سعر الزيت لهذا العطر؟")) return;
-      const token = getToken();
-      if(!token){ csBox("oc_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
-      try{
-        materialsData = await updateMaterialsJsonWithRetry(token, (obj) => {
-          const oc = Object.assign({}, obj.oilCosts || {}); delete oc[id];
-          return { ...obj, oilCosts: oc };
-        }, "Delete perfume oil price");
-        csBox("oc_statusBox", "ok", "انحذف."); renderCostPanel();
-      }catch(err){ csBox("oc_statusBox", "err", "صار خطأ: " + err.message); }
-    }));
-  }
-  renderOilPreview();
+  renderOilTable();
 }
-["cs_oilPct","cs_alcPrice","cs_alcLiters","cs_alcVat"].forEach(id => document.getElementById(id).addEventListener("input", renderCostSettingsPreview));
-["oc_perfume","oc_price","oc_grams","oc_vat"].forEach(id => document.getElementById(id).addEventListener("input", renderOilPreview));
-document.getElementById("oc_perfume").addEventListener("change", () => {
-  const p = ocSelectedPerfume(); const e = p && oilEntryFor(p.id);
-  if(e){ document.getElementById("oc_price").value = e.price; document.getElementById("oc_grams").value = e.grams; document.getElementById("oc_vat").checked = !!e.vat; }
-  renderOilPreview();
-});
+["cs_oilPct","cs_alcPrice","cs_alcLiters","cs_alcVat","cs_bottle","cs_pack","cs_manuf"].forEach(id => document.getElementById(id).addEventListener("input", renderCostSettingsPreview));
+document.getElementById("oc_search").addEventListener("input", renderOilTable);
 document.getElementById("cs_saveBtn").addEventListener("click", async () => {
   const token = getToken();
   if(!token){ csBox("cs_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
-  const oilPct = parseFloat(document.getElementById("cs_oilPct").value);
-  const alcPrice = parseFloat(document.getElementById("cs_alcPrice").value);
-  const alcLiters = parseFloat(document.getElementById("cs_alcLiters").value);
+  const num = id => parseFloat(document.getElementById(id).value);
+  const oilPct = num("cs_oilPct"), alcPrice = num("cs_alcPrice"), alcLiters = num("cs_alcLiters");
   if(!(oilPct > 0 && oilPct <= 100)){ csBox("cs_statusBox", "err", "نسبة الزيت لازم تكون بين 1 و 100."); return; }
   if(!(alcPrice >= 0) || !(alcLiters > 0)){ csBox("cs_statusBox", "err", "اكتب سعر الكحول وعدد اللترات."); return; }
-  const settings = { oilPct, alcPrice, alcLiters, alcVat: document.getElementById("cs_alcVat").checked, vatPct: 5 };
+  const settings = { oilPct, alcPrice, alcLiters, alcVat: document.getElementById("cs_alcVat").checked, vatPct: 5,
+    bottle: num("cs_bottle") || 0, pack: num("cs_pack") || 0, manuf: num("cs_manuf") || 0 };
   const btn = document.getElementById("cs_saveBtn"); btn.disabled = true;
   try{
     csBox("cs_statusBox", "info", "جارِ الحفظ...");
-    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, settings }), "Update cost settings (oil %, alcohol price)");
+    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, settings }), "Update cost settings");
     csBox("cs_statusBox", "ok", "تم حفظ الإعدادات.");
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
     renderCostPanel();
   }catch(err){ csBox("cs_statusBox", "err", "صار خطأ: " + err.message); }
-  finally{ btn.disabled = false; }
-});
-document.getElementById("oc_saveBtn").addEventListener("click", async () => {
-  const token = getToken();
-  if(!token){ csBox("oc_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
-  const p = ocSelectedPerfume();
-  if(!p){ csBox("oc_statusBox", "err", "اختر العطر من القائمة (اكتب جزء من اسمه واضغط على الاقتراح)."); return; }
-  const e = ocEntryFromForm();
-  if(!(e.price > 0)){ csBox("oc_statusBox", "err", "اكتب السعر المدفوع."); return; }
-  if(!(e.grams > 0)){ csBox("oc_statusBox", "err", "اكتب الكمية بالجرام."); return; }
-  const btn = document.getElementById("oc_saveBtn"); btn.disabled = true;
-  try{
-    csBox("oc_statusBox", "info", "جارِ الحفظ...");
-    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, oilCosts: Object.assign({}, obj.oilCosts || {}, { [p.id]: { price: e.price, grams: e.grams, vat: e.vat, updatedAt: todayStr() } }) }), `Set oil price: ${p.id}`);
-    csBox("oc_statusBox", "ok", `تم حفظ سعر زيت ${ocPerfumeLabel(p)}.`);
-    document.getElementById("oc_perfume").value = ""; document.getElementById("oc_price").value = "";
-    document.getElementById("oc_grams").value = 100; document.getElementById("oc_vat").checked = true;
-    renderCostPanel();
-  }catch(err){ csBox("oc_statusBox", "err", "صار خطأ: " + err.message); }
   finally{ btn.disabled = false; }
 });
 
