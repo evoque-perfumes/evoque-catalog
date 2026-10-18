@@ -184,7 +184,7 @@
     <button type="button" id="modeCostBtn">🧮 التكلفة والأرباح</button>
     <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
-    <button type="button" id="modeBankBtn">🏦 بيانات البنك</button>
+    <button type="button" id="modeBankBtn" style="display:none;">🏦 بيانات البنك</button>
     <button type="button" id="modeShippingBtn">🚚 رسوم التوصيل</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
     <button type="button" id="modeDistBtn">🎁 توزيعات المناسبات</button>
@@ -246,7 +246,7 @@
       <div class="kpi-card"><div class="kpi-label">متوسط سعر 50مل (AED)</div><div class="kpi-value" id="ov_avgPrice">—</div></div>
       <div class="kpi-card"><div class="kpi-label">قيمة المخزون التقديرية (AED)</div><div class="kpi-value" id="ov_stockValue">—</div><div class="kpi-sub">حسب السعر × الكمية المتوفرة</div></div>
       <div class="kpi-card"><div class="kpi-label">إجمالي القطع بالمخزون الحين</div><div class="kpi-value" id="ov_stockUnits">—</div><div class="kpi-sub">مجموع كميات كل الأحجام</div></div>
-      <div class="kpi-card"><div class="kpi-label">إجمالي قطع 10مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits10">—</div></div>
+      <div class="kpi-card" style="display:none;"><div class="kpi-label">إجمالي قطع 10مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits10">—</div></div>
       <div class="kpi-card"><div class="kpi-label">إجمالي قطع 50مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits50">—</div></div>
       <div class="kpi-card"><div class="kpi-label">متوسط التقييم</div><div class="kpi-value" id="ov_rating">—</div><div class="kpi-sub" id="ov_ratingSub"></div></div>
     </div>
@@ -278,6 +278,7 @@
       <div id="ov_countryStats" class="static-list"></div>
     </div>
 
+    <div style="display:none;" aria-hidden="true">
     <div class="ov-section-title">طلبات نموذج الموقع (Google Sheet) — اختياري</div>
     <div class="kpi-grid" id="ov_siteGrid">
       <div class="kpi-card"><div class="kpi-label">عدد الطلبات</div><div class="kpi-value" id="ov_siteCount">—</div></div>
@@ -304,6 +305,7 @@
         <div class="status" id="ov_appsStatus"></div>
       </div>
     </details>
+    </div>
   </div>
 
   <div class="panel" id="photoSubModeToggle" style="display:none;">
@@ -578,7 +580,7 @@
     <div class="stats" id="sl_statusStats">
       <div class="stat">🆕 طلبات جديدة<b id="sl_stat_new">—</b></div>
       <div class="stat">🔧 قيد التجهيز<b id="sl_stat_prep">—</b></div>
-      <div class="stat">🛢️ يحتاج زيت<b id="sl_stat_needsOil">—</b></div>
+      <div class="stat" style="display:none;">🛢️ يحتاج زيت<b id="sl_stat_needsOil">—</b></div>
       <div class="stat">🚚 تم الشحن<b id="sl_stat_shipped">—</b></div>
       <div class="stat">📦 تم الاستلام<b id="sl_stat_received">—</b></div>
       <div class="stat">💰 باقي استلام المبلغ<b id="sl_stat_unpaid">—</b></div>
@@ -590,7 +592,6 @@
         <option value="all">كل الحالات</option>
         <option value="">🆕 جديد</option>
         <option value="prep">🔧 قيد التجهيز</option>
-        <option value="needs_oil">🛢️ يحتاج زيت</option>
         <option value="shipped">🚚 تم الشحن</option>
         <option value="received">📦 تم الاستلام</option>
       </select>
@@ -674,7 +675,7 @@
       </div>
     </fieldset>
 
-    <fieldset style="margin-top:16px;">
+    <fieldset style="margin-top:16px; display:none;">
       <legend>💳 عمولة تابي (Tabby)</legend>
       <small class="hint" style="margin-top:0;">تُضاف تلقائيًا على إجمالي الطلب فقط لما العميل يختار الدفع عبر تابي (الإمارات حاليًا).</small>
       <div class="field"><label for="ship_tabbyPercent">نسبة العمولة (%)</label><input type="number" id="ship_tabbyPercent" min="0" step="0.1"></div>
@@ -992,6 +993,7 @@
         الإكسل (نفس القالب اللي أرسلته لك بالمحادثة) بصف واحد لكل عطر جديد، وارفعه هنا. الصور تضل تُرفع
         بعدين بوضع "رفع كل الصور دفعة وحدة" — بس تسمّي الصور بنفس اسم البراند والعطر زي المعتاد.
       </small>
+      <div class="row" style="margin:10px 0;"><button type="button" class="secondary" id="xlsxTplAddBtn">⬇️ حمّل نموذج الإكسل (عطور جديدة)</button></div>
       <label for="xlsx_fileInput">اختر ملف الإكسل</label>
       <input type="file" id="xlsx_fileInput" accept=".xlsx,.xls">
       <div id="xlsx_previewWrap" style="display:none;">
@@ -1018,6 +1020,7 @@
         عمود "الموسم" يقبل قيمة وحدة ("صيفي" أو "شتوي") أو قيمتين مفصولتين بفاصلة ("صيفي، شتوي") لعطر مناسب للموسمين.
         أي خانة تسيبها فاضية بالإكسل، القيمة القديمة المسجّلة بالموقع تضل زي ما هي (ما تنمسح).
       </small>
+      <div class="row" style="margin:10px 0;"><button type="button" class="secondary" id="xlsxTplUpdBtn">⬇️ حمّل نموذج الإكسل (تحديث عطور)</button></div>
       <label for="xlsxUpd_fileInput">اختر ملف الإكسل</label>
       <input type="file" id="xlsxUpd_fileInput" accept=".xlsx,.xls">
       <div id="xlsxUpd_previewWrap" style="display:none;">
@@ -1126,34 +1129,48 @@
     </small>
     <div class="kpi-grid" id="exp_kpiGrid"></div>
 
-    <div class="row" style="margin-top:16px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
-      <div class="field" style="flex:2; min-width:200px;">
-        <label for="exp_description">وصف المصروف</label>
-        <input type="text" id="exp_description" placeholder="مثال: قمعات بلاستيك لصناعة العطور">
+    <small class="hint" style="margin-top:12px;">سجّل بسرعة: اضغط نوع المصروف، اكتب المبلغ، واضغط سجّل. التاريخ يتسجل اليوم تلقائيًا.</small>
+    <div class="row" id="exp_chips" style="gap:8px; flex-wrap:wrap; margin-top:8px;">
+      <button type="button" class="secondary exp-chip" data-d="أكياس وتغليف" data-c="manufacturing_supplies">📦 أكياس وتغليف</button>
+      <button type="button" class="secondary exp-chip" data-d="ملصقات وطباعة" data-c="manufacturing_supplies">🏷️ ملصقات وطباعة</button>
+      <button type="button" class="secondary exp-chip" data-d="أدوات تصنيع" data-c="manufacturing_supplies">🧰 أدوات تصنيع</button>
+      <button type="button" class="secondary exp-chip" data-d="شحن وتوصيل" data-c="shipping">🚚 شحن وتوصيل</button>
+      <button type="button" class="secondary exp-chip" data-d="إعلانات" data-c="marketing">📣 إعلانات</button>
+      <button type="button" class="secondary exp-chip" data-d="" data-c="other">➕ شي ثاني</button>
+    </div>
+    <div class="row" style="margin-top:12px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="flex:2; min-width:180px;">
+        <label for="exp_description">وش اشتريت؟</label>
+        <input type="text" id="exp_description" placeholder="اضغط نوع فوق أو اكتب بنفسك">
       </div>
       <div class="field" style="min-width:130px;">
-        <label for="exp_amount">المبلغ الإجمالي (AED)</label>
+        <label for="exp_amount">المبلغ (AED)</label>
         <input type="number" id="exp_amount" min="0" step="0.01">
-      </div>
-      <div class="field" style="min-width:150px;">
-        <label for="exp_date">التاريخ</label>
-        <input type="date" id="exp_date">
-      </div>
-      <div class="field" style="min-width:180px;">
-        <label for="exp_category">التصنيف</label>
-        <select id="exp_category">
-          <option value="manufacturing_supplies">مستلزمات تصنيع (أدوات/قمعات...)</option>
-          <option value="marketing">تسويق وإعلانات</option>
-          <option value="shipping">شحن وتوصيل</option>
-          <option value="other">أخرى</option>
-        </select>
-      </div>
-      <div class="field" style="flex:2; min-width:180px;">
-        <label for="exp_note">ملاحظة (اختياري)</label>
-        <input type="text" id="exp_note" placeholder="مثال: رقم الطلب أو اسم الموقع">
       </div>
       <button type="button" id="exp_addBtn">➕ سجّل المصروف</button>
     </div>
+    <details style="margin-top:8px;">
+      <summary style="cursor:pointer; color:var(--muted); font-size:12.5px;">تفاصيل إضافية (اختياري): تاريخ ثاني، تصنيف، ملاحظة</summary>
+      <div class="row" style="margin-top:10px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
+        <div class="field" style="min-width:150px;">
+          <label for="exp_date">التاريخ</label>
+          <input type="date" id="exp_date">
+        </div>
+        <div class="field" style="min-width:180px;">
+          <label for="exp_category">التصنيف</label>
+          <select id="exp_category">
+            <option value="manufacturing_supplies">مستلزمات تصنيع (أدوات/قمعات...)</option>
+            <option value="marketing">تسويق وإعلانات</option>
+            <option value="shipping">شحن وتوصيل</option>
+            <option value="other">أخرى</option>
+          </select>
+        </div>
+        <div class="field" style="flex:2; min-width:180px;">
+          <label for="exp_note">ملاحظة (اختياري)</label>
+          <input type="text" id="exp_note" placeholder="مثال: رقم الطلب أو اسم الموقع">
+        </div>
+      </div>
+    </details>
     <div class="status" id="exp_statusBox"></div>
 
     <div style="margin-top:14px;">
@@ -1197,13 +1214,9 @@
 
     <label for="bp_field">أي سعر تبي تعدّل؟</label>
     <select id="bp_field">
-      <option value="price10">10مل (درهم)</option>
       <option value="price50">50مل (درهم)</option>
-      <option value="price10Before">10مل قبل الخصم (درهم)</option>
       <option value="price50Before">50مل قبل الخصم (درهم)</option>
-      <option value="price10Om">10مل (ريال عُماني)</option>
       <option value="price50Om">50مل (ريال عُماني)</option>
-      <option value="price10OmBefore">10مل قبل الخصم (ريال عُماني)</option>
       <option value="price50OmBefore">50مل قبل الخصم (ريال عُماني)</option>
     </select>
 
@@ -1290,7 +1303,7 @@
         <div class="field"><label for="f_price50">50مل</label><input type="number" id="f_price50" min="0" step="0.01"></div>
         <div class="field"><label for="f_price10">10مل</label><input type="number" id="f_price10" min="0" step="0.01"></div>
         <div class="field"><label for="f_price50Before">50مل قبل الخصم</label><input type="number" id="f_price50Before" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price10Before">10مل قبل الخصم</label><input type="number" id="f_price10Before" min="0" step="0.01"></div>
+        <div class="field" style="display:none;"><label for="f_price10Before">10مل قبل الخصم</label><input type="number" id="f_price10Before" min="0" step="0.01"></div>
       </div>
       <small class="hint">خانات "قبل الخصم" اختيارية — عبّيها بس لو تبا يظهر شريط خصم على العطر. خليها فاضية إذا ما فيه خصم.</small>
     </fieldset>
@@ -1301,7 +1314,7 @@
         <div class="field"><label for="f_price50Om">50مل</label><input type="number" id="f_price50Om" min="0" step="0.01"></div>
         <div class="field"><label for="f_price10Om">10مل</label><input type="number" id="f_price10Om" min="0" step="0.01"></div>
         <div class="field"><label for="f_price50OmBefore">50مل قبل الخصم</label><input type="number" id="f_price50OmBefore" min="0" step="0.01"></div>
-        <div class="field"><label for="f_price10OmBefore">10مل قبل الخصم</label><input type="number" id="f_price10OmBefore" min="0" step="0.01"></div>
+        <div class="field" style="display:none;"><label for="f_price10OmBefore">10مل قبل الخصم</label><input type="number" id="f_price10OmBefore" min="0" step="0.01"></div>
       </div>
     </fieldset>
 
@@ -3042,8 +3055,7 @@ function renderSalesHistory(){
       <div class="sale-row-actions">
         <select class="sale-row-status-select" data-key="${g.key}" style="color:${orderStatusColor(status)};">
           <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
-          <option value="prep" ${status === "prep" ? "selected" : ""}>🔧 قيد التجهيز</option>
-          <option value="needs_oil" ${status === "needs_oil" ? "selected" : ""}>🛢️ يحتاج زيت</option>
+          <option value="prep" ${(status === "prep" || status === "needs_oil") ? "selected" : ""}>🔧 قيد التجهيز</option>
           <option value="shipped" ${status === "shipped" ? "selected" : ""}>🚚 تم الشحن</option>
           <option value="received" ${status === "received" ? "selected" : ""}>📦 تم الاستلام</option>
         </select>
@@ -5099,6 +5111,12 @@ function renderExpensesSection(){
   }
 }
 
+document.querySelectorAll(".exp-chip").forEach(b => b.addEventListener("click", () => {
+  document.getElementById("exp_category").value = b.dataset.c;
+  const d = document.getElementById("exp_description");
+  d.value = b.dataset.d;
+  (b.dataset.d ? document.getElementById("exp_amount") : d).focus();
+}));
 document.getElementById("exp_addBtn").addEventListener("click", async () => {
   const token = getToken();
   const box = document.getElementById("exp_statusBox");
@@ -6849,6 +6867,43 @@ function xlsxGetCell(row, key){
   const foundKey = Object.keys(row).find(k => k.trim() === targetHeader);
   return foundKey ? row[foundKey] : "";
 }
+
+// 18 أكتوبر 2026: زر تحميل نموذج الإكسل الفاضي (نفس الأعمدة اللي يقراها الاستيراد) — لو ضاع الملف الأصلي
+function xlsxDownloadTemplate(kind){
+  const H = XLSX_HEADERS;
+  const isUpd = kind === "update";
+  const cols = isUpd
+    ? ["brand","name","seasons","accords","accordsAR","notesTop","notesTopAR","longevity","sillage"]
+    : ["brand","name","gender","seasons","price50","price50Om","stock50","stock10","accords","accordsAR","notesTop","notesTopAR","longevity","sillage"];
+  const headers = cols.map(k => H[k]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet([], { header: headers });
+  ws["!cols"] = headers.map(h => ({ wch: Math.max(14, h.length + 4) }));
+  XLSX.utils.book_append_sheet(wb, ws, isUpd ? "تحديث" : "عطور جديدة");
+  const help = [
+    { "العمود": H.brand, "الشرح": "اسم البراند بالإنجليزي (يتحول لحروف كبيرة تلقائيًا). مطلوب." },
+    { "العمود": H.name, "الشرح": "اسم العطر. مطلوب. " + (isUpd ? "لازم يطابق الاسم الموجود بالموقع." : "") },
+  ];
+  if(!isUpd){
+    help.push({ "العمود": H.gender, "الشرح": "رجالي أو نسائي أو للجنسين (لو تركته فاضي = للجنسين)." });
+    help.push({ "العمود": H.price50, "الشرح": "سعر 50مل بالدرهم (مثلاً 70)." });
+    help.push({ "العمود": H.price50Om, "الشرح": "سعر 50مل بالريال العماني (مثلاً 7)." });
+    help.push({ "العمود": H.stock50, "الشرح": "الكمية المتوفرة من 50مل (رقم). 0 = نفدت." });
+    help.push({ "العمود": H.stock10, "الشرح": "اختياري: كمية 10مل للإحصائيات فقط (ما يُباع للعملاء)." });
+  }
+  help.push({ "العمود": H.seasons, "الشرح": "صيفي أو شتوي، أو الاثنين مفصولين بفاصلة: صيفي، شتوي." });
+  help.push({ "العمود": H.accords + " / " + H.accordsAR, "الشرح": "الأكوردات مفصولة بفاصلة، بالإنجليزي والعربي." });
+  help.push({ "العمود": H.notesTop + " / " + H.notesTopAR, "الشرح": "النوتات مفصولة بفاصلة، بالإنجليزي والعربي." });
+  help.push({ "العمود": H.longevity, "الشرح": "مثال: 8-10 ساعات." });
+  help.push({ "العمود": H.sillage, "الشرح": "مثال: متوسط إلى قوي." });
+  help.push({ "العمود": "ملاحظة", "الشرح": isUpd ? "الخانة الفاضية = القيمة القديمة تبقى كما هي." : "صف واحد لكل عطر جديد. العطر الموجود أصلاً بالموقع يتجاوزه الاستيراد." });
+  const wsH = XLSX.utils.json_to_sheet(help);
+  wsH["!cols"] = [{ wch: 34 }, { wch: 80 }];
+  XLSX.utils.book_append_sheet(wb, wsH, "تعليمات");
+  XLSX.writeFile(wb, isUpd ? "Evoque_Update_Template.xlsx" : "Evoque_New_Perfumes_Template.xlsx");
+}
+document.getElementById("xlsxTplAddBtn").addEventListener("click", () => xlsxDownloadTemplate("add"));
+document.getElementById("xlsxTplUpdBtn").addEventListener("click", () => xlsxDownloadTemplate("update"));
 
 let xlsxParsedRows = [];
 
