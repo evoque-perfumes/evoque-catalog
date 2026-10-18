@@ -5305,6 +5305,7 @@ document.getElementById("exp_addBtn").addEventListener("click", async () => {
   }
 });
 
+let matEditingId = null; // id عملية الشراء اللي تنعدّل الحين (فورم التعديل داخل الصف)
 function renderMaterialsSection(){
   const grid = document.getElementById("mat_kpiGrid");
   if(!grid) return;
@@ -5325,7 +5326,22 @@ function renderMaterialsSection(){
   if(!hist.length){
     histBox.innerHTML = `<div class="ov-empty-note">ما فيه أي عملية شراء مسجّلة بعد — سجّلي أول عملية شراء من الفورم فوق.</div>`;
   } else {
-    histBox.innerHTML = hist.map(p => `
+    histBox.innerHTML = hist.map(p => p.id === matEditingId ? `
+      <div class="sale-row" data-mid="${p.id}">
+        <div class="sale-row-top"><span class="sale-row-name">✏️ تعديل: ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : p.material}</span></div>
+        <div class="grid2" style="margin-top:8px;">
+          <div class="field"><label>الكمية</label><input type="number" class="me-qty" min="0" step="1" value="${Number(p.qty)||0}"></div>
+          <div class="field"><label>سعر الحبة / الوحدة (AED)</label><input type="number" class="me-unit" min="0" step="0.001" value="${((Number(p.totalPrice)||0)/Math.max(1,Number(p.qty)||1)).toFixed(3)}"></div>
+          <div class="field"><label>السعر الإجمالي (AED)</label><input type="number" class="me-total" min="0" step="0.01" value="${Number(p.totalPrice)||0}"></div>
+          <div class="field"><label>التاريخ</label><input type="date" class="me-date" value="${p.date||""}"></div>
+        </div>
+        <div class="field" style="margin-top:6px;"><label>ملاحظة</label><input type="text" class="me-note" value="${String(p.note||"").replace(/"/g,"&quot;").replace(/</g,"&lt;")}"></div>
+        <small class="hint">عدّل سعر الحبة أو الإجمالي، والثاني ينحسب تلقائي.</small>
+        <div class="sale-row-actions" style="margin-top:8px;">
+          <button type="button" class="mat-edit-save">💾 احفظ التعديل</button>
+          <button type="button" class="secondary mat-edit-cancel">إلغاء</button>
+        </div>
+      </div>` : `
       <div class="sale-row">
         <div class="sale-row-top">
           <span class="sale-row-name">${p.date} — ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : p.material} × ${fmtNum(p.qty)} ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].unit : ""}</span>
@@ -5333,9 +5349,40 @@ function renderMaterialsSection(){
         </div>
         <div class="sale-row-meta">
           سعر الوحدة: ${(Number(p.totalPrice)/Math.max(1,Number(p.qty))).toFixed(3)} AED${p.note ? " — " + p.note : ""}
-          <button type="button" class="secondary mat-delete-btn" data-id="${p.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+          <button type="button" class="secondary mat-edit-btn" data-id="${p.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">✏️ تعديل</button>
+          <button type="button" class="secondary mat-delete-btn" data-id="${p.id}" style="margin-inline-start:6px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
         </div>
       </div>`).join("");
+    histBox.querySelectorAll(".mat-edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => { matEditingId = btn.dataset.id; renderMaterialsSection(); });
+    });
+    const editRow = histBox.querySelector(".sale-row[data-mid]");
+    if(editRow){
+      const q = editRow.querySelector(".me-qty"), u = editRow.querySelector(".me-unit"), t = editRow.querySelector(".me-total");
+      q.addEventListener("input", () => { t.value = Math.round((parseFloat(q.value)||0) * (parseFloat(u.value)||0) * 100) / 100; });
+      u.addEventListener("input", () => { t.value = Math.round((parseFloat(q.value)||0) * (parseFloat(u.value)||0) * 100) / 100; });
+      t.addEventListener("input", () => { const qq = parseFloat(q.value)||0; u.value = qq > 0 ? ((parseFloat(t.value)||0) / qq).toFixed(3) : ""; });
+      editRow.querySelector(".mat-edit-cancel").addEventListener("click", () => { matEditingId = null; renderMaterialsSection(); });
+      editRow.querySelector(".mat-edit-save").addEventListener("click", async () => {
+        const box = document.getElementById("mat_statusBox");
+        const token = getToken();
+        if(!token){ box.className = "status show err"; box.textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+        const qty = parseFloat(q.value), totalPrice = parseFloat(t.value);
+        if(!(qty > 0) || !(totalPrice > 0)){ box.className = "status show err"; box.textContent = "اكتب كمية وسعر أكبر من صفر."; return; }
+        const id = editRow.dataset.mid;
+        const date = editRow.querySelector(".me-date").value, note = editRow.querySelector(".me-note").value.trim();
+        const saveBtn = editRow.querySelector(".mat-edit-save"); saveBtn.disabled = true;
+        try{
+          box.className = "status show info"; box.textContent = "جارِ حفظ التعديل...";
+          materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, purchases: obj.purchases.map(x => x.id === id ? { ...x, qty, totalPrice, date: date || x.date, note } : x) }), "Edit material purchase entry");
+          matEditingId = null;
+          box.className = "status show ok"; box.textContent = "تم حفظ التعديل، والتكاليف انحسبت من جديد.";
+          renderCostPanel();
+        }catch(e){
+          box.className = "status show err"; box.textContent = "صار خطأ: " + e.message; saveBtn.disabled = false;
+        }
+      });
+    }
     histBox.querySelectorAll(".mat-delete-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         if(!confirm("تأكيد حذف عملية الشراء هذي؟")) return;
@@ -5367,6 +5414,7 @@ document.getElementById("mat_addBtn").addEventListener("click", async () => {
   const note = document.getElementById("mat_note").value.trim();
   if(!qty || qty <= 0){ box.className = "status show err"; box.textContent = "اكتبي الكمية المشتراة أول."; return; }
   if(!totalPrice || totalPrice <= 0){ box.className = "status show err"; box.textContent = "اكتبي السعر الإجمالي أول."; return; }
+  if(material !== "alcohol" && totalPrice < qty && !confirm(`السعر الإجمالي (${totalPrice}) أقل من الكمية (${qty}) — يعني سعر الحبة أقل من درهم. غالبًا كتبت سعر الحبة بدل الإجمالي. تبا تكمل بنفس الرقم؟`)) return;
   const btn = document.getElementById("mat_addBtn");
   btn.disabled = true;
   try{
