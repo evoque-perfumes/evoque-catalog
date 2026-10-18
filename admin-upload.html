@@ -2986,7 +2986,7 @@ function renderSalesHistory(){
         <span class="sale-row-amount">${fmtNum(total)} AED${discountTxt}</span>
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
-      <div class="sale-row-meta">${g.date || ""} — ${slCountText(g.items)}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
+      <div class="sale-row-meta">${g.date || ""} — <b style="color:var(--text,#2A1216); font-size:14px;">🧴 ${slCountText(g.items)}</b>${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
       <div class="sale-row-actions">
         <select class="sale-row-status-select" data-key="${g.key}" style="color:${orderStatusColor(status)};">
           <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
