@@ -2534,8 +2534,10 @@ function selectPerfumeForSales(p){
   document.getElementById("sl_price").value = defaultSize === "50" ? (p.price50 != null ? p.price50 : "") : (p.price10 != null ? p.price10 : "");
   document.getElementById("sl_isGift").checked = false;
   document.getElementById("sl_price").disabled = false;
+  slAutoGift = false;
   document.getElementById("sl_addItemWrap").style.display = "block";
   document.getElementById("sl_pickHint").style.display = "none";
+  slSyncSizeGift();
 }
 
 // تعديل عنصر موجود بالسلة: نطلعه من السلة ونعبّي الفورم ببياناته عشان يصححها ويضيفه من جديد
@@ -2558,8 +2560,26 @@ function slEditCartItem(idx){
   document.getElementById("sl_qty").focus();
 }
 
+// 18 أكتوبر 2026: 10مل ما يُباع، يُعطى هدية مجانية للعميل. فلما تختار 10مل نفعّل "هدية" تلقائيًا
+// (السعر 0، ما يدخل بالإيراد ولا بعدد العطور المباعة، بس ينقص من مخزون 10مل عشان الإحصائيات).
+let slAutoGift = false;
+function slSyncSizeGift(){
+  const size = document.getElementById("sl_size").value;
+  const chk = document.getElementById("sl_isGift");
+  const priceInput = document.getElementById("sl_price");
+  if(size === "10"){
+    if(!chk.checked){ priceInput.dataset.prevValue = priceInput.value; slAutoGift = true; }
+    chk.checked = true; priceInput.value = "0"; priceInput.disabled = true;
+    slShowStatus("10مل ما يُباع — انحسب هدية مجانية تلقائيًا (ما يدخل بالمبيعات ولا بالعدد).", "info");
+  } else if(slAutoGift){
+    slAutoGift = false;
+    chk.checked = false; priceInput.disabled = false;
+    priceInput.value = (salesSelected && salesSelected.price50 != null) ? salesSelected.price50 : (priceInput.dataset.prevValue || "");
+  }
+}
 document.getElementById("sl_size").addEventListener("change", () => {
   if(!salesSelected) return;
+  slSyncSizeGift();
   if(document.getElementById("sl_isGift").checked) return; // عطر مجاني — السعر يضل 0 بغض النظر عن الحجم
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
@@ -2607,7 +2627,7 @@ document.getElementById("sl_addToCartBtn").addEventListener("click", () => {
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
   const qty = Math.max(1, parseInt(document.getElementById("sl_qty").value, 10) || 1);
-  const isGift = document.getElementById("sl_isGift").checked;
+  const isGift = document.getElementById("sl_isGift").checked || size === "10"; // 10مل دايمًا هدية
   const unitPrice = isGift ? 0 : Math.max(0, parseFloat(document.getElementById("sl_price").value) || 0);
   salesCart.push({ perfumeId: p.id, brand: p.brand, name: p.name, size: Number(size), qty, unitPrice, isGift });
   slRenderCart();
@@ -2740,7 +2760,7 @@ function slCountPerfumes(items){
   let paid = 0, gift = 0;
   (items || []).forEach(it => {
     const q = Number(it.qty) || 0;
-    if(it.isGift) gift += q; else paid += q;
+    if(it.isGift || String(it.size) === "10") gift += q; else paid += q; // 10مل = هدية دايمًا
   });
   return { paid, gift };
 }
