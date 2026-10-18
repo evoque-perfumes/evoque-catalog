@@ -522,6 +522,9 @@
       <div class="row" style="justify-content:space-between; margin-top:10px;">
         <b>إجمالي السلة: <span id="sl_cartTotal">0</span> AED</b>
       </div>
+      <div class="row" style="justify-content:space-between; margin-top:6px;">
+        <b>🧴 عدد العطور: <span id="sl_cartCount">0</span><span id="sl_cartFree" style="display:none; color:#1F6B41; margin-inline-start:8px;">🚚 توصيل مجاني</span></b>
+      </div>
       <div class="field" style="margin-top:10px; max-width:240px;">
         <label for="sl_discount">خصم على الطلب (AED) — اختياري</label>
         <input type="number" id="sl_discount" min="0" step="0.01" placeholder="0">
@@ -2655,6 +2658,8 @@ function slRenderCart(){
     </div>`;
   }).join("");
   totalEl.textContent = fmtNum(total);
+  const cntEl = document.getElementById("sl_cartCount"); if(cntEl) cntEl.textContent = slCountText(salesCart);
+  const freeEl = document.getElementById("sl_cartFree"); if(freeEl) freeEl.style.display = hasFreeShippingForItems(salesCart) ? "inline" : "none";
   slCartSubtotal = total;
   slUpdateDiscountPreview();
   listEl.querySelectorAll(".sl-cart-edit-btn").forEach(btn => {
@@ -2727,6 +2732,29 @@ function slExitEditMode(){
 function hasFreeShippingForItems(items){
   const qty50 = (items || []).reduce((s, it) => s + (String(it.size) === "50" ? (Number(it.qty) || 0) : 0), 0);
   return qty50 >= 5;
+}
+
+// 18 أكتوبر 2026: عدد العطور بالطلب = مجموع الكميات (مو عدد السطور). الهدايا تنعدّ لحالها.
+// مثال: عطر واحد × 3 = "٣ عطور"، مو "عطر".
+function slCountPerfumes(items){
+  let paid = 0, gift = 0;
+  (items || []).forEach(it => {
+    const q = Number(it.qty) || 0;
+    if(it.isGift) gift += q; else paid += q;
+  });
+  return { paid, gift };
+}
+function slCountWord(n){
+  if(n === 1) return "عطر واحد";
+  if(n === 2) return "عطرين";
+  if(n >= 3 && n <= 10) return n + " عطور";
+  return n + " عطر";
+}
+function slCountText(items){
+  const c = slCountPerfumes(items);
+  let t = slCountWord(c.paid);
+  if(c.gift > 0) t += " + " + c.gift + " 🎁 هدية";
+  return t;
 }
 
 // ===== خصم/إرجاع المخزون تلقائيًا مع كل عملية بيع (تسجيل جديد / تعديل / حذف) =====
@@ -2958,7 +2986,7 @@ function renderSalesHistory(){
         <span class="sale-row-amount">${fmtNum(total)} AED${discountTxt}</span>
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
-      <div class="sale-row-meta">${g.date || ""} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
+      <div class="sale-row-meta">${g.date || ""} — ${slCountText(g.items)}${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
       <div class="sale-row-actions">
         <select class="sale-row-status-select" data-key="${g.key}" style="color:${orderStatusColor(status)};">
           <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
