@@ -936,7 +936,11 @@ async function loadPerfumesFromJson(){
   // نتعامل مع الشكلين احتياطًا (مصفوفة مباشرة أو {perfumes:[...]}) عشان ما ننكسر لو تغيّر لاحقًا.
   const list = Array.isArray(data) ? data : (data && Array.isArray(data.perfumes) ? data.perfumes : null);
   if(!list || list.length === 0) throw new Error("empty data.json");
-  perfumes = list;
+  // 18 أكتوبر 2026: 10مل ما يُباع بالموقع (يُعطى هدية للعميل). نخفيه من عرض العملاء بالذاكرة فقط —
+  // data.json ولوحة التحكم ما يتغيرون، فالبيانات القديمة تبقى للإحصائيات.
+  perfumes = list.map(p => Object.assign({}, p, {
+    price10: null, price10Om: null, price10Before: null, price10OmBefore: null, stock10: 0
+  }));
 }
 
 // ------------------------------------------------------------------
