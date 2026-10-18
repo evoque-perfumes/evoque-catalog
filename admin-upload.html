@@ -613,7 +613,9 @@
         <option value="paid">✅ تم استلام المبلغ</option>
       </select>
     </div>
+    <div class="field" style="margin-top:8px;"><input type="search" id="sl_histSearch" placeholder="🔍 ابحث بالاسم أو الهاتف أو اسم العطر أو التاريخ"></div>
     <div id="sl_history" class="static-list" style="display:none;"></div>
+    <div class="row"><button type="button" id="sl_histMoreBtn" class="secondary" style="display:none;">عرض ١٥ طلب أكثر</button></div>
     <small class="hint" id="sl_historyEmptyHint" style="margin-top:0;">ما فيه مبيعات مسجّلة بعد.</small>
   </div>
 
@@ -2536,6 +2538,7 @@ let salesEditingOrderId = null; // لو مو null، معناها نعدّل طل
 // 11 أكتوبر 2026: فلتر سجل المبيعات — بطلب المستخدم، عشان يقدر يحدد بسرعة مين باقي
 // له الدفع، أو مين تم شحن طلبه وما استلمه بعد، بدل ما يمرر على كل الطلبات يدويًا.
 let slFilterStatus = "all"; // "all" أو قيمة status (فاضي = جديد، prep، needs_oil، shipped، received)
+let slHistLimit = 15, slHistQuery = "";
 let slFilterPaid = "all";   // "all" | "unpaid" | "paid"
 let salesEditingOriginalItems = []; // نسخة من عناصر الطلب الأصلية وقت بداية التعديل — تُستخدم لحساب فرق المخزون الصحيح عند الحفظ
 // 14 سبتمبر 2026: خيارات قائمة "sl_country" أكواد (AE/OM/...) بس الطلبات الجاية من
@@ -3066,6 +3069,8 @@ document.getElementById("sl_filterStatus").addEventListener("change", (e) => {
   slFilterStatus = e.target.value;
   renderSalesHistory();
 });
+document.getElementById("sl_histSearch").addEventListener("input", (e) => { slHistQuery = e.target.value.trim(); slHistLimit = 15; renderSalesHistory(); });
+document.getElementById("sl_histMoreBtn").addEventListener("click", () => { slHistLimit += 15; renderSalesHistory(); });
 document.getElementById("sl_filterPaid").addEventListener("change", (e) => {
   slFilterPaid = e.target.value;
   renderSalesHistory();
@@ -3170,9 +3175,24 @@ function renderSalesHistory(){
     emptyHint.textContent = "ما فيه طلبات مطابقة لهذا الفلتر.";
     return;
   }
+  if(slHistQuery){
+    const q = slHistQuery.toLowerCase();
+    filtered = filtered.filter(g => {
+      const hay = [g.customer, g.phone, g.date, g.address].concat(g.items.map(o => { const p = perfumes.find(x => x.id === o.perfumeId); return p ? p.brand + " " + p.name : o.perfumeId; })).join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+    if(filtered.length === 0){
+      wrap.style.display = "none"; emptyHint.style.display = "block"; emptyHint.textContent = "ما فيه طلبات مطابقة للبحث.";
+      document.getElementById("sl_histMoreBtn").style.display = "none";
+      return;
+    }
+  }
+  const moreBtn = document.getElementById("sl_histMoreBtn");
+  moreBtn.style.display = filtered.length > slHistLimit ? "inline-block" : "none";
+  moreBtn.textContent = `عرض ١٥ طلب أكثر (باقي ${filtered.length - slHistLimit})`;
   emptyHint.style.display = "none";
   wrap.style.display = "block";
-  wrap.innerHTML = filtered.slice(0, 15).map(g => {
+  wrap.innerHTML = filtered.slice(0, slHistLimit).map(g => {
     const subtotal = g.items.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
     const discount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
     const total = Math.max(0, subtotal - discount);
@@ -5237,7 +5257,22 @@ function renderExpensesSection(){
   if(!hist.length){
     histBox.innerHTML = `<div class="ov-empty-note">ما فيه أي مصروف مسجّل بعد — سجّلي أول مصروف من الفورم فوق.</div>`;
   } else {
-    histBox.innerHTML = hist.map(e => `
+    const escA = v => String(v == null ? "" : v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+    histBox.innerHTML = hist.map(e => e.id === expEditingId ? `
+      <div class="sale-row" data-eid="${escA(e.id)}">
+        <div class="sale-row-top"><span class="sale-row-name">✏️ تعديل مصروف</span></div>
+        <div class="grid2" style="margin-top:8px;">
+          <div class="field"><label>الوصف</label><input type="text" class="ee-desc" value="${escA(e.description)}"></div>
+          <div class="field"><label>المبلغ (AED)</label><input type="number" class="ee-amount" min="0" step="0.01" value="${Number(e.amount)||0}"></div>
+          <div class="field"><label>التاريخ</label><input type="date" class="ee-date" value="${escA(e.date)}"></div>
+          <div class="field"><label>التصنيف</label><select class="ee-cat">${Object.keys(EXPENSE_CATEGORIES).map(k => `<option value="${k}" ${k === e.category ? "selected" : ""}>${EXPENSE_CATEGORIES[k]}</option>`).join("")}</select></div>
+        </div>
+        <div class="field" style="margin-top:6px;"><label>ملاحظة</label><input type="text" class="ee-note" value="${escA(e.note)}"></div>
+        <div class="sale-row-actions" style="margin-top:8px;">
+          <button type="button" class="ee-save">💾 احفظ التعديل</button>
+          <button type="button" class="secondary ee-cancel">إلغاء</button>
+        </div>
+      </div>` : `
       <div class="sale-row">
         <div class="sale-row-top">
           <span class="sale-row-name">${e.date} — ${String(e.description || "").replace(/</g,"&lt;")}</span>
@@ -5245,9 +5280,32 @@ function renderExpensesSection(){
         </div>
         <div class="sale-row-meta">
           ${EXPENSE_CATEGORIES[e.category] || "أخرى"}${e.note ? " — " + String(e.note).replace(/</g,"&lt;") : ""}
-          <button type="button" class="secondary exp-delete-btn" data-id="${e.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+          <button type="button" class="secondary exp-edit-btn" data-id="${e.id}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">✏️ تعديل</button>
+          <button type="button" class="secondary exp-delete-btn" data-id="${e.id}" style="margin-inline-start:6px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
         </div>
       </div>`).join("");
+    histBox.querySelectorAll(".exp-edit-btn").forEach(btn => btn.addEventListener("click", () => { expEditingId = btn.dataset.id; renderExpensesSection(); }));
+    const eRow = histBox.querySelector(".sale-row[data-eid]");
+    if(eRow){
+      eRow.querySelector(".ee-cancel").addEventListener("click", () => { expEditingId = null; renderExpensesSection(); });
+      eRow.querySelector(".ee-save").addEventListener("click", async () => {
+        const box = document.getElementById("exp_statusBox");
+        const token = getToken();
+        if(!token){ box.className = "status show err"; box.textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+        const description = eRow.querySelector(".ee-desc").value.trim();
+        const amount = parseFloat(eRow.querySelector(".ee-amount").value);
+        const date = eRow.querySelector(".ee-date").value, category = eRow.querySelector(".ee-cat").value, note = eRow.querySelector(".ee-note").value.trim();
+        if(!description || !(amount > 0)){ box.className = "status show err"; box.textContent = "اكتب الوصف والمبلغ."; return; }
+        const id = eRow.dataset.eid, sb = eRow.querySelector(".ee-save"); sb.disabled = true;
+        try{
+          box.className = "status show info"; box.textContent = "جارِ حفظ التعديل...";
+          expensesData = await updateExpensesJsonWithRetry(token, (obj) => ({ ...obj, expenses: obj.expenses.map(x => x.id === id ? { ...x, description, amount, date: date || x.date, category, note } : x) }), "Edit monthly expense entry");
+          expEditingId = null;
+          box.className = "status show ok"; box.textContent = "تم حفظ التعديل.";
+          renderCostPanel();
+        }catch(err){ box.className = "status show err"; box.textContent = "صار خطأ: " + err.message; sb.disabled = false; }
+      });
+    }
     histBox.querySelectorAll(".exp-delete-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         if(!confirm("تأكيد حذف هذا المصروف؟")) return;
@@ -5305,6 +5363,7 @@ document.getElementById("exp_addBtn").addEventListener("click", async () => {
   }
 });
 
+let expEditingId = null;
 let matEditingId = null; // id عملية الشراء اللي تنعدّل الحين (فورم التعديل داخل الصف)
 function renderMaterialsSection(){
   const grid = document.getElementById("mat_kpiGrid");
@@ -5329,6 +5388,7 @@ function renderMaterialsSection(){
     histBox.innerHTML = hist.map(p => p.id === matEditingId ? `
       <div class="sale-row" data-mid="${p.id}">
         <div class="sale-row-top"><span class="sale-row-name">✏️ تعديل: ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : p.material}</span></div>
+        <div class="field" style="margin-top:8px;"><label>المادة</label><select class="me-material">${Object.keys(MATERIALS_DEF).map(k => `<option value="${k}" ${k === p.material ? "selected" : ""}>${MATERIALS_DEF[k].labelAr}</option>`).join("")}</select></div>
         <div class="grid2" style="margin-top:8px;">
           <div class="field"><label>الكمية</label><input type="number" class="me-qty" min="0" step="1" value="${Number(p.qty)||0}"></div>
           <div class="field"><label>سعر الحبة / الوحدة (AED)</label><input type="number" class="me-unit" min="0" step="0.001" value="${((Number(p.totalPrice)||0)/Math.max(1,Number(p.qty)||1)).toFixed(3)}"></div>
@@ -5374,7 +5434,7 @@ function renderMaterialsSection(){
         const saveBtn = editRow.querySelector(".mat-edit-save"); saveBtn.disabled = true;
         try{
           box.className = "status show info"; box.textContent = "جارِ حفظ التعديل...";
-          materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, purchases: obj.purchases.map(x => x.id === id ? { ...x, qty, totalPrice, date: date || x.date, note } : x) }), "Edit material purchase entry");
+          materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, purchases: obj.purchases.map(x => x.id === id ? { ...x, material: editRow.querySelector(".me-material").value, qty, totalPrice, date: date || x.date, note } : x) }), "Edit material purchase entry");
           matEditingId = null;
           box.className = "status show ok"; box.textContent = "تم حفظ التعديل، والتكاليف انحسبت من جديد.";
           renderCostPanel();
