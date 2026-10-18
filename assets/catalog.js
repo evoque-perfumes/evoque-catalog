@@ -297,7 +297,7 @@ const I18N = {
     cartEmpty: "سلتك فارغة",
     cartItemsLabel: "عطر",
     approxTotal: "الإجمالي تقريبًا",
-    withoutDelivery: "(بدون التوصيل)",
+    withoutDelivery: "· التوصيل مجاني 🚚",
     checkout: "إتمام الطلب عبر واتساب",
     cartModalTitle: "سلتك",
     cartModalEmpty: "سلتك فارغة حاليًا",
@@ -340,10 +340,12 @@ const I18N = {
     lblDeliveryDoor: "توصيل للمنزل",
     lblDeliveryNool: "استلام من مكتب NOOL",
     shipSubtotal: "المجموع الفرعي",
+    shipDiscount: "خصم ١٥٪ (٣ عطور فأكثر)",
+    freeDeliveryAll: "🚚 التوصيل مجاني لكل الطلبات",
     shipFee: "رسوم التوصيل",
     shipFree: "مجاني 🎁",
-    shipGrandTotal: "الإجمالي شامل التوصيل",
-    shipEstimateNote: "(الرسوم النهائية تتأكد حسب موقعك بالضبط)",
+    shipGrandTotal: "الإجمالي (التوصيل مجاني)",
+    shipEstimateNote: "",
     orderSubmitBtn: "إرسال الطلب",
     orderSubmitting: "جاري الإرسال...",
     orderFormNote: "عبّي بياناتك واطلب مباشرة أونلاين — يوصلك تأكيد الطلب على إيميلك فورًا، بدون ما تحتاج واتساب.",
@@ -466,7 +468,7 @@ const I18N = {
     cartModalEmpty: "Your cart is empty right now",
     cartModalTotalLabel: "Total",
     removeItem: "Remove",
-    withoutDelivery: "(excl. delivery)",
+    withoutDelivery: "· free delivery 🚚",
     checkout: "Checkout via WhatsApp",
     orderMsgIntro: "I'd like to order from Evoque Perfume:\n\n",
     orderMsgPayment: "Preferred payment method",
@@ -505,10 +507,12 @@ const I18N = {
     lblDeliveryDoor: "Home Delivery",
     lblDeliveryNool: "Pickup from NOOL office",
     shipSubtotal: "Subtotal",
+    shipDiscount: "15% off (3+ perfumes)",
+    freeDeliveryAll: "🚚 Free delivery on every order",
     shipFee: "Delivery Fee",
     shipFree: "Free 🎁",
-    shipGrandTotal: "Total incl. delivery",
-    shipEstimateNote: "(Final fee confirmed based on your exact location)",
+    shipGrandTotal: "Total (free delivery)",
+    shipEstimateNote: "",
     orderSubmitBtn: "Submit Order",
     orderSubmitting: "Submitting...",
     orderFormNote: "Fill in your details and order directly online — your confirmation lands in your inbox right away, no WhatsApp needed.",
@@ -561,12 +565,35 @@ const I18N = {
 // المتجر — صار يختار الهدية يدويًا بنفسه من لوحة التحكم (تبويب "💰 المبيعات") بدل
 // ما تُحسب تلقائيًا هنا. أبقينا فقط على التوصيل المجاني التلقائي زي ما هو بالضبط
 // (5 قطع 50مل فأكثر = توصيل مجاني)، لأنه طلب صريح يبقى كما هو.
+// 18 أكتوبر 2026 (طلب صاحب المتجر): صار التوصيل مجاني لكل الطلبات (حتى عطر واحد)،
+// ومن 3 عطور 50مل فأكثر خصم 15% على المجموع. التوصيل يكلّف المتجر (يُسجَّل بلوحة
+// التحكم كتكلفة) لكن العميل ما يدفع شي. غيّر الأرقام هنا فقط لو تغيّر العرض.
+const FREE_DELIVERY_ALL = true;
 const OFFERS_CONFIG = [
-  { size:"50", minQty:5, freeShipping:true, reward:{ ar:"توصيل مجاني", en:"Free delivery" } },
+  { size:"50", minQty:3, discountPct:15, reward:{ ar:"خصم ١٥٪ على الطلب", en:"15% off your order" } },
 ];
 
 function hasFreeShipping(offerStatus){
-  return offerStatus.unlocked.some(o => o.freeShipping);
+  return FREE_DELIVERY_ALL || offerStatus.unlocked.some(o => o.freeShipping);
+}
+
+// حساب موحّد لمبالغ السلة: المجموع قبل الخصم، قيمة الخصم، والمجموع بعد الخصم.
+// الخصم يُحسب على عطور 50مل فقط. أرقام الإمارات صحيحة، وعُمان لخانتين عشريتين.
+function offersText(offerStatus, freeShip){
+  const parts = [];
+  if(freeShip) parts.push(lang==="ar" ? "توصيل مجاني" : "Free delivery");
+  offerStatus.unlocked.forEach(o => parts.push(o.reward[lang]));
+  return parts.join(" + ");
+}
+function computeCartPricing(items){
+  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
+  const base50 = items.filter(i=>i.size==="50").reduce((sum,i)=> sum + (i.lineTotal||0), 0);
+  const st = computeOffersStatus(items);
+  const discountPct = st.unlocked.reduce((m,o)=> Math.max(m, o.discountPct||0), 0);
+  let discount = base50 * discountPct / 100;
+  discount = country === "OM" ? Math.round(discount*100)/100 : Math.round(discount);
+  const afterDiscount = Math.round((subtotal - discount)*100)/100;
+  return { subtotal, discountPct, discount, afterDiscount, offerStatus: st };
 }
 
 /* ===== إعدادات الشحن — قيم افتراضية احتياطية بس (30 أغسطس 2026: صارت تُدار فعليًا من
@@ -574,7 +601,7 @@ function hasFreeShipping(offerStatus){
    شوف loadShippingRatesFromJson() تحت. هذي القيم تُستخدم فقط لو shipping-rates.json
    غير موجود أو فيه خطأ مؤقت، عشان الموقع ما ينكسر أبدًا). ===== */
 let SHIPPING_RATES = {
-  AE: { standard: 20, western: 50 },
+  AE: { standard: 25, western: 50 },
   OM: { door: 2, nool: 1 }
 };
 
@@ -2237,9 +2264,10 @@ function renderCart(){
   }
 
   const totalQty = items.reduce((sum,i)=> sum + i.qty, 0);
-  const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
-  const offerStatus = computeOffersStatus(items);
-  const offerBadge = offerStatus.unlocked.length ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🚚</span>` : "";
+  const pricing = computeCartPricing(items);
+  const total = pricing.afterDiscount;
+  const offerStatus = pricing.offerStatus;
+  const offerBadge = pricing.discountPct ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🎉</span>` : "";
   cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${totalQty}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}${offerBadge}</span>`;
   checkoutBtn.style.opacity = "1"; checkoutBtn.style.pointerEvents = "auto";
   orderFormBtn.disabled = false;
@@ -2251,12 +2279,14 @@ function renderCart(){
   const estFee = currentShippingFee();
   const shippingCharged = freeShip ? 0 : estFee;
   const estGrandTotal = total + shippingCharged;
+  const subtotalFull = pricing.subtotal;
   let msg = t.orderMsgIntro;
   items.forEach((i,idx)=>{
     const priceTxt = i.lineTotal != null ? `${i.lineTotal} ${cur}` : t.orderMsgAskPrice;
     msg += `${idx+1}. ${toTitleCase(i.p.brand)} - ${toTitleCase(i.p.name)} (${i.size}ml) x${i.qty} — ${priceTxt}\n`;
   });
-  msg += `\n${t.shipSubtotal}: ${total} ${cur}`;
+  msg += `\n${t.shipSubtotal}: ${subtotalFull} ${cur}`;
+  if(pricing.discount > 0) msg += `\n${t.shipDiscount}: -${pricing.discount} ${cur}`;
   msg += `\n${t.shipFee}: ${freeShip ? t.shipFree : estFee + " " + cur}`;
   msg += `\n${t.shipGrandTotal}: ${estGrandTotal} ${cur} ${t.shipEstimateNote}`;
   msg += `\n${t.orderMsgPayment}: ${paymentLabel(t, paymentMethod)}`;
@@ -2280,12 +2310,14 @@ function renderCart(){
       emirateOrWilayat: "", deliveryMethod: "", address: "", notes: "",
       currency: cur,
       paymentMethod: paymentLabel(t, paymentMethod),
-      subtotal: total,
+      subtotal: subtotalFull,
+      discount: pricing.discount,
+      discountPct: pricing.discountPct,
       shippingFee: shippingCharged,
       shippingFree: freeShip,
       tabbyFee: 0,
       total: estGrandTotal,
-      offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
+      offers: offersText(offerStatus, freeShip),
       items: items.map(i => ({
         perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name),
         size: i.size, qty: i.qty, unitPrice: i.unitPrice || 0, lineTotal: i.lineTotal || 0
@@ -2319,18 +2351,20 @@ function renderCartModal(){
     return;
   }
 
-  const offerStatus = computeOffersStatus(items);
+  const pricingM = computeCartPricing(items);
+  const offerStatus = pricingM.offerStatus;
   let offerBannerHtml = "";
   if(offerStatus.unlocked.length){
     offerBannerHtml = `<div class="offer-banner offer-banner-won">
       <div class="offer-banner-title">${t.offerUnlockedTitle}</div>
-      ${offerStatus.unlocked.map(o=>`<div class="offer-banner-item">${o.reward[lang]}</div>`).join("")}
+      ${offerStatus.unlocked.map(o=>`<div class="offer-banner-item">${o.reward[lang]}${pricingM.discount>0 ? ` (-${pricingM.discount} ${currencyLabel()})` : ""}</div>`).join("")}
+      <div class="offer-banner-item">${t.freeDeliveryAll}</div>
     </div>`;
   } else if(offerStatus.nextHint){
     const h = offerStatus.nextHint;
     const mid = h.sizeKey === "50" ? t.offerNextMid50 : t.offerNextMid10;
     offerBannerHtml = `<div class="offer-banner offer-banner-progress">
-      ${t.offerNextPrefix} <b>${h.remaining}</b> ${mid} <b>${h.reward[lang]}</b>
+      ${t.offerNextPrefix} <b>${h.remaining}</b> ${mid} <b>${h.reward[lang]}</b><br>${t.freeDeliveryAll}
     </div>`;
   }
 
@@ -2380,9 +2414,11 @@ function renderCartModal(){
     };
   });
 
-  const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
   totalWrap.style.display = "flex";
-  totalWrap.innerHTML = `<span>${t.cartModalTotalLabel}</span><span>${total} ${cur}</span>`;
+  totalWrap.style.flexWrap = "wrap";
+  totalWrap.innerHTML = pricingM.discount > 0
+    ? `<span style="flex-basis:100%;display:flex;justify-content:space-between;font-size:.85em;opacity:.8;"><span>${t.shipSubtotal}</span><span>${pricingM.subtotal} ${cur}</span></span><span style="flex-basis:100%;display:flex;justify-content:space-between;font-size:.85em;"><span>${t.shipDiscount}</span><span>-${pricingM.discount} ${cur}</span></span><span>${t.cartModalTotalLabel}</span><span>${pricingM.afterDiscount} ${cur}</span>`
+    : `<span>${t.cartModalTotalLabel}</span><span>${pricingM.afterDiscount} ${cur}</span>`;
 }
 
 function openCartModal(){ document.getElementById("cartModalOverlay").classList.add("open"); renderCartModal(); }
@@ -2478,17 +2514,21 @@ function renderShippingSummary(){
   const t = I18N[lang];
   const items = cartItemsList();
   const cur = currencyLabel();
-  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
-  const offerStatus = computeOffersStatus(items);
+  const pr = computeCartPricing(items);
+  const subtotal = pr.subtotal;
+  const offerStatus = pr.offerStatus;
   const freeShip = hasFreeShipping(offerStatus);
   const fee = currentShippingFee();
   const shippingCharged = freeShip ? 0 : fee;
-  const preTabbyTotal = subtotal + shippingCharged;
+  const preTabbyTotal = pr.afterDiscount + shippingCharged;
   const tabbyFee = tabbyFeeFor(preTabbyTotal);
   const grand = preTabbyTotal + tabbyFee;
   const feeHtml = freeShip
-    ? `<s>${fee} ${cur}</s> <span class="os-free">${t.shipFree}</span>`
+    ? `<span class="os-free">${t.shipFree}</span>`
     : `${fee} ${cur}`;
+  const discountRowHtml = pr.discount > 0
+    ? `<div class="os-row"><span>${t.shipDiscount}</span><span>-${pr.discount} ${cur}</span></div>`
+    : "";
   const tabbyRowHtml = tabbyFee > 0
     ? `<div class="os-row"><span>${t.tabbyFeeLabel}</span><span>${tabbyFee} ${cur}</span></div>`
     : "";
@@ -2501,6 +2541,7 @@ function renderShippingSummary(){
   document.getElementById("orderShippingSummary").innerHTML = `
     ${itemsHtml}
     <div class="os-row"><span>${t.shipSubtotal}</span><span>${subtotal} ${cur}</span></div>
+    ${discountRowHtml}
     <div class="os-row"><span>${t.shipFee}</span><span>${feeHtml}</span></div>
     ${tabbyRowHtml}
     <div class="os-row os-total"><span>${t.shipGrandTotal}</span><span>${grand} ${cur}</span></div>
@@ -2546,12 +2587,13 @@ function buildOrderPayload(){
   const t = I18N[lang];
   const items = cartItemsList();
   const cur = currencyLabel();
-  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
-  const offerStatus = computeOffersStatus(items);
+  const pr = computeCartPricing(items);
+  const subtotal = pr.subtotal;
+  const offerStatus = pr.offerStatus;
   const freeShip = hasFreeShipping(offerStatus);
   const shippingFee = currentShippingFee();
   const shippingCharged = freeShip ? 0 : shippingFee;
-  const preTabbyTotal = subtotal + shippingCharged;
+  const preTabbyTotal = pr.afterDiscount + shippingCharged;
   const tabbyFee = tabbyFeeFor(preTabbyTotal);
   const grandTotal = preTabbyTotal + tabbyFee;
 
@@ -2580,11 +2622,13 @@ function buildOrderPayload(){
     currency: cur,
     paymentMethod: paymentLabel(t, paymentMethod),
     subtotal,
+    discount: pr.discount,
+    discountPct: pr.discountPct,
     shippingFee: shippingCharged,
     shippingFree: freeShip,
     tabbyFee,
     total: grandTotal,
-    offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
+    offers: offersText(offerStatus, freeShip),
     items: items.map(i => ({
       perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: i.size, qty: i.qty,
       unitPrice: i.unitPrice || 0, lineTotal: i.lineTotal
@@ -2654,6 +2698,8 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
   payload.items.forEach((i,idx)=>{
     waMsgLines.push(`${idx+1}. ${i.brand} - ${i.name} (${i.size}ml) x${i.qty}`);
   });
+  if(payload.discount > 0) waMsgLines.push(`${t.shipDiscount}: -${payload.discount} ${payload.currency}`);
+  waMsgLines.push(t.freeDeliveryAll);
   if(payload.tabbyFee > 0) waMsgLines.push(`${t.tabbyFeeLabel}: ${payload.tabbyFee} ${payload.currency}`);
   waMsgLines.push(`${t.shipGrandTotal}: ${payload.total} ${payload.currency}`);
   waMsgLines.push(`${t.orderMsgPayment}: ${payload.paymentMethod}`);

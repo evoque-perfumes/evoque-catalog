@@ -530,6 +530,7 @@
       <div class="field" style="margin-top:10px; max-width:240px;">
         <label for="sl_discount">خصم على الطلب (AED) — اختياري</label>
         <input type="number" id="sl_discount" min="0" step="0.01" placeholder="0">
+        <small class="hint" id="sl_discountHint" style="margin-top:4px;"></small>
       </div>
       <div class="row" id="sl_netTotalRow" style="justify-content:space-between; margin-top:6px; display:none;">
         <b>الإجمالي بعد الخصم: <span id="sl_netTotal">0</span> AED</b>
@@ -567,6 +568,17 @@
     <div class="field" style="margin-top:10px;">
       <label for="sl_address">العنوان — اختياري</label>
       <input type="text" id="sl_address" placeholder="مثال: دبي، الإمارات — أو تفاصيل التوصيل">
+    </div>
+
+    <div id="sl_rulesBox" style="margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--panel-2);">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:700;">
+        <input type="checkbox" id="sl_legacy" style="width:auto; margin:0;"> 📜 طلب قديم (قبل ١٨ أكتوبر) — بدون القواعد الجديدة
+      </label>
+      <small class="hint" id="sl_legacyHint" style="margin-top:6px;"></small>
+      <div id="sl_deliveryBox" class="grid2" style="margin-top:10px;">
+        <div class="field"><label for="sl_delivType">🚚 نوع التوصيل (التوصيل مجاني للعميل)</label><select id="sl_delivType"></select></div>
+        <div class="field"><label for="sl_deliveryCost">تكلفة التوصيل علينا (AED)</label><input type="number" id="sl_deliveryCost" min="0" step="0.01" placeholder="0"></div>
+      </div>
     </div>
 
     <div class="row">
@@ -1185,10 +1197,12 @@
     <div class="kpi-grid" id="cost_kpiGrid">
       <div class="kpi-card"><div class="kpi-label">عدد القطع المحتسبة</div><div class="kpi-value" id="cost_units">—</div></div>
       <div class="kpi-card good"><div class="kpi-label">إجمالي الإيرادات (AED)</div><div class="kpi-value" id="cost_revenue">—</div></div>
-      <div class="kpi-card"><div class="kpi-label">إجمالي رأس المال / التكلفة (AED)</div><div class="kpi-value" id="cost_capital">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">إجمالي التكلفة: عطور + توصيل (AED)</div><div class="kpi-value" id="cost_capital">—</div></div>
       <div class="kpi-card good"><div class="kpi-label">صافي الربح (AED)</div><div class="kpi-value" id="cost_profit">—</div></div>
       <div class="kpi-card"><div class="kpi-label">هامش الربح</div><div class="kpi-value" id="cost_margin">—</div></div>
       <div class="kpi-card clickable alert" id="cost_missingCard"><div class="kpi-label">عطور بيعت بدون بيانات تكلفة (اضغط للمراجعة)</div><div class="kpi-value" id="cost_missingCount">—</div><div class="kpi-sub">تُحسب تكلفتها صفر لين تعبّي بياناتها</div></div>
+      <div class="kpi-card"><div class="kpi-label">🚚 تكلفة التوصيل المجاني (AED)</div><div class="kpi-value" id="cost_deliveryCost">—</div><div class="kpi-sub" id="cost_deliverySub">محسوبة ضمن التكلفة أعلاه</div></div>
+      <div class="kpi-card"><div class="kpi-label">🏷️ إجمالي الخصومات الممنوحة (AED)</div><div class="kpi-value" id="cost_discountGiven">—</div><div class="kpi-sub">مطروحة من الإيرادات أصلاً</div></div>
       <div class="kpi-card"><div class="kpi-label">🎁 تكلفة قطع الهدايا المجانية (AED)</div><div class="kpi-value" id="cost_giftCost">—</div><div class="kpi-sub">غير محتسبة بالربح أعلاه</div></div>
     </div>
 
@@ -2576,7 +2590,7 @@ function selectPerfumeForSales(p){
   const defaultSize = s50 > 0 ? "50" : (s10 > 0 ? "10" : "50");
   document.getElementById("sl_size").innerHTML = slSizeOptionsHtml(p, defaultSize);
   document.getElementById("sl_qty").value = "1";
-  document.getElementById("sl_price").value = defaultSize === "50" ? (p.price50 != null ? p.price50 : "") : (p.price10 != null ? p.price10 : "");
+  document.getElementById("sl_price").value = slPriceFor(p, defaultSize);
   document.getElementById("sl_isGift").checked = false;
   document.getElementById("sl_price").disabled = false;
   slAutoGift = false;
@@ -2619,7 +2633,7 @@ function slSyncSizeGift(){
   } else if(slAutoGift){
     slAutoGift = false;
     chk.checked = false; priceInput.disabled = false;
-    priceInput.value = (salesSelected && salesSelected.price50 != null) ? salesSelected.price50 : (priceInput.dataset.prevValue || "");
+    priceInput.value = (salesSelected && salesSelected.price50 != null) ? slPriceFor(salesSelected, "50") : (priceInput.dataset.prevValue || "");
   }
 }
 document.getElementById("sl_size").addEventListener("change", () => {
@@ -2628,7 +2642,7 @@ document.getElementById("sl_size").addEventListener("change", () => {
   if(document.getElementById("sl_isGift").checked) return; // عطر مجاني — السعر يضل 0 بغض النظر عن الحجم
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
-  document.getElementById("sl_price").value = size === "50" ? (p.price50 ?? "") : (p.price10 ?? "");
+  document.getElementById("sl_price").value = slPriceFor(p, size);
 });
 
 // 13 أكتوبر 2026: علامة "🎁 هدية مجانية" اليدوية — لما تتفعّل، نثبّت السعر على 0
@@ -2701,7 +2715,7 @@ function slRenderCart(){
     saveBtn.disabled = true;
     clearBtn.style.display = "none";
     slCartSubtotal = 0;
-    slUpdateDiscountPreview();
+    slApplyRules();
     return;
   }
   cartWrap.style.display = "block";
@@ -2724,9 +2738,9 @@ function slRenderCart(){
   }).join("");
   totalEl.textContent = fmtNum(total);
   const cntEl = document.getElementById("sl_cartCount"); if(cntEl) cntEl.textContent = slCountText(salesCart);
-  const freeEl = document.getElementById("sl_cartFree"); if(freeEl) freeEl.style.display = hasFreeShippingForItems(salesCart) ? "inline" : "none";
+  const freeEl = document.getElementById("sl_cartFree"); if(freeEl) freeEl.style.display = (!slIsLegacy() || hasFreeShippingForItems(salesCart)) ? "inline" : "none";
   slCartSubtotal = total;
-  slUpdateDiscountPreview();
+  slApplyRules();
   listEl.querySelectorAll(".sl-cart-edit-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const idx = Number(e.target.closest(".sale-row").dataset.idx);
@@ -2750,6 +2764,122 @@ document.getElementById("sl_clearCartBtn").addEventListener("click", () => {
 
 // 3 أكتوبر 2026: معاينة لحظية للإجمالي بعد الخصم — ما يلمس سعر الوحدة لأي عنصر
 // بالسلة، فقط يعرض "كم المطلوب فعليًا من العميل" بعد طرح الخصم من مجموع السلة.
+// ===== 18 أكتوبر 2026: القواعد الجديدة (توصيل مجاني لكل طلب + خصم 15% من 3 عطور) =====
+// الطلبات القديمة (قبل التاريخ هذا) تُسجَّل بخيار "طلب قديم": السعر القديم 50، بدون خصم
+// تلقائي، وبدون تكلفة توصيل. التوصيل المجاني يكلّف المتجر، فنسجّل تكلفته على الطلب ونطرحها من الربح.
+const NEW_RULES_START = "2026-10-18";
+const LEGACY_PRICE_50 = 50;
+const NEW_DISC_MIN_QTY = 3, NEW_DISC_PCT = 15;
+const OMR_TO_AED_EQ = 10; // نفس معادلة اللوحة: 1 ريال عُماني = 10 بالحسابات (سعر عُمان = سعر الإمارات ÷ 10)
+let slDiscountTouched = false, slCostTouched = false, slRatesLoaded = false;
+
+function slIsLegacy(){ return document.getElementById("sl_legacy").checked; }
+function slPaidQty50(items){
+  return (items || []).reduce((s, it) => s + ((!it.isGift && String(it.size) === "50") ? (Number(it.qty) || 0) : 0), 0);
+}
+function slPaidSubtotal50(items){
+  return (items || []).reduce((s, it) => s + ((!it.isGift && String(it.size) === "50") ? (Number(it.qty) || 0) * (Number(it.unitPrice) || 0) : 0), 0);
+}
+function slAutoDiscountFor(items){
+  if(slPaidQty50(items) < NEW_DISC_MIN_QTY) return 0;
+  const raw = slPaidSubtotal50(items) * NEW_DISC_PCT / 100;
+  // نفس تقريب الموقع: الإمارات رقم صحيح، عُمان لخانتين عشريتين بالريال
+  return document.getElementById("sl_country").value === "OM"
+    ? Math.round(raw / OMR_TO_AED_EQ * 100) / 100 * OMR_TO_AED_EQ
+    : Math.round(raw);
+}
+async function slEnsureRates(){
+  if(slRatesLoaded) return;
+  try{
+    const res = await fetch(SHIPPING_JSON_RAW_URL, { cache: "no-store" });
+    if(res.ok){ shippingRatesData = await res.json(); slRatesLoaded = true; }
+  }catch(e){ /* نكمل بالقيم الافتراضية */ }
+  slApplyRules();
+}
+function slDeliveryOptions(countryCode){
+  const r = shippingRatesData || SHIPPING_DEFAULTS;
+  const ae = r.AE || SHIPPING_DEFAULTS.AE, om = r.OM || SHIPPING_DEFAULTS.OM;
+  if(countryCode === "AE") return [
+    { v: "ae_standard", label: "الإمارات — عادي", cost: Number(ae.standard) || 0 },
+    { v: "ae_western", label: "الإمارات — المنطقة الغربية", cost: Number(ae.western) || 0 }
+  ];
+  if(countryCode === "OM") return [
+    { v: "om_door", label: "عُمان — توصيل للمنزل", cost: (Number(om.door) || 0) * OMR_TO_AED_EQ },
+    { v: "om_nool", label: "عُمان — استلام NOOL", cost: (Number(om.nool) || 0) * OMR_TO_AED_EQ }
+  ];
+  return [{ v: "other", label: "دولة ثانية / غير محدد (اكتب التكلفة)", cost: 0 }];
+}
+// يعيد بناء خيارات التوصيل حسب الدولة (يحافظ على الاختيار الحالي لو لسا موجود) ثم يطبّق القواعد
+function slRefreshDeliveryOptions(keepValue){
+  const sel = document.getElementById("sl_delivType");
+  const opts = slDeliveryOptions(document.getElementById("sl_country").value);
+  const prev = keepValue != null ? keepValue : sel.value;
+  sel.innerHTML = opts.map(o => `<option value="${o.v}">${o.label}</option>`).join("");
+  if(opts.some(o => o.v === prev)) sel.value = prev;
+}
+function slApplyRules(){
+  const legacy = slIsLegacy();
+  document.getElementById("sl_deliveryBox").style.display = legacy ? "none" : "";
+  document.getElementById("sl_legacyHint").textContent = legacy
+    ? "الطلب القديم: السعر 50 للعطر، بدون خصم تلقائي، وبدون تكلفة توصيل. تقدر تعدّل أي رقم يدويًا."
+    : "القواعد الجديدة: السعر 70، توصيل مجاني للعميل (يُسجَّل كتكلفة علينا)، وخصم 15% تلقائي من 3 عطور.";
+  const dHint = document.getElementById("sl_discountHint");
+  const auto = slAutoDiscountFor(salesCart);
+  if(!slDiscountTouched){
+    document.getElementById("sl_discount").value = (!legacy && auto > 0) ? auto : "";
+  }
+  dHint.textContent = (!legacy && slPaidQty50(salesCart) >= NEW_DISC_MIN_QTY)
+    ? `خصم ${NEW_DISC_PCT}% تلقائي (${slPaidQty50(salesCart)} عطور) = ${fmtNum(auto)} AED — تقدر تغيّره.`
+    : "";
+  if(!legacy){
+    slRefreshDeliveryOptions();
+    const sel = document.getElementById("sl_delivType");
+    const opt = slDeliveryOptions(document.getElementById("sl_country").value).find(o => o.v === sel.value);
+    if(!slCostTouched) document.getElementById("sl_deliveryCost").value = opt && opt.cost ? opt.cost : "";
+  }
+  slUpdateDiscountPreview();
+}
+// يبدّل سعر عطور 50مل بين القديم (50) والجديد (سعر الكتالوج) فقط للسطور اللي سعرها يساوي الافتراضي الآخر
+function slSwitchDefaultPrices(){
+  const legacy = slIsLegacy();
+  let changed = 0;
+  salesCart.forEach(it => {
+    if(it.isGift || String(it.size) !== "50") return;
+    const p = perfumes.find(x => x.id === it.perfumeId);
+    const cur = p && p.price50 != null ? Number(p.price50) : null;
+    if(legacy && cur != null && Number(it.unitPrice) === cur && cur !== LEGACY_PRICE_50){ it.unitPrice = LEGACY_PRICE_50; changed++; }
+    else if(!legacy && Number(it.unitPrice) === LEGACY_PRICE_50 && cur != null && cur !== LEGACY_PRICE_50){ it.unitPrice = cur; changed++; }
+  });
+  const priceInput = document.getElementById("sl_price");
+  if(salesSelected && !document.getElementById("sl_isGift").checked && document.getElementById("sl_size").value === "50"){
+    priceInput.value = slPriceFor(salesSelected, "50");
+  }
+  return changed;
+}
+function slPriceFor(p, size){
+  if(size === "50") return (slIsLegacy() && p.price50 != null) ? LEGACY_PRICE_50 : (p.price50 != null ? p.price50 : "");
+  return p.price10 != null ? p.price10 : "";
+}
+function slAutoSetLegacyByDate(){
+  const d = document.getElementById("sl_date").value;
+  if(!d) return;
+  document.getElementById("sl_legacy").checked = d < NEW_RULES_START;
+}
+document.getElementById("sl_legacy").addEventListener("change", () => {
+  const n = slSwitchDefaultPrices();
+  slDiscountTouched = false; slCostTouched = false;
+  slRenderCart();
+  if(n) slShowStatus(`تم تغيير سعر ${n} عطر بالسلة تلقائيًا (${slIsLegacy() ? "السعر القديم 50" : "السعر الجديد"}).`, "info");
+});
+document.getElementById("sl_date").addEventListener("change", () => {
+  slAutoSetLegacyByDate();
+  document.getElementById("sl_legacy").dispatchEvent(new Event("change"));
+});
+document.getElementById("sl_discount").addEventListener("input", () => { slDiscountTouched = true; });
+document.getElementById("sl_deliveryCost").addEventListener("input", () => { slCostTouched = true; });
+document.getElementById("sl_delivType").addEventListener("change", () => { slCostTouched = false; slApplyRules(); });
+document.getElementById("sl_country").addEventListener("change", () => { slCostTouched = false; slApplyRules(); });
+
 function slUpdateDiscountPreview(){
   const discount = Math.max(0, Number(document.getElementById("sl_discount").value) || 0);
   const row = document.getElementById("sl_netTotalRow");
@@ -2770,7 +2900,11 @@ function slResetOrderFields(){
   document.getElementById("sl_phone").value = "";
   document.getElementById("sl_address").value = "";
   document.getElementById("sl_discount").value = "";
-  slUpdateDiscountPreview();
+  slDiscountTouched = false; slCostTouched = false;
+  document.getElementById("sl_deliveryCost").value = "";
+  slAutoSetLegacyByDate();
+  slRefreshDeliveryOptions();
+  slApplyRules();
   salesEditingOriginalCountry = null;
   sl_countryTouched = false;
 }
@@ -2902,6 +3036,11 @@ function slLoadOrderForEdit(key){
   document.getElementById("sl_address").value = g.address || "";
   const existingDiscount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
   document.getElementById("sl_discount").value = existingDiscount > 0 ? existingDiscount : "";
+  const first = g.items[0] || {};
+  document.getElementById("sl_legacy").checked = first.freeDelivery !== true;
+  slDiscountTouched = true; slCostTouched = true;
+  slRefreshDeliveryOptions(first.deliveryType || null);
+  document.getElementById("sl_deliveryCost").value = Number(first.deliveryCost) > 0 ? first.deliveryCost : "";
 
   salesSelected = null;
   document.getElementById("selectedChipWrap").innerHTML = "";
@@ -3038,6 +3177,15 @@ function renderSalesHistory(){
     const discount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
     const total = Math.max(0, subtotal - discount);
     const discountTxt = discount > 0 ? ` (بعد خصم ${fmtNum(discount)} AED)` : "";
+    const f0 = g.items[0] || {};
+    let rulesTxt = "";
+    if(f0.freeDelivery === true){
+      const perfCost = g.items.filter(o => !o.isGift).reduce((sum,o) => sum + (Number(o.qty)||0) * perfumeUnitCost(perfumes.find(x => x.id === o.perfumeId), o.size), 0);
+      const dCost = Number(f0.deliveryCost) || 0;
+      rulesTxt = `<div class="sale-row-meta">🚚 توصيل مجاني (تكلفته علينا ${fmtNum(dCost)} AED) — ربح الطلب تقريبًا <b>${fmtNum(total - perfCost - dCost)} AED</b></div>`;
+    } else {
+      rulesTxt = `<div class="sale-row-meta">📜 طلب قديم</div>`;
+    }
     const status = (g.items[0] && g.items[0].status) || "";
     const paid = !!(g.items[0] && g.items[0].paid);
     const itemsListHtml = g.items.map(o => {
@@ -3052,6 +3200,7 @@ function renderSalesHistory(){
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
       <div class="sale-row-meta">${g.date || ""} — <b style="color:var(--text,#2A1216); font-size:14px;">🧴 ${slCountText(g.items)}</b>${g.countryLabel ? " — " + g.countryLabel : ""}${g.phone ? " — 📞 " + String(g.phone).replace(/</g,"&lt;") : ""}${g.address ? " — 📍 " + String(g.address).replace(/</g,"&lt;") : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
+      ${rulesTxt}
       <div class="sale-row-actions">
         <select class="sale-row-status-select" data-key="${g.key}" style="color:${orderStatusColor(status)};">
           <option value="" ${status === "" ? "selected" : ""}>🆕 جديد</option>
@@ -3169,6 +3318,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       unitPrice: item.isGift ? 0 : item.unitPrice,
       ...(item.isGift ? { isGift: true } : {}),
       ...(i === 0 && discount > 0 ? { discount } : {}),
+      ...(i === 0 && !slIsLegacy() ? { freeDelivery: true, deliveryType: document.getElementById("sl_delivType").value, deliveryCost: Math.max(0, Number(document.getElementById("sl_deliveryCost").value) || 0) } : {}),
       customer, date,
       country, countryLabel, phone, address,
       orderId,
@@ -3298,8 +3448,9 @@ function setMode(newMode){
   if(mode === "sales"){
     document.getElementById("sl_addItemWrap").style.display = "none";
     document.getElementById("sl_pickHint").style.display = "block";
-    if(!document.getElementById("sl_date").value) document.getElementById("sl_date").value = todayStr();
+    if(!document.getElementById("sl_date").value){ document.getElementById("sl_date").value = todayStr(); slAutoSetLegacyByDate(); }
     slRenderCart();
+    slEnsureRates();
     renderSalesHistory();
   }
   hideStatus();
@@ -4909,7 +5060,7 @@ COST_FIELD_KEYS.forEach(k => {
 function computeProfitReport(){
   const result = {
     totalRevenue: 0, totalCost: 0, totalProfit: 0, margin: 0, unitsCount: 0,
-    giftCost: 0, missingCostIds: [], rows: []
+    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0
   };
   if(!salesData || !salesData.length) return result;
   const missingCostIds = new Set();
@@ -4936,6 +5087,12 @@ function computeProfitReport(){
     const p = perfumes.find(x => x.id === o.perfumeId);
     result.giftCost += (Number(o.qty) || 0) * perfumeUnitCost(p, o.size);
   });
+  // 18 أكتوبر 2026: تكلفة التوصيل المجاني (على الطلبات الجديدة فقط) تنطرح من الربح
+  salesData.forEach(o => {
+    if(o.freeDelivery === true){ result.newOrders++; result.deliveryCost += Number(o.deliveryCost) || 0; }
+    result.discountGiven += Number(o.discount) || 0;
+  });
+  result.totalCost += result.deliveryCost;
   result.totalProfit = result.totalRevenue - result.totalCost;
   result.margin = result.totalRevenue > 0 ? (result.totalProfit / result.totalRevenue * 100) : 0;
   result.missingCostIds = Array.from(missingCostIds);
@@ -5389,6 +5546,9 @@ function renderCostPanel(){
   document.getElementById("cost_margin").textContent = report.totalRevenue > 0 ? report.margin.toFixed(1) + "%" : "—";
   document.getElementById("cost_missingCount").textContent = fmtNum(report.missingCostIds.length);
   document.getElementById("cost_giftCost").textContent = fmtNum(report.giftCost);
+  document.getElementById("cost_deliveryCost").textContent = fmtNum(report.deliveryCost);
+  document.getElementById("cost_deliverySub").textContent = `على ${report.newOrders} طلب بالقواعد الجديدة — محسوبة ضمن التكلفة أعلاه`;
+  document.getElementById("cost_discountGiven").textContent = fmtNum(report.discountGiven);
   renderCostByPerfumeList(report.rows);
   renderCostManageList(document.getElementById("cost_manageSearch").value);
 }
@@ -6140,7 +6300,7 @@ document.getElementById("bank_saveBtn").addEventListener("click", async () => {
 // وكتابة عبر GitHub Contents API بتوكن المستخدم. الموقع (assets/catalog.js) يقرأ نفس
 // الملف مباشرة (loadShippingRatesFromJson) فيحدّث رسوم التوصيل وعمولة تابي فورًا
 // بدون أي تعديل كود — هذا كان طلب جاسم بالضبط: "أقدر أغيّر الرسوم أي وقت".
-const SHIPPING_DEFAULTS = { AE: { standard: 20, western: 50 }, OM: { door: 2, nool: 1 }, tabbyFeePercent: 5 };
+const SHIPPING_DEFAULTS = { AE: { standard: 25, western: 50 }, OM: { door: 2, nool: 1 }, tabbyFeePercent: 5 };
 let shippingRatesData = JSON.parse(JSON.stringify(SHIPPING_DEFAULTS));
 
 function shipShowStatus(msg, cls){
@@ -6469,7 +6629,7 @@ function renderOrdersQueueList(){
       </div>
       <div style="margin-top:10px; font-size:13px; line-height:1.9;">${itemsHtml || "<em>ما فيه عناصر</em>"}</div>
       <div style="margin-top:6px; font-size:13px;">
-        المجموع الفرعي: ${fmtNum(o.subtotal||0)} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${o.currency||""}</b>
+        المجموع الفرعي: ${fmtNum(o.subtotal||0)}${(Number(o.subtotal)||0)+(Number(o.shippingFee)||0)+(Number(o.tabbyFee)||0)-(Number(o.total)||0) > 0 ? ` — خصم: ${fmtNum((Number(o.subtotal)||0)+(Number(o.shippingFee)||0)+(Number(o.tabbyFee)||0)-(Number(o.total)||0))}` : ""} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${o.currency||""}</b>
       </div>
       ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#1F6B41; font-weight:700;">🚚 ${String(o.offers).replace(/</g,"&lt;")}</div>` : ""}
       ${metaParts ? `<div style="margin-top:6px; font-size:12px; color:var(--muted);">${metaParts}</div>` : ""}
@@ -6536,12 +6696,29 @@ function renderOrdersQueueList(){
         const finalAddress = addressInput.value.trim();
         const orderKey = order.orderId;
         const nowDate = todayStr();
+        // 18 أكتوبر 2026: طلبات الموقع الجديدة. عُمان تُسجَّل بالحسابات (ريال × 10) مثل بقية اللوحة.
+        // الخصم = المجموع قبل الخصم + التوصيل المدفوع - الإجمالي (السكربت يمرّر هذي الأرقام فقط).
+        const isOm = /OMR|ر\.ع|عمان|عُمان|oman/i.test(String(order.currency || "") + " " + String(order.country || ""));
+        const mult = isOm ? OMR_TO_AED_EQ : 1;
+        const orderDiscount = Math.max(0, (Number(order.subtotal)||0) + (Number(order.shippingFee)||0) + (Number(order.tabbyFee)||0) - (Number(order.total)||0)) * mult;
+        let orderDelivCost = 0, orderDelivType = "";
+        if(order.shippingFree === true){
+          const em = String(order.emirateOrWilayat || "");
+          const dm = String(order.deliveryMethod || "");
+          const optsAll = isOm ? slDeliveryOptions("OM") : slDeliveryOptions("AE");
+          const pick = isOm
+            ? (/nool|نول/i.test(dm) ? optsAll[1] : optsAll[0])
+            : (/الغربية|western/i.test(em) ? optsAll[1] : optsAll[0]);
+          orderDelivCost = pick.cost; orderDelivType = pick.v;
+        }
         const newSalesEntries = items.map((it, i) => ({
           id: `${it.perfumeId}-${Date.now()}-${i}`,
           perfumeId: it.perfumeId,
           size: it.size,
           qty: it.qty,
-          unitPrice: it.unitPrice,
+          unitPrice: (Number(it.unitPrice) || 0) * mult,
+          ...(i === 0 && orderDiscount > 0 ? { discount: Math.round(orderDiscount*100)/100 } : {}),
+          ...(i === 0 && order.shippingFree === true ? { freeDelivery: true, deliveryType: orderDelivType, deliveryCost: orderDelivCost } : {}),
           customer: finalName,
           date: nowDate,
           country: order.country || "",
