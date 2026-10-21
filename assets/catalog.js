@@ -304,7 +304,7 @@ const I18N = {
     cartEmpty: "سلتك فارغة",
     cartItemsLabel: "عطر",
     approxTotal: "الإجمالي تقريبًا",
-    withoutDelivery: "(بدون التوصيل)",
+    withoutDelivery: "· التوصيل مجاني",
     checkout: "إتمام الطلب عبر واتساب",
     cartModalTitle: "سلتك",
     cartModalEmpty: "سلتك فارغة حاليًا",
@@ -336,8 +336,10 @@ const I18N = {
     lblDeliveryNool: "استلام من مكتب NOOL",
     shipSubtotal: "المجموع الفرعي",
     shipFee: "رسوم التوصيل",
-    shipFree: "مجاني 🎁",
-    shipGrandTotal: "الإجمالي شامل التوصيل",
+    shipFree: "مجاني",
+    shipDiscount: "خصم ١٥٪ (٣ عطور فأكثر)",
+    freeDeliveryAll: "التوصيل مجاني لكل الطلبات",
+    shipGrandTotal: "الإجمالي (التوصيل مجاني)",
     shipEstimateNote: "(الرسوم النهائية تتأكد حسب موقعك بالضبط)",
     orderSubmitBtn: "إرسال الطلب",
     orderSubmitting: "جاري الإرسال...",
@@ -348,7 +350,7 @@ const I18N = {
     orderErrorMsg: "حدث خطأ بإرسال الطلب. تقدر تكمل الطلب مباشرة عبر واتساب:",
     waFallbackLabel: "تواصل عبر واتساب",
     footer: "© 2026 إيفوك للعطور — جميع الحقوق محفوظة",
-    heroEyebrow: "عطور فاخرة، هوية تعرف اسمك",
+    heroEyebrow: "",
     teaserTag: "قريبًا",
     teaserTitle: "تشكيلة «قلعة الحمراء»",
     teaserText: "عطور بقصة من قلب الأندلس.",
@@ -361,9 +363,9 @@ const I18N = {
     lightboxHint: "اضغط على الصورة لتكبيرها وقراءة التفاصيل",
     // ===== نصوص إعادة الهيكلة لعدة صفحات — 21 أغسطس 2026 =====
     navHome: "الرئيسية", navMen: "رجالي", navWomen: "نسائي", navUnisex: "للجنسين",
-    bestSellersEyebrow: "الأكثر طلبًا",
-    bestSellersTitle: "عطورنا الأكثر مبيعًا",
-    bestSellersSubtitle: "أبرز العطور اللي يطلبها عملاؤنا بكثرة — نقطة بداية ممتازة لو أول مرة تتسوق من عندنا.",
+    bestSellersEyebrow: "مختارات",
+    bestSellersTitle: "مختارات إيفوك",
+    bestSellersSubtitle: "مجموعة مختارة من عطورنا — بداية حلوة لو أول مرة تطلب من عندنا.",
     homeSearchPlaceholder: "ابحث عن أي عطر بالاسم أو البراند...",
     searchResultsEyebrow: "نتائج البحث",
     searchResultsTitle: "عطور مطابقة لبحثك",
@@ -474,7 +476,7 @@ const I18N = {
     cartModalEmpty: "Your cart is empty right now",
     cartModalTotalLabel: "Total",
     removeItem: "Remove",
-    withoutDelivery: "(excl. delivery)",
+    withoutDelivery: "· free delivery",
     checkout: "Checkout via WhatsApp",
     orderMsgIntro: "I'd like to order from Evoque:\n\n",
     orderMsgPayment: "Preferred payment method",
@@ -502,8 +504,10 @@ const I18N = {
     lblDeliveryNool: "Pickup from NOOL office",
     shipSubtotal: "Subtotal",
     shipFee: "Delivery Fee",
-    shipFree: "Free 🎁",
-    shipGrandTotal: "Total incl. delivery",
+    shipFree: "Free",
+    shipDiscount: "15% off (3+ perfumes)",
+    freeDeliveryAll: "Free delivery on every order",
+    shipGrandTotal: "Total (free delivery)",
     shipEstimateNote: "(Final fee confirmed based on your exact location)",
     orderSubmitBtn: "Submit Order",
     orderSubmitting: "Submitting...",
@@ -514,7 +518,7 @@ const I18N = {
     orderErrorMsg: "There was an error submitting your order. You can complete it directly via WhatsApp:",
     waFallbackLabel: "Contact via WhatsApp",
     footer: "© 2026 Evoque Perfumes — All rights reserved",
-    heroEyebrow: "Luxury fragrances, made for you",
+    heroEyebrow: "",
     teaserTag: "Coming soon",
     teaserTitle: "The Alhambra Collection",
     teaserText: "Fragrances with a story from the heart of Andalusia.",
@@ -527,9 +531,9 @@ const I18N = {
     lightboxHint: "Tap the image to zoom in and read the details",
     // ===== Multi-page restructure strings — Aug 21, 2026 =====
     navHome: "Home", navMen: "Men", navWomen: "Women", navUnisex: "Unisex",
-    bestSellersEyebrow: "Most Requested",
-    bestSellersTitle: "Our Best-Selling Fragrances",
-    bestSellersSubtitle: "The scents our customers order most — a great place to start if this is your first time shopping with us.",
+    bestSellersEyebrow: "Picks",
+    bestSellersTitle: "Evoque Picks",
+    bestSellersSubtitle: "A curated selection from our collection — a good place to start.",
     homeSearchPlaceholder: "Search any perfume by name or brand...",
     searchResultsEyebrow: "Search Results",
     searchResultsTitle: "Fragrances Matching Your Search",
@@ -560,12 +564,32 @@ const I18N = {
 // المتجر — صار يختار الهدية يدويًا بنفسه من لوحة التحكم (تبويب "💰 المبيعات") بدل
 // ما تُحسب تلقائيًا هنا. أبقينا فقط على التوصيل المجاني التلقائي زي ما هو بالضبط
 // (5 قطع 50مل فأكثر = توصيل مجاني)، لأنه طلب صريح يبقى كما هو.
+// 18 أكتوبر 2026 (طلب صاحب المتجر): التوصيل مجاني لكل الطلبات، ومن 3 عطور 50مل
+// فأكثر خصم 15% على المجموع. التوصيل تكلفة على المتجر (تُسجَّل بلوحة التحكم).
+const FREE_DELIVERY_ALL = true;
 const OFFERS_CONFIG = [
-  { size:"50", minQty:5, freeShipping:true, reward:{ ar:"توصيل مجاني", en:"Free delivery" } },
+  { size:"50", minQty:3, discountPct:15, reward:{ ar:"خصم ١٥٪ على الطلب", en:"15% off your order" } },
 ];
 
 function hasFreeShipping(offerStatus){
-  return offerStatus.unlocked.some(o => o.freeShipping);
+  return FREE_DELIVERY_ALL || offerStatus.unlocked.some(o => o.freeShipping);
+}
+function offersText(offerStatus, freeShip){
+  const parts = [];
+  if(freeShip) parts.push(lang==="ar" ? "توصيل مجاني" : "Free delivery");
+  offerStatus.unlocked.forEach(o => parts.push(o.reward[lang]));
+  return parts.join(" + ");
+}
+// حساب موحّد: المجموع قبل الخصم، الخصم (على عطور 50مل)، والمجموع بعده.
+function computeCartPricing(items){
+  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
+  const base50 = items.filter(i=>String(i.size)==="50").reduce((sum,i)=> sum + (i.lineTotal||0), 0);
+  const st = computeOffersStatus(items);
+  const discountPct = st.unlocked.reduce((m,o)=> Math.max(m, o.discountPct||0), 0);
+  let discount = base50 * discountPct / 100;
+  discount = country === "OM" ? Math.round(discount*100)/100 : Math.round(discount);
+  const afterDiscount = Math.round((subtotal - discount)*100)/100;
+  return { subtotal, discountPct, discount, afterDiscount, offerStatus: st };
 }
 
 /* ===== إعدادات الشحن — قيم افتراضية احتياطية بس (30 أغسطس 2026: صارت تُدار فعليًا من
@@ -2151,6 +2175,7 @@ function renderCart(){
   const items = cartItemsList();
   const cur = currencyLabel();
 
+  document.body.classList.toggle("cart-empty", items.length === 0);
   if(items.length === 0){
     cartInfo.innerHTML = svgIcon("ic-cart") + `<span>${t.cartEmpty}</span>`;
     checkoutBtn.style.opacity = ".35"; checkoutBtn.style.pointerEvents = "none";
@@ -2162,9 +2187,10 @@ function renderCart(){
   }
 
   const totalQty = items.reduce((sum,i)=> sum + i.qty, 0);
-  const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
-  const offerStatus = computeOffersStatus(items);
-  const offerBadge = offerStatus.unlocked.length ? `<span title="${offerStatus.unlocked.map(o=>o.reward[lang]).join(' + ')}" style="margin-inline-start:4px;">🚚</span>` : "";
+  const pricing = computeCartPricing(items);
+  const total = pricing.afterDiscount;
+  const offerStatus = pricing.offerStatus;
+  const offerBadge = "";
   cartInfo.innerHTML = svgIcon("ic-cart") + `<span><b>${totalQty}</b> ${t.cartItemsLabel} · ${t.approxTotal} <b>${total} ${cur}</b> ${t.withoutDelivery}${offerBadge}</span>`;
   checkoutBtn.style.opacity = "1"; checkoutBtn.style.pointerEvents = "auto";
   orderFormBtn.disabled = false;
@@ -2181,7 +2207,8 @@ function renderCart(){
     const priceTxt = i.lineTotal != null ? `${i.lineTotal} ${cur}` : t.orderMsgAskPrice;
     msg += `${idx+1}. ${toTitleCase(i.p.brand)} - ${toTitleCase(i.p.name)} (${i.size}ml) x${i.qty} — ${priceTxt}\n`;
   });
-  msg += `\n${t.shipSubtotal}: ${total} ${cur}`;
+  msg += `\n${t.shipSubtotal}: ${pricing.subtotal} ${cur}`;
+  if(pricing.discount > 0) msg += `\n${t.shipDiscount}: -${pricing.discount} ${cur}`;
   msg += `\n${t.shipFee}: ${freeShip ? t.shipFree : estFee + " " + cur}`;
   msg += `\n${t.shipGrandTotal}: ${estGrandTotal} ${cur} ${t.shipEstimateNote}`;
   msg += `\n${t.orderMsgPayment}: ${paymentLabel(t)}`;
@@ -2205,11 +2232,13 @@ function renderCart(){
       emirateOrWilayat: "", deliveryMethod: "", address: "", notes: "",
       currency: cur,
       paymentMethod: paymentLabel(t),
-      subtotal: total,
+      subtotal: pricing.subtotal,
+      discount: pricing.discount,
+      discountPct: pricing.discountPct,
       shippingFee: shippingCharged,
       shippingFree: freeShip,
       total: estGrandTotal,
-      offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
+      offers: offersText(offerStatus, freeShip),
       items: items.map(i => ({
         perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name),
         size: i.size, qty: i.qty, unitPrice: i.unitPrice || 0, lineTotal: i.lineTotal || 0
@@ -2243,18 +2272,20 @@ function renderCartModal(){
     return;
   }
 
-  const offerStatus = computeOffersStatus(items);
+  const pricingM = computeCartPricing(items);
+  const offerStatus = pricingM.offerStatus;
   let offerBannerHtml = "";
   if(offerStatus.unlocked.length){
     offerBannerHtml = `<div class="offer-banner offer-banner-won">
       <div class="offer-banner-title">${t.offerUnlockedTitle}</div>
-      ${offerStatus.unlocked.map(o=>`<div class="offer-banner-item">${o.reward[lang]}</div>`).join("")}
+      ${offerStatus.unlocked.map(o=>`<div class="offer-banner-item">${o.reward[lang]}${pricingM.discount>0 ? `: <bdi dir="ltr">−${pricingM.discount}</bdi> ${currencyLabel()}` : ""}</div>`).join("")}
+      <div class="offer-banner-item">${t.freeDeliveryAll}</div>
     </div>`;
   } else if(offerStatus.nextHint){
     const h = offerStatus.nextHint;
     const mid = t.offerNextMid50;
     offerBannerHtml = `<div class="offer-banner offer-banner-progress">
-      ${t.offerNextPrefix} <b>${h.remaining}</b> ${mid} <b>${h.reward[lang]}</b>
+      ${t.offerNextPrefix} <b>${h.remaining}</b> ${mid} <b>${h.reward[lang]}</b><br>${t.freeDeliveryAll}
     </div>`;
   }
 
@@ -2304,9 +2335,11 @@ function renderCartModal(){
     };
   });
 
-  const total = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
   totalWrap.style.display = "flex";
-  totalWrap.innerHTML = `<span>${t.cartModalTotalLabel}</span><span>${total} ${cur}</span>`;
+  totalWrap.style.flexWrap = "wrap";
+  totalWrap.innerHTML = pricingM.discount > 0
+    ? `<span class="cmt-sub"><span>${t.shipSubtotal}</span><span>${pricingM.subtotal} ${cur}</span></span><span class="cmt-sub cmt-disc"><span>${t.shipDiscount}</span><span><bdi dir="ltr">−${pricingM.discount}</bdi> ${cur}</span></span><span>${t.cartModalTotalLabel}</span><span>${pricingM.afterDiscount} ${cur}</span>`
+    : `<span>${t.cartModalTotalLabel}</span><span>${pricingM.afterDiscount} ${cur}</span>`;
 }
 
 function openCartModal(){ document.getElementById("cartModalOverlay").classList.add("open"); renderCartModal(); }
@@ -2409,15 +2442,19 @@ function renderShippingSummary(){
   const t = I18N[lang];
   const items = cartItemsList();
   const cur = currencyLabel();
-  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
-  const offerStatus = computeOffersStatus(items);
+  const pr = computeCartPricing(items);
+  const subtotal = pr.subtotal;
+  const offerStatus = pr.offerStatus;
   const freeShip = hasFreeShipping(offerStatus);
   const fee = currentShippingFee();
   const shippingCharged = freeShip ? 0 : fee;
-  const grand = subtotal + shippingCharged;
+  const grand = pr.afterDiscount + shippingCharged;
   const feeHtml = freeShip
-    ? `<s>${fee} ${cur}</s> <span class="os-free">${t.shipFree}</span>`
+    ? `<span class="os-free">${t.shipFree}</span>`
     : `${fee} ${cur}`;
+  const discountRowHtml = pr.discount > 0
+    ? `<div class="os-row os-disc"><span>${t.shipDiscount}</span><span><bdi dir="ltr">−${pr.discount}</bdi> ${cur}</span></div>`
+    : "";
   // 1 سبتمبر 2026: نعرض تفاصيل كل عطر بالسلة (الاسم + الحجم + الكمية + السعر) قبل
   // المجموع الفرعي، عشان العميل يشوف طلبه كامل وواضح قبل ما يضغط إرسال — بدل ما
   // يوصله بس رقم إجمالي بدون تفاصيل.
@@ -2427,6 +2464,7 @@ function renderShippingSummary(){
   document.getElementById("orderShippingSummary").innerHTML = `
     ${itemsHtml}
     <div class="os-row"><span>${t.shipSubtotal}</span><span>${subtotal} ${cur}</span></div>
+    ${discountRowHtml}
     <div class="os-row"><span>${t.shipFee}</span><span>${feeHtml}</span></div>
     <div class="os-row os-total"><span>${t.shipGrandTotal}</span><span>${grand} ${cur}</span></div>
   `;
@@ -2472,12 +2510,13 @@ function buildOrderPayload(){
   const t = I18N[lang];
   const items = cartItemsList();
   const cur = currencyLabel();
-  const subtotal = items.reduce((sum,i)=> sum + (i.lineTotal||0), 0);
-  const offerStatus = computeOffersStatus(items);
+  const pr = computeCartPricing(items);
+  const subtotal = pr.subtotal;
+  const offerStatus = pr.offerStatus;
   const freeShip = hasFreeShipping(offerStatus);
   const shippingFee = currentShippingFee();
   const shippingCharged = freeShip ? 0 : shippingFee;
-  const grandTotal = subtotal + shippingCharged;
+  const grandTotal = pr.afterDiscount + shippingCharged;
 
   const isAe = country === "AE";
   const deliveryCode = currentDeliveryCode();
@@ -2507,10 +2546,12 @@ function buildOrderPayload(){
     currency: cur,
     paymentMethod: paymentLabel(t),
     subtotal,
+    discount: pr.discount,
+    discountPct: pr.discountPct,
     shippingFee: shippingCharged,
     shippingFree: freeShip,
     total: grandTotal,
-    offers: offerStatus.unlocked.map(o=> o.reward[lang]).join(" + "),
+    offers: offersText(offerStatus, freeShip),
     items: items.map(i => ({
       perfumeId: i.id, brand: toTitleCase(i.p.brand), name: toTitleCase(i.p.name), size: "50", qty: i.qty,
       unitPrice: i.unitPrice || 0, lineTotal: i.lineTotal
@@ -2602,6 +2643,8 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
   payload.items.forEach((i,idx)=>{
     waMsgLines.push(`${idx+1}. ${i.brand} - ${i.name} (${i.size}ml) x${i.qty}`);
   });
+  if(payload.discount > 0) waMsgLines.push(`${t.shipDiscount}: -${payload.discount} ${payload.currency}`);
+  waMsgLines.push(t.freeDeliveryAll);
   waMsgLines.push(`${t.shipGrandTotal}: ${payload.total} ${payload.currency}`);
   waMsgLines.push(`${t.orderMsgPayment}: ${payload.paymentMethod}`);
   const waFallbackHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsgLines.join("\n"))}`;

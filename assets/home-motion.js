@@ -22,7 +22,7 @@
       s1:"عطر متوفر الآن", s2:"براند مستوحى منه", s3:"سعر العطر 50مل", s4:"يوم لإرجاع العطر لو ما ناسبك",
       wT:"ضمان إيفوك", w1n:"٢", w1:"يومين من الاستلام لإرجاع العطر", w2n:"٨٥٪", w2:"أو أكثر لازم يبقى في العطر", w3n:"٣", w3:"أيام عمل ونرجع لك المبلغ بعد الفحص", wMore:"الشروط والاسترجاع كاملة",
       shopEy:"المتجر", shopT:"اختر عطرك", shopP:"ابحث بالاسم أو البراند، أو تصفّح حسب الفئة.",
-      cur:"د.إ", curNote:"للعطر 50مل · في عُمان "
+      cur:"د.إ", curNote:"في عُمان "
     },
     en:{
       shop:"Shop fragrances", wa:"Chat on WhatsApp", scroll:"Discover",
@@ -34,7 +34,7 @@
       s1:"fragrances available now", s2:"brands that inspired us", s3:"per 50ml fragrance", s4:"days to return it if it doesn't suit you",
       wT:"Evoque Guarantee", w1n:"2", w1:"days from receipt to return the fragrance", w2n:"85%", w2:"or more must remain in the fragrance", w3n:"3", w3:"working days to refund you after inspection", wMore:"Full terms & returns",
       shopEy:"The shop", shopT:"Choose your scent", shopP:"Search by name or brand, or browse by category.",
-      cur:"AED", curNote:"per 50ml · in Oman "
+      cur:"AED", curNote:"in Oman "
     }
   };
   var DATA = [], STATS = {n:0,b:0,p:50,po:5};
@@ -45,7 +45,7 @@
     var cur = $("#stat3Cur"); if(cur) cur.textContent = t.cur;
     var wa = $("#hxWa"), wh = $("#waHeaderBtn"); if(wa && wh && wh.href) wa.href = wh.href;
     var wf = $("#warrFull");
-    if(wf){ try{ var w = I18N[lang()].warranty; wf.innerHTML = esc(w) + ' <a href="terms.html">' + esc(t.wMore) + '</a>'; }catch(e){} }
+    if(wf){ try{ var w = I18N[lang()].warranty; wf.innerHTML = '<a href="terms.html">' + esc(t.wMore) + '</a>'; }catch(e){} }
   }
 
   /* ---------- القارورة (تصميم أصلي، مو قارورة ماركة) ---------- */
@@ -56,22 +56,22 @@
     return '<svg viewBox="0 0 300 440" aria-hidden="true" focusable="false">'+
     '<defs>'+
     '<linearGradient id="gGlass" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".18" stop-color="#fff" stop-opacity=".07"/><stop offset=".6" stop-color="#fff" stop-opacity=".03"/><stop offset=".88" stop-color="#fff" stop-opacity=".13"/><stop offset="1" stop-color="#fff" stop-opacity=".42"/></linearGradient>'+
-    '<linearGradient id="gLiq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b04558"/><stop offset=".45" stop-color="#7a2a3a"/><stop offset="1" stop-color="#3a1019"/></linearGradient>'+
-    '<linearGradient id="gCap" x1="0" x2="1"><stop offset="0" stop-color="#2a1216"/><stop offset=".28" stop-color="#7a2a3a"/><stop offset=".62" stop-color="#3a1019"/><stop offset="1" stop-color="#1c0a0e"/></linearGradient>'+
-    '<linearGradient id="gCollar" x1="0" x2="1"><stop offset="0" stop-color="#8a5a58"/><stop offset=".3" stop-color="#E9C9C5"/><stop offset=".58" stop-color="#C98B86"/><stop offset="1" stop-color="#7a4a4a"/></linearGradient>'+
+    '<linearGradient id="gLiq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6F9A86"/><stop offset=".45" stop-color="#2B5244"/><stop offset="1" stop-color="#12261F"/></linearGradient>'+
+    '<linearGradient id="gCap" x1="0" x2="1"><stop offset="0" stop-color="#18231F"/><stop offset=".28" stop-color="#2B5244"/><stop offset=".62" stop-color="#12261F"/><stop offset="1" stop-color="#0F1814"/></linearGradient>'+
+    '<linearGradient id="gCollar" x1="0" x2="1"><stop offset="0" stop-color="#56625B"/><stop offset=".3" stop-color="#DDE6DA"/><stop offset=".58" stop-color="#B8653F"/><stop offset="1" stop-color="#56625B"/></linearGradient>'+
     '<clipPath id="bodyClip"><rect x="54" y="164" width="192" height="248" rx="27"/></clipPath>'+
     '<filter id="fBlur"><feGaussianBlur stdDeviation="6"/></filter>'+
     '</defs>'+
     '<ellipse cx="150" cy="424" rx="104" ry="10" fill="#000" opacity=".4" filter="url(#fBlur)"/>'+
-    '<rect x="50" y="160" width="200" height="256" rx="30" fill="#E9C9C5" fill-opacity=".1"/>'+
+    '<rect x="50" y="160" width="200" height="256" rx="30" fill="#DDE6DA" fill-opacity=".1"/>'+
     '<g clip-path="url(#bodyClip)"><path class="liq" d="M-110 220 q40 -18 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 V440 H-110 Z" fill="url(#gLiq)"/>'+
     '<rect x="66" y="176" width="13" height="212" rx="6.5" fill="#fff" opacity=".22"/><rect x="222" y="190" width="6" height="170" rx="3" fill="#fff" opacity=".14"/></g>'+
-    '<rect x="88" y="256" width="124" height="104" rx="8" fill="#F6EAE4" opacity=".96"/>'+
-    '<text x="150" y="308" text-anchor="middle" font-family="Aref Ruqaa,serif" font-weight="700" font-size="44" fill="#5B1F2B">إيفوك</text>'+
-    '<line x1="122" y1="322" x2="178" y2="322" stroke="#C98B86" stroke-width="1.2"/>'+
-    '<text x="150" y="342" text-anchor="middle" font-family="Cormorant Garamond,serif" font-weight="600" font-size="12.5" letter-spacing="5" fill="#5B1F2B">EVOQUE</text>'+
-    '<rect x="50" y="160" width="200" height="256" rx="30" fill="url(#gGlass)" stroke="#F6EAE4" stroke-opacity=".5" stroke-width="1.5"/>'+
-    '<rect x="124" y="112" width="52" height="26" fill="url(#gGlass)" stroke="#F6EAE4" stroke-opacity=".4"/>'+
+    '<rect x="88" y="256" width="124" height="104" rx="8" fill="#F5F3EE" opacity=".96"/>'+
+    '<text x="150" y="308" text-anchor="middle" font-family="Aref Ruqaa,serif" font-weight="700" font-size="44" fill="#1F3D33">إيفوك</text>'+
+    '<line x1="122" y1="322" x2="178" y2="322" stroke="#B8653F" stroke-width="1.2"/>'+
+    '<text x="150" y="342" text-anchor="middle" font-family="Cormorant Garamond,serif" font-weight="600" font-size="12.5" letter-spacing="5" fill="#1F3D33">EVOQUE</text>'+
+    '<rect x="50" y="160" width="200" height="256" rx="30" fill="url(#gGlass)" stroke="#F5F3EE" stroke-opacity=".5" stroke-width="1.5"/>'+
+    '<rect x="124" y="112" width="52" height="26" fill="url(#gGlass)" stroke="#F5F3EE" stroke-opacity=".4"/>'+
     '<rect x="110" y="132" width="80" height="34" rx="7" fill="url(#gCollar)"/>'+
     '<rect x="100" y="34" width="100" height="100" rx="14" fill="url(#gCap)"/>'+
     '<rect x="100" y="34" width="100" height="10" rx="5" fill="#fff" opacity=".1"/>'+
@@ -108,7 +108,7 @@
   function buildRail(inStock){
     var rows = [$("#rail1"), $("#rail2")]; if(!rows[0]) return;
     var pk = spread(inStock, 28);
-    function html(arr){ return arr.map(function(p){ return '<a href="#shopStart" data-q="'+esc(p.name)+'" tabindex="0"><img src="'+esc(img(p))+'" alt="" loading="lazy" decoding="async" width="1080" height="1350"></a>'; }).join(""); }
+    function html(arr){ return arr.map(function(p){ return '<a href="#shopStart" data-q="'+esc(p.name)+'" aria-label="'+esc(p.displayName||p.name)+'"><img src="'+esc(img(p))+'" alt="" loading="lazy" decoding="async" width="1080" height="1350"></a>'; }).join(""); }
     rows[0].innerHTML = html(pk.slice(0,14)); rows[1].innerHTML = html(pk.slice(14,28));
     $$(".rail a").forEach(function(a){
       a.addEventListener("click", function(e){

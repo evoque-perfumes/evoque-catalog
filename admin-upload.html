@@ -11,22 +11,22 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Evoque">
-<meta name="theme-color" content="#FAF6EF">
+<meta name="theme-color" content="#F5F3EE">
 <title>لوحة تحكم Evoque Perfumes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F6EAE4; --panel:#FDF8F5; --panel-2:#F1E0DA; --line:#E3CBC4; --ink:#2A1216; --muted:#7A5A58;
     --gold:#5B1F2B; --gold-deep:#451620; --gold-soft:#E9C9C5; --gold-ink:#5B1F2B;
     --emerald:#5B1F2B; --emerald-deep:#451620;
-    --red:#B23A2E; --red-deep:#8E2C22; --green:#1F6B41; --amber:#8A6A1F;
+    --red:#B23A2E; --red-deep:#8E2C22; --green:#1F6B41; --amber:#9A4F2E;
     --radius:14px;
   }
   *{box-sizing:border-box;}
   body{
-    margin:0; font-family:'Tajawal','Segoe UI', Tahoma, Arial, sans-serif; background:var(--bg); color:var(--ink);
+    margin:0; font-family:'IBM Plex Sans Arabic','Segoe UI', Tahoma, Arial, sans-serif; background:var(--bg); color:var(--ink);
     min-height:100vh; padding:24px 16px 80px;
     background-image:radial-gradient(circle at 15% -10%, rgba(201,139,134,.18), transparent 45%);
   }
@@ -34,7 +34,7 @@
   .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
   .brandmark{display:flex; align-items:center; gap:10px;}
   .brandmark .dot{width:9px; height:9px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px rgba(91,31,43,.4);}
-  h1{font-family:'Tajawal', sans-serif; font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; color:var(--ink);}
+  h1{font-family:'IBM Plex Sans Arabic', sans-serif; font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; color:var(--ink);}
   .sub{color:var(--muted); font-size:13.5px; margin:2px 0 0; line-height:1.7;}
   .livepill{font-size:11.5px; color:var(--muted); border:1px solid var(--line); background:var(--panel); border-radius:20px; padding:5px 12px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
   .livepill .dot2{width:7px; height:7px; border-radius:50%; background:var(--green);}
@@ -48,7 +48,7 @@
   nav.tabs button.active{background:var(--gold-soft); color:var(--gold-ink); box-shadow:inset 0 0 0 1px #C98B86;}
 
   .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px; box-shadow:0 1px 2px rgba(42,18,22,.04);}
-  .panel h2{font-family:'Tajawal',sans-serif; font-size:19px; margin:0 0 12px; color:var(--ink); font-weight:700;}
+  .panel h2{font-family:'IBM Plex Sans Arabic',sans-serif; font-size:19px; margin:0 0 12px; color:var(--ink); font-weight:700;}
   label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
   input[type=text], input[type=password], input[type=number], select, textarea{
     width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
@@ -84,7 +84,7 @@
   .chkrow input{width:auto; margin:0;}
   .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   button{
-    background:var(--emerald); color:#F3ECDD; border:none; border-radius:8px; padding:12px 20px;
+    background:var(--emerald); color:#FFFFFF; border:none; border-radius:8px; padding:12px 20px;
     font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;
   }
   button:hover{background:var(--emerald-deep);}
@@ -92,7 +92,7 @@
   button.secondary{background:var(--panel-2); color:var(--ink); border:1px solid var(--line);}
   button.secondary:hover{background:#E9DFC9;}
   button.ghost{background:transparent; border:1px solid var(--line); color:var(--muted);}
-  button.ghost.active{background:var(--emerald); color:#F3ECDD; border-color:var(--emerald);}
+  button.ghost.active{background:var(--emerald); color:#FFFFFF; border-color:var(--emerald);}
   button.danger{background:#FBEBE8; border:1px solid #E3B8AF; color:#963224;}
   button.danger:hover{background:#F5DAD4;}
   .status{font-size:13px; margin-top:10px; padding:10px 12px; border-radius:8px; display:none; line-height:1.7;}
@@ -118,7 +118,7 @@
   .dropdown-item .name{color:var(--ink);}
   .dropdown-item .badge{font-size:11px; padding:2px 7px; border-radius:20px; margin-inline-start:8px;}
   .badge.done{background:rgba(31,107,65,.12); color:#1F6B41;}
-  .badge.pending{background:rgba(138,106,31,.14); color:#8A6A1F;}
+  .badge.pending{background:rgba(138,106,31,.14); color:#9A4F2E;}
   .badge.danger{background:rgba(150,50,36,.14); color:#963224;}
   .selected-chip{
     display:inline-flex; align-items:center; gap:8px; background:var(--panel-2); border:1px solid var(--line);
@@ -145,14 +145,91 @@
   .kpi-card.clickable{cursor:pointer;}
   .kpi-card.clickable:hover{border-color:var(--gold-ink); transform:translateY(-1px);}
   .kpi-card .kpi-label{color:var(--muted); font-size:12.5px; line-height:1.5;}
-  .kpi-card .kpi-value{font-family:'Tajawal',sans-serif; font-size:28px; font-weight:700; color:var(--ink); margin-top:4px;}
+  .kpi-card .kpi-value{font-family:'IBM Plex Sans Arabic',sans-serif; font-size:28px; font-weight:700; color:var(--ink); margin-top:4px;}
   .kpi-card.alert .kpi-value{color:#9C6B1F;}
   .kpi-card.alert-red .kpi-value{color:#B23A2E;}
   .kpi-card.good .kpi-value{color:#1F6B41;}
   .kpi-card .kpi-sub{color:#93897A; font-size:11.5px; margin-top:2px;}
-  .ov-section-title{font-family:'Tajawal',sans-serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
+  .ov-section-title{font-family:'IBM Plex Sans Arabic',sans-serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
   .ov-section-title:first-child{margin-top:0;}
   .ov-empty-note{color:var(--muted); font-size:12.5px; background:var(--panel-2); border:1px dashed var(--line); border-radius:8px; padding:12px 14px; line-height:1.8;}
+
+  /* ===================================================================
+     هوية «ريحان» للوحة التحكم (أكتوبر 2026) — نفس ألوان الموقع وخطوطه.
+     هذا القسم يعيد تعريف المتغيرات فقط + لمسات عصرية؛ ما يغيّر أي وظيفة.
+     =================================================================== */
+  :root{
+    --bg:#F5F3EE; --panel:#FFFFFF; --panel-2:#F2F0EA; --line:#E4E1D8; --ink:#18231F; --muted:#56625B;
+    --gold:#A9BBA4; --gold-deep:#7E9478; --gold-soft:#E4ECE1; --gold-ink:#1F3D33;
+    --emerald:#1F3D33; --emerald-deep:#16302A;
+    --red:#B23A2E; --red-deep:#8E2C22; --green:#1F6B41; --amber:#9A4F2E;
+    --clay:#9A4F2E; --tint:#DDE6DA;
+    --radius:18px;
+    --focus:0 0 0 3px #F5F3EE, 0 0 0 5px #B8653F;
+  }
+  body{
+    font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif; background:var(--bg); background-image:none;
+    font-size:15px; -webkit-font-smoothing:antialiased;
+  }
+  h1, .panel h2, .ov-section-title, .kpi-card .kpi-value{ font-family:'El Messiri','IBM Plex Sans Arabic',sans-serif; }
+  h1{ font-size:28px; color:var(--emerald); }
+  .ov-section-title{ color:var(--emerald); }
+  .brandmark .dot{ background:#B8653F; box-shadow:none; }
+  ::selection{ background:var(--tint); color:var(--emerald-deep); }
+
+  /* شريط التبويبات: ثابت فوق وقابل للتمرير الأفقي بالجوال */
+  nav.tabs{
+    position:sticky; top:8px; z-index:40; border-radius:999px; padding:6px; gap:4px;
+    background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    box-shadow:0 8px 24px rgba(24,35,31,.07); flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  nav.tabs button{ border-radius:999px; padding:10px 16px; min-height:42px; white-space:nowrap; font-weight:600; color:var(--muted); }
+  nav.tabs button:hover{ background:var(--bg); color:var(--ink); }
+  nav.tabs button.active{ background:var(--emerald); color:#fff; box-shadow:none; }
+
+  .panel{ border-radius:var(--radius); border-color:var(--line); box-shadow:0 1px 2px rgba(24,35,31,.04), 0 10px 30px rgba(24,35,31,.04); padding:22px; }
+  input[type=text], input[type=password], input[type=number], input[type=date], input[type=tel], input[type=search], input[type=email], select, textarea{
+    border-radius:12px; border:1.5px solid var(--line); background:var(--panel-2); min-height:46px; font-size:15px;
+  }
+  input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--emerald); box-shadow:0 0 0 4px rgba(31,61,51,.12); background:#fff; }
+  :where(a, button, input, select, textarea, summary):focus-visible{ outline:none; box-shadow:var(--focus); }
+  @media (max-width:640px){ input, select, textarea{ font-size:16px !important; } }
+
+  button{ border-radius:999px; color:#fff; min-height:44px; padding:11px 20px; font-weight:600; transition:background .2s, transform .15s; }
+  button:active{ transform:scale(.98); }
+  button:disabled{ background:#E4E1D8; color:#8A938D; }
+  button.secondary{ background:#fff; border:1.5px solid var(--line); color:var(--ink); }
+  button.secondary:hover{ background:var(--tint); border-color:var(--tint); }
+  button.ghost.active{ color:#fff; }
+  .review-row-actions button, .sale-row-actions button{ min-height:36px; padding:6px 14px; border-radius:999px; }
+  .sale-row-status-select{ border-radius:999px; min-height:36px; }
+
+  .status{ border-radius:12px; }
+  .status.info, .banner{ background:var(--tint); border-color:#CBD8C6; color:var(--emerald-deep); }
+  .banner{ border-radius:14px; }
+  small.hint{ color:var(--muted); }
+  a{ color:var(--emerald); }
+
+  .kpi-card{ background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 2px rgba(24,35,31,.04); }
+  .kpi-card.clickable:hover{ border-color:var(--emerald); box-shadow:0 10px 24px rgba(24,35,31,.08); }
+  .kpi-card .kpi-value{ color:var(--emerald-deep); font-variant-numeric:tabular-nums; }
+  .kpi-card.alert .kpi-value{ color:var(--clay); }
+  .kpi-card.good .kpi-value{ color:var(--green); }
+
+  .static-list{ border-radius:14px; background:#fff; }
+  .sale-row, .review-row{ padding:14px; }
+  .sale-row-amount{ color:var(--emerald); font-variant-numeric:tabular-nums; }
+  .selected-chip{ border-radius:999px; background:var(--tint); border-color:#CBD8C6; }
+  .stat-clickable{ border-radius:14px; }
+  .stat-clickable.active{ border-color:var(--emerald); background:var(--tint); }
+  .dropdown{ border-radius:14px; box-shadow:0 18px 40px rgba(24,35,31,.12); }
+  .dropdown-item:hover, .dropdown-item.active{ background:var(--tint); }
+  .progress-fill{ background:var(--emerald); }
+  fieldset{ border-radius:14px; }
+  .livepill{ border-radius:999px; }
+  @media (prefers-reduced-motion: reduce){ button{ transition:none; } }
+  @media (max-width:640px){ h1{ font-size:22px; } .panel{ padding:16px; } body{ padding:16px 12px 80px; } }
 </style>
 </head>
 <body>
@@ -166,7 +243,7 @@
       </div>
     </div>
     <span class="livepill"><span class="dot2"></span> متصل مباشرة بالموقع الحي</span>
-    <span class="livepill" id="topbarLoginStatus" style="display:none; background:var(--emerald); color:#F3ECDD; cursor:default;">
+    <span class="livepill" id="topbarLoginStatus" style="display:none; background:var(--emerald); color:#FFFFFF; cursor:default;">
       <span class="dot2"></span> مسجّلة الدخول
       <button type="button" id="topbarLogoutBtn" style="margin-inline-start:8px; background:transparent; border:1px solid rgba(255,255,255,0.6); color:inherit; padding:2px 8px; font-size:11.5px; border-radius:6px; cursor:pointer;">تسجيل خروج</button>
     </span>
@@ -321,8 +398,8 @@
       <div id="stockCategoryWrap" style="display:none;">
         <div class="row" style="margin-bottom:6px; align-items:stretch;">
           <div class="stat-clickable" id="stockCatMissing"><div style="color:var(--muted); font-size:13px;">بياناتها ناقصة</div><b id="stockCatMissingCount" style="font-size:20px; display:block;">—</b></div>
-          <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">50 مل غير متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
-          <div class="stat-clickable" id="stockCatLow"><div style="color:var(--muted); font-size:13px;">50 مل قارب على النفاد (بقي 1-2)</div><b id="stockCatLowCount" style="font-size:20px; display:block; color:#8A6A1F;">—</b></div>
+          <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">50 مل غير متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#9A4F2E;">—</b></div>
+          <div class="stat-clickable" id="stockCatLow"><div style="color:var(--muted); font-size:13px;">50 مل قارب على النفاد (بقي 1-2)</div><b id="stockCatLowCount" style="font-size:20px; display:block; color:#9A4F2E;">—</b></div>
           <div class="stat-clickable" id="stockCatIn"><div style="color:var(--muted); font-size:13px;">50 مل متوفر</div><b id="stockCatInCount" style="font-size:20px; display:block; color:#1F6B41;">—</b></div>
         </div>
         <small class="hint" style="margin-top:0;">اضغط أي تصنيف فوق تشوف قائمته، أو ابحث باسم العطر تحت مباشرة، أو اختر براند معيّن من القائمة تحت عشان تحصر النتائج فيه بس.</small>
@@ -495,7 +572,7 @@
         <div class="field"><label for="sl_qty">الكمية</label><input type="number" id="sl_qty" min="1" step="1" value="1"></div>
         <div class="field"><label for="sl_price">سعر الوحدة (AED)</label><input type="number" id="sl_price" min="0" step="0.01"></div>
       </div>
-      <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-top:8px; cursor:pointer; color:#8A6A1F; font-weight:600;">
+      <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-top:8px; cursor:pointer; color:#9A4F2E; font-weight:600;">
         <input type="checkbox" id="sl_isGift" style="width:auto; margin:0;">
         🎁 هدية مجانية (يدوي) — ينقص من المخزون بس ما يُحتسب إيراد/ربح
       </label>
@@ -984,7 +1061,7 @@
         <div class="stats" id="xlsx_statsRow">
           <div class="stat">صفوف بالملف<b id="xlsx_statRows">—</b></div>
           <div class="stat">جاهزة للإضافة<b id="xlsx_statValid" style="color:#1F6B41;">—</b></div>
-          <div class="stat">فيها مشكلة (متجاوَزة)<b id="xlsx_statSkipped" style="color:#8A6A1F;">—</b></div>
+          <div class="stat">فيها مشكلة (متجاوَزة)<b id="xlsx_statSkipped" style="color:#9A4F2E;">—</b></div>
         </div>
         <div id="xlsx_previewList" class="static-list" style="display:none;"></div>
         <div id="xlsx_issuesBox"></div>
@@ -1010,7 +1087,7 @@
         <div class="stats" id="xlsxUpd_statsRow">
           <div class="stat">صفوف بالملف<b id="xlsxUpd_statRows">—</b></div>
           <div class="stat">هتحدّث عطور موجودة<b id="xlsxUpd_statValid" style="color:#1F6B41;">—</b></div>
-          <div class="stat">ما انطابقت (متجاوَزة)<b id="xlsxUpd_statSkipped" style="color:#8A6A1F;">—</b></div>
+          <div class="stat">ما انطابقت (متجاوَزة)<b id="xlsxUpd_statSkipped" style="color:#9A4F2E;">—</b></div>
         </div>
         <div id="xlsxUpd_previewList" class="static-list" style="display:none;"></div>
         <div id="xlsxUpd_issuesBox"></div>
@@ -1198,7 +1275,7 @@
     <div id="bp_previewWrap" style="display:none;">
       <div class="stats">
         <div class="stat">عدد العطور المتأثرة<b id="bp_previewCount" style="color:#1F6B41;">—</b></div>
-        <div class="stat">متجاوَزة (ما فيها هذا السعر)<b id="bp_previewSkipped" style="color:#8A6A1F;">—</b></div>
+        <div class="stat">متجاوَزة (ما فيها هذا السعر)<b id="bp_previewSkipped" style="color:#9A4F2E;">—</b></div>
       </div>
       <div id="bp_previewList" class="static-list" style="max-height:280px;"></div>
       <div class="row" style="margin-top:10px;">
@@ -2653,7 +2730,7 @@ function slRenderCart(){
     total += sub;
     return `<div class="sale-row" data-idx="${idx}">
       <div class="sale-row-top">
-        <span class="sale-row-name">${esc(item.brand)} — ${esc(item.name)} (${esc(item.size)}مل × ${esc(item.qty)})${item.isGift ? ` <span style="color:#8A6A1F; font-weight:700;">🎁 هدية</span>` : ""}</span>
+        <span class="sale-row-name">${esc(item.brand)} — ${esc(item.name)} (${esc(item.size)}مل × ${esc(item.qty)})${item.isGift ? ` <span style="color:#9A4F2E; font-weight:700;">🎁 هدية</span>` : ""}</span>
         <span class="sale-row-amount">${item.isGift ? "مجاني" : fmtNum(sub) + " AED"}</span>
       </div>
       <div class="sale-row-actions">

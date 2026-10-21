@@ -9,16 +9,16 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Tajawal:wght@400;500;700&family=Cormorant+Garamond:wght@600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Cormorant+Garamond:wght@600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --wine:#5B1F2B; --wine-hover:#451620; --blush:#F6EAE4; --rose:#C98B86; --rose-soft:#E9C9C5;
-    --ink:#2A1216; --muted:#7A5A58; --surface:#FDF8F5; --line:#E3CBC4; --wa:#25d366;
-    --shadow:0 10px 30px rgba(42,18,22,.07); --radius:14px;
+    --wine:#1F3D33; --wine-hover:#16302A; --blush:#F5F3EE; --rose:#A9BBA4; --rose-soft:#DDE6DA;
+    --ink:#18231F; --muted:#56625B; --surface:#FFFFFF; --line:#E4E1D8; --wa:#12803F;
+    --shadow:0 10px 30px rgba(24,35,31,.06); --radius:20px;
   }
   *{box-sizing:border-box;}
-  body{ margin:0; background:var(--blush); color:var(--ink); font-family:'Tajawal','Jost','Segoe UI',Tahoma,sans-serif; -webkit-font-smoothing:antialiased; }
-  h1,.serif{ font-family:'Tajawal',sans-serif; font-weight:700; }
+  body{ margin:0; background:var(--blush); color:var(--ink); font-family:'IBM Plex Sans Arabic','Jost','Segoe UI',Tahoma,sans-serif; -webkit-font-smoothing:antialiased; }
+  h1,.serif{ font-family:'El Messiri','IBM Plex Sans Arabic',sans-serif; font-weight:700; }
   a{ color:var(--wine); }
   header{ text-align:center; padding:18px 16px 16px; background:var(--blush); border-bottom:1px solid var(--rose); }
   header .logo-img{ display:block; margin:0 auto; max-width:240px; width:62%; height:auto; }
@@ -30,7 +30,7 @@
   h1.page-title{ font-size:28px; margin:0 0 6px; color:var(--wine); }
   .updated{ color:var(--muted); font-size:12.5px; margin:0 0 24px; }
   .lead{ color:var(--muted); font-size:15px; margin:0 0 22px; }
-  h2{ font-size:19px; color:var(--wine); margin:26px 0 8px; font-family:'Tajawal',sans-serif; font-weight:700; }
+  h2{ font-size:19px; color:var(--wine); margin:26px 0 8px; font-family:'El Messiri','IBM Plex Sans Arabic',sans-serif; font-weight:700; }
   p{ line-height:1.9; font-size:14.5px; margin:0 0 14px; }
   ul,ol{ line-height:1.9; font-size:14.5px; padding-inline-start:22px; }
   table{ width:100%; border-collapse:collapse; margin:8px 0 14px; font-size:14px; }
@@ -40,6 +40,9 @@
   .wa-btn:hover{ background:var(--wine-hover); }
   footer{ text-align:center; color:var(--blush); font-size:12px; padding:28px 20px; background:var(--ink); }
   footer a{ color:var(--blush); }
+  :focus-visible{ outline:none; box-shadow:0 0 0 3px #F5F3EE, 0 0 0 5px #B8653F; border-radius:8px; }
+  .wa-btn{ border-radius:999px; min-height:48px; }
+  .back-link{ min-height:44px; display:inline-flex; align-items:center; }
 </style>
 </head>
 <body>
@@ -61,14 +64,9 @@
     <p>الدفع نقدًا عند الاستلام فقط، في الإمارات وعُمان.</p>
 
     <h2>الشحن والتوصيل</h2>
-    <table>
-      <tr><th>المنطقة</th><th>رسوم التوصيل</th></tr>
-      <tr><td>الإمارات — توصيل عام</td><td data-rate="AE.standard">—</td></tr>
-      <tr><td>الإمارات — المنطقة الغربية</td><td data-rate="AE.western">—</td></tr>
-      <tr><td>عُمان — توصيل للباب</td><td data-rate="OM.door">—</td></tr>
-      <tr><td>عُمان — استلام من مكتب NOOL</td><td data-rate="OM.nool">—</td></tr>
-    </table>
-    <p>رسوم التوصيل تُدفع عند الاستلام. التوصيل مجاني عند شراء ٥ عطور أو أكثر في الطلب الواحد. نتواصل معك على واتساب لتأكيد الطلب والتوصيل قبل الشحن.</p>
+    <p><strong>التوصيل مجاني لجميع الطلبات</strong> داخل الإمارات وعُمان، بدون أي رسوم على العميل.</p>
+    <p>عند شراء <strong>٣ عطور أو أكثر</strong> (٥٠ مل) في الطلب الواحد تحصل على <strong>خصم ١٥٪</strong> على قيمة الطلب، مع التوصيل المجاني.</p>
+    <p>نتواصل معك على واتساب لتأكيد الطلب والتوصيل قبل الشحن.</p>
 
     <h2>ضمان إيفوك</h2>
     <p>إذا ما ناسبك العطر من ناحية الثبات أو الفوحان، ترجع لنا العطر خلال يومين من الاستلام، وتسترد قيمة العطر كاملة. الشروط: يبقى في العطر ٨٥٪ أو أكثر. رسوم التوصيل غير مستردة، وشحن الإرجاع على العميل. نرجع المبلغ خلال ٣ أيام عمل بعد استلام العطر وفحصه.</p>

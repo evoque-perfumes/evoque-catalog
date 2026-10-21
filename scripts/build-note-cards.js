@@ -57,29 +57,30 @@ function html(p){
   const lg = longevityParts(p), sl = sillageParts(p);
   const stat = (lab, labEn, v) => v ? `<div class="stat"><div class="lab"><span class="ar">${lab}</span><span class="en">${labEn}</span></div><div class="sv ar">${esc(v.ar)}</div><div class="sv en">${esc(v.en)}</div></div>` : "";
   return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
-@font-face{font-family:T;font-weight:400;src:url("${font("tajawal-arabic-400-normal.woff2")}")}
-@font-face{font-family:T;font-weight:500;src:url("${font("tajawal-arabic-500-normal.woff2")}")}
-@font-face{font-family:T;font-weight:700;src:url("${font("tajawal-arabic-700-normal.woff2")}")}
+@font-face{font-family:T;font-weight:400;src:url("${font("ibm-plex-sans-arabic-arabic-400-normal.woff2")}")}
+@font-face{font-family:T;font-weight:500;src:url("${font("ibm-plex-sans-arabic-arabic-500-normal.woff2")}")}
+@font-face{font-family:T;font-weight:700;src:url("${font("ibm-plex-sans-arabic-arabic-700-normal.woff2")}")}
+@font-face{font-family:M;font-weight:700;src:url("${font("el-messiri-arabic-700-normal.woff2")}")}
 @font-face{font-family:C;font-weight:600;src:url("${font("cormorant-garamond-latin-600-normal.woff2")}")}
 @font-face{font-family:J;font-weight:400;src:url("${font("jost-latin-400-normal.woff2")}")}
 @font-face{font-family:J;font-weight:500;src:url("${font("jost-latin-500-normal.woff2")}")}
 *{box-sizing:border-box;margin:0;padding:0}
-body{width:1080px;height:1350px;background:#F6EAE4;color:#2A1216;font-family:T,J,sans-serif;position:relative;overflow:hidden}
+body{width:1080px;height:1350px;background:#F5F3EE;color:#18231F;font-family:T,J,sans-serif;position:relative;overflow:hidden}
 .wrap{position:absolute;inset:0;padding:96px 110px 80px;display:flex;flex-direction:column;align-items:center}
 .logo{width:380px;height:auto;display:block}
-.rule{width:120px;height:2px;background:#C98B86;margin:44px 0 52px}
-h1{font-family:${/[؀-ۿ]/.test(title) ? "T" : "C"},T,sans-serif;font-weight:${/[؀-ۿ]/.test(title) ? 700 : 600};font-size:${title.length > 22 ? 66 : 82}px;line-height:1.15;text-align:center;color:#5B1F2B;max-width:860px}
-.insp{margin-top:20px;font-size:27px;color:#7A5A58;text-align:center;font-weight:400}
+.rule{width:120px;height:2px;background:#B8653F;margin:44px 0 52px}
+h1{font-family:${/[؀-ۿ]/.test(title) ? "M" : "C"},T,sans-serif;font-weight:${/[؀-ۿ]/.test(title) ? 700 : 600};font-size:${title.length > 22 ? 66 : 82}px;line-height:1.15;text-align:center;color:#1F3D33;max-width:860px}
+.insp{margin-top:20px;font-size:27px;color:#56625B;text-align:center;font-weight:400}
 .insp span{font-family:J,T,sans-serif}
 .body{margin-top:62px;width:100%;display:flex;flex-direction:column;gap:34px}
 .blk{text-align:center}
-.lab{display:flex;justify-content:center;gap:16px;font-size:23px;color:#7A5A58;letter-spacing:.5px;margin-bottom:10px}
+.lab{display:flex;justify-content:center;gap:16px;font-size:23px;color:#56625B;letter-spacing:.5px;margin-bottom:10px}
 .lab .en{font-family:J,sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:19px;align-self:center}
 .val{font-size:31px;line-height:1.5;font-weight:500}
-.val.en{font-family:J,sans-serif;font-size:25px;color:#7A5A58;font-weight:400;direction:ltr;margin-top:2px}
-.stats{margin-top:auto;width:100%;display:flex;justify-content:center;gap:120px;padding-top:30px;border-top:1px solid #C98B86}
-.stat{text-align:center}.sv{font-size:34px;font-weight:700;color:#5B1F2B}.sv.en{font-family:J,sans-serif;font-size:23px;color:#7A5A58;font-weight:400;direction:ltr}
-.foot{margin-top:34px;font-size:19px;color:#7A5A58;text-align:center;line-height:1.6;max-width:820px}
+.val.en{font-family:J,sans-serif;font-size:25px;color:#56625B;font-weight:400;direction:ltr;margin-top:2px}
+.stats{margin-top:auto;width:100%;display:flex;justify-content:center;gap:120px;padding-top:30px;border-top:1px solid #CBD8C6}
+.stat{text-align:center}.sv{font-size:34px;font-weight:700;color:#1F3D33}.sv.en{font-family:J,sans-serif;font-size:23px;color:#56625B;font-weight:400;direction:ltr}
+.foot{margin-top:34px;font-size:19px;color:#56625B;text-align:center;line-height:1.6;max-width:820px}
 </style></head><body><div class="wrap">
 <img class="logo" src="${logoUri}" alt="">
 <div class="rule"></div>

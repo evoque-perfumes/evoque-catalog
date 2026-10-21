@@ -1,14 +1,17 @@
-  /* ===== Evoque identity "هـ — العنبر" (wine / blush / rose) ===== */
+  /* ===== Evoque identity "ريحان" (myrtle / paper / sage / clay) — أكتوبر 2026 ===== */
   :root{
-    --wine:#5B1F2B; --wine-hover:#451620;
-    --blush:#F6EAE4; --rose:#C98B86; --rose-soft:#E9C9C5;
-    --ink:#2A1216; --muted:#7A5A58;
-    --bg:#F6EAE4; --bg-soft:#EFDDD6; --surface:#FDF8F5;
-    --line:#E3CBC4; --wa:#12803F; --wa-deep:#0D6B33;
-    --shadow:0 10px 30px rgba(42,18,22,.07);
-    --shadow-lg:0 20px 50px rgba(42,18,22,.16);
-    --radius:14px;
+    --brand:#1F3D33; --brand-deep:#16302A; --brand-ink:#12261F; --brand-2:#2B5244;
+    --paper:#F5F3EE; --sage:#A9BBA4; --tint:#DDE6DA; --tint-2:#CBD8C6;
+    --clay:#9A4F2E; --clay-line:#B8653F;
+    --ink:#18231F; --muted:#56625B;
+    --bg:#F5F3EE; --bg-soft:#ECE9E1; --surface:#FFFFFF;
+    --line:#E4E1D8; --wa:#12803F; --wa-deep:#0D6B33;
+    --shadow:0 1px 2px rgba(24,35,31,.04), 0 8px 24px rgba(24,35,31,.06);
+    --shadow-lg:0 2px 6px rgba(24,35,31,.06), 0 24px 56px rgba(24,35,31,.14);
+    --radius:20px; --radius-sm:14px;
+    --focus:0 0 0 3px #F5F3EE, 0 0 0 5px #B8653F;
   }
+
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
@@ -17,40 +20,40 @@
     -webkit-font-smoothing:antialiased;
     padding-bottom:88px;
   }
-  html[lang="ar"] body{ font-family:'Tajawal','Jost','Segoe UI',Tahoma,sans-serif; }
+  html[lang="ar"] body{ font-family:'IBM Plex Sans Arabic','Jost','Segoe UI',Tahoma,sans-serif; }
   html[lang="en"] body{ font-family:'Jost','Jost','Segoe UI',Tahoma,sans-serif; }
   /* الهوية الجديدة "عصري بسيط جريء": عناوين بخط Sans-serif عريض وحاد بدل الخط
      الكلاسيكي المزخرف (Cormorant Garamond / Markazi Text) القديم */
   h1,h2,h3,.serif{ font-family:'Cormorant Garamond','Jost',serif; font-weight:600; letter-spacing:0; }
-  html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3, html[lang="ar"] .serif{ font-family:'Tajawal',sans-serif; font-weight:700; letter-spacing:0; }
+  html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3, html[lang="ar"] .serif{ font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:700; letter-spacing:0; }
   .icon{ width:1em; height:1em; display:inline-block; vertical-align:-0.15em; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
   a{ color:inherit; }
 
   /* ===== Header ===== */
   header{
     position:relative; text-align:center; padding:10px 16px 12px;
-    background:var(--blush); border-bottom:1px solid var(--rose);
-    color:var(--wine);
+    background:var(--paper); border-bottom:1px solid var(--sage);
+    color:var(--brand);
   }
   .top-row{ display:flex; align-items:center; justify-content:space-between; max-width:1100px; margin:0 auto 6px; }
   .lang-switch{
-    display:flex; align-items:center; gap:4px; background:rgba(91,31,43,.05);
-    border:1px solid var(--rose); border-radius:999px; padding:3px; font-size:12px;
+    display:flex; align-items:center; gap:4px; background:rgba(31,61,51,.05);
+    border:1px solid var(--sage); border-radius:999px; padding:3px; font-size:12px;
   }
   .lang-switch button{
-    border:none; background:transparent; color:var(--wine); padding:6px 13px;
+    border:none; background:transparent; color:var(--brand); padding:6px 13px;
     border-radius:999px; cursor:pointer; font-family:'Jost'; font-size:12px; letter-spacing:.3px;
     display:flex; align-items:center; gap:5px; transition:.2s;
   }
-  .lang-switch button.active{ background:var(--wine); color:#fff; font-weight:600; }
+  .lang-switch button.active{ background:var(--brand); color:#fff; font-weight:600; }
   .icon-btn{
-    width:34px; height:34px; border-radius:50%; border:1px solid var(--rose);
-    background:rgba(91,31,43,.05); color:var(--wine); display:flex; align-items:center;
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--sage);
+    background:rgba(31,61,51,.05); color:var(--brand); display:flex; align-items:center;
     justify-content:center; font-size:15px; cursor:pointer;
   }
   .logo-img{ display:block; margin:2px auto 0; max-width:250px; width:62%; height:auto; }
   header .tagline{ margin:2px 0 0; color:var(--muted); font-size:13px; letter-spacing:.4px; }
-  .header-divider{ width:36px; height:2px; background:var(--rose); margin:8px auto 0; border-radius:2px; }
+  .header-divider{ width:36px; height:2px; background:var(--sage); margin:8px auto 0; border-radius:2px; }
 
   /* ===== Trust bar ===== */
   .trust-bar{
@@ -61,14 +64,14 @@
     display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line);
     border-radius:999px; padding:9px 16px; font-size:12px; color:var(--ink); box-shadow:var(--shadow);
   }
-  .trust-item .icon{ color:var(--wine-hover); width:16px; height:16px; flex:none; }
+  .trust-item .icon{ color:var(--brand-deep); width:16px; height:16px; flex:none; }
 
   /* ===== Not-found banner ===== */
   .notfound-banner{
-    max-width:900px; margin:16px auto 0; background:var(--surface); border:1px dashed var(--wine);
+    max-width:900px; margin:16px auto 0; background:var(--surface); border:1px dashed var(--brand);
     border-radius:14px; padding:11px 18px; font-size:12.5px; color:var(--ink); text-align:center;
   }
-  .notfound-banner a{ color:var(--wine); font-weight:700; text-decoration:none; }
+  .notfound-banner a{ color:var(--brand); font-weight:700; text-decoration:none; }
 
   /* ===== Search / filters ===== */
   .search-controls{
@@ -86,7 +89,7 @@
     background:var(--surface); color:var(--ink); border:1px solid var(--line);
     border-radius:999px; padding:11px 18px; font-size:13px; font-family:'Jost'; min-width:150px;
   }
-  .search-input:focus, .brand-select:focus{ outline:none; border-color:var(--wine); box-shadow:0 0 0 3px var(--rose-soft); }
+  .search-input:focus, .brand-select:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--tint); }
 
   .results-count{ max-width:900px; margin:14px auto 0; text-align:center; color:var(--muted); font-size:12.5px; }
 
@@ -99,18 +102,18 @@
     border:1px solid var(--line); padding:9px 16px; border-radius:999px; font-size:12.5px; cursor:pointer;
     font-family:'Jost'; transition:.15s;
   }
-  .filter-btn .icon{ width:14px; height:14px; color:var(--wine-hover); }
-  .filter-btn:hover{ border-color:var(--wine); }
-  .filter-btn.active{ background:var(--wine); color:#fff; border-color:var(--wine); }
+  .filter-btn .icon{ width:14px; height:14px; color:var(--brand-deep); }
+  .filter-btn:hover{ border-color:var(--brand); }
+  .filter-btn.active{ background:var(--brand); color:#fff; border-color:var(--brand); }
   .filter-btn.active .icon{ color:#fff; }
 
   .show-more-wrap{ display:flex; justify-content:center; margin:20px 0 6px; }
   .show-more-btn{
-    background:var(--surface); color:var(--wine-hover); border:1px solid var(--wine);
+    background:var(--surface); color:var(--brand-deep); border:1px solid var(--brand);
     padding:11px 26px; border-radius:999px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Jost';
     display:flex; align-items:center; gap:8px;
   }
-  .show-more-btn:hover{ background:var(--wine); color:#fff; }
+  .show-more-btn:hover{ background:var(--brand); color:#fff; }
   /* التحميل التلقائي عند التمرير (Infinite Scroll) حل محل زر "عرض المزيد" — هذا
      العنصر شفاف تمامًا، وظيفته فقط إعلام الكود إن العميل قرّب من نهاية القائمة */
   .scroll-sentinel{ width:100%; height:1px; }
@@ -154,13 +157,13 @@
     transition:transform .15s ease, background .2s ease, border-color .2s ease;
   }
   .wishlist-heart-btn:hover{ transform:scale(1.1); }
-  .wishlist-heart-btn .icon{ width:14px; height:14px; color:var(--wine); stroke-width:2; }
-  .wishlist-heart-btn.active{ background:var(--wine); border-color:var(--wine); }
+  .wishlist-heart-btn .icon{ width:14px; height:14px; color:var(--brand); stroke-width:2; }
+  .wishlist-heart-btn.active{ background:var(--brand); border-color:var(--brand); }
   .wishlist-heart-btn.active .icon{ fill:#fff; color:#fff; }
   .name-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .card .brand{ font-size:11px; color:var(--wine-hover); letter-spacing:.5px; font-weight:600; }
+  .card .brand{ font-size:11px; color:var(--brand-deep); letter-spacing:.5px; font-weight:600; }
   .discount-tag{
-    flex:none; background:var(--wine-hover); color:#fff; border-radius:999px; padding:3px 8px 3px 7px;
+    flex:none; background:var(--brand-deep); color:#fff; border-radius:999px; padding:3px 8px 3px 7px;
     font-size:10px; font-weight:700; display:flex; align-items:center; gap:3px; line-height:1;
   }
   .discount-tag .icon{ width:10px; height:10px; }
@@ -170,12 +173,12 @@
     display:flex; align-items:center; gap:5px; font-size:10.5px; background:var(--bg-soft); color:var(--muted);
     padding:4px 10px; border-radius:999px; border:1px solid var(--line);
   }
-  .badge.badge-gender{ background:var(--wine); color:#fff; border-color:var(--wine); }
+  .badge.badge-gender{ background:var(--brand); color:#fff; border-color:var(--brand); }
   .badge.badge-gender .icon{ color:#fff; }
-  .badge .icon{ width:11px; height:11px; color:var(--wine-hover); }
+  .badge .icon{ width:11px; height:11px; color:var(--brand-deep); }
 
   .notes-toggle{
-    display:flex; align-items:center; gap:5px; font-size:12px; color:var(--wine-hover); background:none; border:none;
+    display:flex; align-items:center; gap:5px; font-size:12px; color:var(--brand-deep); background:none; border:none;
     cursor:pointer; text-align:start; padding:2px 0; margin-top:2px; font-family:'Jost'; font-weight:500;
   }
   .notes-toggle .chev{ width:12px; height:12px; transition:transform .2s; }
@@ -186,7 +189,7 @@
   }
   .notes-box.open{ display:block; }
   .notes-box .row{ display:flex; gap:6px; align-items:flex-start; margin-bottom:4px; }
-  .notes-box .row .icon{ width:13px; height:13px; margin-top:2px; color:var(--wine-hover); flex:none; }
+  .notes-box .row .icon{ width:13px; height:13px; margin-top:2px; color:var(--brand-deep); flex:none; }
   .notes-box b{ color:var(--ink); font-weight:600; }
 
   .size-row{ display:flex; gap:8px; margin-top:10px; }
@@ -195,18 +198,18 @@
     border-radius:12px; padding:8px 6px; font-size:11.5px; cursor:pointer; font-family:'Jost'; line-height:1.5;
   }
   .size-pill b{ display:block; font-size:13px; }
-  .size-pill.active{ border-color:var(--wine); background:var(--rose-soft); }
+  .size-pill.active{ border-color:var(--brand); background:var(--tint); }
   .size-pill.disabled{ opacity:.45; cursor:not-allowed; text-decoration:line-through; }
 
   .card-bottom{ padding:12px 16px 16px; }
   .add-btn{
     width:100%; margin-top:4px; padding:12px; border:none; border-radius:12px;
-    background:var(--wine); color:#fff; font-weight:600; font-size:13px; cursor:pointer;
+    background:var(--brand); color:#fff; font-weight:600; font-size:13px; cursor:pointer;
     display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Jost'; transition:.2s;
   }
   .add-btn .icon{ width:15px; height:15px; }
-  .add-btn:hover{ background:var(--wine-hover); color:#fff; }
-  .add-btn.added{ background:var(--wine); color:#fff; }
+  .add-btn:hover{ background:var(--brand-deep); color:#fff; }
+  .add-btn.added{ background:var(--brand); color:#fff; }
   .add-btn:disabled{ background:var(--bg-soft); color:var(--muted); cursor:not-allowed; }
 
   .card .brand{ cursor:pointer; }
@@ -228,13 +231,13 @@
 
   /* ===== Cart modal ===== */
   .view-cart-btn{
-    background:none; border:1px solid rgba(246,234,228,.45); color:var(--blush); border-radius:999px;
+    background:none; border:1px solid rgba(245,243,238,.45); color:var(--paper); border-radius:999px;
     padding:5px 9px; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:5px; font-family:'Jost';
     flex:none;
   }
   .view-cart-btn .icon{ width:12px; height:12px; }
   .cart-modal-overlay{
-    display:none; position:fixed; inset:0; background:rgba(42,18,22,.6); z-index:80;
+    display:none; position:fixed; inset:0; background:rgba(24,35,31,.6); z-index:80;
     align-items:flex-end; justify-content:center;
   }
   .cart-modal-overlay.open{ display:flex; }
@@ -253,35 +256,35 @@
   }
   .cart-modal-item img{ width:52px; height:52px; object-fit:cover; border-radius:10px; flex:none; background:var(--bg-soft); }
   .cart-modal-item .ci-info{ flex:1; min-width:0; }
-  .cart-modal-item .ci-brand{ font-size:10.5px; color:var(--wine-hover); font-weight:600; }
+  .cart-modal-item .ci-brand{ font-size:10.5px; color:var(--brand-deep); font-weight:600; }
   .cart-modal-item .ci-name{ font-size:14px; font-weight:600; color:var(--ink); }
   .cart-modal-item .ci-meta{ font-size:11.5px; color:var(--muted); margin-top:1px; }
   .cart-modal-item .ci-actions{ display:flex; align-items:center; gap:8px; flex:none; }
   .cart-modal-item .qty-stepper{ width:auto; background:var(--bg-soft); color:var(--ink); }
   .cart-modal-item .qty-stepper button{ background:var(--surface); color:var(--ink); width:26px; height:26px; font-size:14px; box-shadow:0 1px 2px rgba(0,0,0,.1); }
   .cart-modal-item .remove-btn{
-    background:none; border:none; color:var(--wine-hover); cursor:pointer; padding:4px; display:flex; align-items:center;
+    background:none; border:none; color:var(--brand-deep); cursor:pointer; padding:4px; display:flex; align-items:center;
   }
   .cart-modal-item .remove-btn .icon{ width:16px; height:16px; }
   .cart-modal-empty{ text-align:center; color:var(--muted); padding:40px 10px; }
   .offer-banner{ border-radius:12px; padding:12px 14px; margin-bottom:12px; font-size:12.5px; line-height:1.7; }
-  .offer-banner-won{ background:var(--rose-soft); border:1px solid var(--wine); color:var(--ink); }
-  .offer-banner-won .offer-banner-title{ font-weight:700; color:var(--wine-hover); margin-bottom:3px; font-size:13px; }
+  .offer-banner-won{ background:var(--tint); border:1px solid var(--brand); color:var(--ink); }
+  .offer-banner-won .offer-banner-title{ font-weight:700; color:var(--brand-deep); margin-bottom:3px; font-size:13px; }
   .offer-banner-won .offer-banner-item{ display:flex; align-items:center; gap:6px; }
-  .offer-banner-won .offer-banner-item::before{ content:"✓"; color:var(--wine-hover); font-weight:700; }
-  .offer-banner-progress{ background:var(--bg-soft); border:1px dashed var(--wine); color:var(--muted); text-align:center; }
+  .offer-banner-won .offer-banner-item::before{ content:"✓"; color:var(--brand-deep); font-weight:700; }
+  .offer-banner-progress{ background:var(--bg-soft); border:1px dashed var(--brand); color:var(--muted); text-align:center; }
   .cart-modal-total{ padding:14px 18px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:600; }
 
-  footer{ text-align:center; color:var(--blush); font-size:12px; padding:34px 20px 24px; background:var(--ink); }
-  footer .foot-logo{ color:var(--blush); font-family:'Jost',sans-serif; font-weight:800; font-size:20px; letter-spacing:1px; margin-bottom:6px; }
-  footer .foot-line{ width:34px; height:1px; background:var(--rose); opacity:.7; margin:10px auto; }
+  footer{ text-align:center; color:var(--paper); font-size:12px; padding:34px 20px 24px; background:var(--ink); }
+  footer .foot-logo{ color:var(--paper); font-family:'Jost',sans-serif; font-weight:800; font-size:20px; letter-spacing:1px; margin-bottom:6px; }
+  footer .foot-line{ width:34px; height:1px; background:var(--sage); opacity:.7; margin:10px auto; }
   .empty{ text-align:center; color:var(--muted); padding:50px; grid-column:1/-1; }
 
   /* ===== Floating cart bar ===== */
   .cart-bar{
-    position:fixed; bottom:0; left:0; right:0; background:var(--wine);
+    position:fixed; bottom:0; left:0; right:0; background:var(--brand);
     padding:10px 18px 13px; display:flex; flex-direction:column; gap:8px;
-    z-index:50; box-shadow:0 -8px 24px rgba(42,18,22,.25);
+    z-index:50; box-shadow:0 -8px 24px rgba(24,35,31,.25);
   }
   .cart-bottom-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
   /* ===== اختيار طريقة الدفع — انتقل لداخل نموذج الطلب (خلفية فاتحة)، 23 أغسطس 2026 ===== */
@@ -292,9 +295,9 @@
     cursor:pointer; font-family:'Jost';
   }
   .payment-pill .icon{ width:13px; height:13px; }
-  .payment-pill.active{ background:var(--wine); color:var(--blush); border-color:var(--wine); font-weight:600; }
+  .payment-pill.active{ background:var(--brand); color:var(--paper); border-color:var(--brand); font-weight:600; }
   .cart-bar .cart-info{
-    font-size:12.5px; color:var(--blush); display:flex; align-items:center; gap:8px;
+    font-size:12.5px; color:var(--paper); display:flex; align-items:center; gap:8px;
     background:none; border:none; padding:6px 4px; font-family:'Jost'; text-align:start; cursor:pointer;
   }
   .cart-bar .cart-info .icon{ width:17px; height:17px; }
@@ -303,7 +306,7 @@
      الأساسي (لون العلامة القوي + أبرز حجمًا) لأنه يكمّل الطلب بالكامل أونلاين بدون واتساب،
      وواتساب صار الخيار الثانوي (ستايل شفاف/هادئ) لمن يفضّل يتواصل مباشرة. */
   .checkout-btn{
-    background:rgba(246,234,228,.1); border:1px solid rgba(246,234,228,.45); color:#fff;
+    background:rgba(245,243,238,.1); border:1px solid rgba(245,243,238,.45); color:#fff;
     padding:12px 14px; border-radius:12px; font-weight:600; font-size:12px; cursor:pointer;
     text-decoration:none; white-space:nowrap; display:flex; align-items:center; gap:6px; font-family:'Jost';
   }
@@ -311,7 +314,7 @@
   .checkout-btn:disabled{ opacity:.35; cursor:not-allowed; }
   .checkout-row{ display:flex; align-items:center; gap:8px; }
   .order-form-btn{
-    background:var(--blush); border:none; color:var(--wine);
+    background:var(--paper); border:none; color:var(--brand);
     padding:12px 22px; border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer;
     white-space:nowrap; display:flex; align-items:center; gap:8px; font-family:'Jost';
     box-shadow:0 4px 14px rgba(0,0,0,.18);
@@ -321,7 +324,7 @@
 
   /* ===== Order form modal ===== */
   .order-modal-overlay{
-    display:none; position:fixed; inset:0; background:rgba(42,18,22,.6); z-index:80;
+    display:none; position:fixed; inset:0; background:rgba(24,35,31,.6); z-index:80;
     align-items:flex-end; justify-content:center;
   }
   .order-modal-overlay.open{ display:flex; }
@@ -346,31 +349,31 @@
     display:flex !important; align-items:center; gap:6px; flex:1; border:1px solid var(--line);
     border-radius:10px; padding:9px 10px; font-size:12.5px; margin:0 !important; cursor:pointer; color:var(--ink);
   }
-  .of-radio-pill input{ width:auto !important; accent-color:var(--wine-hover); }
+  .of-radio-pill input{ width:auto !important; accent-color:var(--brand-deep); }
   .order-shipping-summary{
     margin-top:16px; background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
     padding:12px 14px; font-size:13px; line-height:2;
   }
   .order-shipping-summary .os-row{ display:flex; justify-content:space-between; }
   .order-shipping-summary .os-total{ font-weight:700; border-top:1px dashed var(--line); margin-top:4px; padding-top:6px; }
-  .order-shipping-summary .os-free{ color:var(--wine-hover); font-weight:600; }
+  .order-shipping-summary .os-free{ color:var(--brand-deep); font-weight:600; }
   .order-shipping-summary s{ color:var(--muted); margin-inline-end:5px; }
   .order-shipping-summary .os-items{ border-bottom:1px dashed var(--line); margin-bottom:4px; padding-bottom:4px; }
   .order-shipping-summary .os-item{ font-size:12px; color:var(--muted); }
   .order-shipping-summary .os-item span:first-child{ flex:1; padding-inline-end:8px; }
   /* ===== بيانات التحويل البنكي — تظهر داخل نموذج الطلب لما يختار العميل "تحويل بنكي" ===== */
   .bank-details-box{
-    margin-top:10px; background:var(--bg-soft); border:1px solid var(--wine); border-radius:12px;
+    margin-top:10px; background:var(--bg-soft); border:1px solid var(--brand); border-radius:12px;
     padding:12px 14px; font-size:13px; line-height:1.9;
   }
-  .bank-details-box .bd-title{ font-weight:700; color:var(--wine-hover); margin-bottom:6px; font-size:13.5px; }
+  .bank-details-box .bd-title{ font-weight:700; color:var(--brand-deep); margin-bottom:6px; font-size:13.5px; }
   .bank-details-box .bd-row{ display:flex; justify-content:space-between; gap:10px; }
   .bank-details-box .bd-row span{ color:var(--muted); }
   .bank-details-box .bd-row b{ font-weight:600; text-align:end; }
   .bank-details-box .bd-hint{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); color:var(--muted); font-size:11.5px; line-height:1.7; }
   .order-modal-foot{ padding:14px 18px; border-top:1px solid var(--line); }
   .order-submit-btn{
-    width:100%; background:var(--wine-hover); color:#fff; border:none; padding:13px; border-radius:12px;
+    width:100%; background:var(--brand-deep); color:#fff; border:none; padding:13px; border-radius:12px;
     font-weight:600; font-size:14px; cursor:pointer; font-family:'Jost';
   }
   .order-submit-btn:disabled{ opacity:.5; cursor:not-allowed; }
@@ -395,7 +398,7 @@
   .hero{
     position:relative; text-align:center;
     background:
-      radial-gradient(ellipse 70% 100% at 50% 0%, rgba(201,139,134,.18), transparent 65%),
+      radial-gradient(ellipse 70% 100% at 50% 0%, rgba(169,187,164,.18), transparent 65%),
       var(--bg);
     color:var(--ink);
     padding:26px 20px 24px;
@@ -404,9 +407,9 @@
   .hero-inner{ position:relative; z-index:1; max-width:600px; margin:0 auto; }
   .hero-eyebrow{
     display:inline-flex; align-items:center; gap:8px; font-size:10.5px; letter-spacing:2px;
-    text-transform:uppercase; color:var(--wine-hover); font-weight:700; margin-bottom:8px;
+    text-transform:uppercase; color:var(--brand-deep); font-weight:700; margin-bottom:8px;
   }
-  .hero-eyebrow .hr{ width:16px; height:1px; background:var(--wine-hover); opacity:.6; }
+  .hero-eyebrow .hr{ width:16px; height:1px; background:var(--brand-deep); opacity:.6; }
   .hero h2{
     font-size:clamp(22px,4.4vw,30px); line-height:1.25; margin:0 0 8px; font-weight:600;
     color:var(--ink);
@@ -421,10 +424,10 @@
     font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; border:1px solid transparent;
     text-decoration:none;
   }
-  .hero-btn.primary{ background:var(--wine); color:#fff; }
-  .hero-btn.primary:hover{ background:var(--wine-hover); color:#fff; }
+  .hero-btn.primary{ background:var(--brand); color:#fff; }
+  .hero-btn.primary:hover{ background:var(--brand-deep); color:#fff; }
   .hero-btn.secondary{ background:var(--surface); border-color:var(--line); color:var(--ink); }
-  .hero-btn.secondary:hover{ border-color:var(--wine); color:var(--wine-hover); }
+  .hero-btn.secondary:hover{ border-color:var(--brand); color:var(--brand-deep); }
   .hero-btn .icon{ width:14px; height:14px; }
 
   @media (max-width:520px){ .hero{ padding:22px 16px 20px; } }
@@ -433,22 +436,22 @@
      نافذة اختيار اللغة — تظهر عند أول زيارة فقط
      =================================================================== */
   .lang-modal-overlay{
-    display:none; position:fixed; inset:0; background:var(--blush); z-index:200;
+    display:none; position:fixed; inset:0; background:var(--paper); z-index:200;
     align-items:center; justify-content:center; padding:20px;
   }
   .lang-modal-overlay.open{ display:flex; }
   .lang-modal{ text-align:center; max-width:360px; }
-  .lang-modal .lm-mark{ width:40px; height:40px; margin:0 auto 18px; color:var(--wine); }
-  .lang-modal h3{ color:var(--wine); font-family:'Jost',sans-serif; font-weight:800; font-size:24px; margin:0 0 8px; }
+  .lang-modal .lm-mark{ width:40px; height:40px; margin:0 auto 18px; color:var(--brand); }
+  .lang-modal h3{ color:var(--brand); font-family:'Jost',sans-serif; font-weight:800; font-size:24px; margin:0 0 8px; }
   .lang-modal p{ color:var(--muted); font-size:13px; margin:0 0 26px; }
   .lang-modal-btns{ display:flex; flex-direction:column; gap:10px; }
   .lang-modal-btn{
     display:flex; align-items:center; justify-content:center; gap:10px;
-    padding:14px 20px; border-radius:14px; border:1px solid var(--rose);
-    background:var(--surface); color:var(--wine); font-size:14.5px; font-weight:600;
-    cursor:pointer; font-family:'Jost','Tajawal';
+    padding:14px 20px; border-radius:14px; border:1px solid var(--sage);
+    background:var(--surface); color:var(--brand); font-size:14.5px; font-weight:600;
+    cursor:pointer; font-family:'Jost','IBM Plex Sans Arabic';
   }
-  .lang-modal-btn:hover{ background:var(--wine); color:#fff; border-color:var(--wine); }
+  .lang-modal-btn:hover{ background:var(--brand); color:#fff; border-color:var(--brand); }
   .lang-modal-btn .icon{ width:17px; height:17px; }
 
   /* ===================================================================
@@ -456,7 +459,7 @@
      =================================================================== */
   .card .imgwrap{ cursor:zoom-in; }
   .lightbox-overlay{
-    display:none; position:fixed; inset:0; background:rgba(42,18,22,.88); z-index:150;
+    display:none; position:fixed; inset:0; background:rgba(24,35,31,.88); z-index:150;
     align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(2px);
   }
   .lightbox-overlay.open{ display:flex; }
@@ -473,12 +476,12 @@
     background:rgba(0,0,0,.45); color:#fff; border:none; font-size:18px; cursor:pointer; z-index:2;
   }
   .lightbox-info{ padding:24px 26px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
-  .lightbox-brand{ font-size:11.5px; color:var(--wine-hover); letter-spacing:.5px; font-weight:600; }
+  .lightbox-brand{ font-size:11.5px; color:var(--brand-deep); letter-spacing:.5px; font-weight:600; }
   .lightbox-name{ font-family:'Jost',sans-serif; font-weight:800; font-size:26px; font-weight:600; color:var(--ink); line-height:1.2; }
-  html[lang="ar"] .lightbox-name{ font-family:'Tajawal',sans-serif; font-weight:700; }
+  html[lang="ar"] .lightbox-name{ font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:700; }
   .lightbox-details{ font-size:13px; color:var(--muted); line-height:1.9; margin-top:6px; }
   .lightbox-details .row{ display:flex; gap:7px; align-items:flex-start; margin-bottom:8px; }
-  .lightbox-details .row .icon{ width:14px; height:14px; margin-top:3px; color:var(--wine-hover); flex:none; }
+  .lightbox-details .row .icon{ width:14px; height:14px; margin-top:3px; color:var(--brand-deep); flex:none; }
   .lightbox-details b{ color:var(--ink); font-weight:600; }
 
   /* ===================================================================
@@ -487,17 +490,17 @@
      =================================================================== */
   .stars{ display:inline-flex; gap:1px; line-height:1; }
   .stars .star{ color:var(--bg-soft); font-size:12px; }
-  .stars .star.filled{ color:var(--wine-hover); }
+  .stars .star.filled{ color:var(--brand-deep); }
   .card-rating{ display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--muted); margin:1px 0; }
   .card-rating .stars .star{ font-size:11px; }
   .card-rating b, .card-rating span{ color:var(--muted); }
 
-  .reviews-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; margin-top:14px; padding-top:14px; border-top:1px solid var(--rose-soft); }
+  .reviews-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; margin-top:14px; padding-top:14px; border-top:1px solid var(--tint); }
   .reviews-head h3{ margin:0; font-size:14px; font-weight:700; color:var(--ink); }
   .reviews-summary{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); }
   .reviews-summary b{ color:var(--ink); font-size:13px; }
   .reviews-empty{ font-size:12.5px; color:var(--muted); line-height:1.8; margin-top:8px; }
-  .review-card{ background:var(--bg-soft); border:1px solid var(--rose-soft); border-radius:10px; padding:10px 12px; }
+  .review-card{ background:var(--bg-soft); border:1px solid var(--tint); border-radius:10px; padding:10px 12px; }
   .review-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .review-name{ font-size:12.5px; font-weight:700; color:var(--ink); }
   .review-comment{ font-size:12.5px; color:var(--muted); line-height:1.7; margin:6px 0 4px; }
@@ -508,30 +511,30 @@
   .review-carousel-track{ flex:1; min-width:0; }
   .review-carousel-track .review-card{ min-height:64px; }
   .review-nav{
-    flex:0 0 auto; width:28px; border:1px solid var(--rose-soft); border-radius:8px;
+    flex:0 0 auto; width:28px; border:1px solid var(--tint); border-radius:8px;
     background:var(--bg-soft); color:var(--ink); font-size:18px; line-height:1; cursor:pointer;
     display:flex; align-items:center; justify-content:center; transition:background .15s ease;
   }
-  .review-nav:hover{ background:var(--rose-soft); }
+  .review-nav:hover{ background:var(--tint); }
   .review-dots{ display:flex; justify-content:center; gap:5px; margin-top:8px; }
-  .review-dot{ width:6px; height:6px; border-radius:50%; background:var(--rose-soft); cursor:pointer; transition:background .15s ease, transform .15s ease; }
-  .review-dot.active{ background:var(--wine-hover); transform:scale(1.3); }
+  .review-dot{ width:6px; height:6px; border-radius:50%; background:var(--tint); cursor:pointer; transition:background .15s ease, transform .15s ease; }
+  .review-dot.active{ background:var(--brand-deep); transform:scale(1.3); }
 
   /* ===== فورم إضافة تقييم من العميل مباشرة ===== */
-  .review-form-wrap{ margin-top:16px; padding-top:14px; border-top:1px solid var(--rose-soft); }
+  .review-form-wrap{ margin-top:16px; padding-top:14px; border-top:1px solid var(--tint); }
   .review-form-wrap h4{ margin:0 0 8px; font-size:13px; font-weight:700; color:var(--ink); }
   .review-star-picker{ display:flex; gap:4px; margin-bottom:10px; direction:ltr; justify-content:flex-start; }
   .review-star-picker .star-pick{ font-size:22px; color:var(--bg-soft); cursor:pointer; transition:color .12s ease; line-height:1; user-select:none; }
-  .review-star-picker .star-pick.active{ color:var(--wine-hover); }
+  .review-star-picker .star-pick.active{ color:var(--brand-deep); }
   .review-form-wrap input[type="text"], .review-form-wrap textarea{
     width:100%; box-sizing:border-box; font-family:inherit; font-size:12.5px; color:var(--ink);
-    background:var(--bg-soft); border:1px solid var(--rose-soft); border-radius:8px;
+    background:var(--bg-soft); border:1px solid var(--tint); border-radius:8px;
     padding:9px 11px; margin-bottom:8px; resize:vertical;
   }
-  .review-form-wrap input[type="text"]:focus, .review-form-wrap textarea:focus{ outline:none; border-color:var(--wine-hover); }
+  .review-form-wrap input[type="text"]:focus, .review-form-wrap textarea:focus{ outline:none; border-color:var(--brand-deep); }
   .review-hp-field{ position:absolute !important; left:-9999px !important; width:1px !important; height:1px !important; overflow:hidden !important; opacity:0; }
   #reviewSubmitBtn{
-    background:var(--wine); color:#fff; border:none; border-radius:8px; padding:9px 18px;
+    background:var(--brand); color:#fff; border:none; border-radius:8px; padding:9px 18px;
     font-size:12.5px; font-weight:700; cursor:pointer; transition:opacity .15s ease;
   }
   #reviewSubmitBtn:disabled{ opacity:.6; cursor:default; }
@@ -548,11 +551,11 @@
     max-width:520px; margin:10px auto 0;
   }
   .site-nav-link{
-    color:var(--wine); text-decoration:none; font-size:12.5px; font-weight:500;
+    color:var(--brand); text-decoration:none; font-size:12.5px; font-weight:500;
     padding:6px 14px; border-radius:999px; border:1px solid transparent; transition:.15s;
   }
-  .site-nav-link:hover{ border-color:var(--rose); }
-  .site-nav-link.active{ background:var(--wine); color:#fff; font-weight:700; }
+  .site-nav-link:hover{ border-color:var(--sage); }
+  .site-nav-link.active{ background:var(--brand); color:#fff; font-weight:700; }
 
   .category-intro{
     max-width:700px; margin:14px auto 0; padding:0 16px; text-align:center;
@@ -562,7 +565,7 @@
   .section-head{ max-width:700px; margin:34px auto 4px; padding:0 16px; text-align:center; }
   .section-head .eyebrow{
     display:inline-flex; align-items:center; gap:8px; font-size:10.5px; letter-spacing:2px;
-    text-transform:uppercase; color:var(--wine-hover); font-weight:700; margin-bottom:6px;
+    text-transform:uppercase; color:var(--brand-deep); font-weight:700; margin-bottom:6px;
   }
   .section-head h2{ font-size:clamp(20px,4vw,26px); margin:0 0 6px; color:var(--ink); font-weight:600; }
   .section-head p{ font-size:13px; color:var(--muted); margin:0; line-height:1.7; }
@@ -578,13 +581,13 @@
     transition:transform .25s ease, box-shadow .25s ease;
   }
   .category-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-lg); }
-  .category-card-icon{ width:34px; height:34px; color:var(--wine-hover); margin-bottom:6px; }
+  .category-card-icon{ width:34px; height:34px; color:var(--brand-deep); margin-bottom:6px; }
   .category-card-title{ font-family:'Jost',sans-serif; font-weight:800; font-size:22px; font-weight:600; }
-  html[lang="ar"] .category-card-title{ font-family:'Tajawal',sans-serif; font-weight:700; }
+  html[lang="ar"] .category-card-title{ font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:700; }
   .category-card-desc{ font-size:12.5px; color:var(--muted); line-height:1.6; max-width:220px; }
   .category-card-cta{
     display:flex; align-items:center; gap:6px; margin-top:10px; font-size:12.5px; font-weight:700;
-    color:var(--wine-hover);
+    color:var(--brand-deep);
   }
   .category-card-cta .icon{ width:13px; height:13px; transform:rotate(-90deg); }
   html[dir="rtl"] .category-card-cta .icon{ transform:rotate(90deg); }
@@ -595,7 +598,7 @@
   }
 
   .header-country-select{
-    background:rgba(91,31,43,.05); color:var(--wine); border:1px solid var(--rose);
+    background:rgba(31,61,51,.05); color:var(--brand); border:1px solid var(--sage);
     border-radius:999px; padding:6px 10px; font-size:11px; font-family:'Jost'; cursor:pointer;
   }
   .header-country-select option{ color:var(--ink); }
@@ -621,7 +624,7 @@
   .brands-mega-title{ font-size:11px; font-weight:700; color:var(--muted); margin-bottom:10px; }
   .brands-mega-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px 14px; }
   .bm-item{ color:var(--ink); text-decoration:none; font-size:12.5px; padding:6px 4px; border-radius:6px; display:block; }
-  .bm-item:hover{ color:var(--wine-hover); background:var(--rose-soft); }
+  .bm-item:hover{ color:var(--brand-deep); background:var(--tint); }
   @media(max-width:640px){ .brands-mega-grid{ grid-template-columns:repeat(2,1fr); } }
 
   /* -- سلايدر الأكثر مبيعًا بالرئيسية -- */
@@ -653,8 +656,8 @@
   }
   /* بالرئيسية، عناصر التصنيفات أزرار فلترة (<button>) مو روابط تنقل (<a>) — نفس المظهر بالضبط */
   button.sidebar-link{ appearance:none; -webkit-appearance:none; background:none; border:none; font:inherit; text-align:inherit; cursor:pointer; }
-  .sidebar-link:hover{ color:var(--wine-hover); background:var(--rose-soft); }
-  .sidebar-link.active{ color:var(--wine-hover); font-weight:700; }
+  .sidebar-link:hover{ color:var(--brand-deep); background:var(--tint); }
+  .sidebar-link.active{ color:var(--brand-deep); font-weight:700; }
   .sb-count{ color:var(--muted); font-size:11px; }
   .sidebar-check{ display:flex; align-items:center; gap:8px; font-size:13px; padding:6px 2px; cursor:pointer; }
   .shop-main{ flex:1; min-width:0; }
@@ -693,11 +696,11 @@
 
 /* ===== أضيفت مع صفحة الدفع الجديدة (كاش عند الاستلام، ضمان إيفوك، شريط آخر الطلبات) ===== */
 .stock-note{ font-size:10px; margin-top:2px; }
-.stock-note.low{ color:var(--wine-hover); font-weight:700; }
+.stock-note.low{ color:var(--brand-deep); font-weight:700; }
 .stock-note.out{ color:var(--muted); }
 .inspired-line{ font-size:11px; color:var(--muted); margin-top:2px; }
 .verified-badge{
-  display:inline-block; font-size:10px; font-weight:600; color:var(--wine-hover); background:var(--rose-soft);
+  display:inline-block; font-size:10px; font-weight:600; color:var(--brand-deep); background:var(--tint);
   border-radius:999px; padding:1px 8px; margin-inline-start:6px; vertical-align:middle;
 }
 .lb-disclaimer{ font-size:11.5px; color:var(--muted); }
@@ -716,25 +719,25 @@
 }
 
 /* ===== Hero title: Arabic display face (logo/hero only) ===== */
-html[lang="ar"] .hero h2{ font-family:'Aref Ruqaa','Tajawal',serif; font-weight:700; }
+html[lang="ar"] .hero h2{ font-family:'El Messiri','IBM Plex Sans Arabic',sans-serif; font-weight:700; }
 html[lang="en"] .hero h2{ font-family:'Cormorant Garamond','Jost',serif; font-weight:600; }
 
 /* ===== شريط الموافقة على التتبع (غير حاجب) ===== */
-.consent-bar{ display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; padding:8px 14px; background:var(--rose-soft); border-bottom:1px solid var(--rose); color:var(--ink); font-size:12.5px; line-height:1.6; text-align:center; }
+.consent-bar{ display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; padding:8px 14px; background:var(--tint); border-bottom:1px solid var(--sage); color:var(--ink); font-size:12.5px; line-height:1.6; text-align:center; }
 .consent-bar p{ margin:0; }
-.consent-bar a{ color:var(--wine); text-decoration:underline; }
+.consent-bar a{ color:var(--brand); text-decoration:underline; }
 .consent-actions{ display:flex; gap:8px; }
-.consent-bar button{ font-family:inherit; font-size:12.5px; border-radius:999px; padding:5px 16px; cursor:pointer; border:1px solid var(--wine); }
-.consent-yes{ background:var(--wine); color:#fff; }
-.consent-no{ background:transparent; color:var(--wine); }
+.consent-bar button{ font-family:inherit; font-size:12.5px; border-radius:999px; padding:5px 16px; cursor:pointer; border:1px solid var(--brand); }
+.consent-yes{ background:var(--brand); color:#fff; }
+.consent-no{ background:transparent; color:var(--brand); }
 
 /* ===== تيزر تشكيلة «قلعة الحمراء» — ألوان التشكيلة تُستخدم هنا فقط ===== */
 .teaser{ max-width:760px; margin:18px auto 6px; padding:0 16px; }
 .teaser-inner{ position:relative; background:#F5EEE2; border:1px solid #A3472F; border-radius:var(--radius); padding:22px 20px 26px; text-align:center; overflow:hidden; }
 .teaser-tag{ display:inline-block; background:#A3472F; color:#fff; font-size:12px; font-weight:700; padding:3px 14px; border-radius:999px; letter-spacing:.3px; }
 .teaser h2{ margin:12px 0 6px; font-size:26px; color:#1D4E7A; }
-html[lang="ar"] .teaser h2{ font-family:'Aref Ruqaa','Tajawal',serif; font-weight:700; }
+html[lang="ar"] .teaser h2{ font-family:'El Messiri','IBM Plex Sans Arabic',sans-serif; font-weight:700; }
 .teaser p{ margin:0; color:#3E5A47; font-size:14.5px; font-weight:500; }
 .teaser-tiles{ display:flex; justify-content:center; gap:8px; margin-top:16px; }
 .teaser-tiles i{ width:22px; height:22px; border-radius:4px; background:#1D4E7A; }
-.teaser-tiles i:nth-child(2){ background:#A3472F; } .teaser-tiles i:nth-child(3){ background:#3E5A47; } .teaser-tiles i:nth-child(4){ background:#C98B86; }
+.teaser-tiles i:nth-child(2){ background:#A3472F; } .teaser-tiles i:nth-child(3){ background:#3E5A47; } .teaser-tiles i:nth-child(4){ background:#A9BBA4; }
