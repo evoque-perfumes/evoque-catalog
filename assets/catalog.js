@@ -19,14 +19,14 @@ const REVIEWS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxwC7mC6JegXo-
 // "المفضلة" (❤️ Wishlist) — كل ضغطة قلب على عطر تحدّث عداده بملف wishlist.json
 // بجذر الريبو. سكربت منفصل تمامًا عن الطلبات والتقييمات (نفس مبدأ الفصل). انشره
 // حسب دليل wishlist-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
-const WISHLIST_ENDPOINT = "https://script.google.com/macros/s/AKfycbyRBlIFQ9jHZ2mCabZHeVrTrd6205U8zvMZQRPcW03J8gX70zaKFD-KeGZGn2db_b8N/exec";
+const WISHLIST_ENDPOINT = "https://script.google.com/macros/s/AKfycbyczBitpaWL8Z9xRi5YFGUxEJAb7B11_TxCn-N33-my7cLP6z3q5pYDUKf5MO3P2RWk/exec"; // 22 أكتوبر 2026: السكربت الجديد (مفتاح evoque-private فقط)
 // رابط Google Apps Script Web App منفصل رابع (27 أغسطس 2026) لاستقبال نسخة من
 // كل طلب (نموذج كامل أو زر واتساب السريع) وكتابتها بملف pending-orders.json
 // عشان تظهر بتبويب "🧾 الطلبات الجديدة" بلوحة التحكم للاعتماد/الرفض بدون إدخال
 // يدوي. سكربت منفصل تمامًا عن نظام الطلبات القديم (ORDER_ENDPOINT) — القديم
 // يضل شغال بالضبط زي ما كان، هذا بس يضيف نسخة موازية. انشره حسب دليل
 // order-queue-apps-script/Code.gs، والصق رابطه هنا بدل القيمة المؤقتة تحت.
-const ORDER_QUEUE_ENDPOINT = "https://script.google.com/macros/s/AKfycbxXrXt26AgddAb5kGWzUtUM34CfM_SbMw6Q27SB2nAgRBmCztsB62IpISya-ird3o2I/exec";
+const ORDER_QUEUE_ENDPOINT = "https://script.google.com/macros/s/AKfycbzkocInmosn2QLbYPUYbvY7w4Gs2TP-vsSFJqB8BlU38H0iAfRex1To6YISA1wqFYc-/exec"; // 22 أكتوبر 2026: Evoque Order Intake الجديد
 const SHEET_ID = "1UT6Ej7xH0Fsnm91sDwsZQR-dFiIRSEHP3Vzy8TNiXC0"; // Evoque - Public Catalog (Website Source) — safe, no payment data
 const SHEET_TAB = "Sheet1";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
