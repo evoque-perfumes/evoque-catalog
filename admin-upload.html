@@ -18,9 +18,9 @@
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F6EAE4; --panel:#FDF8F5; --panel-2:#F1E0DA; --line:#E3CBC4; --ink:#2A1216; --muted:#7A5A58;
-    --gold:#5B1F2B; --gold-deep:#451620; --gold-soft:#E9C9C5; --gold-ink:#5B1F2B;
-    --emerald:#5B1F2B; --emerald-deep:#451620;
+    --bg:#FAF6EF; --panel:#FFFFFF; --panel-2:#F1E9DC; --line:#E4D9C5; --ink:#221F1C; --muted:#7A7168;
+    --gold:#C6AB8B; --gold-deep:#A9835C; --gold-soft:rgba(198,171,139,.16); --gold-ink:#6B4F2E;
+    --emerald:#2F4A3D; --emerald-deep:#213830;
     --red:#B23A2E; --red-deep:#8E2C22; --green:#1F6B41; --amber:#9A4F2E;
     --radius:14px;
   }
@@ -33,8 +33,8 @@
   .wrap{max-width:960px; margin:0 auto;}
   .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
   .brandmark{display:flex; align-items:center; gap:10px;}
-  .brandmark .dot{width:9px; height:9px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px rgba(91,31,43,.4);}
-  h1{font-family:'IBM Plex Sans Arabic', sans-serif; font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; color:var(--ink);}
+  .brandmark .dot{width:9px; height:9px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px rgba(47,74,61,.4);}
+  h1{font-family:'El Messiri', 'IBM Plex Sans Arabic', serif; font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; color:var(--ink);}
   .sub{color:var(--muted); font-size:13.5px; margin:2px 0 0; line-height:1.7;}
   .livepill{font-size:11.5px; color:var(--muted); border:1px solid var(--line); background:var(--panel); border-radius:20px; padding:5px 12px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
   .livepill .dot2{width:7px; height:7px; border-radius:50%; background:var(--green);}
@@ -47,8 +47,8 @@
   nav.tabs button:hover{color:var(--ink); background:var(--panel-2);}
   nav.tabs button.active{background:var(--gold-soft); color:var(--gold-ink); box-shadow:inset 0 0 0 1px #C98B86;}
 
-  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px; box-shadow:0 1px 2px rgba(42,18,22,.04);}
-  .panel h2{font-family:'IBM Plex Sans Arabic',sans-serif; font-size:19px; margin:0 0 12px; color:var(--ink); font-weight:700;}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px; box-shadow:0 1px 2px rgba(34,31,28,.04);}
+  .panel h2{font-family:'El Messiri','IBM Plex Sans Arabic',serif; font-size:19px; margin:0 0 12px; color:var(--ink); font-weight:700;}
   label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
   input[type=text], input[type=password], input[type=number], select, textarea{
     width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
@@ -145,12 +145,12 @@
   .kpi-card.clickable{cursor:pointer;}
   .kpi-card.clickable:hover{border-color:var(--gold-ink); transform:translateY(-1px);}
   .kpi-card .kpi-label{color:var(--muted); font-size:12.5px; line-height:1.5;}
-  .kpi-card .kpi-value{font-family:'IBM Plex Sans Arabic',sans-serif; font-size:28px; font-weight:700; color:var(--ink); margin-top:4px;}
+  .kpi-card .kpi-value{font-family:'El Messiri','IBM Plex Sans Arabic',serif; font-size:28px; font-weight:700; color:var(--ink); margin-top:4px;}
   .kpi-card.alert .kpi-value{color:#9C6B1F;}
   .kpi-card.alert-red .kpi-value{color:#B23A2E;}
   .kpi-card.good .kpi-value{color:#1F6B41;}
   .kpi-card .kpi-sub{color:#93897A; font-size:11.5px; margin-top:2px;}
-  .ov-section-title{font-family:'IBM Plex Sans Arabic',sans-serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
+  .ov-section-title{font-family:'El Messiri','IBM Plex Sans Arabic',serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
   .ov-section-title:first-child{margin-top:0;}
   .ov-empty-note{color:var(--muted); font-size:12.5px; background:var(--panel-2); border:1px dashed var(--line); border-radius:8px; padding:12px 14px; line-height:1.8;}
 
@@ -313,7 +313,7 @@
       <div class="kpi-card"><div class="kpi-label">متوسط سعر 50مل (AED)</div><div class="kpi-value" id="ov_avgPrice">—</div></div>
       <div class="kpi-card"><div class="kpi-label">قيمة المخزون التقديرية (AED)</div><div class="kpi-value" id="ov_stockValue">—</div><div class="kpi-sub">حسب السعر × الكمية المتوفرة</div></div>
       <div class="kpi-card"><div class="kpi-label">إجمالي القطع بالمخزون الحين</div><div class="kpi-value" id="ov_stockUnits">—</div><div class="kpi-sub">مجموع كميات كل الأحجام</div></div>
-      <div class="kpi-card"><div class="kpi-label">إجمالي قطع 10مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits10">—</div></div>
+      <div class="kpi-card" style="display:none;"><div class="kpi-label">إجمالي قطع 10مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits10">—</div></div>
       <div class="kpi-card"><div class="kpi-label">إجمالي قطع 50مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits50">—</div></div>
       <div class="kpi-card"><div class="kpi-label">متوسط التقييم</div><div class="kpi-value" id="ov_rating">—</div><div class="kpi-sub" id="ov_ratingSub"></div></div>
     </div>
@@ -345,6 +345,7 @@
       <div id="ov_countryStats" class="static-list"></div>
     </div>
 
+    <div style="display:none;" aria-hidden="true">
     <div class="ov-section-title">طلبات نموذج الموقع (Google Sheet) — اختياري</div>
     <div class="kpi-grid" id="ov_siteGrid">
       <div class="kpi-card"><div class="kpi-label">عدد الطلبات</div><div class="kpi-value" id="ov_siteCount">—</div></div>
@@ -371,6 +372,7 @@
         <div class="status" id="ov_appsStatus"></div>
       </div>
     </details>
+    </div>
   </div>
 
   <div class="panel" id="photoSubModeToggle" style="display:none;">
@@ -589,9 +591,13 @@
       <div class="row" style="justify-content:space-between; margin-top:10px;">
         <b>إجمالي السلة: <span id="sl_cartTotal">0</span> AED</b>
       </div>
+      <div class="row" style="justify-content:space-between; margin-top:6px;">
+        <b>🧴 عدد العطور: <span id="sl_cartCount">0</span><span id="sl_cartFree" style="display:none; color:#1F6B41; margin-inline-start:8px;">🚚 توصيل مجاني</span></b>
+      </div>
       <div class="field" style="margin-top:10px; max-width:240px;">
         <label for="sl_discount">خصم على الطلب (AED) — اختياري</label>
         <input type="number" id="sl_discount" min="0" step="0.01" placeholder="0">
+        <small class="hint" id="sl_discountHint" style="margin-top:4px;"></small>
       </div>
       <div class="row" id="sl_netTotalRow" style="justify-content:space-between; margin-top:6px; display:none;">
         <b>الإجمالي بعد الخصم: <span id="sl_netTotal">0</span> AED</b>
@@ -637,6 +643,17 @@
     <div class="grid2" style="margin-top:10px;">
       <div class="field"><label for="sl_status">حالة الطلب</label><select id="sl_status"></select></div>
       <div class="field"><label style="display:flex; align-items:center; gap:6px; margin-top:26px; cursor:pointer;"><input type="checkbox" id="sl_recentConsent" style="width:auto; margin:0;"> العميل وافق يظهر اسمه الأول ومدينته بشريط "آخر الطلبات"</label></div>
+    </div>
+
+    <div id="sl_rulesBox" style="margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--panel-2);">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:700;">
+        <input type="checkbox" id="sl_legacy" style="width:auto; margin:0;"> 📜 طلب قديم (قبل ١٨ أكتوبر) — بدون القواعد الجديدة
+      </label>
+      <small class="hint" id="sl_legacyHint" style="margin-top:6px;"></small>
+      <div id="sl_deliveryBox" style="margin-top:10px; max-width:320px;">
+        <div class="field"><label for="sl_deliveryCost">🚚 تكلفة التوصيل علينا (AED) — التوصيل مجاني للعميل</label><input type="number" id="sl_deliveryCost" min="0" step="0.01" placeholder="0"></div>
+        <small class="hint" style="margin-top:2px;">تتعبّى تلقائيًا حسب «نوع التوصيل» فوق، وتقدر تغيّرها.</small>
+      </div>
     </div>
 
     <div class="row">
@@ -695,7 +712,9 @@
         <option value="paid">✅ تم استلام المبلغ</option>
       </select>
     </div>
+    <div class="field" style="margin-top:8px;"><input type="search" id="sl_histSearch" placeholder="🔍 ابحث بالاسم أو الهاتف أو اسم العطر أو التاريخ"></div>
     <div id="sl_history" class="static-list" style="display:none;"></div>
+    <div class="row"><button type="button" id="sl_histMoreBtn" class="secondary" style="display:none;">عرض ١٥ طلب أكثر</button></div>
     <small class="hint" id="sl_historyEmptyHint" style="margin-top:0;">ما فيه مبيعات مسجّلة بعد.</small>
   </div>
 
@@ -1055,6 +1074,7 @@
         الإكسل (نفس القالب اللي أرسلته لك بالمحادثة) بصف واحد لكل عطر جديد، وارفعه هنا. الصور تضل تُرفع
         بعدين بوضع "رفع كل الصور دفعة وحدة" — بس تسمّي الصور بنفس اسم البراند والعطر زي المعتاد.
       </small>
+      <div class="row" style="margin:10px 0;"><button type="button" class="secondary" id="xlsxTplAddBtn">⬇️ حمّل نموذج الإكسل (عطور جديدة)</button></div>
       <label for="xlsx_fileInput">اختر ملف الإكسل</label>
       <input type="file" id="xlsx_fileInput" accept=".xlsx,.xls">
       <div id="xlsx_previewWrap" style="display:none;">
@@ -1081,6 +1101,7 @@
         عمود "الموسم" يقبل قيمة وحدة ("صيفي" أو "شتوي") أو قيمتين مفصولتين بفاصلة ("صيفي، شتوي") لعطر مناسب للموسمين.
         أي خانة تسيبها فاضية بالإكسل، القيمة القديمة المسجّلة بالموقع تضل زي ما هي (ما تنمسح).
       </small>
+      <div class="row" style="margin:10px 0;"><button type="button" class="secondary" id="xlsxTplUpdBtn">⬇️ حمّل نموذج الإكسل (تحديث عطور)</button></div>
       <label for="xlsxUpd_fileInput">اختر ملف الإكسل</label>
       <input type="file" id="xlsxUpd_fileInput" accept=".xlsx,.xls">
       <div id="xlsxUpd_previewWrap" style="display:none;">
@@ -1107,7 +1128,36 @@
       (نفس منطق "الأكثر مبيعًا فعليًا") لكن تكلفتها معروضة لحالها تحت.
     </small>
 
-    <div class="ov-section-title">📦 مشتريات المواد الخام والمخزون</div>
+    <div class="ov-section-title">⚙️ إعدادات الحساب (مرة وحدة للكل)</div>
+    <small class="hint" style="margin-top:0;">
+      هذي القيم تنكتب مرة وحدة وتنطبق على كل العطور. زجاجة 50مل بنسبة زيت 33% = 16.5 جرام زيت + 33.5 مل كحول.
+      الكحول: اكتب كم دفعت وكم لتر (مثلاً 300 درهم لـ 20 لتر). الزجاجة والتغليف: سعر الحبة الوحدة. لو سجّلت مشتريات لهذي المواد تحت، النظام يعتمد على متوسط مشترياتك بدل الرقم المكتوب هنا.
+    </small>
+    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="min-width:110px;"><label for="cs_oilPct">نسبة الزيت (%)</label><input type="number" id="cs_oilPct" min="1" max="100" step="0.1"></div>
+      <div class="field" style="min-width:110px;"><label for="cs_alcPrice">سعر الكحول (AED)</label><input type="number" id="cs_alcPrice" min="0" step="0.01"></div>
+      <div class="field" style="min-width:90px;"><label for="cs_alcLiters">لكم لتر</label><input type="number" id="cs_alcLiters" min="0" step="0.1"></div>
+      <label style="display:flex; align-items:center; gap:6px; padding-bottom:12px; cursor:pointer;"><input type="checkbox" id="cs_alcVat" style="width:auto; margin:0;"> +5% ضريبة</label>
+    </div>
+    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="min-width:130px;"><label for="cs_bottle">زجاجة 50مل (AED/حبة)</label><input type="number" id="cs_bottle" min="0" step="0.01"></div>
+      <div class="field" style="min-width:130px;"><label for="cs_pack">التغليف (AED/قطعة)</label><input type="number" id="cs_pack" min="0" step="0.01"></div>
+      <div class="field" style="min-width:130px;"><label for="cs_manuf">أجرة تصنيع (AED/زجاجة)</label><input type="number" id="cs_manuf" min="0" step="0.01"></div>
+      <button type="button" id="cs_saveBtn">💾 احفظ الإعدادات</button>
+    </div>
+    <div class="status show info" id="cs_summary" style="margin-top:8px;"></div>
+    <div class="status" id="cs_statusBox"></div>
+
+    <div class="ov-section-title" style="margin-top:22px;">🛢️ زيوت العطور وتكلفة كل عطر</div>
+    <small class="hint" style="margin-top:0;">
+      كل عطر في صف: اكتب <b>السعر اللي دفعته للزيت</b> (مثلاً سعر الـ100 جرام كامل، مو سعر الجرام) والجرامات، واضغط 💾 في نفس الصف. النظام يحسب سعر الجرام وتكلفة زجاجة 50مل كاملة. الأسعار تنحفظ في ملف المواد (materials.json) مو في بيانات العطور اللي يشوفها الزوار.
+    </small>
+    <input type="text" id="oc_search" placeholder="ابحث باسم البراند أو العطر...">
+    <div class="status" id="oc_statusBox"></div>
+    <div class="static-list" id="oc_rows" style="margin-top:10px; max-height:640px;"></div>
+    <small class="hint" id="oc_more" style="margin-top:6px;"></small>
+
+    <div class="ov-section-title" style="margin-top:26px;">📦 مشتريات المواد الخام والمخزون</div>
     <small class="hint" style="margin-top:0;">
       سجّلي هنا كل عملية شراء (زجاجات، كحول، تغليف) — النظام يحسب متوسط سعر الوحدة تلقائيًا من كل مشترياتك، ويطرح
       منه اللي استُهلك فعليًا بالطلبات الحقيقية المعتمدة، عشان تعرفي كم باقي عندك بالمخزون بأي لحظة (زي "كم زجاجة فاضية
@@ -1160,34 +1210,48 @@
     </small>
     <div class="kpi-grid" id="exp_kpiGrid"></div>
 
-    <div class="row" style="margin-top:16px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
-      <div class="field" style="flex:2; min-width:200px;">
-        <label for="exp_description">وصف المصروف</label>
-        <input type="text" id="exp_description" placeholder="مثال: قمعات بلاستيك لصناعة العطور">
+    <small class="hint" style="margin-top:12px;">سجّل بسرعة: اضغط نوع المصروف، اكتب المبلغ، واضغط سجّل. التاريخ يتسجل اليوم تلقائيًا.</small>
+    <div class="row" id="exp_chips" style="gap:8px; flex-wrap:wrap; margin-top:8px;">
+      <button type="button" class="secondary exp-chip" data-d="أكياس وتغليف" data-c="manufacturing_supplies">📦 أكياس وتغليف</button>
+      <button type="button" class="secondary exp-chip" data-d="ملصقات وطباعة" data-c="manufacturing_supplies">🏷️ ملصقات وطباعة</button>
+      <button type="button" class="secondary exp-chip" data-d="أدوات تصنيع" data-c="manufacturing_supplies">🧰 أدوات تصنيع</button>
+      <button type="button" class="secondary exp-chip" data-d="شحن وتوصيل" data-c="shipping">🚚 شحن وتوصيل</button>
+      <button type="button" class="secondary exp-chip" data-d="إعلانات" data-c="marketing">📣 إعلانات</button>
+      <button type="button" class="secondary exp-chip" data-d="" data-c="other">➕ شي ثاني</button>
+    </div>
+    <div class="row" style="margin-top:12px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="flex:2; min-width:180px;">
+        <label for="exp_description">وش اشتريت؟</label>
+        <input type="text" id="exp_description" placeholder="اضغط نوع فوق أو اكتب بنفسك">
       </div>
       <div class="field" style="min-width:130px;">
-        <label for="exp_amount">المبلغ الإجمالي (AED)</label>
+        <label for="exp_amount">المبلغ (AED)</label>
         <input type="number" id="exp_amount" min="0" step="0.01">
-      </div>
-      <div class="field" style="min-width:150px;">
-        <label for="exp_date">التاريخ</label>
-        <input type="date" id="exp_date">
-      </div>
-      <div class="field" style="min-width:180px;">
-        <label for="exp_category">التصنيف</label>
-        <select id="exp_category">
-          <option value="manufacturing_supplies">مستلزمات تصنيع (أدوات/قمعات...)</option>
-          <option value="marketing">تسويق وإعلانات</option>
-          <option value="shipping">شحن وتوصيل</option>
-          <option value="other">أخرى</option>
-        </select>
-      </div>
-      <div class="field" style="flex:2; min-width:180px;">
-        <label for="exp_note">ملاحظة (اختياري)</label>
-        <input type="text" id="exp_note" placeholder="مثال: رقم الطلب أو اسم الموقع">
       </div>
       <button type="button" id="exp_addBtn">➕ سجّل المصروف</button>
     </div>
+    <details style="margin-top:8px;">
+      <summary style="cursor:pointer; color:var(--muted); font-size:12.5px;">تفاصيل إضافية (اختياري): تاريخ ثاني، تصنيف، ملاحظة</summary>
+      <div class="row" style="margin-top:10px; align-items:flex-end; flex-wrap:wrap; gap:10px;">
+        <div class="field" style="min-width:150px;">
+          <label for="exp_date">التاريخ</label>
+          <input type="date" id="exp_date">
+        </div>
+        <div class="field" style="min-width:180px;">
+          <label for="exp_category">التصنيف</label>
+          <select id="exp_category">
+            <option value="manufacturing_supplies">مستلزمات تصنيع (أدوات/قمعات...)</option>
+            <option value="marketing">تسويق وإعلانات</option>
+            <option value="shipping">شحن وتوصيل</option>
+            <option value="other">أخرى</option>
+          </select>
+        </div>
+        <div class="field" style="flex:2; min-width:180px;">
+          <label for="exp_note">ملاحظة (اختياري)</label>
+          <input type="text" id="exp_note" placeholder="مثال: رقم الطلب أو اسم الموقع">
+        </div>
+      </div>
+    </details>
     <div class="status" id="exp_statusBox"></div>
 
     <div style="margin-top:14px;">
@@ -1202,10 +1266,12 @@
     <div class="kpi-grid" id="cost_kpiGrid">
       <div class="kpi-card"><div class="kpi-label">عدد القطع المحتسبة</div><div class="kpi-value" id="cost_units">—</div></div>
       <div class="kpi-card good"><div class="kpi-label">إجمالي الإيرادات (AED)</div><div class="kpi-value" id="cost_revenue">—</div></div>
-      <div class="kpi-card"><div class="kpi-label">إجمالي رأس المال / التكلفة (AED)</div><div class="kpi-value" id="cost_capital">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">إجمالي التكلفة: عطور + توصيل (AED)</div><div class="kpi-value" id="cost_capital">—</div></div>
       <div class="kpi-card good"><div class="kpi-label">صافي الربح (AED)</div><div class="kpi-value" id="cost_profit">—</div></div>
       <div class="kpi-card"><div class="kpi-label">هامش الربح</div><div class="kpi-value" id="cost_margin">—</div></div>
       <div class="kpi-card clickable alert" id="cost_missingCard"><div class="kpi-label">عطور بيعت بدون بيانات تكلفة (اضغط للمراجعة)</div><div class="kpi-value" id="cost_missingCount">—</div><div class="kpi-sub">تُحسب تكلفتها صفر لين تعبّي بياناتها</div></div>
+      <div class="kpi-card"><div class="kpi-label">🚚 تكلفة التوصيل المجاني (AED)</div><div class="kpi-value" id="cost_deliveryCost">—</div><div class="kpi-sub" id="cost_deliverySub">محسوبة ضمن التكلفة أعلاه</div></div>
+      <div class="kpi-card"><div class="kpi-label">🏷️ إجمالي الخصومات الممنوحة (AED)</div><div class="kpi-value" id="cost_discountGiven">—</div><div class="kpi-sub">مطروحة من الإيرادات أصلاً</div></div>
       <div class="kpi-card"><div class="kpi-label">🎁 تكلفة قطع الهدايا المجانية (AED)</div><div class="kpi-value" id="cost_giftCost">—</div><div class="kpi-sub">غير محتسبة بالربح أعلاه</div></div>
     </div>
 
@@ -1213,10 +1279,12 @@
     <div id="cost_byPerfumeEmpty" class="ov-empty-note" style="display:none;">ما فيه بيانات كافية بعد.</div>
     <div class="static-list" id="cost_byPerfumeList"></div>
 
+    <div style="display:none;">
     <div class="ov-section-title" style="margin-top:22px;">إدارة تكلفة كل عطور الكتالوج</div>
     <small class="hint" style="margin-top:0;">ابحث عن عطر عشان تشوف تكلفته الحالية المحسوبة، واضغط "تعديل" عشان تعبّي أو تغيّر أرقامه.</small>
     <input type="text" id="cost_manageSearch" placeholder="ابحث باسم البراند أو العطر...">
     <div class="static-list" id="cost_manageList" style="max-height:420px;"></div>
+    </div>
   </div>
 
   <div class="panel" id="bulkPricePanel" style="display:none;">
@@ -1348,8 +1416,9 @@
       <small class="hint" style="margin-top:0;">0 = نفدت الكمية (الموقع يعرض "نفدت الكمية" تلقائيًا). أي رقم أكبر من صفر = متوفر.</small>
     </fieldset>
 
-    <fieldset>
-      <legend>🧮 تكلفة التصنيع (اختياري — لحساب الأرباح تلقائيًا)</legend>
+    <small class="hint" style="margin-top:0;">🧮 التكلفة (الزيت والكحول والزجاجة) تنضبط كلها من تبويب "🧮 التكلفة والأرباح" — مو من هنا.</small>
+    <fieldset style="display:none;">
+      <legend>🧮 تكلفة التصنيع (قديم — مخفي)</legend>
       <small class="hint" style="margin-top:0;">
         عبّي هالحقول مرة وحدة لكل عطر، والنظام يحسب تكلفة القطعة الواحدة تلقائيًا، ولما توصل طلبية فعلية من الموقع
         يحسب رأس المال والربح الصافي وحده من تبويب "🧮 التكلفة والأرباح" — بدون أي إدخال يدوي إضافي منك.
@@ -2556,6 +2625,7 @@ let salesEditingOrderId = null; // لو مو null، معناها نعدّل طل
 // 11 أكتوبر 2026: فلتر سجل المبيعات — بطلب المستخدم، عشان يقدر يحدد بسرعة مين باقي
 // له الدفع، أو مين تم شحن طلبه وما استلمه بعد، بدل ما يمرر على كل الطلبات يدويًا.
 let slFilterStatus = "all"; // "all" أو قيمة status (new، confirmed، dispatched، delivered، …)
+let slHistLimit = 15, slHistQuery = "";
 let slFilterPaid = "all";   // "all" | "unpaid" | "paid"
 let salesEditingOriginalItems = []; // نسخة من عناصر الطلب الأصلية وقت بداية التعديل — تُستخدم لحساب فرق المخزون الصحيح عند الحفظ
 // 14 سبتمبر 2026: خيارات قائمة "sl_country" أكواد (AE/OM/...) بس الطلبات الجاية من
@@ -2610,11 +2680,13 @@ function selectPerfumeForSales(p){
   const defaultSize = "50";
   document.getElementById("sl_size").innerHTML = slSizeOptionsHtml(p, defaultSize);
   document.getElementById("sl_qty").value = "1";
-  document.getElementById("sl_price").value = defaultSize === "50" ? (p.price50 != null ? p.price50 : "") : (p.price10 != null ? p.price10 : "");
+  document.getElementById("sl_price").value = slPriceFor(p, defaultSize);
   document.getElementById("sl_isGift").checked = false;
   document.getElementById("sl_price").disabled = false;
+  slAutoGift = false;
   document.getElementById("sl_addItemWrap").style.display = "block";
   document.getElementById("sl_pickHint").style.display = "none";
+  slSyncSizeGift();
 }
 
 // تعديل عنصر موجود بالسلة: نطلعه من السلة ونعبّي الفورم ببياناته عشان يصححها ويضيفه من جديد
@@ -2637,12 +2709,30 @@ function slEditCartItem(idx){
   document.getElementById("sl_qty").focus();
 }
 
+// 18 أكتوبر 2026: 10مل ما يُباع، يُعطى هدية مجانية للعميل. فلما تختار 10مل نفعّل "هدية" تلقائيًا
+// (السعر 0، ما يدخل بالإيراد ولا بعدد العطور المباعة، بس ينقص من مخزون 10مل عشان الإحصائيات).
+let slAutoGift = false;
+function slSyncSizeGift(){
+  const size = document.getElementById("sl_size").value;
+  const chk = document.getElementById("sl_isGift");
+  const priceInput = document.getElementById("sl_price");
+  if(size === "10"){
+    if(!chk.checked){ priceInput.dataset.prevValue = priceInput.value; slAutoGift = true; }
+    chk.checked = true; priceInput.value = "0"; priceInput.disabled = true;
+    slShowStatus("10مل ما يُباع — انحسب هدية مجانية تلقائيًا (ما يدخل بالمبيعات ولا بالعدد).", "info");
+  } else if(slAutoGift){
+    slAutoGift = false;
+    chk.checked = false; priceInput.disabled = false;
+    priceInput.value = (salesSelected && salesSelected.price50 != null) ? slPriceFor(salesSelected, "50") : (priceInput.dataset.prevValue || "");
+  }
+}
 document.getElementById("sl_size").addEventListener("change", () => {
   if(!salesSelected) return;
+  slSyncSizeGift();
   if(document.getElementById("sl_isGift").checked) return; // عطر مجاني — السعر يضل 0 بغض النظر عن الحجم
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
-  document.getElementById("sl_price").value = size === "50" ? (p.price50 ?? "") : (p.price10 ?? "");
+  document.getElementById("sl_price").value = slPriceFor(p, size);
 });
 
 // 13 أكتوبر 2026: علامة "🎁 هدية مجانية" اليدوية — لما تتفعّل، نثبّت السعر على 0
@@ -2689,7 +2779,7 @@ document.getElementById("sl_addToCartBtn").addEventListener("click", () => {
   const p = salesSelected;
   const size = document.getElementById("sl_size").value;
   const qty = Math.max(1, parseInt(document.getElementById("sl_qty").value, 10) || 1);
-  const isGift = document.getElementById("sl_isGift").checked;
+  const isGift = document.getElementById("sl_isGift").checked || size === "10"; // 10مل دايمًا هدية
   const unitPrice = isGift ? 0 : Math.max(0, parseFloat(document.getElementById("sl_price").value) || 0);
   salesCart.push({ perfumeId: p.id, brand: p.brand, name: p.name, size: Number(size), qty, unitPrice, isGift });
   slRenderCart();
@@ -2718,7 +2808,7 @@ function slRenderCart(){
     saveBtn.disabled = true;
     clearBtn.style.display = "none";
     slCartSubtotal = 0;
-    slUpdateDiscountPreview();
+    slApplyRules();
     return;
   }
   cartWrap.style.display = "block";
@@ -2740,8 +2830,10 @@ function slRenderCart(){
     </div>`;
   }).join("");
   totalEl.textContent = fmtNum(total);
+  const cntEl = document.getElementById("sl_cartCount"); if(cntEl) cntEl.textContent = slCountText(salesCart);
+  const freeEl = document.getElementById("sl_cartFree"); if(freeEl) freeEl.style.display = (!slIsLegacy() || hasFreeShippingForItems(salesCart)) ? "inline" : "none";
   slCartSubtotal = total;
-  slUpdateDiscountPreview();
+  slApplyRules();
   listEl.querySelectorAll(".sl-cart-edit-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const idx = Number(e.target.closest(".sale-row").dataset.idx);
@@ -2765,6 +2857,115 @@ document.getElementById("sl_clearCartBtn").addEventListener("click", () => {
 
 // 3 أكتوبر 2026: معاينة لحظية للإجمالي بعد الخصم — ما يلمس سعر الوحدة لأي عنصر
 // بالسلة، فقط يعرض "كم المطلوب فعليًا من العميل" بعد طرح الخصم من مجموع السلة.
+// ===== 18 أكتوبر 2026: القواعد الجديدة (توصيل مجاني لكل طلب + خصم 15% من 3 عطور) =====
+// الطلبات القديمة (قبل التاريخ هذا) تُسجَّل بخيار "طلب قديم": السعر القديم 50، بدون خصم
+// تلقائي، وبدون تكلفة توصيل. التوصيل المجاني يكلّف المتجر، فنسجّل تكلفته على الطلب ونطرحها من الربح.
+const NEW_RULES_START = "2026-10-18";
+const LEGACY_PRICE_50 = 50;
+const NEW_DISC_MIN_QTY = 3, NEW_DISC_PCT = 15;
+const OMR_TO_AED_EQ = 10; // نفس معادلة اللوحة: 1 ريال عُماني = 10 بالحسابات (سعر عُمان = سعر الإمارات ÷ 10)
+let slDiscountTouched = false, slCostTouched = false, slRatesLoaded = false;
+
+function slIsLegacy(){ return document.getElementById("sl_legacy").checked; }
+function slPaidQty50(items){
+  return (items || []).reduce((s, it) => s + ((!it.isGift && String(it.size) === "50") ? (Number(it.qty) || 0) : 0), 0);
+}
+function slPaidSubtotal50(items){
+  return (items || []).reduce((s, it) => s + ((!it.isGift && String(it.size) === "50") ? (Number(it.qty) || 0) * (Number(it.unitPrice) || 0) : 0), 0);
+}
+function slAutoDiscountFor(items){
+  if(slPaidQty50(items) < NEW_DISC_MIN_QTY) return 0;
+  const raw = slPaidSubtotal50(items) * NEW_DISC_PCT / 100;
+  // نفس تقريب الموقع: الإمارات رقم صحيح، عُمان لخانتين عشريتين بالريال
+  return document.getElementById("sl_country").value === "OM"
+    ? Math.round(raw / OMR_TO_AED_EQ * 100) / 100 * OMR_TO_AED_EQ
+    : Math.round(raw);
+}
+async function slEnsureRates(){
+  if(slRatesLoaded) return;
+  try{
+    const res = await fetch(SHIPPING_JSON_RAW_URL, { cache: "no-store" });
+    if(res.ok){ shippingRatesData = await res.json(); slRatesLoaded = true; }
+  }catch(e){ /* نكمل بالقيم الافتراضية */ }
+  slApplyRules();
+}
+function slDeliveryOptions(countryCode){
+  const r = shippingRatesData || SHIPPING_DEFAULTS;
+  const ae = r.AE || SHIPPING_DEFAULTS.AE, om = r.OM || SHIPPING_DEFAULTS.OM;
+  if(countryCode === "AE") return [
+    { v: "standard", label: "الإمارات — عادي", cost: Number(ae.standard) || 0 },
+    { v: "western", label: "الإمارات — المنطقة الغربية", cost: Number(ae.western) || 0 }
+  ];
+  if(countryCode === "OM") return [
+    { v: "door", label: "عُمان — توصيل للمنزل", cost: (Number(om.door) || 0) * OMR_TO_AED_EQ },
+    { v: "nool", label: "عُمان — استلام NOOL", cost: (Number(om.nool) || 0) * OMR_TO_AED_EQ }
+  ];
+  return [{ v: "other", label: "دولة ثانية / غير محدد (اكتب التكلفة)", cost: 0 }];
+}
+// يعيد بناء خيارات التوصيل حسب الدولة (يحافظ على الاختيار الحالي لو لسا موجود) ثم يطبّق القواعد
+function slRefreshDeliveryOptions(){ /* نوع التوصيل صار من حقل sl_delivery نفسه */ }
+function slApplyRules(){
+  const legacy = slIsLegacy();
+  document.getElementById("sl_deliveryBox").style.display = legacy ? "none" : "";
+  document.getElementById("sl_legacyHint").textContent = legacy
+    ? "الطلب القديم: السعر 50 للعطر، بدون خصم تلقائي، وبدون تكلفة توصيل. تقدر تعدّل أي رقم يدويًا."
+    : "القواعد الجديدة: السعر 70، توصيل مجاني للعميل (يُسجَّل كتكلفة علينا)، وخصم 15% تلقائي من 3 عطور.";
+  const dHint = document.getElementById("sl_discountHint");
+  const auto = slAutoDiscountFor(salesCart);
+  if(!slDiscountTouched){
+    document.getElementById("sl_discount").value = (!legacy && auto > 0) ? auto : "";
+  }
+  dHint.textContent = (!legacy && slPaidQty50(salesCart) >= NEW_DISC_MIN_QTY)
+    ? `خصم ${NEW_DISC_PCT}% تلقائي (${slPaidQty50(salesCart)} عطور) = ${fmtNum(auto)} AED — تقدر تغيّره.`
+    : "";
+  if(!legacy){
+    const dv = document.getElementById("sl_delivery").value;
+    const opt = slDeliveryOptions(document.getElementById("sl_country").value).find(o => o.v === dv);
+    if(!slCostTouched) document.getElementById("sl_deliveryCost").value = opt && opt.cost ? opt.cost : "";
+  }
+  slUpdateDiscountPreview();
+}
+// يبدّل سعر عطور 50مل بين القديم (50) والجديد (سعر الكتالوج) فقط للسطور اللي سعرها يساوي الافتراضي الآخر
+function slSwitchDefaultPrices(){
+  const legacy = slIsLegacy();
+  let changed = 0;
+  salesCart.forEach(it => {
+    if(it.isGift || String(it.size) !== "50") return;
+    const p = perfumes.find(x => x.id === it.perfumeId);
+    const cur = p && p.price50 != null ? Number(p.price50) : null;
+    if(legacy && cur != null && Number(it.unitPrice) === cur && cur !== LEGACY_PRICE_50){ it.unitPrice = LEGACY_PRICE_50; changed++; }
+    else if(!legacy && Number(it.unitPrice) === LEGACY_PRICE_50 && cur != null && cur !== LEGACY_PRICE_50){ it.unitPrice = cur; changed++; }
+  });
+  const priceInput = document.getElementById("sl_price");
+  if(salesSelected && !document.getElementById("sl_isGift").checked && document.getElementById("sl_size").value === "50"){
+    priceInput.value = slPriceFor(salesSelected, "50");
+  }
+  return changed;
+}
+function slPriceFor(p, size){
+  if(size === "50") return (slIsLegacy() && p.price50 != null) ? LEGACY_PRICE_50 : (p.price50 != null ? p.price50 : "");
+  return p.price10 != null ? p.price10 : "";
+}
+function slAutoSetLegacyByDate(){
+  const d = document.getElementById("sl_date").value;
+  if(!d) return;
+  document.getElementById("sl_legacy").checked = d < NEW_RULES_START;
+}
+document.getElementById("sl_legacy").addEventListener("change", () => {
+  const n = slSwitchDefaultPrices();
+  slDiscountTouched = false; slCostTouched = false;
+  slRenderCart();
+  if(n) slShowStatus(`تم تغيير سعر ${n} عطر بالسلة تلقائيًا (${slIsLegacy() ? "السعر القديم 50" : "السعر الجديد"}).`, "info");
+});
+document.getElementById("sl_date").addEventListener("change", () => {
+  slAutoSetLegacyByDate();
+  document.getElementById("sl_legacy").dispatchEvent(new Event("change"));
+});
+document.getElementById("sl_discount").addEventListener("input", () => { slDiscountTouched = true; });
+document.getElementById("sl_deliveryCost").addEventListener("input", () => { slCostTouched = true; });
+document.getElementById("sl_delivery").addEventListener("change", () => { slCostTouched = false; slApplyRules(); });
+document.getElementById("sl_country").addEventListener("change", () => { slCostTouched = false; slApplyRules(); });
+
 function slUpdateDiscountPreview(){
   const discount = Math.max(0, Number(document.getElementById("sl_discount").value) || 0);
   const row = document.getElementById("sl_netTotalRow");
@@ -2793,7 +2994,11 @@ function slResetOrderFields(){
   document.getElementById("sl_recentConsent").checked = false;
   document.getElementById("sl_custWarn").innerHTML = "";
   document.getElementById("sl_discount").value = "";
-  slUpdateDiscountPreview();
+  slDiscountTouched = false; slCostTouched = false;
+  document.getElementById("sl_deliveryCost").value = "";
+  slAutoSetLegacyByDate();
+  slRefreshDeliveryOptions();
+  slApplyRules();
   salesEditingOriginalCountry = null;
   sl_countryTouched = false;
 }
@@ -2820,6 +3025,29 @@ function slExitEditMode(){
 function hasFreeShippingForItems(items){
   const qty50 = (items || []).reduce((s, it) => s + (String(it.size) === "50" ? (Number(it.qty) || 0) : 0), 0);
   return qty50 >= 5;
+}
+
+// 18 أكتوبر 2026: عدد العطور بالطلب = مجموع الكميات (مو عدد السطور). الهدايا تنعدّ لحالها.
+// مثال: عطر واحد × 3 = "٣ عطور"، مو "عطر".
+function slCountPerfumes(items){
+  let paid = 0, gift = 0;
+  (items || []).forEach(it => {
+    const q = Number(it.qty) || 0;
+    if(it.isGift || String(it.size) === "10") gift += q; else paid += q; // 10مل = هدية دايمًا
+  });
+  return { paid, gift };
+}
+function slCountWord(n){
+  if(n === 1) return "عطر واحد";
+  if(n === 2) return "عطرين";
+  if(n >= 3 && n <= 10) return n + " عطور";
+  return n + " عطر";
+}
+function slCountText(items){
+  const c = slCountPerfumes(items);
+  let t = slCountWord(c.paid);
+  if(c.gift > 0) t += " + " + c.gift + " 🎁 هدية";
+  return t;
 }
 
 // ===== خصم/إرجاع المخزون تلقائيًا مع كل عملية بيع (تسجيل جديد / تعديل / حذف) =====
@@ -2910,6 +3138,10 @@ function slLoadOrderForEdit(key){
   slRefreshCustWarn();
   const existingDiscount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
   document.getElementById("sl_discount").value = existingDiscount > 0 ? existingDiscount : "";
+  const first = g.items[0] || {};
+  document.getElementById("sl_legacy").checked = first.freeDelivery !== true;
+  slDiscountTouched = true; slCostTouched = true;
+  document.getElementById("sl_deliveryCost").value = Number(first.deliveryCost) > 0 ? first.deliveryCost : "";
 
   salesSelected = null;
   document.getElementById("selectedChipWrap").innerHTML = "";
@@ -2935,6 +3167,8 @@ document.getElementById("sl_filterStatus").addEventListener("change", (e) => {
   slFilterStatus = e.target.value;
   renderSalesHistory();
 });
+document.getElementById("sl_histSearch").addEventListener("input", (e) => { slHistQuery = e.target.value.trim(); slHistLimit = 15; renderSalesHistory(); });
+document.getElementById("sl_histMoreBtn").addEventListener("click", () => { slHistLimit += 15; renderSalesHistory(); });
 document.getElementById("sl_filterPaid").addEventListener("change", (e) => {
   slFilterPaid = e.target.value;
   renderSalesHistory();
@@ -3352,13 +3586,37 @@ function renderSalesHistory(){
     emptyHint.textContent = "ما فيه طلبات مطابقة لهذا الفلتر.";
     return;
   }
+  if(slHistQuery){
+    const q = slHistQuery.toLowerCase();
+    filtered = filtered.filter(g => {
+      const hay = [g.customer, g.phone, g.date, g.address].concat(g.items.map(o => { const p = perfumes.find(x => x.id === o.perfumeId); return p ? p.brand + " " + p.name : o.perfumeId; })).join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+    if(filtered.length === 0){
+      wrap.style.display = "none"; emptyHint.style.display = "block"; emptyHint.textContent = "ما فيه طلبات مطابقة للبحث.";
+      document.getElementById("sl_histMoreBtn").style.display = "none";
+      return;
+    }
+  }
+  const moreBtn = document.getElementById("sl_histMoreBtn");
+  moreBtn.style.display = filtered.length > slHistLimit ? "inline-block" : "none";
+  moreBtn.textContent = `عرض ١٥ طلب أكثر (باقي ${filtered.length - slHistLimit})`;
   emptyHint.style.display = "none";
   wrap.style.display = "block";
-  wrap.innerHTML = filtered.slice(0, 15).map(g => {
+  wrap.innerHTML = filtered.slice(0, slHistLimit).map(g => {
     const subtotal = g.items.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
     const discount = g.items.reduce((s,o) => s + (Number(o.discount)||0), 0);
     const total = Math.max(0, subtotal - discount);
     const discountTxt = discount > 0 ? ` (بعد خصم ${fmtNum(discount)} AED)` : "";
+    const f0 = g.items[0] || {};
+    let rulesTxt = "";
+    if(f0.freeDelivery === true){
+      const perfCost = g.items.filter(o => !o.isGift).reduce((sum,o) => sum + (Number(o.qty)||0) * perfumeUnitCost(perfumes.find(x => x.id === o.perfumeId), o.size), 0);
+      const dCost = Number(f0.deliveryCost) || 0;
+      rulesTxt = `<div class="sale-row-meta">🚚 توصيل مجاني (تكلفته علينا ${fmtNum(dCost)} AED) — ربح الطلب تقريبًا <b>${fmtNum(total - perfCost - dCost)} AED</b></div>`;
+    } else {
+      rulesTxt = `<div class="sale-row-meta">📜 طلب قديم</div>`;
+    }
     const status = (g.items[0] && g.items[0].status) || "";
     const paid = !!(g.items[0] && g.items[0].paid);
     const itemsListHtml = g.items.map(o => {
@@ -3372,7 +3630,8 @@ function renderSalesHistory(){
         <span class="sale-row-amount">${fmtNum(total)} AED${discountTxt}</span>
       </div>
       <div class="sale-row-items">${itemsListHtml}</div>
-      <div class="sale-row-meta">${esc(g.date || "")} — ${g.items.length} ${g.items.length === 1 ? "عطر" : "عطور"}${g.countryLabel ? " — " + esc(g.countryLabel) : ""}${g.phone ? " — 📞 " + esc(g.phone) : ""}${g.address ? " — 📍 " + esc(g.address) : ""}${hasFreeShippingForItems(g.items) ? ` — <span style="color:#1F6B41; font-weight:700;">🚚 توصيل مجاني</span>` : ""}</div>
+      <div class="sale-row-meta">${esc(g.date || "")} — <b style="color:var(--ink); font-size:14px;">🧴 ${slCountText(g.items)}</b>${g.countryLabel ? " — " + esc(g.countryLabel) : ""}${g.phone ? " — 📞 " + esc(g.phone) : ""}${g.address ? " — 📍 " + esc(g.address) : ""}</div>
+      ${rulesTxt}
       ${saleRowExtraHtml(g)}
       <div class="sale-row-actions">
         <select class="sale-row-status-select" data-key="${esc(g.key)}" style="color:${orderStatusColor(status)};">
@@ -3509,6 +3768,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       unitPrice: item.isGift ? 0 : item.unitPrice,
       ...(item.isGift ? { isGift: true } : {}),
       ...(i === 0 && discount > 0 ? { discount } : {}),
+      ...(i === 0 && !slIsLegacy() ? { freeDelivery: true, deliveryCost: Math.max(0, Number(document.getElementById("sl_deliveryCost").value) || 0) } : {}),
       customer, date,
       country, countryLabel, phone, address,
       email, emirateOrWilayat: region, city, deliveryType,
@@ -3583,6 +3843,7 @@ function setMode(newMode){
   document.getElementById("modeCustomersBtn").classList.toggle("active", mode === "customers");
   document.getElementById("modeDistBtn").classList.toggle("active", mode === "dist");
   document.getElementById("modeOrdersQueueBtn").classList.toggle("active", mode === "ordersQueue");
+  try{ const _act = document.querySelector("nav.tabs button.active"); if(_act && _act.scrollIntoView) _act.scrollIntoView({block:"nearest", inline:"center"}); }catch(e){}
   document.getElementById("overviewPanel").style.display = mode === "overview" ? "block" : "none";
   document.getElementById("editSearchWrap").style.display = (mode === "edit" || mode === "photo" || mode === "stock" || mode === "reviews" || mode === "sales") ? "block" : "none";
   document.getElementById("progressStatsWrap").style.display = (mode === "edit" || mode === "photo") ? "block" : "none";
@@ -3645,9 +3906,10 @@ function setMode(newMode){
   if(mode === "sales"){
     document.getElementById("sl_addItemWrap").style.display = "none";
     document.getElementById("sl_pickHint").style.display = "block";
-    if(!document.getElementById("sl_date").value) document.getElementById("sl_date").value = todayStr();
+    if(!document.getElementById("sl_date").value){ document.getElementById("sl_date").value = todayStr(); slAutoSetLegacyByDate(); }
     slInitFormExtras();
     slRenderCart();
+    slEnsureRates();
     renderSalesHistory();
   }
   hideStatus();
@@ -5182,30 +5444,67 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 // ===================================================================
 const COST_FIELD_KEYS = ["costOilPerMl","costAlcoholPerMl","costBottle50","costBottle10","costPackaging50","costPackaging10","costManufacturing50","costManufacturing10"];
 
+// 18 أكتوبر 2026: الحساب صار على نسبة الخلط. زجاجة 50مل بنسبة زيت 33% = 16.5 جرام زيت (1 جرام = 1 مل تقريبًا)
+// + 33.5 مل كحول. سعر الزيت لكل عطر يجي من materials.json (oilCosts)، وسعر الكحول من مشترياتك المسجّلة
+// أو من السعر الافتراضي بالإعدادات. الحقول القديمة (تكلفة الزيت/الكحول لكل مل بنموذج العطر) تبقى كخيار يدوي احتياطي.
+const COST_DEFAULTS = { oilPct: 33, alcPrice: 300, alcLiters: 20, alcVat: false, vatPct: 5, bottle: 0, pack: 0, manuf: 0 };
+const OIL_G_PER_ML = 1;
+function costSettings(){
+  const st = (materialsData && materialsData.settings) || {};
+  return Object.assign({}, COST_DEFAULTS, st);
+}
+function alcoholPerMlInfo(){
+  const avg = materialWeightedAvgCost("alcohol");
+  if(avg > 0) return { value: avg, source: "purchases" };
+  const st = costSettings();
+  const ml = (Number(st.alcLiters) || 0) * 1000;
+  const base = ml > 0 ? (Number(st.alcPrice) || 0) / ml : 0;
+  return { value: base * (st.alcVat ? 1 + (Number(st.vatPct) || 0) / 100 : 1), source: "default" };
+}
+// زجاجة + تغليف + تصنيع: من متوسط المشتريات المسجّلة لو موجود، وإلا من الإعدادات
+function extraUnitCosts(ml){
+  const st = costSettings();
+  const bottle = ml === 50 ? (materialWeightedAvgCost("bottle50") || Number(st.bottle) || 0) : (materialWeightedAvgCost("bottle10") || 0);
+  const pack = materialWeightedAvgCost("packaging") || Number(st.pack) || 0;
+  return { bottle, pack, manuf: Number(st.manuf) || 0 };
+}
+function oilEntryFor(id){
+  return (id && materialsData && materialsData.oilCosts && materialsData.oilCosts[id]) || null;
+}
+function oilPerGramOfEntry(e){
+  if(!e) return 0;
+  const g = Number(e.grams) || 0;
+  if(g <= 0) return 0;
+  const vat = e.vat ? 1 + (Number(costSettings().vatPct) || 0) / 100 : 1;
+  return (Number(e.price) || 0) * vat / g;
+}
+function mixSplit(ml){
+  const pct = Math.min(100, Math.max(0, Number(costSettings().oilPct) || 0)) / 100;
+  const oilMl = ml * pct;
+  return { oilMl, oilG: oilMl * OIL_G_PER_ML, alcMl: ml - oilMl };
+}
+// تفصيل التكلفة لزجاجة بحجم ml لو سعر الجرام معروف
+function costBreakdown(ml, oilPerG){
+  const m = mixSplit(ml), ex = extraUnitCosts(ml), alc = alcoholPerMlInfo().value;
+  const oil = m.oilG * oilPerG, alcohol = m.alcMl * alc;
+  return { oil, alcohol, bottle: ex.bottle, pack: ex.pack, manuf: ex.manuf, total: oil + alcohol + ex.bottle + ex.pack + ex.manuf, m };
+}
+
 function perfumeUnitCost(p, size){
   if(!p) return 0;
   const ml = Number(size) === 50 ? 50 : 10;
-  const oil = Number(p.costOilPerMl) || 0;
-  const alcohol = Number(p.costAlcoholPerMl) || 0;
-  const bottle = Number(ml === 50 ? p.costBottle50 : p.costBottle10) || 0;
-  const packaging = Number(ml === 50 ? p.costPackaging50 : p.costPackaging10) || 0;
-  const manuf = Number(ml === 50 ? p.costManufacturing50 : p.costManufacturing10) || 0;
-  return (oil + alcohol) * ml + bottle + packaging + manuf;
+  const entry = oilEntryFor(p.id);
+  const legacyOil = Number(p.costOilPerMl) || 0; // قديم: كان لكل مل (= جرام)
+  if(!entry && !legacyOil) return 0; // ما فيها سعر زيت = تبقى "ناقصة" بالأرباح
+  return costBreakdown(ml, entry ? oilPerGramOfEntry(entry) : legacyOil).total;
 }
 
 function perfumeHasCostData(p){
   if(!p) return false;
-  return COST_FIELD_KEYS.some(k => Number(p[k]) > 0);
+  return !!oilEntryFor(p.id) || Number(p.costOilPerMl) > 0;
 }
 
-function updateFormCostPreview(){
-  const val = id => parseFloat(document.getElementById(id).value) || 0;
-  const oil = val("f_costOilPerMl"), alcohol = val("f_costAlcoholPerMl");
-  const cost50 = (oil + alcohol) * 50 + val("f_costBottle50") + val("f_costPackaging50") + val("f_costManufacturing50");
-  const cost10 = (oil + alcohol) * 10 + val("f_costBottle10") + val("f_costPackaging10") + val("f_costManufacturing10");
-  const box = document.getElementById("f_costPreview");
-  if(box) box.textContent = `تكلفة الوحدة المقدّرة: 50مل = ${cost50.toFixed(2)} AED — 10مل = ${cost10.toFixed(2)} AED`;
-}
+function updateFormCostPreview(){ /* الحقول القديمة مخفية — التكلفة تنضبط من تبويب التكلفة */ }
 COST_FIELD_KEYS.forEach(k => {
   const el = document.getElementById("f_" + k);
   if(el) el.addEventListener("input", updateFormCostPreview);
@@ -5215,7 +5514,7 @@ COST_FIELD_KEYS.forEach(k => {
 function computeProfitReport(){
   const result = {
     totalRevenue: 0, totalCost: 0, totalProfit: 0, margin: 0, unitsCount: 0,
-    giftCost: 0, missingCostIds: [], rows: []
+    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0
   };
   if(!salesData || !salesData.length) return result;
   const missingCostIds = new Set();
@@ -5242,6 +5541,12 @@ function computeProfitReport(){
     const p = perfumes.find(x => x.id === o.perfumeId);
     result.giftCost += (Number(o.qty) || 0) * perfumeUnitCost(p, o.size);
   });
+  // 18 أكتوبر 2026: تكلفة التوصيل المجاني (على الطلبات الجديدة فقط) تنطرح من الربح
+  salesData.forEach(o => {
+    if(o.freeDelivery === true){ result.newOrders++; result.deliveryCost += Number(o.deliveryCost) || 0; }
+    result.discountGiven += Number(o.discount) || 0;
+  });
+  result.totalCost += result.deliveryCost;
   result.totalProfit = result.totalRevenue - result.totalCost;
   result.margin = result.totalRevenue > 0 ? (result.totalProfit / result.totalRevenue * 100) : 0;
   result.missingCostIds = Array.from(missingCostIds);
@@ -5280,14 +5585,13 @@ function renderCostManageList(filterText){
   wrap.innerHTML = list.map(p => {
     const has = perfumeHasCostData(p);
     const c50 = perfumeUnitCost(p, 50).toFixed(2);
-    const c10 = perfumeUnitCost(p, 10).toFixed(2);
     return `
     <div class="sale-row">
       <div class="sale-row-top">
         <span class="sale-row-name">${has ? "" : "⚠️ "}${esc(p.brand)} — ${esc(p.name)}</span>
         <button type="button" class="secondary cost-edit-btn" data-id="${esc(p.id)}" style="padding:4px 12px; font-size:12.5px;">✏️ تعديل</button>
       </div>
-      <div class="sale-row-meta">${has ? `تكلفة الوحدة: 50مل = ${c50} AED — 10مل = ${c10} AED` : "ما فيها بيانات تكلفة بعد"}</div>
+      <div class="sale-row-meta">${has ? `تكلفة الوحدة: 50مل = ${c50} AED` : "ما فيها بيانات تكلفة بعد"}</div>
     </div>`;
   }).join("");
   wrap.querySelectorAll(".cost-edit-btn").forEach(btn => {
@@ -5336,7 +5640,7 @@ function materialTotalUsed(material){
   if(material === "bottle50") return nonGift.filter(o => Number(o.size)===50).reduce((s,o)=>s+(Number(o.qty)||0),0);
   if(material === "bottle10") return nonGift.filter(o => Number(o.size)===10).reduce((s,o)=>s+(Number(o.qty)||0),0);
   if(material === "packaging") return nonGift.reduce((s,o)=>s+(Number(o.qty)||0),0);
-  if(material === "alcohol") return nonGift.reduce((s,o)=>s+(Number(o.qty)||0)*(Number(o.size)||0),0);
+  if(material === "alcohol") return nonGift.reduce((s,o)=>s+(Number(o.qty)||0)*mixSplit(Number(o.size)||0).alcMl,0);
   return 0;
 }
 function materialCurrentStock(material){
@@ -5387,7 +5691,22 @@ function renderExpensesSection(){
   if(!hist.length){
     histBox.innerHTML = `<div class="ov-empty-note">ما فيه أي مصروف مسجّل بعد — سجّلي أول مصروف من الفورم فوق.</div>`;
   } else {
-    histBox.innerHTML = hist.map(e => `
+    const escA = v => String(v == null ? "" : v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+    histBox.innerHTML = hist.map(e => e.id === expEditingId ? `
+      <div class="sale-row" data-eid="${escA(e.id)}">
+        <div class="sale-row-top"><span class="sale-row-name">✏️ تعديل مصروف</span></div>
+        <div class="grid2" style="margin-top:8px;">
+          <div class="field"><label>الوصف</label><input type="text" class="ee-desc" value="${escA(e.description)}"></div>
+          <div class="field"><label>المبلغ (AED)</label><input type="number" class="ee-amount" min="0" step="0.01" value="${Number(e.amount)||0}"></div>
+          <div class="field"><label>التاريخ</label><input type="date" class="ee-date" value="${escA(e.date)}"></div>
+          <div class="field"><label>التصنيف</label><select class="ee-cat">${Object.keys(EXPENSE_CATEGORIES).map(k => `<option value="${k}" ${k === e.category ? "selected" : ""}>${EXPENSE_CATEGORIES[k]}</option>`).join("")}</select></div>
+        </div>
+        <div class="field" style="margin-top:6px;"><label>ملاحظة</label><input type="text" class="ee-note" value="${escA(e.note)}"></div>
+        <div class="sale-row-actions" style="margin-top:8px;">
+          <button type="button" class="ee-save">💾 احفظ التعديل</button>
+          <button type="button" class="secondary ee-cancel">إلغاء</button>
+        </div>
+      </div>` : `
       <div class="sale-row">
         <div class="sale-row-top">
           <span class="sale-row-name">${esc(e.date)} — ${esc(e.description || "")}</span>
@@ -5395,9 +5714,32 @@ function renderExpensesSection(){
         </div>
         <div class="sale-row-meta">
           ${EXPENSE_CATEGORIES[e.category] || "أخرى"}${e.note ? " — " + esc(e.note) : ""}
-          <button type="button" class="secondary exp-delete-btn" data-id="${esc(e.id)}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+          <button type="button" class="secondary exp-edit-btn" data-id="${esc(e.id)}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">✏️ تعديل</button>
+          <button type="button" class="secondary exp-delete-btn" data-id="${esc(e.id)}" style="margin-inline-start:6px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
         </div>
       </div>`).join("");
+    histBox.querySelectorAll(".exp-edit-btn").forEach(btn => btn.addEventListener("click", () => { expEditingId = btn.dataset.id; renderExpensesSection(); }));
+    const eRow = histBox.querySelector(".sale-row[data-eid]");
+    if(eRow){
+      eRow.querySelector(".ee-cancel").addEventListener("click", () => { expEditingId = null; renderExpensesSection(); });
+      eRow.querySelector(".ee-save").addEventListener("click", async () => {
+        const box = document.getElementById("exp_statusBox");
+        const token = getToken();
+        if(!token){ box.className = "status show err"; box.textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+        const description = eRow.querySelector(".ee-desc").value.trim();
+        const amount = parseFloat(eRow.querySelector(".ee-amount").value);
+        const date = eRow.querySelector(".ee-date").value, category = eRow.querySelector(".ee-cat").value, note = eRow.querySelector(".ee-note").value.trim();
+        if(!description || !(amount > 0)){ box.className = "status show err"; box.textContent = "اكتب الوصف والمبلغ."; return; }
+        const id = eRow.dataset.eid, sb = eRow.querySelector(".ee-save"); sb.disabled = true;
+        try{
+          box.className = "status show info"; box.textContent = "جارِ حفظ التعديل...";
+          expensesData = await updateExpensesJsonWithRetry(token, (obj) => ({ ...obj, expenses: obj.expenses.map(x => x.id === id ? { ...x, description, amount, date: date || x.date, category, note } : x) }), "Edit monthly expense entry");
+          expEditingId = null;
+          box.className = "status show ok"; box.textContent = "تم حفظ التعديل.";
+          renderCostPanel();
+        }catch(err){ box.className = "status show err"; box.textContent = "صار خطأ: " + err.message; sb.disabled = false; }
+      });
+    }
     histBox.querySelectorAll(".exp-delete-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         if(!confirm("تأكيد حذف هذا المصروف؟")) return;
@@ -5418,6 +5760,12 @@ function renderExpensesSection(){
   }
 }
 
+document.querySelectorAll(".exp-chip").forEach(b => b.addEventListener("click", () => {
+  document.getElementById("exp_category").value = b.dataset.c;
+  const d = document.getElementById("exp_description");
+  d.value = b.dataset.d;
+  (b.dataset.d ? document.getElementById("exp_amount") : d).focus();
+}));
 document.getElementById("exp_addBtn").addEventListener("click", async () => {
   const token = getToken();
   const box = document.getElementById("exp_statusBox");
@@ -5449,6 +5797,8 @@ document.getElementById("exp_addBtn").addEventListener("click", async () => {
   }
 });
 
+let expEditingId = null;
+let matEditingId = null; // id عملية الشراء اللي تنعدّل الحين (فورم التعديل داخل الصف)
 function renderMaterialsSection(){
   const grid = document.getElementById("mat_kpiGrid");
   if(!grid) return;
@@ -5469,7 +5819,23 @@ function renderMaterialsSection(){
   if(!hist.length){
     histBox.innerHTML = `<div class="ov-empty-note">ما فيه أي عملية شراء مسجّلة بعد — سجّلي أول عملية شراء من الفورم فوق.</div>`;
   } else {
-    histBox.innerHTML = hist.map(p => `
+    histBox.innerHTML = hist.map(p => p.id === matEditingId ? `
+      <div class="sale-row" data-mid="${p.id}">
+        <div class="sale-row-top"><span class="sale-row-name">✏️ تعديل: ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : p.material}</span></div>
+        <div class="field" style="margin-top:8px;"><label>المادة</label><select class="me-material">${Object.keys(MATERIALS_DEF).map(k => `<option value="${k}" ${k === p.material ? "selected" : ""}>${MATERIALS_DEF[k].labelAr}</option>`).join("")}</select></div>
+        <div class="grid2" style="margin-top:8px;">
+          <div class="field"><label>الكمية</label><input type="number" class="me-qty" min="0" step="1" value="${Number(p.qty)||0}"></div>
+          <div class="field"><label>سعر الحبة / الوحدة (AED)</label><input type="number" class="me-unit" min="0" step="0.001" value="${((Number(p.totalPrice)||0)/Math.max(1,Number(p.qty)||1)).toFixed(3)}"></div>
+          <div class="field"><label>السعر الإجمالي (AED)</label><input type="number" class="me-total" min="0" step="0.01" value="${Number(p.totalPrice)||0}"></div>
+          <div class="field"><label>التاريخ</label><input type="date" class="me-date" value="${p.date||""}"></div>
+        </div>
+        <div class="field" style="margin-top:6px;"><label>ملاحظة</label><input type="text" class="me-note" value="${String(p.note||"").replace(/"/g,"&quot;").replace(/</g,"&lt;")}"></div>
+        <small class="hint">عدّل سعر الحبة أو الإجمالي، والثاني ينحسب تلقائي.</small>
+        <div class="sale-row-actions" style="margin-top:8px;">
+          <button type="button" class="mat-edit-save">💾 احفظ التعديل</button>
+          <button type="button" class="secondary mat-edit-cancel">إلغاء</button>
+        </div>
+      </div>` : `
       <div class="sale-row">
         <div class="sale-row-top">
           <span class="sale-row-name">${esc(p.date)} — ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].labelAr : esc(p.material)} × ${fmtNum(p.qty)} ${MATERIALS_DEF[p.material] ? MATERIALS_DEF[p.material].unit : ""}</span>
@@ -5477,9 +5843,40 @@ function renderMaterialsSection(){
         </div>
         <div class="sale-row-meta">
           سعر الوحدة: ${(Number(p.totalPrice)/Math.max(1,Number(p.qty))).toFixed(3)} AED${p.note ? " — " + esc(p.note) : ""}
-          <button type="button" class="secondary mat-delete-btn" data-id="${esc(p.id)}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
+          <button type="button" class="secondary mat-edit-btn" data-id="${esc(p.id)}" style="margin-inline-start:10px; padding:2px 10px; font-size:11.5px;">✏️ تعديل</button>
+          <button type="button" class="secondary mat-delete-btn" data-id="${esc(p.id)}" style="margin-inline-start:6px; padding:2px 10px; font-size:11.5px;">🗑️ حذف</button>
         </div>
       </div>`).join("");
+    histBox.querySelectorAll(".mat-edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => { matEditingId = btn.dataset.id; renderMaterialsSection(); });
+    });
+    const editRow = histBox.querySelector(".sale-row[data-mid]");
+    if(editRow){
+      const q = editRow.querySelector(".me-qty"), u = editRow.querySelector(".me-unit"), t = editRow.querySelector(".me-total");
+      q.addEventListener("input", () => { t.value = Math.round((parseFloat(q.value)||0) * (parseFloat(u.value)||0) * 100) / 100; });
+      u.addEventListener("input", () => { t.value = Math.round((parseFloat(q.value)||0) * (parseFloat(u.value)||0) * 100) / 100; });
+      t.addEventListener("input", () => { const qq = parseFloat(q.value)||0; u.value = qq > 0 ? ((parseFloat(t.value)||0) / qq).toFixed(3) : ""; });
+      editRow.querySelector(".mat-edit-cancel").addEventListener("click", () => { matEditingId = null; renderMaterialsSection(); });
+      editRow.querySelector(".mat-edit-save").addEventListener("click", async () => {
+        const box = document.getElementById("mat_statusBox");
+        const token = getToken();
+        if(!token){ box.className = "status show err"; box.textContent = "لازم تدخل مفتاح الدخول أول."; return; }
+        const qty = parseFloat(q.value), totalPrice = parseFloat(t.value);
+        if(!(qty > 0) || !(totalPrice > 0)){ box.className = "status show err"; box.textContent = "اكتب كمية وسعر أكبر من صفر."; return; }
+        const id = editRow.dataset.mid;
+        const date = editRow.querySelector(".me-date").value, note = editRow.querySelector(".me-note").value.trim();
+        const saveBtn = editRow.querySelector(".mat-edit-save"); saveBtn.disabled = true;
+        try{
+          box.className = "status show info"; box.textContent = "جارِ حفظ التعديل...";
+          materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, purchases: obj.purchases.map(x => x.id === id ? { ...x, material: editRow.querySelector(".me-material").value, qty, totalPrice, date: date || x.date, note } : x) }), "Edit material purchase entry");
+          matEditingId = null;
+          box.className = "status show ok"; box.textContent = "تم حفظ التعديل، والتكاليف انحسبت من جديد.";
+          renderCostPanel();
+        }catch(e){
+          box.className = "status show err"; box.textContent = "صار خطأ: " + e.message; saveBtn.disabled = false;
+        }
+      });
+    }
     histBox.querySelectorAll(".mat-delete-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         if(!confirm("تأكيد حذف عملية الشراء هذي؟")) return;
@@ -5511,6 +5908,7 @@ document.getElementById("mat_addBtn").addEventListener("click", async () => {
   const note = document.getElementById("mat_note").value.trim();
   if(!qty || qty <= 0){ box.className = "status show err"; box.textContent = "اكتبي الكمية المشتراة أول."; return; }
   if(!totalPrice || totalPrice <= 0){ box.className = "status show err"; box.textContent = "اكتبي السعر الإجمالي أول."; return; }
+  if(material !== "alcohol" && totalPrice < qty && !confirm(`السعر الإجمالي (${totalPrice}) أقل من الكمية (${qty}) — يعني سعر الحبة أقل من درهم. غالبًا كتبت سعر الحبة بدل الإجمالي. تبا تكمل بنفس الرقم؟`)) return;
   const btn = document.getElementById("mat_addBtn");
   btn.disabled = true;
   try{
@@ -5531,8 +5929,153 @@ document.getElementById("mat_addBtn").addEventListener("click", async () => {
   }
 });
 
+// ===================================================================
+// ⚙️ إعدادات الحساب + 🛢️ جدول زيوت العطور (18 أكتوبر 2026) — مكان واحد لكل شي
+// materials.json: settings (نسبة الزيت/الكحول/الزجاجة/التغليف/التصنيع) و oilCosts[perfumeId] = {price, grams, vat}
+// ===================================================================
+function csBox(id, cls, msg){ const b = document.getElementById(id); b.className = "status show " + cls; b.textContent = msg; }
+function fmt2(n){ return (Number(n) || 0).toFixed(2); }
+function ocLabel(p){ return `${p.brand} — ${p.name}`; }
+function escHtml(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function renderCostSettingsPreview(){
+  const st = costSettings();
+  const pctIn = parseFloat(document.getElementById("cs_oilPct").value);
+  const x = Math.min(100, Math.max(0, isNaN(pctIn) ? Number(st.oilPct) : pctIn)) / 100;
+  const alc = alcoholPerMlInfo();
+  const price = parseFloat(document.getElementById("cs_alcPrice").value) || 0;
+  const liters = parseFloat(document.getElementById("cs_alcLiters").value) || 0;
+  const vat = document.getElementById("cs_alcVat").checked;
+  const formPerMl = liters > 0 ? price / (liters * 1000) * (vat ? 1 + (Number(st.vatPct) || 0) / 100 : 1) : 0;
+  let t = `زجاجة 50مل = ${(50 * x).toFixed(1)} جرام زيت + ${(50 - 50 * x).toFixed(1)} مل كحول. سعر مل الكحول: ${formPerMl.toFixed(4)} AED.`;
+  if(alc.source === "purchases") t += ` (الحين معتمد متوسط مشترياتك المسجّلة: ${alc.value.toFixed(4)} AED/مل)`;
+  document.getElementById("cs_summary").textContent = t;
+}
+
+function ocRowCostText(price, grams, vat){
+  if(!(price > 0) || !(grams > 0)) return "";
+  const perG = oilPerGramOfEntry({ price, grams, vat });
+  const c = costBreakdown(50, perG);
+  return `الجرام ${perG.toFixed(3)} — زيت ${fmt2(c.oil)} + كحول ${fmt2(c.alcohol)} + زجاجة ${fmt2(c.bottle)} + تغليف ${fmt2(c.pack)} + تصنيع ${fmt2(c.manuf)} = ${fmt2(c.total)} AED`;
+}
+
+function renderOilTable(){
+  const wrap = document.getElementById("oc_rows");
+  if(!wrap) return;
+  if(wrap.contains(document.activeElement)) return; // لا نمسح اللي تكتبه الحين
+  const q = (document.getElementById("oc_search").value || "").trim().toLowerCase();
+  const all = sortPerfumes(perfumes);
+  const withData = all.filter(p => perfumeHasCostData(p));
+  const without = all.filter(p => !perfumeHasCostData(p));
+  let shown;
+  if(q) shown = all.filter(p => (p.brand + " " + p.name).toLowerCase().includes(q)).slice(0, 40);
+  else shown = withData.concat(without.slice(0, 12));
+  document.getElementById("oc_more").textContent = q
+    ? (shown.length ? `${shown.length} نتيجة` : "ما فيه نتائج.")
+    : `معروض ${shown.length} من ${all.length} عطر — اكتب في البحث عشان تلقى أي عطر. (⚠️ = ما انكتب له سعر زيت بعد)`;
+  wrap.innerHTML = shown.map(p => {
+    const e = oilEntryFor(p.id);
+    const legacy = !e && Number(p.costOilPerMl) > 0;
+    const price = e ? e.price : "", grams = e ? e.grams : 100, vat = e ? !!e.vat : true;
+    const cost = e ? ocRowCostText(e.price, e.grams, e.vat) : (legacy ? `سعر قديم: ${p.costOilPerMl} AED لكل جرام (من النموذج القديم) — اكتب السعر الجديد يحل محله` : "");
+    const total = perfumeHasCostData(p) ? `<span class="sale-row-amount">${fmt2(perfumeUnitCost(p, 50))} AED</span>` : "";
+    return `<div class="sale-row oc-row" data-id="${escHtml(p.id)}">
+      <div class="sale-row-top"><span class="sale-row-name">${perfumeHasCostData(p) ? "" : "⚠️ "}${escHtml(ocLabel(p))}</span>${total}</div>
+      <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:8px; margin-top:6px;">
+        <div class="field" style="flex:1; min-width:110px; margin:0;"><label>السعر المدفوع (AED)</label><input type="number" class="oc-price" min="0" step="0.01" value="${price}"></div>
+        <div class="field" style="flex:1; min-width:90px; margin:0;"><label>جرام</label><input type="number" class="oc-grams" min="1" step="1" value="${grams}"></div>
+        <label style="display:flex; align-items:center; gap:5px; padding-bottom:10px; cursor:pointer; font-size:13px;"><input type="checkbox" class="oc-vat" style="width:auto; margin:0;" ${vat ? "checked" : ""}> +5%</label>
+        <button type="button" class="oc-save-btn" style="padding:8px 14px;">💾</button>
+        ${e ? `<button type="button" class="secondary oc-del-btn" style="padding:8px 12px;">🗑️</button>` : ""}
+      </div>
+      <div class="sale-row-meta oc-calc" style="margin-top:4px;">${escHtml(cost)}</div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".oc-row").forEach(row => {
+    const calc = () => {
+      const pr = parseFloat(row.querySelector(".oc-price").value) || 0, gr = parseFloat(row.querySelector(".oc-grams").value) || 0;
+      row.querySelector(".oc-calc").textContent = ocRowCostText(pr, gr, row.querySelector(".oc-vat").checked);
+    };
+    row.querySelectorAll("input").forEach(i => i.addEventListener("input", calc));
+    row.querySelector(".oc-save-btn").addEventListener("click", () => ocSaveRow(row));
+    const d = row.querySelector(".oc-del-btn");
+    if(d) d.addEventListener("click", () => ocDeleteRow(row));
+  });
+}
+
+async function ocSaveRow(row){
+  const token = getToken();
+  if(!token){ csBox("oc_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
+  const id = row.dataset.id, p = perfumes.find(x => x.id === id);
+  const price = parseFloat(row.querySelector(".oc-price").value) || 0;
+  const grams = parseFloat(row.querySelector(".oc-grams").value) || 0;
+  const vat = row.querySelector(".oc-vat").checked;
+  if(!(price > 0)){ csBox("oc_statusBox", "err", "اكتب السعر المدفوع للزيت."); return; }
+  if(!(grams > 0)){ csBox("oc_statusBox", "err", "اكتب الجرامات."); return; }
+  const btn = row.querySelector(".oc-save-btn"); btn.disabled = true;
+  try{
+    csBox("oc_statusBox", "info", "جارِ الحفظ...");
+    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, oilCosts: Object.assign({}, obj.oilCosts || {}, { [id]: { price, grams, vat, updatedAt: todayStr() } }) }), `Set oil price: ${id}`);
+    csBox("oc_statusBox", "ok", `تم حفظ زيت ${p ? ocLabel(p) : id}.`);
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    renderCostPanel();
+  }catch(err){ csBox("oc_statusBox", "err", "صار خطأ: " + err.message); }
+  finally{ btn.disabled = false; }
+}
+async function ocDeleteRow(row){
+  const id = row.dataset.id;
+  if(!confirm("تأكيد حذف سعر الزيت لهذا العطر؟")) return;
+  const token = getToken();
+  if(!token){ csBox("oc_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
+  try{
+    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => { const oc = Object.assign({}, obj.oilCosts || {}); delete oc[id]; return { ...obj, oilCosts: oc }; }, "Delete perfume oil price");
+    csBox("oc_statusBox", "ok", "انحذف.");
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    renderCostPanel();
+  }catch(err){ csBox("oc_statusBox", "err", "صار خطأ: " + err.message); }
+}
+
+function renderCostSettingsAndOil(){
+  if(!document.getElementById("cs_oilPct")) return;
+  const st = costSettings();
+  const ae = document.activeElement;
+  if(!ae || !String(ae.id).startsWith("cs_")){
+    document.getElementById("cs_oilPct").value = st.oilPct;
+    document.getElementById("cs_alcPrice").value = st.alcPrice;
+    document.getElementById("cs_alcLiters").value = st.alcLiters;
+    document.getElementById("cs_alcVat").checked = !!st.alcVat;
+    document.getElementById("cs_bottle").value = st.bottle || "";
+    document.getElementById("cs_pack").value = st.pack || "";
+    document.getElementById("cs_manuf").value = st.manuf || "";
+  }
+  renderCostSettingsPreview();
+  renderOilTable();
+}
+["cs_oilPct","cs_alcPrice","cs_alcLiters","cs_alcVat","cs_bottle","cs_pack","cs_manuf"].forEach(id => document.getElementById(id).addEventListener("input", renderCostSettingsPreview));
+document.getElementById("oc_search").addEventListener("input", renderOilTable);
+document.getElementById("cs_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ csBox("cs_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
+  const num = id => parseFloat(document.getElementById(id).value);
+  const oilPct = num("cs_oilPct"), alcPrice = num("cs_alcPrice"), alcLiters = num("cs_alcLiters");
+  if(!(oilPct > 0 && oilPct <= 100)){ csBox("cs_statusBox", "err", "نسبة الزيت لازم تكون بين 1 و 100."); return; }
+  if(!(alcPrice >= 0) || !(alcLiters > 0)){ csBox("cs_statusBox", "err", "اكتب سعر الكحول وعدد اللترات."); return; }
+  const settings = { oilPct, alcPrice, alcLiters, alcVat: document.getElementById("cs_alcVat").checked, vatPct: 5,
+    bottle: num("cs_bottle") || 0, pack: num("cs_pack") || 0, manuf: num("cs_manuf") || 0 };
+  const btn = document.getElementById("cs_saveBtn"); btn.disabled = true;
+  try{
+    csBox("cs_statusBox", "info", "جارِ الحفظ...");
+    materialsData = await updateMaterialsJsonWithRetry(token, (obj) => ({ ...obj, settings }), "Update cost settings");
+    csBox("cs_statusBox", "ok", "تم حفظ الإعدادات.");
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    renderCostPanel();
+  }catch(err){ csBox("cs_statusBox", "err", "صار خطأ: " + err.message); }
+  finally{ btn.disabled = false; }
+});
+
 function renderCostPanel(){
   if(!document.getElementById("cost_units")) return; // الصفحة لسا ما خلصت تحميل
+  renderCostSettingsAndOil();
   renderMaterialsSection();
   renderExpensesSection();
   const report = computeProfitReport();
@@ -5545,6 +6088,9 @@ function renderCostPanel(){
   document.getElementById("cost_margin").textContent = report.totalRevenue > 0 ? report.margin.toFixed(1) + "%" : "—";
   document.getElementById("cost_missingCount").textContent = fmtNum(report.missingCostIds.length);
   document.getElementById("cost_giftCost").textContent = fmtNum(report.giftCost);
+  document.getElementById("cost_deliveryCost").textContent = fmtNum(report.deliveryCost);
+  document.getElementById("cost_deliverySub").textContent = `على ${report.newOrders} طلب بالقواعد الجديدة — محسوبة ضمن التكلفة أعلاه`;
+  document.getElementById("cost_discountGiven").textContent = fmtNum(report.discountGiven);
   renderCostByPerfumeList(report.rows);
   renderCostManageList(document.getElementById("cost_manageSearch").value);
 }
@@ -6544,7 +7090,7 @@ function renderOrdersQueueList(){
       </div>
       <div style="margin-top:10px; font-size:13px; line-height:1.9;">${itemsHtml || "<em>ما فيه عناصر</em>"}</div>
       <div style="margin-top:6px; font-size:13px;">
-        المجموع الفرعي: ${fmtNum(o.subtotal||0)} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${esc(o.currency||"")}</b>
+        المجموع الفرعي: ${fmtNum(o.subtotal||0)}${(Number(o.subtotal)||0)+(Number(o.shippingFee)||0)+(Number(o.tabbyFee)||0)-(Number(o.total)||0) > 0 ? ` — خصم: ${fmtNum((Number(o.subtotal)||0)+(Number(o.shippingFee)||0)+(Number(o.tabbyFee)||0)-(Number(o.total)||0))}` : ""} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${esc(o.currency||"")}</b>
       </div>
       ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#1F6B41; font-weight:700;">🚚 ${esc(o.offers)}</div>` : ""}
       ${metaParts ? `<div style="margin-top:6px; font-size:12px; color:var(--muted);">${metaParts}</div>` : ""}
@@ -6614,12 +7160,33 @@ function renderOrdersQueueList(){
         const finalAddress = addressInput.value.trim();
         const orderKey = order.orderId;
         const nowDate = todayStr();
+        // 18 أكتوبر 2026: طلبات الموقع الجديدة. عُمان تُسجَّل بالحسابات (ريال × 10) مثل بقية اللوحة.
+        // الخصم = المجموع قبل الخصم + التوصيل المدفوع - الإجمالي (السكربت يمرّر هذي الأرقام فقط).
+        const isOm = /OMR|ر\.ع|عمان|عُمان|oman/i.test(String(order.currency || "") + " " + String(order.country || ""));
+        const mult = isOm ? OMR_TO_AED_EQ : 1;
+        const orderDiscount = (order.discount != null && isFinite(Number(order.discount)))
+          ? Math.max(0, Number(order.discount)) * mult
+          : Math.max(0, (Number(order.subtotal)||0) + (Number(order.shippingFee)||0) + (Number(order.tabbyFee)||0) - (Number(order.total)||0)) * mult;
+        let orderDelivCost = 0, orderDelivType = "";
+        if(order.shippingFree === true && order.deliveryCost != null && isFinite(Number(order.deliveryCost))){
+          orderDelivCost = Number(order.deliveryCost) * mult;
+        } else if(order.shippingFree === true){
+          const em = String(order.emirateOrWilayat || "");
+          const dm = String(order.deliveryMethod || "");
+          const optsAll = isOm ? slDeliveryOptions("OM") : slDeliveryOptions("AE");
+          const pick = isOm
+            ? (/nool|نول/i.test(dm) ? optsAll[1] : optsAll[0])
+            : (/الغربية|western/i.test(em) ? optsAll[1] : optsAll[0]);
+          orderDelivCost = pick.cost; orderDelivType = pick.v;
+        }
         const newSalesEntries = items.map((it, i) => ({
           id: `${it.perfumeId}-${Date.now()}-${i}`,
           perfumeId: it.perfumeId,
           size: it.size,
           qty: it.qty,
-          unitPrice: it.unitPrice,
+          unitPrice: (Number(it.unitPrice) || 0) * mult,
+          ...(i === 0 && orderDiscount > 0 ? { discount: Math.round(orderDiscount*100)/100 } : {}),
+          ...(i === 0 && order.shippingFree === true ? { freeDelivery: true, deliveryCost: orderDelivCost } : {}),
           customer: finalName,
           date: nowDate,
           country: order.country || "",
@@ -6953,6 +7520,43 @@ function xlsxGetCell(row, key){
   const foundKey = Object.keys(row).find(k => k.trim() === targetHeader);
   return foundKey ? row[foundKey] : "";
 }
+
+// 18 أكتوبر 2026: زر تحميل نموذج الإكسل الفاضي (نفس الأعمدة اللي يقراها الاستيراد) — لو ضاع الملف الأصلي
+function xlsxDownloadTemplate(kind){
+  const H = XLSX_HEADERS;
+  const isUpd = kind === "update";
+  const cols = isUpd
+    ? ["brand","name","seasons","accords","accordsAR","notesTop","notesTopAR","longevity","sillage"]
+    : ["brand","name","gender","seasons","price50","price50Om","stock50","stock10","accords","accordsAR","notesTop","notesTopAR","longevity","sillage"];
+  const headers = cols.map(k => H[k]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet([], { header: headers });
+  ws["!cols"] = headers.map(h => ({ wch: Math.max(14, h.length + 4) }));
+  XLSX.utils.book_append_sheet(wb, ws, isUpd ? "تحديث" : "عطور جديدة");
+  const help = [
+    { "العمود": H.brand, "الشرح": "اسم البراند بالإنجليزي (يتحول لحروف كبيرة تلقائيًا). مطلوب." },
+    { "العمود": H.name, "الشرح": "اسم العطر. مطلوب. " + (isUpd ? "لازم يطابق الاسم الموجود بالموقع." : "") },
+  ];
+  if(!isUpd){
+    help.push({ "العمود": H.gender, "الشرح": "رجالي أو نسائي أو للجنسين (لو تركته فاضي = للجنسين)." });
+    help.push({ "العمود": H.price50, "الشرح": "سعر 50مل بالدرهم (مثلاً 70)." });
+    help.push({ "العمود": H.price50Om, "الشرح": "سعر 50مل بالريال العماني (مثلاً 7)." });
+    help.push({ "العمود": H.stock50, "الشرح": "الكمية المتوفرة من 50مل (رقم). 0 = نفدت." });
+    help.push({ "العمود": H.stock10, "الشرح": "اختياري: كمية 10مل للإحصائيات فقط (ما يُباع للعملاء)." });
+  }
+  help.push({ "العمود": H.seasons, "الشرح": "صيفي أو شتوي، أو الاثنين مفصولين بفاصلة: صيفي، شتوي." });
+  help.push({ "العمود": H.accords + " / " + H.accordsAR, "الشرح": "الأكوردات مفصولة بفاصلة، بالإنجليزي والعربي." });
+  help.push({ "العمود": H.notesTop + " / " + H.notesTopAR, "الشرح": "النوتات مفصولة بفاصلة، بالإنجليزي والعربي." });
+  help.push({ "العمود": H.longevity, "الشرح": "مثال: 8-10 ساعات." });
+  help.push({ "العمود": H.sillage, "الشرح": "مثال: متوسط إلى قوي." });
+  help.push({ "العمود": "ملاحظة", "الشرح": isUpd ? "الخانة الفاضية = القيمة القديمة تبقى كما هي." : "صف واحد لكل عطر جديد. العطر الموجود أصلاً بالموقع يتجاوزه الاستيراد." });
+  const wsH = XLSX.utils.json_to_sheet(help);
+  wsH["!cols"] = [{ wch: 34 }, { wch: 80 }];
+  XLSX.utils.book_append_sheet(wb, wsH, "تعليمات");
+  XLSX.writeFile(wb, isUpd ? "Evoque_Update_Template.xlsx" : "Evoque_New_Perfumes_Template.xlsx");
+}
+document.getElementById("xlsxTplAddBtn").addEventListener("click", () => xlsxDownloadTemplate("add"));
+document.getElementById("xlsxTplUpdBtn").addEventListener("click", () => xlsxDownloadTemplate("update"));
 
 let xlsxParsedRows = [];
 
