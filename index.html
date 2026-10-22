@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Cormorant+Garamond:wght@600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/catalog.css?v=20261022a">
-<link rel="stylesheet" href="assets/home-motion.css?v=20261022a">
-<link rel="stylesheet" href="assets/rayhan.css?v=20261022a">
+<link rel="stylesheet" href="assets/catalog.css?v=20261022b">
+<link rel="stylesheet" href="assets/home-motion.css?v=20261022b">
+<link rel="stylesheet" href="assets/rayhan.css?v=20261022b">
 <meta name="theme-color" content="#F5F3EE">
 <!-- ===== إضافات SEO ===== -->
 <meta name="description" content="إيفوك للعطور — انطباعات عطرية فاخرة مستوحاة من أشهر العطور، في الإمارات وعُمان. اختر عطرك واطلبه أونلاين أو عبر واتساب. الدفع عند الاستلام وضمان إيفوك.">
@@ -146,6 +146,7 @@
         <a class="hx-btn primary" href="#shopStart" data-t="shop"></a>
         <a class="hx-btn ghost" id="hxWa" href="#" target="_blank" rel="noopener"><svg class="icon"><use href="#ic-whatsapp"/></svg><span data-t="wa"></span></a>
       </div>
+      <a class="hx-proof" id="hxProof" href="#reviewsSec" hidden style="--i:4"><span class="st" aria-hidden="true">★</span><b id="hxProofAvg"></b><span id="hxProofTxt"></span></a>
     </div>
     <div class="hx-stage" aria-hidden="true">
       <div class="hx-glow"></div>
@@ -169,6 +170,87 @@
   </div>
 </section>
 
+
+
+<!-- مربع بحث الصفحة الرئيسية (27 أغسطس 2026) — يبحث بكل العطور (كل الأجناس) بالاسم أو
+     البراند مباشرة من غير ما الزائر يحتاج يفتح تصنيف رجالي/نسائي أول -->
+<section class="shop-sec" aria-labelledby="shopTitle">
+<div class="shop-intro" id="shopStart" data-reveal>
+  <div class="eyebrow" data-t="shopEy"></div>
+  <h2 id="shopTitle" data-t="shopT"></h2>
+  <p data-t="shopP"></p>
+</div>
+<div class="search-controls">
+  <div class="search-field">
+    <svg class="icon"><use href="#ic-search"/></svg>
+    <input class="search-input" id="homeSearchInput" type="search" aria-label="ابحث عن عطر" autocomplete="off">
+  </div>
+</div>
+<div class="category-nav-wrap compact" id="categoryNavWrap">
+  <section class="section-head" id="shopByCategoryHead">
+    <h2 id="shopByCategoryTitle"></h2>
+    <p id="shopByCategorySubtitle"></p>
+  </section>
+  <div class="category-nav" id="categoryNav"></div>
+</div>
+<section class="section-head" id="bestSellersHead">
+  <div class="eyebrow" id="bestSellersEyebrow"></div>
+  <h2 id="bestSellersTitle"></h2>
+  <p id="bestSellersSubtitle"></p>
+</section>
+<!-- الشريط الجانبي (تصنيفات + توفر) — 14 سبتمبر 2026: صار موجود بالرئيسية نفسها
+     بدل صفحات رجالي/نسائي/للجنسين منفصلة. يظهر بس لما نعرض نتائج مفلترة فعليًا
+     (براند/جنس/بحث) — مخفي تلقائيًا فوق سلايدر "الأكثر مبيعًا" عبر كلاس no-sidebar
+     (شوف renderBestSellers بـcatalog.js). class="no-sidebar" مبدئيًا بالـHTML عشان
+     ما تطلع وميضة (flash) قبل ما يشتغل الجافاسكربت بأول تحميل عادي للصفحة. -->
+<div class="shop-layout no-sidebar" id="shopLayout">
+  <aside class="shop-sidebar" id="shopSidebar">
+    <div class="sidebar-block">
+      <h4 id="sidebarCategoriesTitle"></h4>
+      <div id="sidebarCategories"></div>
+    </div>
+    <div class="sidebar-block">
+      <h4 id="sidebarAvailabilityTitle"></h4>
+      <label class="sidebar-check"><input type="checkbox" id="availInStock" checked> <span id="availInLabel"></span></label>
+      <label class="sidebar-check"><input type="checkbox" id="availOutStock"> <span id="availOutLabel"></span></label>
+    </div>
+  </aside>
+  <div class="shop-main">
+    <div class="results-count" id="resultsCount"></div>
+    <div class="filters" id="filters"></div>
+    <div class="bs-slider-wrap">
+      <div class="grid" id="grid"></div>
+      <div id="bsArrows">
+        <button type="button" class="bs-arrow right" id="bsArrowRight" aria-label="التالي">&rsaquo;</button>
+        <button type="button" class="bs-arrow left" id="bsArrowLeft" aria-label="السابق">&lsaquo;</button>
+      </div>
+    </div>
+    <div class="show-more-wrap" id="showMoreWrap"></div>
+  </div>
+</div>
+</section>
+<section class="rv" id="reviewsSec" aria-labelledby="rvTitle" hidden>
+  <div class="rv-in">
+    <div class="rv-head" data-reveal>
+      <div>
+        <div class="eyebrow" data-t="rvEy"></div>
+        <h2 id="rvTitle" data-t="rvT"></h2>
+      </div>
+      <div class="rv-score">
+        <span class="rv-avg" id="rvAvg"></span>
+        <span class="rv-meta"><span class="rv-stars" aria-hidden="true">★★★★★</span><span id="rvCount"></span></span>
+      </div>
+    </div>
+    <div class="rv-viewport">
+      <div class="rv-track" id="rvTrack" role="list" tabindex="0"></div>
+    </div>
+    <div class="rv-ctrl">
+      <button type="button" class="rv-btn" id="rvPrev"><svg class="icon" aria-hidden="true"><use href="#ic-chevron"/></svg></button>
+      <div class="rv-bar" aria-hidden="true"><i id="rvBar"></i></div>
+      <button type="button" class="rv-btn" id="rvNext"><svg class="icon" aria-hidden="true"><use href="#ic-chevron"/></svg></button>
+    </div>
+  </div>
+</section>
 <section class="story" id="story" data-ch="1" aria-label="إيفوك">
   <div class="story-stage">
     <div class="story-in">
@@ -182,7 +264,6 @@
     <div class="story-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   </div>
 </section>
-
 <section class="rail-sec" id="railSec">
   <div class="rail-head" data-reveal>
     <div class="eyebrow" data-t="railEy"></div>
@@ -192,7 +273,6 @@
   <div class="rail" id="rail1"></div>
   <div class="rail" id="rail2"></div>
 </section>
-
 <section class="stats" aria-label="Evoque">
   <div class="stats-in">
     <div class="stat" data-reveal style="--d:0s"><span class="n" id="stat1">0</span><span class="l" data-t="s1"></span></div>
@@ -237,64 +317,9 @@
   </div>
 </div>
 
-<!-- مربع بحث الصفحة الرئيسية (27 أغسطس 2026) — يبحث بكل العطور (كل الأجناس) بالاسم أو
-     البراند مباشرة من غير ما الزائر يحتاج يفتح تصنيف رجالي/نسائي أول -->
-<div class="shop-intro" id="shopStart" data-reveal>
-  <div class="eyebrow" data-t="shopEy"></div>
-  <h2 data-t="shopT"></h2>
-  <p data-t="shopP"></p>
-</div>
-<div class="search-controls">
-  <div class="search-field">
-    <svg class="icon"><use href="#ic-search"/></svg>
-    <input class="search-input" id="homeSearchInput" type="search" aria-label="ابحث عن عطر" autocomplete="off">
-  </div>
-</div>
 
-<section class="section-head" id="bestSellersHead">
-  <div class="eyebrow" id="bestSellersEyebrow"></div>
-  <h2 id="bestSellersTitle"></h2>
-  <p id="bestSellersSubtitle"></p>
-</section>
 
-<!-- الشريط الجانبي (تصنيفات + توفر) — 14 سبتمبر 2026: صار موجود بالرئيسية نفسها
-     بدل صفحات رجالي/نسائي/للجنسين منفصلة. يظهر بس لما نعرض نتائج مفلترة فعليًا
-     (براند/جنس/بحث) — مخفي تلقائيًا فوق سلايدر "الأكثر مبيعًا" عبر كلاس no-sidebar
-     (شوف renderBestSellers بـcatalog.js). class="no-sidebar" مبدئيًا بالـHTML عشان
-     ما تطلع وميضة (flash) قبل ما يشتغل الجافاسكربت بأول تحميل عادي للصفحة. -->
-<div class="shop-layout no-sidebar" id="shopLayout">
-  <aside class="shop-sidebar" id="shopSidebar">
-    <div class="sidebar-block">
-      <h4 id="sidebarCategoriesTitle"></h4>
-      <div id="sidebarCategories"></div>
-    </div>
-    <div class="sidebar-block">
-      <h4 id="sidebarAvailabilityTitle"></h4>
-      <label class="sidebar-check"><input type="checkbox" id="availInStock" checked> <span id="availInLabel"></span></label>
-      <label class="sidebar-check"><input type="checkbox" id="availOutStock"> <span id="availOutLabel"></span></label>
-    </div>
-  </aside>
-  <div class="shop-main">
-    <div class="results-count" id="resultsCount"></div>
-    <div class="filters" id="filters"></div>
-    <div class="bs-slider-wrap">
-      <div class="grid" id="grid"></div>
-      <div id="bsArrows">
-        <button type="button" class="bs-arrow right" id="bsArrowRight" aria-label="التالي">&rsaquo;</button>
-        <button type="button" class="bs-arrow left" id="bsArrowLeft" aria-label="السابق">&lsaquo;</button>
-      </div>
-    </div>
-    <div class="show-more-wrap" id="showMoreWrap"></div>
-  </div>
-</div>
 
-<div class="category-nav-wrap" id="categoryNavWrap">
-  <section class="section-head" id="shopByCategoryHead">
-    <h2 id="shopByCategoryTitle"></h2>
-    <p id="shopByCategorySubtitle"></p>
-  </section>
-  <div class="category-nav" id="categoryNav"></div>
-</div>
 
 </main>
 
@@ -423,8 +448,8 @@
 <script>
   window.EVOQUE_PAGE = { mode: "home" };
 </script>
-<script src="assets/catalog.js?v=20261022a"></script>
-<script src="assets/home-motion.js?v=20261022a" defer></script>
+<script src="assets/catalog.js?v=20261022b"></script>
+<script src="assets/home-motion.js?v=20261022b" defer></script>
 
 <!-- ===== تتبع Meta Pixel لضغطات واتساب (حدث Contact) — 15 أغسطس 2026 ===== -->
 <script>

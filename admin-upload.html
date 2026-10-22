@@ -712,7 +712,7 @@
     </div>
 
     <div class="ov-section-title" style="margin-top:26px;">📊 حالة الطلبات</div>
-    <div class="stats" id="sl_statusStats">
+    <div class="stats" id="sl_statusStats" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px;">
 <div class="stat">🆕 جديد<b id="sl_stat_new">—</b></div>
       <div class="stat">✅ مؤكد<b id="sl_stat_confirmed">—</b></div>
       <div class="stat">🚚 تم الشحن<b id="sl_stat_dispatched">—</b></div>
@@ -2060,7 +2060,7 @@ function renderOverview(){
     el("ov_salesEmpty").style.display = "none";
     el("ov_salesGrid").style.display = "grid";
     el("ov_salesCount").textContent = fmtNum(paidSales.length);
-    const revenue = paidSales.reduce((s,o) => s + (Number(o.qty)||0)*(Number(o.unitPrice)||0), 0);
+    const revenue = computeProfitReport().totalRevenue; // بعد الخصم والمسترد، وبدون الملغي
     el("ov_salesRevenue").textContent = fmtNum(revenue);
     const totalUnitsSold = paidSales.reduce((s,o) => s + (Number(o.qty)||0), 0);
     el("ov_salesUnits").textContent = fmtNum(totalUnitsSold);
@@ -3245,18 +3245,19 @@ function normPhone(raw, dial){
 
 // إحصائيات عميل (حسب الرقم الموحّد) من سجل الطلبات. excludeKey = طلب نعدّله حاليًا (ما نحسبه على نفسه)
 function customerInfoFor(phone, excludeKey){
-  const info = { orders: 0, delivered: 0, returned: 0, refunded: 0, last: "", name: "", flag: false, reason: "", notes: "" };
+  const info = { orders: 0, delivered: 0, returned: 0, refunded: 0, cancelled: 0, last: "", name: "", flag: false, reason: "", notes: "" };
   if(!phone) return info;
   groupSalesData().forEach(g => {
     if(excludeKey && g.key === excludeKey) return;
     if(normPhone(g.phone, "") !== phone) return;
     const f = g.items[0] || {};
     const st = normStatus(f.status);
-    if(st === "cancelled") return;
+    if(st === "cancelled"){ info.cancelled++; return; }
     info.orders++;
     if(st === "delivered") info.delivered++;
-    if(st === "return_requested" || st === "returned" || st === "refunded") info.returned++;
-    info.refunded += g.items.reduce((a, o) => a + (Number(o.refundAmount) || 0), 0);
+    const refAmt = g.items.reduce((a, o) => a + (Number(o.refundAmount) || 0), 0);
+    if(st === "return_requested" || st === "returned" || st === "refunded" || refAmt > 0) info.returned++;
+    info.refunded += refAmt;
     if((g.date || "") > info.last){ info.last = g.date || ""; info.name = g.customer || info.name; }
   });
   const c = customersData[phone];
@@ -3269,10 +3270,16 @@ function custWarnHtml(phone, excludeKey){
   if(i.flag){
     return `<div class="banner" style="background:#fdecea; border-color:#c0392b; color:#8a1c14; margin:8px 0;">⛔ <b>لا يُباع لهذا العميل</b>${i.reason ? " — " + esc(i.reason) : ""}${i.notes ? "<br>📝 " + esc(i.notes) : ""}</div>`;
   }
-  if(i.orders > 0){
-    const warn = i.returned > 0;
-    const txt = `عميل سابق — ${esc(i.orders)} ${i.orders === 1 ? "طلب" : "طلبات"} سابقة${i.returned ? "، " + esc(i.returned) + " إرجاع" : ""}${i.refunded ? "، مسترد " + esc(fmtNum(i.refunded)) + " AED" : ""}${i.last ? "، آخر طلب " + esc(i.last) : ""}`;
-    return `<div class="banner" style="${warn ? "background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;" : ""} margin:8px 0;">${warn ? "⚠️" : "🔁"} <b>${txt}</b>${i.notes ? "<br>📝 " + esc(i.notes) : ""}</div>`;
+  if(i.orders > 0 || i.cancelled > 0){
+    const warn = i.returned > 0 || i.cancelled > 0;
+    const hist = groupSalesData().filter(g => (!excludeKey || g.key !== excludeKey) && normPhone(g.phone, "") === phone)
+      .sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 4)
+      .map(g => {
+        const rq = Object.values(refundedQtyMap(g)).reduce((a, n) => a + n, 0);
+        return `• ${esc(g.date || "—")}: ${esc(slCountText(g.items))} — <b>${esc(statusLabel(normStatus((g.items[0] || {}).status)))}</b>${rq ? ` (رجّع ${esc(rq)} ${rq === 1 ? "حبة" : "حبات"})` : ""}`;
+      });
+    const txt = `عميل سابق — ${esc(i.orders)} ${i.orders === 1 ? "طلب سابق" : "طلبات سابقة"}${i.returned ? "، " + esc(i.returned) + " فيها إرجاع" : ""}${i.cancelled ? "، " + esc(i.cancelled) + " ملغي" : ""}${i.refunded ? "، مسترد " + esc(fmtNum(i.refunded)) + " AED" : ""}${i.last ? "، آخر طلب " + esc(i.last) : ""}`;
+    return `<div class="banner" style="${warn ? "background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;" : ""} margin:8px 0;">${warn ? "⚠️" : "🔁"} <b>${txt}</b>${hist.length ? `<div style="margin-top:6px; font-size:12.5px; line-height:1.9;">${hist.join("<br>")}</div>` : ""}${i.notes ? "<br>📝 " + esc(i.notes) : ""}</div>`;
   }
   return "";
 }
@@ -3459,10 +3466,22 @@ function saleRowExtraHtml(g){
     parts.push(days > 0 ? `⏳ نافذة الإرجاع: باقي ${esc(days)} ${days === 1 ? "يوم" : "أيام"}` : (days === 0 ? "⏳ نافذة الإرجاع: آخر يوم" : "⌛ انتهت نافذة الإرجاع (يومين)"));
   }
   const refund = g.items.reduce((a, o) => a + (Number(o.refundAmount) || 0), 0);
-  if(refund > 0) parts.push(`💸 مسترد ${esc(fmtNum(refund))} AED${f.refundDate ? " بتاريخ " + esc(f.refundDate) : ""}`);
+  if(refund > 0){
+    const pcs = Object.values(refundedQtyMap(g)).reduce((a, n) => a + n, 0);
+    parts.push(`💸 مسترد ${esc(fmtNum(refund))} AED${pcs ? " عن " + esc(pcs) + " " + (pcs === 1 ? "حبة" : "حبات") : ""}${f.refundDate ? " بتاريخ " + esc(f.refundDate) : ""}`);
+  }
   return parts.length ? `<div class="sale-row-meta" style="margin-top:4px;">${parts.join(" — ")}</div>` : "";
 }
 let slRefundKey = null;
+// كم حبة رجعت من الطلب — refundItems الجديد [{perfumeId, qty}]، والقديم كان قائمة معرّفات (= كل كمية العطر)
+function refundedQtyMap(g){
+  const m = {};
+  g.items.forEach(o => (o.refundItems || []).forEach(r => {
+    if(r && typeof r === "object"){ m[r.perfumeId] = (m[r.perfumeId] || 0) + (Number(r.qty) || 0); }
+    else if(typeof r === "string"){ const line = g.items.find(x => x.perfumeId === r && !x.isGift); m[r] = (m[r] || 0) + (line ? Number(line.qty) || 0 : 0); }
+  }));
+  return m;
+}
 function slOpenRefund(key){
   const g = groupSalesData().find(x => x.key === key);
   if(!g) return;
@@ -3470,10 +3489,25 @@ function slOpenRefund(key){
   document.getElementById("sl_refundOrderLabel").textContent = (g.customer || "بدون اسم") + " — " + (g.date || "");
   document.getElementById("sl_refundAmount").value = "";
   document.getElementById("sl_refundDate").value = todayStr();
-  document.getElementById("sl_refundItems").innerHTML = g.items.map((o, i) => {
-    const pf = perfumes.find(x => x.id === o.perfumeId);
-    return `<label style="display:flex; align-items:center; gap:6px; margin:4px 0; cursor:pointer;"><input type="checkbox" class="sl-refund-item" data-pid="${esc(o.perfumeId)}" style="width:auto; margin:0;" checked> ${esc(pf ? pf.brand + " — " + pf.name : o.perfumeId)} (${esc(o.qty)}×)</label>`;
-  }).join("");
+  const sub = g.items.filter(o => !o.isGift).reduce((a, o) => a + (Number(o.qty) || 0) * (Number(o.unitPrice) || 0), 0);
+  const disc = g.items.reduce((a, o) => a + (Number(o.discount) || 0), 0);
+  const factor = sub > 0 ? Math.max(0, (sub - disc) / sub) : 1; // نسبة ما دفعه العميل فعلًا بعد الخصم
+  const already = refundedQtyMap(g);
+  document.getElementById("sl_refundItems").innerHTML = `<div class="hint" style="margin:0 0 6px;">حدد كم حبة رجعت من كل عطر — المبلغ ينحسب تلقائيًا بعد الخصم${disc > 0 ? ` (العميل كان عنده خصم ${esc(fmtNum(disc))} AED)` : ""}، وتقدر تعدّله.</div>` +
+    g.items.filter(o => !o.isGift).map(o => {
+      const pf = perfumes.find(x => x.id === o.perfumeId);
+      const max = Math.max(0, (Number(o.qty) || 0) - (already[o.perfumeId] || 0));
+      const unitPaid = Math.round((Number(o.unitPrice) || 0) * factor * 100) / 100;
+      return `<div style="display:flex; align-items:center; gap:10px; margin:6px 0; flex-wrap:wrap;">
+        <span style="flex:1; min-width:160px;">${esc(pf ? pf.brand + " — " + pf.name : o.perfumeId)} <small style="color:var(--muted);">(طلب ${esc(o.qty)} — دفع ${esc(unitPaid.toFixed(2).replace(/\.00$/, ""))} للحبة)</small></span>
+        <input type="number" class="sl-refund-qty" data-pid="${esc(o.perfumeId)}" data-unit="${unitPaid}" min="0" max="${max}" value="0" style="width:90px; margin:0;" aria-label="عدد الحبات المرتجعة">
+      </div>`;
+    }).join("");
+  const recalc = () => {
+    let t = 0; document.querySelectorAll(".sl-refund-qty").forEach(i => { t += (Math.max(0, Math.min(Number(i.max), Number(i.value) || 0))) * Number(i.dataset.unit); });
+    document.getElementById("sl_refundAmount").value = t > 0 ? Math.round(t * 100) / 100 : "";
+  };
+  document.querySelectorAll(".sl-refund-qty").forEach(i => i.addEventListener("input", recalc));
   document.getElementById("sl_refundStatus").className = "status";
   const panel = document.getElementById("sl_refundPanel");
   panel.style.display = "block";
@@ -3483,6 +3517,32 @@ document.getElementById("sl_history").addEventListener("click", (e) => {
   const b = e.target.closest(".sl-history-refund-btn");
   if(b) slOpenRefund(b.closest(".sale-row").dataset.key);
 });
+document.getElementById("sl_history").addEventListener("click", async (e) => {
+  const b = e.target.closest(".sl-history-cancel-btn");
+  if(!b) return;
+  const key = b.closest(".sale-row").dataset.key;
+  const g = groupSalesData().find(x => x.key === key);
+  if(!g) return;
+  if(!confirm("متأكد تبا تلغي هذا الطلب؟ ما راح ينحسب بالمبيعات ولا بالأرباح.")) return;
+  const restock = confirm("ترجّع عطور هذا الطلب للمخزون؟\n(اضغط «موافق» لو العطور ما طلعت من عندك، و«إلغاء» لو انشحنت أو انفتحت)");
+  const token = getToken();
+  if(!token){ slShowStatus("لازم تدخل بحساب Google أول.", "err"); return; }
+  b.disabled = true;
+  try{
+    salesData = await updateOrdersJsonWithRetry(token, (list) => list.map(o => (o.orderId || o.id) === key ? Object.assign({}, o, { status: "cancelled", cancelledAt: todayStr() }) : o), `Cancel order: ${key}`);
+    let note = "";
+    if(restock){
+      try{
+        const items = g.items.map(o => ({ perfumeId: o.perfumeId, size: Number(o.size), qty: Number(o.qty) || 0 }));
+        const { changes } = await applySalesStockDelta(token, computeStockDelta(items, []));
+        if(changes.length) note = ` ورجّعنا ${changes.length} ${changes.length === 1 ? "عطر" : "عطور"} للمخزون.`;
+        updateStockCounts();
+      }catch(err){ note = " — تنبيه: ما قدرنا نرجّع المخزون تلقائيًا (" + err.message + ")، عدّله يدويًا."; }
+    }
+    renderSalesHistory(); renderOverview(); syncRecentOrders();
+    slShowStatus("تم إلغاء الطلب." + note, "ok");
+  }catch(err){ slShowStatus("صار خطأ: " + err.message, "err"); b.disabled = false; }
+});
 document.getElementById("sl_refundCancelBtn").addEventListener("click", () => { document.getElementById("sl_refundPanel").style.display = "none"; slRefundKey = null; });
 document.getElementById("sl_refundSaveBtn").addEventListener("click", async () => {
   const box = document.getElementById("sl_refundStatus");
@@ -3490,13 +3550,15 @@ document.getElementById("sl_refundSaveBtn").addEventListener("click", async () =
   if(!token){ box.textContent = "لازم تدخل بحساب Google أول."; box.className = "status err"; return; }
   const amount = Number(document.getElementById("sl_refundAmount").value) || 0;
   const date = document.getElementById("sl_refundDate").value || todayStr();
-  const chosen = Array.from(document.querySelectorAll(".sl-refund-item")).filter(c => c.checked).map(c => c.dataset.pid);
+  const chosen = Array.from(document.querySelectorAll(".sl-refund-qty")).map(i => ({ perfumeId: i.dataset.pid, qty: Math.max(0, Math.min(Number(i.max), Math.floor(Number(i.value) || 0))) })).filter(r => r.qty > 0);
+  if(!chosen.length){ box.textContent = "حدد كم حبة رجعت (عطر وحد على الأقل)."; box.className = "status err"; return; }
   if(amount <= 0){ box.textContent = "اكتب مبلغ الاسترداد."; box.className = "status err"; return; }
-  if(!chosen.length){ box.textContent = "اختر عطر وحد على الأقل."; box.className = "status err"; return; }
   const key = slRefundKey;
   const g = groupSalesData().find(x => x.key === key);
   if(!g) return;
-  const full = new Set(g.items.map(o => o.perfumeId)).size === new Set(chosen).size;
+  const prevQty = Object.values(refundedQtyMap(g)).reduce((a, n) => a + n, 0);
+  const paidQty = g.items.filter(o => !o.isGift).reduce((a, o) => a + (Number(o.qty) || 0), 0);
+  const full = prevQty + chosen.reduce((a, r) => a + r.qty, 0) >= paidQty;
   const btn = document.getElementById("sl_refundSaveBtn");
   btn.disabled = true;
   try{
@@ -3510,7 +3572,7 @@ document.getElementById("sl_refundSaveBtn").addEventListener("click", async () =
           first = false;
           n.refundAmount = (Number(o.refundAmount) || 0) + amount;
           n.refundDate = date;
-          n.refundItems = Array.from(new Set((o.refundItems || []).concat(chosen)));
+          n.refundItems = (o.refundItems || []).concat(chosen.map(r => Object.assign({ date }, r)));
         }
         if(full) n.status = "refunded";
         return n;
@@ -3520,7 +3582,7 @@ document.getElementById("sl_refundSaveBtn").addEventListener("click", async () =
     document.getElementById("sl_refundPanel").style.display = "none";
     slRefundKey = null;
     renderSalesHistory(); renderOverview(); syncRecentOrders();
-    slShowStatus("تم تسجيل الاسترداد" + (full ? " وتحديث حالة الطلب إلى «تم الاسترداد»." : "."), "ok");
+    slShowStatus("تم تسجيل الاسترداد" + (full ? " وتحديث حالة الطلب إلى «تم الاسترداد»." : " (استرجاع جزئي — باقي الطلب بنفس حالته)."), "ok");
   }catch(err){ box.textContent = "صار خطأ: " + err.message; box.className = "status err"; }
   finally{ btn.disabled = false; }
 });
@@ -3540,6 +3602,7 @@ const ORDER_STATUSES = [
   ["cancelled","⛔ ملغي","#963224"]
 ];
 const LEGACY_STATUS_MAP = { "": "new", prep: "confirmed", needs_oil: "confirmed", shipped: "dispatched", received: "delivered" };
+function statusLabel(st){ const x = ORDER_STATUSES.find(r => r[0] === st); return x ? x[1] : st; }
 function normStatus(s){
   s = s || "";
   if(Object.prototype.hasOwnProperty.call(LEGACY_STATUS_MAP, s)) return LEGACY_STATUS_MAP[s];
@@ -3680,7 +3743,8 @@ function renderSalesHistory(){
           <input type="checkbox" class="sale-row-paid-check" data-key="${esc(g.key)}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
         </label>
         <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
-        <button type="button" class="secondary sl-history-refund-btn">↩️ استرجاع</button>
+        <button type="button" class="secondary sl-history-refund-btn">↩️ إرجاع عطر / استرداد</button>
+        ${normStatus(status) !== "cancelled" ? `<button type="button" class="secondary sl-history-cancel-btn">⛔ إلغاء الطلب</button>` : ""}
         <button type="button" class="secondary sl-history-delete-btn">🗑️ حذف الطلب</button>
       </div>
     </div>`;
@@ -5604,39 +5668,42 @@ COST_FIELD_KEYS.forEach(k => {
 
 // يحسب رأس المال/الإيرادات/الربح من الطلبات الفعلية (salesData) × تكلفة كل عطر
 function computeProfitReport(){
+  // 22 أكتوبر 2026: الحساب على مستوى الطلب. الملغي ما ينحسب أبدًا. المرتجع/المسترد:
+  // الإيراد = المدفوع − المسترد، وتكلفة العطر تبقى (العطر انفتح ومستعمل) وتكلفة التوصيل تبقى.
   const result = {
     totalRevenue: 0, totalCost: 0, totalProfit: 0, margin: 0, unitsCount: 0,
-    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0
+    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0, refunded: 0
   };
   if(!salesData || !salesData.length) return result;
   const missingCostIds = new Set();
   const byPerfume = {};
-  salesData.filter(isRevenueRow).forEach(o => {
-    const p = perfumes.find(x => x.id === o.perfumeId);
-    const qty = Number(o.qty) || 0;
-    // 3 أكتوبر 2026: الخصم المُعطى للعميل (لو فيه) يُخزَّن على سطر واحد من الطلب
-    // ويُطرح من إيراد ذاك السطر هنا، عشان الربح المحسوب يعكس المبلغ الفعلي
-    // المُحصَّل من العميل، لا سعر الوحدة الأصلي قبل الخصم.
-    const revenue = Math.max(0, qty * (Number(o.unitPrice) || 0) - (Number(o.discount) || 0) - (Number(o.refundAmount) || 0));
-    const cost = qty * perfumeUnitCost(p, o.size);
-    if(p && !perfumeHasCostData(p)) missingCostIds.add(p.id);
-    result.totalRevenue += revenue;
-    result.totalCost += cost;
-    result.unitsCount += qty;
-    const key = o.perfumeId;
-    if(!byPerfume[key]) byPerfume[key] = { id: key, brand: p ? p.brand : "؟", name: p ? p.name : o.perfumeId, units: 0, revenue: 0, cost: 0 };
-    byPerfume[key].units += qty;
-    byPerfume[key].revenue += revenue;
-    byPerfume[key].cost += cost;
-  });
-  salesData.filter(o => o.isGift).forEach(o => {
-    const p = perfumes.find(x => x.id === o.perfumeId);
-    result.giftCost += (Number(o.qty) || 0) * perfumeUnitCost(p, o.size);
-  });
-  // 18 أكتوبر 2026: تكلفة التوصيل المجاني (على الطلبات الجديدة فقط) تنطرح من الربح
-  salesData.forEach(o => {
-    if(o.freeDelivery === true){ result.newOrders++; result.deliveryCost += Number(o.deliveryCost) || 0; }
-    result.discountGiven += Number(o.discount) || 0;
+  groupSalesData().forEach(g => {
+    const f = g.items[0] || {};
+    if(normStatus(f.status) === "cancelled") return;
+    const paidLines = g.items.filter(o => !o.isGift);
+    const sub = paidLines.reduce((a, o) => a + (Number(o.qty) || 0) * (Number(o.unitPrice) || 0), 0);
+    const disc = g.items.reduce((a, o) => a + (Number(o.discount) || 0), 0);
+    const refund = g.items.reduce((a, o) => a + (Number(o.refundAmount) || 0), 0);
+    const net = Math.max(0, sub - disc - refund);
+    result.discountGiven += disc;
+    result.refunded += refund;
+    paidLines.forEach(o => {
+      const p = perfumes.find(x => x.id === o.perfumeId);
+      const qty = Number(o.qty) || 0;
+      const lineSub = qty * (Number(o.unitPrice) || 0);
+      const revenue = sub > 0 ? net * (lineSub / sub) : 0;
+      const cost = qty * perfumeUnitCost(p, o.size);
+      if(p && !perfumeHasCostData(p)) missingCostIds.add(p.id);
+      result.totalRevenue += revenue; result.totalCost += cost; result.unitsCount += qty;
+      const key = o.perfumeId;
+      if(!byPerfume[key]) byPerfume[key] = { id: key, brand: p ? p.brand : "؟", name: p ? p.name : o.perfumeId, units: 0, revenue: 0, cost: 0 };
+      byPerfume[key].units += qty; byPerfume[key].revenue += revenue; byPerfume[key].cost += cost;
+    });
+    g.items.filter(o => o.isGift).forEach(o => {
+      const p = perfumes.find(x => x.id === o.perfumeId);
+      result.giftCost += (Number(o.qty) || 0) * perfumeUnitCost(p, o.size);
+    });
+    g.items.forEach(o => { if(o.freeDelivery === true){ result.newOrders++; result.deliveryCost += Number(o.deliveryCost) || 0; } });
   });
   result.totalCost += result.deliveryCost;
   result.totalProfit = result.totalRevenue - result.totalCost;
@@ -5728,7 +5795,8 @@ function materialTotalSpent(material){
 // كمية كل مادة استُهلكت فعليًا حسب الطلبات الحقيقية المعتمدة (نفس بيانات تبويب الأرباح،
 // بدون هدايا العروض المجانية) — تقدير: قطعة مباعة = زجاجة حجمها + تغليف + كحول بمقدار حجمها
 function materialTotalUsed(material){
-  const nonGift = (salesData||[]).filter(isRevenueRow);
+  // المرتجع استهلك زجاجة وتغليف فعلًا — نستبعد الملغي بس
+  const nonGift = (salesData||[]).filter(o => !o.isGift && normStatus(o.status) !== "cancelled");
   if(material === "bottle50") return nonGift.filter(o => Number(o.size)===50).reduce((s,o)=>s+(Number(o.qty)||0),0);
   if(material === "bottle10") return nonGift.filter(o => Number(o.size)===10).reduce((s,o)=>s+(Number(o.qty)||0),0);
   if(material === "packaging") return nonGift.reduce((s,o)=>s+(Number(o.qty)||0),0);

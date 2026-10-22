@@ -323,3 +323,88 @@ html[lang="en"] .offer b{ font-family:'Jost',sans-serif; font-weight:600; }
 .orig-link{ align-self:flex-start; display:inline-flex; align-items:center; gap:4px; min-height:32px; font-size:12.5px; font-weight:600; color:var(--brand); text-decoration:underline; text-underline-offset:3px; }
 .orig-link:hover{ color:var(--brand-deep); }
 .lightbox-details .inspired-block{ margin-bottom:10px; }
+
+/* =====================================================================
+   22 أكتوبر 2026 — ترتيب الرئيسية الجديد + شريط التقييمات
+   البطل ← العروض ← المتجر (بحث + تصنيفات + مختارات) ← التقييمات ← القصة ← النوتات ← الضمان ← قريبًا
+   ===================================================================== */
+.hx-proof{ display:inline-flex; align-items:center; gap:8px; margin-top:20px; padding:8px 14px 8px 16px; border-radius:999px;
+  background:rgba(255,255,255,.55); border:1px solid var(--line); color:var(--ink); text-decoration:none; font-size:13px; line-height:1;
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); transition:border-color .25s, background .25s; }
+.hx-proof:hover{ border-color:var(--sage); background:rgba(255,255,255,.8); }
+.hx-proof .st{ color:var(--clay-line); font-size:15px; }
+.hx-proof b{ font-family:'Jost',sans-serif; font-weight:600; font-size:14px; direction:ltr; }
+.hx-proof[hidden]{ display:none; }
+
+/* المتجر صار مباشرة بعد العروض */
+.shop-sec{ background:var(--paper); padding-bottom:30px; }
+.shop-sec .shop-intro{ padding-top:58px; }
+#shopByCategoryHead{ display:none; }
+.category-nav-wrap.compact{ max-width:860px; margin:16px auto 6px; padding:0 16px; }
+.category-nav-wrap.compact .category-nav{ grid-template-columns:repeat(3,1fr); gap:10px; margin-top:0; }
+.category-nav-wrap.compact .category-card{ padding:14px 8px 12px; gap:4px; border-radius:14px; box-shadow:none; background:#FBFAF7; min-height:44px; }
+.category-nav-wrap.compact .category-card:hover{ transform:translateY(-2px); border-color:var(--sage); box-shadow:0 10px 24px -14px rgba(31,61,51,.35); }
+.category-nav-wrap.compact .category-card-icon{ width:22px; height:22px; margin:0 0 2px; }
+.category-nav-wrap.compact .category-card-title{ font-size:15px; }
+.category-nav-wrap.compact .category-card-desc,
+.category-nav-wrap.compact .category-card-cta{ display:none; }
+@media (min-width:820px){
+  .category-nav-wrap.compact .category-card{ flex-direction:row; justify-content:center; gap:12px; padding:16px 14px; }
+  .category-nav-wrap.compact .category-card-icon{ margin:0; }
+}
+
+/* ===== شريط التقييمات ===== */
+.rv{ background:var(--bg-soft); padding:76px 0 60px; position:relative; overflow:hidden; }
+.rv[hidden]{ display:none; }
+.rv::before{ content:"”"; position:absolute; top:-40px; inset-inline-end:4%; font-family:'Cormorant Garamond',serif; font-weight:600;
+  font-size:min(46vw,420px); line-height:1; color:var(--brand); opacity:.05; pointer-events:none; }
+.rv-in{ position:relative; max-width:1180px; margin:0 auto; }
+.rv-head{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:18px; padding:0 20px; margin-bottom:30px; }
+.rv-head .eyebrow{ font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--brand); font-weight:700; margin-bottom:8px; }
+.rv-head h2{ font-family:'El Messiri','IBM Plex Sans Arabic',sans-serif !important; font-weight:700 !important; font-size:clamp(28px,6vw,42px); color:var(--brand); margin:0; line-height:1.3; }
+html[lang="en"] .rv-head h2{ font-family:'Cormorant Garamond',serif !important; font-weight:600 !important; }
+.rv-score{ display:flex; align-items:center; gap:14px; }
+.rv-avg{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:64px; line-height:.8; color:var(--brand); direction:ltr; }
+.rv-meta{ display:flex; flex-direction:column; gap:6px; text-align:start; }
+.rv-stars{ color:var(--clay-line); letter-spacing:2px; font-size:16px; line-height:1; }
+#rvCount{ color:var(--muted); font-size:13px; line-height:1.4; }
+@media (min-width:820px){
+  .rv-head{ flex-direction:row; justify-content:space-between; align-items:flex-end; text-align:start; padding:0 32px; }
+  .rv-score{ padding-bottom:4px; }
+}
+.rv-viewport{ position:relative; }
+.rv-track{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:20px; padding:6px 20px 18px;
+  scrollbar-width:none; -webkit-overflow-scrolling:touch; outline:none; }
+.rv-track::-webkit-scrollbar{ display:none; }
+.rv-track:focus-visible{ box-shadow:var(--focus); border-radius:18px; }
+.rv-card{ flex:0 0 min(84vw,340px); scroll-snap-align:start; margin:0; display:flex; flex-direction:column; gap:14px;
+  background:#FBFAF7; border:1px solid var(--line); border-radius:18px; padding:24px 22px 18px; position:relative;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 18px 40px -30px rgba(18,38,31,.45); }
+@media (min-width:820px){
+  .rv-track{ padding:6px 32px 18px; scroll-padding-inline:32px; gap:20px; }
+  .rv-card{ flex-basis:calc((100% - 40px) / 3); }
+}
+.rv-cstars{ color:var(--clay-line); letter-spacing:2px; font-size:14px; line-height:1; }
+.rv-q{ margin:0; color:var(--ink); font-size:15.5px; line-height:1.95; flex:1;
+  display:-webkit-box; -webkit-line-clamp:6; -webkit-box-orient:vertical; overflow:hidden; }
+.rv-cap{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding-top:14px; border-top:1px solid var(--line); }
+.rv-who{ font-weight:700; color:var(--ink); font-size:14.5px; }
+.rv-ver{ display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; color:var(--brand); background:var(--tint); padding:4px 9px; border-radius:999px; }
+.rv-ver::before{ content:""; width:10px; height:6px; border:solid currentColor; border-width:0 0 1.8px 1.8px; transform:rotate(-45deg) translate(1px,-1px); }
+.rv-p{ flex-basis:100%; color:var(--muted); font-size:12.5px; text-decoration:none; line-height:1.6; }
+.rv-p:hover{ color:var(--brand); text-decoration:underline; text-underline-offset:3px; }
+.rv-ctrl{ display:flex; align-items:center; justify-content:center; gap:18px; margin-top:12px; padding:0 20px; }
+.rv-btn{ width:44px; height:44px; border-radius:50%; border:1px solid var(--brand); background:transparent; color:var(--brand);
+  display:grid; place-items:center; cursor:pointer; transition:background .2s, color .2s; }
+.rv-btn:hover{ background:var(--brand); color:var(--paper); }
+.rv-btn:focus-visible{ outline:none; box-shadow:var(--focus); }
+.rv-btn .icon{ width:18px; height:18px; }
+html[dir="rtl"] #rvPrev .icon{ transform:rotate(-90deg); } html[dir="rtl"] #rvNext .icon{ transform:rotate(90deg); }
+html[dir="ltr"] #rvPrev .icon{ transform:rotate(90deg); }  html[dir="ltr"] #rvNext .icon{ transform:rotate(-90deg); }
+.rv-bar{ width:150px; height:2px; background:var(--line); border-radius:2px; overflow:hidden; }
+.rv-bar i{ display:block; height:100%; width:30%; background:var(--brand); border-radius:2px; transition:transform .35s var(--ease, ease); }
+
+/* القصة أقصر (كانت 330vh) والإعلان القادم أخف */
+.story{ height:260vh; }
+.teaser{ padding:72px 20px; }
+@media (prefers-reduced-motion: reduce){ .story{ height:auto; } .rv-bar i{ transition:none; } }

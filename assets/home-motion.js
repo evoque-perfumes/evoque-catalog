@@ -17,9 +17,10 @@
       railEy:"من التشكيلة", railT:"عطور تستاهل تشمّها", railP:"انطباعات عطرية مستوحاة من أشهر العطور. لكل عطر نوتاته وثباته وفوحانه مكتوبة بوضوح.",
       c1t:"انطباعات عطرية", c1p:"عطور مستوحاة من أشهر العطور العالمية. هي مو أصلية، وإيفوك غير تابعة لأي ماركة — وهذا مكتوب لك بوضوح.",
       c2t:"كل شي مكتوب لك", c2p:"النوتات والأكوردات والثبات والفوحان لكل عطر، قبل لا تطلب. تختار وإنت عارف وش تاخذ.",
-      c3t:"ضمان إيفوك", c3p:"ما ناسبك العطر؟ ترجعه خلال يومين من الاستلام وتسترد قيمته. والدفع عند الاستلام.",
+      c3t:"ضمان إيفوك", c3p:"ما ناسبك العطر؟ ترجعه خلال يومين من الاستلام وتسترد المبلغ اللي دفعته فيه. التوصيل مجاني والدفع عند الاستلام.",
+      rvEy:"من عملائنا", rvT:"قالوا عن إيفوك", rvCount:"من {n} تقييم لعملاء موثّقين", rvBadge:"عميل موثّق", rvInsp:"مستوحى من", rvPrev:"التقييم السابق", rvNext:"التقييم التالي", rvProof:"{n} تقييم موثّق", rvList:"تقييمات العملاء",
       c3a:"الشروط كاملة",
-      s1:"عطر متوفر الآن", s2:"براند مستوحى منه", s3:"سعر العطر 50مل", s4:"يوم لإرجاع العطر لو ما ناسبك",
+      s1:"عطر متوفر الآن", s2:"تقييم من عملاء موثّقين", s3:"سعر العطر 50مل", s4:"يوم لإرجاع العطر لو ما ناسبك",
       wT:"ضمان إيفوك", w1n:"٢", w1:"يومين من الاستلام لإرجاع العطر", w2n:"٨٥٪", w2:"أو أكثر لازم يبقى في العطر", w3n:"٣", w3:"أيام عمل ونرجع لك المبلغ بعد الفحص", wMore:"الشروط والاسترجاع كاملة",
       ann:"توصيل مجاني لكل الطلبات · خصم ١٥٪ عند شراء ٣ عطور أو أكثر", oT:"عروض إيفوك", o1t:"توصيل مجاني", o1s:"لكل الطلبات في الإمارات وعُمان", o2t:"خصم ١٥٪", o2s:"عند شراء ٣ عطور أو أكثر", o3t:"ضمان إيفوك", o3s:"ما ناسبك العطر؟ رجّعه خلال يومين من الاستلام",
       shopEy:"المتجر", shopT:"اختر عطرك", shopP:"ابحث بالاسم أو البراند، أو تصفّح حسب الفئة.",
@@ -30,9 +31,10 @@
       railEy:"The collection", railT:"Scents worth smelling", railP:"Fragrance impressions inspired by famous perfumes. Every scent lists its notes, longevity and projection clearly.",
       c1t:"Fragrance impressions", c1p:"Inspired by famous fragrances. They are not originals, and Evoque is not affiliated with any brand — we state it clearly.",
       c2t:"Everything written down", c2p:"Notes, accords, longevity and projection for every scent, before you order. You choose knowing what you get.",
-      c3t:"Evoque Guarantee", c3p:"Doesn't suit you? Return it within 2 days of receiving it and get its price back. Cash on delivery.",
+      c3t:"Evoque Guarantee", c3p:"Doesn't suit you? Return it within 2 days of receiving it and get back what you paid for it. Free delivery, cash on delivery.",
+      rvEy:"From our customers", rvT:"What they say about Evoque", rvCount:"from {n} verified customer reviews", rvBadge:"Verified customer", rvInsp:"Inspired by", rvPrev:"Previous review", rvNext:"Next review", rvProof:"{n} verified reviews", rvList:"Customer reviews",
       c3a:"Full terms",
-      s1:"fragrances available now", s2:"brands that inspired us", s3:"per 50ml fragrance", s4:"days to return it if it doesn't suit you",
+      s1:"fragrances available now", s2:"verified customer reviews", s3:"per 50ml fragrance", s4:"days to return it if it doesn't suit you",
       wT:"Evoque Guarantee", w1n:"2", w1:"days from receipt to return the fragrance", w2n:"85%", w2:"or more must remain in the fragrance", w3n:"3", w3:"working days to refund you after inspection", wMore:"Full terms & returns",
       ann:"Free delivery on every order · 15% off when you buy 3 or more", oT:"Evoque offers", o1t:"Free delivery", o1s:"On every order in the UAE and Oman", o2t:"15% off", o2s:"When you buy 3 perfumes or more", o3t:"Evoque Guarantee", o3s:"Not for you? Return it within 2 days of delivery",
       shopEy:"The shop", shopT:"Choose your scent", shopP:"Search by name or brand, or browse by category.",
@@ -46,8 +48,92 @@
     var l = $("#stat3Label"); if(l) l.textContent = t.s3 + " · " + (STATS.po ? (t.curNote + STATS.po + (lang()==="en"?" OMR":" ر.ع")) : "");
     var cur = $("#stat3Cur"); if(cur) cur.textContent = t.cur;
     var wa = $("#hxWa"), wh = $("#waHeaderBtn"); if(wa && wh && wh.href) wa.href = wh.href;
+    renderReviews();
     var wf = $("#warrFull");
     if(wf){ try{ var w = I18N[lang()].warranty; wf.innerHTML = '<a href="terms.html">' + esc(t.wMore) + '</a>'; }catch(e){} }
+  }
+
+  /* ---------- تقييمات العملاء (حقيقية من reviews.json فقط) ---------- */
+  var REVIEWS = [], rvTimer = null, rvPaused = false, rvVisible = false;
+  function firstName(n){ return String(n || "").trim().split(/\s+/)[0] || ""; }
+  function renderReviews(){
+    var sec = $("#reviewsSec"), track = $("#rvTrack"); if(!sec || !track) return;
+    var list = REVIEWS.filter(function(r){ return r && r.comment && +r.rating > 0; });
+    if(list.length < 3){ sec.hidden = true; var pc = $("#hxProof"); if(pc) pc.hidden = true; return; }
+    var t = T[lang()];
+    var avg = list.reduce(function(a, r){ return a + (+r.rating || 0); }, 0) / list.length;
+    var avgTxt = (Math.floor(avg * 10) / 10).toFixed(1); // تقريب للأسفل — ما نضخّم الرقم
+    $("#rvAvg").textContent = avgTxt;
+    $("#rvCount").textContent = t.rvCount.replace("{n}", list.length);
+    var pr = $("#hxProof");
+    if(pr){ pr.hidden = false; $("#hxProofAvg").textContent = avgTxt; $("#hxProofTxt").textContent = t.rvProof.replace("{n}", list.length); }
+    var byId = {}; DATA.forEach(function(p){ byId[p.id] = p; });
+    var shown = list.slice().sort(function(a, b){ return String(b.date || "").localeCompare(String(a.date || "")); }).slice(0, 24);
+    track.setAttribute("aria-label", t.rvList);
+    track.innerHTML = "";
+    shown.forEach(function(r){
+      var card = document.createElement("figure"); card.className = "rv-card"; card.setAttribute("role", "listitem");
+      var st = document.createElement("div"); st.className = "rv-cstars"; var n = Math.max(0, Math.min(5, Math.round(+r.rating)));
+      st.textContent = "★★★★★".slice(0, n) + "☆☆☆☆☆".slice(0, 5 - n); st.setAttribute("aria-label", n + "/5");
+      var q = document.createElement("blockquote"); q.className = "rv-q"; q.setAttribute("dir", "auto"); q.textContent = r.comment;
+      var cap = document.createElement("figcaption"); cap.className = "rv-cap";
+      var who = document.createElement("span"); who.className = "rv-who"; who.setAttribute("dir", "auto"); who.textContent = firstName(r.name);
+      var vb = document.createElement("span"); vb.className = "rv-ver"; vb.textContent = t.rvBadge;
+      cap.appendChild(who); cap.appendChild(vb);
+      var p = byId[r.perfumeId];
+      if(p){
+        var a = document.createElement("a"); a.className = "rv-p"; a.href = "#shopStart"; a.setAttribute("data-q", p.name || "");
+        var tc = function(x){ return String(x || "").toLowerCase().replace(/(^|[\s\-'’(])([a-z])/g, function(m, s1, c){ return s1 + c.toUpperCase(); }); };
+        var nm = (lang() === "ar" && p.inspiredAr) ? p.inspiredAr : [tc(p.brand), tc(p.name)].filter(Boolean).join(" ");
+        a.textContent = t.rvInsp + " " + nm; a.setAttribute("dir", "auto");
+        a.addEventListener("click", function(e){ e.preventDefault(); goSearch(p.name || ""); });
+        cap.appendChild(a);
+      }
+      card.appendChild(st); card.appendChild(q); card.appendChild(cap);
+      track.appendChild(card);
+    });
+    $("#rvPrev").setAttribute("aria-label", t.rvPrev); $("#rvNext").setAttribute("aria-label", t.rvNext);
+    sec.hidden = false; rvProgress();
+  }
+  function goSearch(q){
+    var inp = $("#homeSearchInput");
+    if(inp){ inp.value = q; inp.dispatchEvent(new Event("input", {bubbles:true})); }
+    var t = $("#shopStart"); if(t) t.scrollIntoView({behavior: REDUCE ? "auto":"smooth", block:"start"});
+  }
+  function rvStep(dir){ // dir: +1 = التالي (بالاتجاه الطبيعي للقراءة)
+    var tr = $("#rvTrack"); if(!tr || !tr.firstElementChild) return;
+    var w = tr.firstElementChild.getBoundingClientRect().width + 16;
+    var rtl = getComputedStyle(tr).direction === "rtl";
+    var pos = Math.abs(tr.scrollLeft), max = tr.scrollWidth - tr.clientWidth;
+    if(dir > 0 && pos >= max - 4){ tr.scrollTo({left:0, behavior: REDUCE ? "auto" : "smooth"}); return; }
+    if(dir < 0 && pos <= 4){ tr.scrollTo({left:(rtl ? -1 : 1) * max, behavior: REDUCE ? "auto" : "smooth"}); return; }
+    tr.scrollBy({left:(rtl ? -1 : 1) * dir * w, behavior: REDUCE ? "auto" : "smooth"});
+  }
+  function rvProgress(){
+    var tr = $("#rvTrack"), bar = $("#rvBar"); if(!tr || !bar) return;
+    var max = tr.scrollWidth - tr.clientWidth, k = max > 0 ? Math.abs(tr.scrollLeft) / max : 1;
+    var vis = tr.scrollWidth > 0 ? tr.clientWidth / tr.scrollWidth : 1;
+    bar.style.width = (Math.max(.16, vis) * 100) + "%";
+    bar.style.transform = "translateX(" + ((getComputedStyle(tr).direction === "rtl" ? -1 : 1) * k * (1 / Math.max(.16, vis) - 1) * 100) + "%)";
+  }
+  function initReviewsUI(){
+    var tr = $("#rvTrack"), sec = $("#reviewsSec"); if(!tr || !sec) return;
+    $("#rvPrev").addEventListener("click", function(){ rvStep(-1); });
+    $("#rvNext").addEventListener("click", function(){ rvStep(1); });
+    tr.addEventListener("scroll", function(){ requestAnimationFrame(rvProgress); }, {passive:true});
+    window.addEventListener("resize", rvProgress);
+    ["pointerenter","focusin","touchstart"].forEach(function(ev){ sec.addEventListener(ev, function(){ rvPaused = true; }, {passive:true}); });
+    ["pointerleave","focusout"].forEach(function(ev){ sec.addEventListener(ev, function(){ rvPaused = false; }); });
+    tr.addEventListener("keydown", function(e){
+      if(e.key === "ArrowLeft"){ e.preventDefault(); rvStep(getComputedStyle(tr).direction === "rtl" ? 1 : -1); }
+      if(e.key === "ArrowRight"){ e.preventDefault(); rvStep(getComputedStyle(tr).direction === "rtl" ? -1 : 1); }
+    });
+    if("IntersectionObserver" in window){
+      new IntersectionObserver(function(es){ rvVisible = es[0].isIntersecting; }, {threshold:.35}).observe(sec);
+    }
+    if(!REDUCE){
+      rvTimer = setInterval(function(){ if(rvVisible && !rvPaused && !document.hidden) rvStep(1); }, 5200);
+    }
   }
 
   /* ---------- القارورة (تصميم أصلي، مو قارورة ماركة) ---------- */
@@ -115,15 +201,13 @@
     $$(".rail a").forEach(function(a){
       a.addEventListener("click", function(e){
         e.preventDefault();
-        var inp = $("#homeSearchInput");
-        if(inp){ inp.value = a.getAttribute("data-q"); inp.dispatchEvent(new Event("input", {bubbles:true})); }
-        var t = $("#shopStart"); if(t) t.scrollIntoView({behavior: REDUCE ? "auto":"smooth", block:"start"});
+        goSearch(a.getAttribute("data-q"));
       });
     });
   }
   function buildStats(){
     var host = $("#stat1"); if(host) host.setAttribute("data-count", STATS.n);
-    var s2 = $("#stat2"); if(s2) s2.setAttribute("data-count", STATS.b);
+    var s2 = $("#stat2"); if(s2) s2.setAttribute("data-count", STATS.r || 0);
     var s3 = $("#stat3"); if(s3) s3.setAttribute("data-count", STATS.p);
     var s4 = $("#stat4"); if(s4) s4.setAttribute("data-count", 2);
     $$(".stat .n").forEach(function(el){ if(REDUCE) el.firstChild.nodeValue = el.getAttribute("data-count"); else watch(el); });
@@ -131,6 +215,7 @@
 
   /* ---------- عدّاد الأرقام ---------- */
   function countUp(el){
+    el.setAttribute("data-done", "1");
     var to = +el.getAttribute("data-count") || 0, t0 = null, dur = 1700;
     function step(ts){
       if(t0 === null) t0 = ts;
@@ -225,7 +310,7 @@
     window.addEventListener("scroll", onScroll, {passive:true});
     window.addEventListener("resize", onScroll);
     new MutationObserver(applyText).observe(document.documentElement, {attributes:true, attributeFilter:["lang"]});
-    watchCards();
+    watchCards(); initReviewsUI();
     var hw = $("#hxWa"); if(hw) hw.addEventListener("click", function(){ var wh = $("#waHeaderBtn"); if(wh && wh.href) hw.href = wh.href; });
     applyText(); update();
 
@@ -239,6 +324,14 @@
       STATS.po = +(DATA.find(function(p){ return +p.price50Om > 0; }) || {}).price50Om || 0;
       buildHero(inStock); buildStory(inStock); buildRail(inStock); buildStats(); applyText();
       update();
+      return fetch("reviews.json").then(function(r){ return r.ok ? r.json() : []; }).then(function(rv){
+        REVIEWS = Array.isArray(rv) ? rv.filter(function(r){ return r && r.visible !== false; }) : [];
+        renderReviews();
+        STATS.r = REVIEWS.filter(function(r){ return r && r.comment && +r.rating > 0; }).length;
+        var s2 = $("#stat2");
+        if(s2){ s2.setAttribute("data-count", STATS.r); if(REDUCE || s2.hasAttribute("data-done")) s2.firstChild.nodeValue = String(STATS.r); }
+        if(!STATS.r){ var st = s2 && s2.closest(".stat"); if(st) st.style.display = "none"; }
+      }).catch(function(){});
     }).catch(function(){ buildHero([]); });
   }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
