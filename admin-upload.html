@@ -229,6 +229,30 @@
   fieldset{ border-radius:14px; }
   .livepill{ border-radius:999px; }
   @media (prefers-reduced-motion: reduce){ button{ transition:none; } }
+  /* ===== تنقل من مستويين: أقسام رئيسية فوق + صفحات القسم تحتها (22 أكتوبر 2026) ===== */
+  nav.groups{
+    position:sticky; top:8px; z-index:41; display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:4px;
+    background:var(--emerald); border-radius:20px; padding:6px; margin-bottom:10px; box-shadow:0 10px 26px rgba(24,35,31,.16);
+  }
+  nav.groups button{
+    background:transparent; color:rgba(245,243,238,.82); border-radius:14px; min-height:48px; padding:8px 6px;
+    font-size:13.5px; font-weight:600; white-space:nowrap; display:flex; align-items:center; justify-content:center; gap:4px;
+  }
+  nav.groups button:hover{ background:rgba(255,255,255,.08); color:#fff; }
+  nav.groups button.active{ background:#F5F3EE; color:var(--emerald-deep); }
+  nav.tabs#subNav{ top:76px; position:sticky; background:#fff; margin-bottom:18px; }
+  nav.tabs#subNav button.hidden-sub{ display:none; }
+  nav.tabs#subNav.single{ display:none; }
+  @media (max-width:640px){
+    nav.groups{ grid-template-columns:repeat(3, minmax(0,1fr)); top:6px; }
+    nav.groups button{ min-height:44px; font-size:12.5px; }
+    nav.tabs#subNav{ top:112px; }
+  }
+  /* تبويبات داخل التوزيعات */
+  .dist-subnav{ display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 16px; }
+  .dist-subnav button{ background:#fff; color:var(--ink); border:1.5px solid var(--line); min-height:42px; padding:8px 16px; }
+  .dist-subnav button.active{ background:var(--emerald); color:#fff; border-color:var(--emerald); }
+  #distPanel fieldset.dsec-hidden{ display:none; }
   @media (max-width:640px){ h1{ font-size:22px; } .panel{ padding:16px; } body{ padding:16px 12px 80px; } }
 </style>
 </head>
@@ -251,7 +275,15 @@
     <button type="button" class="secondary" id="exportExcelBtn" title="تصدير كل العطور إلى ملف إكسل">📤 تصدير إكسل</button>
   </div>
 
-  <nav class="tabs">
+  <nav class="groups" id="groupNav" aria-label="أقسام لوحة التحكم">
+    <button type="button" data-g="home" class="active">🏠 الرئيسية</button>
+    <button type="button" data-g="orders">🧾 الطلبات<span class="badge pending" id="oqGroupBadge" style="display:none; margin-inline-start:6px;"></span></button>
+    <button type="button" data-g="perfumes">🧴 العطور</button>
+    <button type="button" data-g="customers">👥 العملاء</button>
+    <button type="button" data-g="money">💰 الحسابات</button>
+    <button type="button" data-g="dist">🎁 التوزيعات</button>
+  </nav>
+  <nav class="tabs" id="subNav" aria-label="صفحات القسم">
     <button type="button" class="active" id="modeOverviewBtn">🏠 نظرة عامة</button>
     <button type="button" id="modePhotoBtn">📷 رفع الصور</button>
     <button type="button" id="modeEditBtn">✏️ تعديل عطر</button>
@@ -787,8 +819,14 @@
     <div class="row" style="margin-bottom:6px;">
       <button type="button" id="dist_reloadBtn" class="secondary">تحميل آخر نسخة</button>
     </div>
+    <div class="dist-subnav" id="distSubNav" role="tablist">
+      <button type="button" data-ds="sales" class="active">🧾 المبيعات</button>
+      <button type="button" data-ds="stock">📦 المخزون والتعبئة</button>
+      <button type="button" data-ds="buy">🛒 المشتريات والتكلفة</button>
+      <button type="button" data-ds="overview">📊 نظرة عامة</button>
+    </div>
 
-    <fieldset>
+    <fieldset data-ds="overview">
       <legend>📊 نظرة عامة على مبيعات التوزيعات</legend>
       <div class="stats" id="dist_overviewStats">
         <div class="stat">عدد عمليات البيع<b id="dist_ov_count">—</b></div>
@@ -808,7 +846,7 @@
       </div>
     </fieldset>
 
-    <fieldset>
+    <fieldset data-ds="stock">
       <legend>📦 المخزون الحالي</legend>
       <div class="stats" id="dist_stockStats">
         <div class="stat">مسكة سوداء متوفرة<b id="dist_stockBlackDisplay">—</b></div>
@@ -843,7 +881,7 @@
       </div>
     </fieldset>
 
-    <fieldset style="margin-top:16px;">
+    <fieldset data-ds="stock" style="margin-top:16px;">
       <legend>🧪 تعبئة الزجاجات (تحويل فارغة → جاهزة للبيع)</legend>
       <small class="hint" style="margin-top:0;">
         لما تعبّي زجاجات بمزيج الزيت/الكحول، سجّل العدد هنا — يخصم تلقائيًا من الزجاجات الفارغة والزيت (جرام) والكحول (مل) حسب نسبة الخلط، ويزيد الزجاجات الجاهزة للبيع.
@@ -868,7 +906,7 @@
       <div id="dist_fillLog" style="max-height:220px; overflow-y:auto; margin-top:10px;"></div>
     </fieldset>
 
-    <fieldset style="margin-top:16px;">
+    <fieldset data-ds="buy" style="margin-top:16px;">
       <legend>🧾 المواد الخام والتكلفة (تلقائي — متوسط مرجّح لكل مشترياتك)</legend>
       <small class="hint" style="margin-top:0;">
         التكلفة تتحسب تلقائيًا كمتوسط مرجّح لكل عمليات الشراء المسجّلة لكل مادة (يعني لو اشتريت بسعرين مختلفين، تنحسب التكلفة على أساس إجمالي المبلغ ÷ إجمالي الكمية — مو آخر سعر بس). نسبة الخلط الثابتة: 1000 جرام زيت + 2000 مل كحول = 3000 مل، وحجم زجاجة العطر 15مل — محسوبة تلقائيًا بالأسفل.
@@ -889,7 +927,7 @@
       </div>
     </fieldset>
 
-    <fieldset style="margin-top:16px;">
+    <fieldset data-ds="buy" style="margin-top:16px;">
       <legend>🧾 سجل المشتريات (تواريخ وتكاليف شراء المواد الخام)</legend>
       <div class="row" id="dist_purchaseEditBanner" style="display:none; align-items:center; justify-content:space-between; background:#FFF6DA; border:1px solid #E4C874; border-radius:8px; padding:8px 10px; margin-bottom:8px;">
         <span style="font-weight:700;">✏️ تعديل عملية شراء سابقة</span>
@@ -938,7 +976,7 @@
       <div id="dist_purchaseLog" style="max-height:320px; overflow-y:auto; margin-top:10px;"></div>
     </fieldset>
 
-    <fieldset style="margin-top:16px;">
+    <fieldset data-ds="buy" style="margin-top:16px;">
       <legend>💲 سعر البيع</legend>
       <div class="field"><label for="dist_basePrice">السعر بدون ثيم (للقطعة الواحدة) — درهم</label><input type="number" id="dist_basePrice" min="0" step="0.5"></div>
       <div class="grid2">
@@ -954,7 +992,7 @@
       </div>
     </fieldset>
 
-    <fieldset style="margin-top:16px;">
+    <fieldset data-ds="sales" style="margin-top:16px;">
       <legend>🧾 تسجيل عملية بيع (منفصلة عن مبيعات العطور)</legend>
       <div class="row" id="dist_saleEditBanner" style="display:none; align-items:center; justify-content:space-between; background:#FFF6DA; border:1px solid #E4C874; border-radius:8px; padding:8px 10px; margin-bottom:8px;">
         <span style="font-weight:700;">✏️ تعديل عملية بيع سابقة</span>
@@ -1010,7 +1048,7 @@
       </div>
     </fieldset>
 
-    <fieldset style="margin-top:16px;">
+    <fieldset data-ds="sales" style="margin-top:16px;">
       <legend>📜 سجل مبيعات التوزيعات</legend>
       <div class="stats" id="dist_salesStats">
         <div class="stat">إجمالي القطع المباعة<b id="dist_totalUnitsSold">—</b></div>
@@ -3948,6 +3986,58 @@ document.getElementById("modeReviewsBtn").addEventListener("click", () => setMod
 document.getElementById("modeShippingBtn").addEventListener("click", () => { setMode("shipping"); loadShippingRatesIntoForm(); });
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
 document.getElementById("modeDistBtn").addEventListener("click", () => { setMode("dist"); loadDistributionsIntoPanel(); });
+
+// ===== تنقل من مستويين (22 أكتوبر 2026): 6 أقسام رئيسية، وتحت كل قسم صفحاته =====
+const NAV_GROUPS = {
+  home: ["modeOverviewBtn"],
+  orders: ["modeOrdersQueueBtn", "modeSalesBtn"],
+  perfumes: ["modeEditBtn", "modeAddBtn", "modeStockBtn", "modePhotoBtn", "modeBulkPriceBtn", "modeExcelBtn"],
+  customers: ["modeCustomersBtn", "modeReviewsBtn", "modeWishlistBtn"],
+  money: ["modeCostBtn", "modeShippingBtn"],
+  dist: ["modeDistBtn"]
+};
+const NAV_LAST = {};
+function navGroupOfMode(){
+  const act = document.querySelector("#subNav button.active");
+  const id = act ? act.id : "modeOverviewBtn";
+  return Object.keys(NAV_GROUPS).find(g => NAV_GROUPS[g].includes(id)) || "home";
+}
+function navSync(){
+  const g = navGroupOfMode();
+  const act = document.querySelector("#subNav button.active");
+  if(act) NAV_LAST[g] = act.id;
+  document.querySelectorAll("#groupNav button").forEach(b => b.classList.toggle("active", b.dataset.g === g));
+  const ids = NAV_GROUPS[g];
+  document.querySelectorAll("#subNav > button").forEach(b => b.classList.toggle("hidden-sub", !ids.includes(b.id)));
+  ids.forEach((id, i) => { const el = document.getElementById(id); if(el) el.style.order = i; });
+  document.getElementById("subNav").classList.toggle("single", ids.length < 2);
+}
+document.querySelectorAll("#groupNav button").forEach(btn => btn.addEventListener("click", () => {
+  const g = btn.dataset.g;
+  const target = NAV_LAST[g] || NAV_GROUPS[g][0];
+  document.getElementById(target).click();
+  navSync();
+}));
+document.querySelectorAll("#subNav > button").forEach(b => b.addEventListener("click", () => setTimeout(navSync, 0)));
+(function(){ // شارة الطلبات الجديدة تظهر على قسم "الطلبات" كمان
+  const src = document.getElementById("oqNavBadge"), dst = document.getElementById("oqGroupBadge");
+  if(!src || !dst) return;
+  const copy = () => { dst.textContent = src.textContent; dst.style.display = src.style.display; };
+  new MutationObserver(copy).observe(src, { attributes:true, childList:true, characterData:true, subtree:true });
+  copy();
+})();
+const _setModeOrig = setMode;
+setMode = function(m){ _setModeOrig(m); try{ navSync(); }catch(e){} };
+navSync();
+
+// تبويبات داخل التوزيعات
+function distShowSection(ds){
+  document.querySelectorAll("#distSubNav button").forEach(b => b.classList.toggle("active", b.dataset.ds === ds));
+  document.querySelectorAll("#distPanel fieldset[data-ds]").forEach(f => f.classList.toggle("dsec-hidden", f.dataset.ds !== ds));
+  try{ localStorage.setItem("evoque_dist_tab", ds); }catch(e){}
+}
+document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener("click", () => distShowSection(b.dataset.ds)));
+(function(){ let ds = "sales"; try{ ds = localStorage.getItem("evoque_dist_tab") || "sales"; }catch(e){} distShowSection(ds); })();
 
 
     // ===== وضع "🎁 توزيعات وهدايا المناسبات" — منتج منفصل بالكامل عن العطور (مخزون + تكاليف + إنتاج + مبيعات) — 29-30 أغسطس 2026 =====
