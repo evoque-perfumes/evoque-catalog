@@ -1402,6 +1402,7 @@
     <div class="grid2">
       <div class="field"><label for="f_displayName">اسم إيفوك للعطر (يظهر للعميل) — اختياري</label><input type="text" id="f_displayName" maxlength="80" placeholder="اتركه فاضي لحد ما تحدد الاسم"></div>
       <div class="field"><label for="f_inspiredBy">مستوحى من (نص السطر الصغير) — اختياري</label><input type="text" id="f_inspiredBy" maxlength="120" placeholder="مثال: Gucci Intense Oud — الفاضي = البراند + الاسم"></div>
+      <div class="field"><label for="f_inspiredAr">اسم العطر الأصلي بالعربي (يظهر للعميل: «مستوحى من …»)</label><input type="text" id="f_inspiredAr" maxlength="120" placeholder="مثال: ديور سوفاج"></div>
     </div>
     <div class="grid2">
       <div class="field"><label for="f_photo">صورة إيفوك الخاصة للعطر (رابط داخل الموقع) — اختياري</label><input type="text" id="f_photo" maxlength="200" placeholder="assets/photos/xxx.webp — الفاضي = بطاقة المكونات"></div>
@@ -5454,6 +5455,7 @@ function fillForm(p){
   document.getElementById("f_name").value = p.name || "";
   document.getElementById("f_displayName").value = p.displayName || "";
   document.getElementById("f_inspiredBy").value = p.inspiredBy || "";
+  document.getElementById("f_inspiredAr").value = p.inspiredAr || "";
   document.getElementById("f_photo").value = p.photo || "";
   document.getElementById("f_collection").value = p.collection || "";
   document.getElementById("f_gender").value = p.gender || "unisex";
@@ -5499,7 +5501,7 @@ function fillForm(p){
 function resetForm(){
   document.getElementById("f_brand").value = "";
   document.getElementById("f_name").value = "";
-  ["f_displayName","f_inspiredBy","f_photo","f_collection"].forEach(id => document.getElementById(id).value = "");
+  ["f_displayName","f_inspiredBy","f_inspiredAr","f_photo","f_collection"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("f_gender").value = "unisex";
   document.querySelectorAll(".f_season").forEach(cb => cb.checked = (cb.value === "winter"));
   ["f_price50","f_price10","f_price50Om","f_price10Om","f_price50Before","f_price10Before","f_price50OmBefore","f_price10OmBefore"]
@@ -6467,6 +6469,7 @@ function readFormAsPerfume(existingImage){
     name: document.getElementById("f_name").value.trim(),
     ...(document.getElementById("f_displayName").value.trim() ? { displayName: document.getElementById("f_displayName").value.trim() } : {}),
     ...(document.getElementById("f_inspiredBy").value.trim() ? { inspiredBy: document.getElementById("f_inspiredBy").value.trim() } : {}),
+    ...(document.getElementById("f_inspiredAr").value.trim() ? { inspiredAr: document.getElementById("f_inspiredAr").value.trim() } : {}),
     ...(document.getElementById("f_photo").value.trim() ? { photo: document.getElementById("f_photo").value.trim() } : {}),
     ...(document.getElementById("f_collection").value.trim() ? { collection: document.getElementById("f_collection").value.trim() } : {}),
     image: existingImage || "",

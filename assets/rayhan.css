@@ -297,3 +297,29 @@ body.cart-empty .cart-bar{ transform:translateY(calc(100% + 24px)); opacity:0; p
   .hx-wrap{ padding-top:18px; }
 }
 @media (prefers-reduced-motion: reduce){ .cart-bar{ transition:none; } }
+
+/* ---------- شريط الإعلان + عروض إيفوك (22 أكتوبر 2026) ---------- */
+.announce{ background:var(--brand-ink); color:var(--paper); text-align:center; font-size:13px; font-weight:500; padding:8px 14px; line-height:1.5; }
+.offers{ background:var(--paper); padding:34px 16px 10px; }
+.offers-in{ max-width:1100px; margin:0 auto; }
+.offers-title{ text-align:center; margin:0 0 16px; font-size:clamp(24px,5.5vw,34px); color:var(--brand-ink); }
+.offers-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+@media (min-width:760px){ .offers-grid{ grid-template-columns:repeat(3,1fr); gap:14px; } }
+.offer{ display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; column-gap:14px; align-items:center;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; }
+.offer .icon{ grid-row:1 / span 2; width:44px; height:44px; padding:10px; border-radius:50%; background:var(--tint); color:var(--brand); box-sizing:border-box; }
+.offer b{ font-size:18px; color:var(--brand-ink); font-family:'El Messiri','IBM Plex Sans Arabic',sans-serif; }
+html[lang="en"] .offer b{ font-family:'Jost',sans-serif; font-weight:600; }
+.offer span{ font-size:13.5px; color:var(--muted); }
+.offer.hl{ background:var(--clay); border-color:var(--clay); }
+.offer.hl b, .offer.hl span{ color:#fff; }
+.offer.hl .icon{ background:rgba(255,255,255,.18); color:#fff; }
+
+/* اسم العطر الأصلي + رابط صورته */
+.inspired-block{ display:flex; flex-direction:column; gap:2px; margin:2px 0 4px; }
+.inspired-ar{ font-size:13px; color:var(--muted); }
+.inspired-ar b{ color:var(--ink); font-weight:600; }
+.inspired-en{ font-size:12px; color:var(--muted); }
+.orig-link{ align-self:flex-start; display:inline-flex; align-items:center; gap:4px; min-height:32px; font-size:12.5px; font-weight:600; color:var(--brand); text-decoration:underline; text-underline-offset:3px; }
+.orig-link:hover{ color:var(--brand-deep); }
+.lightbox-details .inspired-block{ margin-bottom:10px; }

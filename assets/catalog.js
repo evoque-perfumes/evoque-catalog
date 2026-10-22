@@ -7,6 +7,22 @@
 const WHATSAPP_NUMBER = "971522275255";
 // صورة المنتج: صورة إيفوك الخاصة (photo) إن وُجدت، وإلا بطاقة المكونات assets/cards/<id>.webp
 // (لا نستخدم صور زجاجات أي علامة تجارية أخرى — حقل image القديم مهمل)
+// 22 أكتوبر 2026: اسم العطر المستوحى منه بالعربي + رابط بحث صور جوجل (ما نعرض ولا نخزّن صور الماركات)
+function arNorm(s){
+  return String(s || "").toLowerCase()
+    .replace(/[\u064B-\u0652\u0640]/g, "").replace(/[إأآٱ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
+    .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+}
+function searchHay(p){ return arNorm([p.brand, p.name, p.inspiredAr, p.displayName].filter(Boolean).join(" ")); }
+function origSearchUrl(p){ return "https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(toTitleCase(p.brand) + " " + toTitleCase(p.name) + " perfume"); }
+function inspiredBlockHtml(p, t){
+  const en = p.inspiredBy ? p.inspiredBy : toTitleCase(p.brand) + " " + toTitleCase(p.name);
+  const arLine = (lang === "ar" && p.inspiredAr) ? `<div class="inspired-ar">${t.inspiredBy} <b>${escapeHtml(p.inspiredAr)}</b></div>` : "";
+  const enLine = p.displayName ? `<div class="inspired-en">${lang === "ar" && p.inspiredAr ? "" : t.inspiredBy + " "}<span dir="ltr">${escapeHtml(en)}</span></div>` : "";
+  return `<div class="inspired-block">${arLine}${enLine}
+      <a class="orig-link" href="${escapeHtml(origSearchUrl(p))}" target="_blank" rel="noopener nofollow">${t.origLink} <span aria-hidden="true">↗</span></a>
+    </div>`;
+}
 function productImage(p){ return p.photo ? p.photo : "assets/cards/" + encodeURIComponent(p.id) + ".webp"; }
 const COMING_SOON_IMAGE = "assets/coming-soon.jpg"; // صورة "الصور قيد التجهيز" الموحدة — 29 أغسطس 2026
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
@@ -221,6 +237,7 @@ const I18N = {
     dir: "rtl",
     impressionTag: "انطباع عطري",
     inspiredBy: "مستوحى من",
+    origLink: "شوف صورة العطر الأصلي",
     imgAlt: "عطر من إيفوك — انطباع عطري",
     disclaimer: "إيفوك تقدّم انطباعات عطرية مستوحاة من عطور عالمية. هي ليست العطور الأصلية، وإيفوك غير تابعة ولا مرتبطة بأي علامة تجارية.",
     warranty: "ضمان إيفوك إذا ما ناسبك العطر من ناحية الثبات أو الفوحان، ترجع لنا العطر خلال يومين من الاستلام، وتسترد قيمة العطر كاملة. الشروط: يبقى في العطر ٨٥٪ أو أكثر. رسوم التوصيل غير مستردة، وشحن الإرجاع على العميل. نرجع المبلغ خلال ٣ أيام عمل بعد استلام العطر وفحصه.",
@@ -389,6 +406,7 @@ const I18N = {
     dir: "ltr",
     impressionTag: "Fragrance impression",
     inspiredBy: "Inspired by",
+    origLink: "See the original perfume",
     imgAlt: "Evoque fragrance — inspired impression",
     disclaimer: "Evoque offers fragrance impressions inspired by well-known perfumes. They are not the original perfumes, and Evoque is not affiliated with or connected to any brand.",
     warranty: "Evoque Guarantee: if the fragrance doesn't suit you in terms of longevity or projection, return it within 2 days of receiving it and get the full price of the fragrance back. Conditions: 85% or more of the fragrance must remain. Delivery fees are non-refundable, and return shipping is paid by the customer. We refund the amount within 3 working days after receiving and inspecting the fragrance.",
@@ -692,7 +710,7 @@ const TERM_AR = {
   "unisex":"للجنسين","men":"رجالي","women":"نسائي",
   "all seasons":"كل الفصول","summer":"صيفي","winter":"شتوي","spring":"ربيعي","autumn":"خريفي","fall":"خريفي",
   "day & night":"نهار وليل","day":"نهاري","night":"ليلي/سهرة",
-  "strong":"قوي","moderate":"متوسط","light":"خفيف","very strong":"قوي جدًا",
+  "strong":"قوي","enormous":"هائل","moderate":"متوسط","light":"خفيف","very strong":"قوي جدًا",
   "hours":"ساعات","hour":"ساعة",
   "amberwood":"خشب العنبر","amber wood":"خشب العنبر","amber woods":"أخشاب العنبر",
   "sandalwood":"خشب الصندل","patchouli":"باتشولي","bergamot":"برغموت","vetiver":"نجيل الهند",
@@ -1365,6 +1383,7 @@ function openLightbox(p){
   if(notesTopDisplay) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.top}:</b> ${notesTopDisplay}</div></div>`);
   if(longevityDisplay) rows.push(`<div class="row">${svgIcon("ic-clock")}<div><b>${t.longevity}:</b> ${longevityDisplay}</div></div>`);
   if(sillageDisplay) rows.push(`<div class="row">${svgIcon("ic-wind")}<div><b>${t.sillage}:</b> ${sillageDisplay}</div></div>`);
+  rows.unshift(inspiredBlockHtml(p, t));
   rows.push(`<div class="row">${svgIcon("ic-shield")}<div><b>${t.warrantyTitle}:</b> ${t.warranty}</div></div>`);
   rows.push(`<div class="row lb-disclaimer"><div>${t.disclaimer}</div></div>`);
   document.getElementById("lightboxDetails").innerHTML = rows.join("");
@@ -1748,8 +1767,8 @@ function matches(p){
   if(availabilityFilter === "in" && bsStockScore(p) <= 0) return false;
   if(availabilityFilter === "out" && bsStockScore(p) > 0) return false;
   if(searchQuery.trim()){
-    const q = searchQuery.trim().toLowerCase();
-    if(!(p.brand.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))) return false;
+    const q = arNorm(searchQuery);
+    if(q && !searchHay(p).includes(q)) return false;
   }
   if(activeFilter==="all") return true;
   if(activeFilter==="night" || activeFilter==="day") return p.daynight.includes(activeFilter);
@@ -1769,8 +1788,8 @@ function matchesExceptGender(p, genderKey){
   if(availabilityFilter === "in" && bsStockScore(p) <= 0) return false;
   if(availabilityFilter === "out" && bsStockScore(p) > 0) return false;
   if(searchQuery.trim()){
-    const q = searchQuery.trim().toLowerCase();
-    if(!(p.brand.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))) return false;
+    const q = arNorm(searchQuery);
+    if(q && !searchHay(p).includes(q)) return false;
   }
   if(activeFilter!=="all"){
     if(activeFilter==="night" || activeFilter==="day"){
@@ -1887,7 +1906,7 @@ function renderGrid(explicitList){
         <div class="brand" title="${lang==="ar" ? "عرض كل عطور هذا البراند" : "Show all perfumes from this brand"}">${toTitleCase(p.brand)}</div>
       </div>`}
       <div class="name">${p.displayName ? escapeHtml(p.displayName) : toTitleCase(p.name)}</div>
-      ${p.displayName ? `<div class="inspired-line">${t.inspiredBy} ${p.inspiredBy ? escapeHtml(p.inspiredBy) : escapeHtml(toTitleCase(p.brand)) + " " + escapeHtml(toTitleCase(p.name))}</div>` : ""}
+      ${inspiredBlockHtml(p, t)}
       ${cardRating ? `<div class="card-rating">${starsHtml(cardRating.avg)}<span>${cardRating.avg.toFixed(1)} (${cardRating.count})</span></div>` : ""}
       ${genderLabel ? `<div class="badge-row"><span class="badge badge-gender">${svgIcon(ICONS[p.gender])}${genderLabel}</span></div>` : ""}
       <button class="notes-toggle" type="button"><span>${t.notesToggleOpen}</span>${svgIcon("ic-chevron","chev")}</button>

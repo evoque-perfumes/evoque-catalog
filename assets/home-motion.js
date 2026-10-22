@@ -21,6 +21,7 @@
       c3a:"الشروط كاملة",
       s1:"عطر متوفر الآن", s2:"براند مستوحى منه", s3:"سعر العطر 50مل", s4:"يوم لإرجاع العطر لو ما ناسبك",
       wT:"ضمان إيفوك", w1n:"٢", w1:"يومين من الاستلام لإرجاع العطر", w2n:"٨٥٪", w2:"أو أكثر لازم يبقى في العطر", w3n:"٣", w3:"أيام عمل ونرجع لك المبلغ بعد الفحص", wMore:"الشروط والاسترجاع كاملة",
+      ann:"توصيل مجاني لكل الطلبات · خصم ١٥٪ عند شراء ٣ عطور أو أكثر", oT:"عروض إيفوك", o1t:"توصيل مجاني", o1s:"لكل الطلبات في الإمارات وعُمان", o2t:"خصم ١٥٪", o2s:"عند شراء ٣ عطور أو أكثر", o3t:"ضمان إيفوك", o3s:"ما ناسبك العطر؟ رجّعه خلال يومين من الاستلام",
       shopEy:"المتجر", shopT:"اختر عطرك", shopP:"ابحث بالاسم أو البراند، أو تصفّح حسب الفئة.",
       cur:"د.إ", curNote:"في عُمان "
     },
@@ -33,6 +34,7 @@
       c3a:"Full terms",
       s1:"fragrances available now", s2:"brands that inspired us", s3:"per 50ml fragrance", s4:"days to return it if it doesn't suit you",
       wT:"Evoque Guarantee", w1n:"2", w1:"days from receipt to return the fragrance", w2n:"85%", w2:"or more must remain in the fragrance", w3n:"3", w3:"working days to refund you after inspection", wMore:"Full terms & returns",
+      ann:"Free delivery on every order · 15% off when you buy 3 or more", oT:"Evoque offers", o1t:"Free delivery", o1s:"On every order in the UAE and Oman", o2t:"15% off", o2s:"When you buy 3 perfumes or more", o3t:"Evoque Guarantee", o3s:"Not for you? Return it within 2 days of delivery",
       shopEy:"The shop", shopT:"Choose your scent", shopP:"Search by name or brand, or browse by category.",
       cur:"AED", curNote:"in Oman "
     }
