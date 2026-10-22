@@ -46,9 +46,12 @@ var CFG = {
   CATALOG_URL: "https://evoqueperfumes.com/data.json",
   SHIPPING_URL: "https://evoqueperfumes.com/shipping-rates.json",
   CATALOG_CACHE_SEC: 600,
-  FREE_SHIPPING_MIN_QTY: 5,
+  // 18 أكتوبر 2026: التوصيل مجاني لكل الطلبات، وخصم 15% من 3 عطور فأكثر
+  FREE_DELIVERY_ALL: true,
+  DISCOUNT_MIN_QTY: 3,
+  DISCOUNT_PCT: 15,
   SIZE: 50,
-  FLAT_PRICE: { AE: 50, OM: 5 }   // احتياطي لو data.json ما انقرأ
+  FLAT_PRICE: { AE: 70, OM: 7 }   // احتياطي لو data.json ما انقرأ
 };
 
 function doPost(e) {
@@ -194,7 +197,7 @@ function buildOrder_(d) {
   });
   if (!items.length) return null;
 
-  // رسوم التوصيل: تنقرأ من shipping-rates.json (مصدر واحد)، والتوصيل المجاني من 5 عطور
+  // تكلفة التوصيل على المتجر: تنقرأ من shipping-rates.json (مصدر واحد). العميل ما يدفعها.
   var shipping = loadShipping_();
   var method = clean_(d.deliveryCode || d.deliveryMethod, 20);
   var fee = 0;
@@ -202,9 +205,12 @@ function buildOrder_(d) {
     if (country === "AE") fee = method === "western" ? shipping.AE.western : shipping.AE.standard;
     else fee = method === "nool" ? shipping.OM.nool : shipping.OM.door;
   } else { flags.push("shipping-unverified"); }
-  var free = totalQty >= CFG.FREE_SHIPPING_MIN_QTY;
+  var free = CFG.FREE_DELIVERY_ALL === true;
   var shippingFee = free ? 0 : Number(fee) || 0;
-  var total = subtotal + shippingFee;
+  var discountPct = totalQty >= CFG.DISCOUNT_MIN_QTY ? CFG.DISCOUNT_PCT : 0;
+  var discount = subtotal * discountPct / 100;
+  discount = country === "OM" ? Math.round(discount * 100) / 100 : Math.round(discount);
+  var total = Math.round((subtotal - discount + shippingFee) * 100) / 100;
 
   var clientTotal = Number(d.total);
   if (isFinite(clientTotal) && Math.abs(clientTotal - total) > 0.5) flags.push("total-mismatch");
@@ -227,8 +233,11 @@ function buildOrder_(d) {
     recentConsent: d.recentConsent === true,
     currency: country === "OM" ? "OMR" : "AED",
     subtotal: subtotal,
+    discount: discount,
+    discountPct: discountPct,
     shippingFee: shippingFee,
     shippingFree: free,
+    deliveryCost: Number(fee) || 0,
     total: total,
     flags: flags,
     items: items
