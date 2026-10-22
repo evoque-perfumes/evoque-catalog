@@ -60,16 +60,16 @@ function doGet() {
   // الرابط ينفتح بنفس النافذة (target=_top) بضغطة المستخدم — جوجل تمنع التحويل التلقائي من داخل السكربت
   return page_(
     '<h2>تم التحقق من حسابك ✅</h2>' +
-    '<p><a id="go" target="_top" rel="noopener" style="display:inline-block;padding:14px 22px;background:#5B1F2B;color:#F6EAE4;border-radius:10px;text-decoration:none;font-weight:700" href="' +
+    '<p><a id="go" target="_top" rel="noopener" style="display:inline-block;padding:14px 22px;background:#1F3D33;color:#F5F3EE;border-radius:10px;text-decoration:none;font-weight:700" href="' +
     escAttr_(href) + '">فتح لوحة التحكم</a></p>' +
-    '<p style="color:#7A5A58;font-size:13px">لا تشارك هذا الرابط ولا تلقطه بصورة — فيه مفتاح الدخول.</p>'
+    '<p style="color:#56625B;font-size:13px">لا تشارك هذا الرابط ولا تلقطه بصورة — فيه مفتاح الدخول.</p>'
   );
 }
 
 function page_(bodyHtml) {
   var html = '<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<style>body{font-family:Tahoma,Arial,sans-serif;background:#F6EAE4;color:#2A1216;padding:28px;line-height:1.8}</style>' +
+    '<style>body{font-family:Tahoma,Arial,sans-serif;background:#F5F3EE;color:#18231F;padding:28px;line-height:1.8}</style>' +
     '</head><body>' + bodyHtml + '</body></html>';
   return HtmlService.createHtmlOutput(html)
     .setTitle("Evoque Admin")
