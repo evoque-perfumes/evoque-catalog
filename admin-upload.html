@@ -5741,7 +5741,7 @@ document.getElementById("tokenInput").addEventListener("change", () => {
 // عبر مشروع Apps Script منفصل ينشر بخيار "Execute as me + Only myself": جوجل نفسها
 // تتحقق إن اللي دخل هو صاحب الحساب، وبعدها الصفحة تعطيك زر يفتح لوحة التحكم ومعه
 // المفتاح داخل الجزء بعد # (ما يُرسل لأي سيرفر). شوف apps-script/admin-auth/Code.gs
-const ADMIN_AUTH_URL = "PASTE_ADMIN_AUTH_WEBAPP_URL"; // يُستبدل بعد نشر apps-script/admin-auth (خطوات النشر بالملف)
+const ADMIN_AUTH_URL = "https://script.google.com/macros/s/AKfycbweDBfIcx91eo3JfFJq0D69fQHHCKfsSIZjBYxJqmI-DsR_kYMzliowVuVmUDZfRQkJOA/exec"; // يُستبدل بعد نشر apps-script/admin-auth (خطوات النشر بالملف)
 const TOKEN_KEY = "evoque_admin_token";
 
 function adminLoginStatus(msg, type){
