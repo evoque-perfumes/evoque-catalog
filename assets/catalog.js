@@ -266,11 +266,13 @@ const I18N = {
     codNote: "الدفع نقدًا عند الاستلام، والتوصيل مجاني.",
     lblCity: "المدينة / المنطقة",
     lblRecentConsent: "أوافق أن يظهر اسمي الأول ومدينتي في شريط الطلبات الأخيرة",
-    phoneHint: "اكتب الرقم مع رمز الدولة، مثال: ‎+9715XXXXXXXX",
+    phoneHint: "رقم إماراتي، مثال: ‎+971 5X XXX XXXX",
+    phoneHintOM: "رقم عُماني، مثال: ‎+968 9XXX XXXX",
     recentOrdersLabel: "آخر الطلبات",
     verifiedBadge: "عميل موثّق",
     errRequired: "الرجاء تعبئة كل الحقول المطلوبة.",
-    errPhone: "رقم الهاتف غير صحيح. اكتبه مع رمز الدولة، مثال: ‎+9715XXXXXXXX",
+    errPhone: "رقم الهاتف غير صحيح. مثال لرقم إماراتي: ‎+971 5X XXX XXXX",
+    errPhoneOM: "رقم الهاتف غير صحيح. مثال لرقم عُماني: ‎+968 9XXX XXXX (8 أرقام بعد 968)",
     errEmail: "البريد الإلكتروني غير صحيح.",
     errAddress: "اكتب العنوان بالتفصيل (الشارع، البناية، أقرب معلم).",
     errWilayat: "اكتب اسم الولاية.",
@@ -456,11 +458,13 @@ const I18N = {
     codNote: "Pay in cash on delivery. Delivery is free.",
     lblCity: "City / Area",
     lblRecentConsent: "I agree that my first name and city may appear in the recent orders strip",
-    phoneHint: "Include the country code, e.g. +9715XXXXXXXX",
+    phoneHint: "UAE number, e.g. +971 5X XXX XXXX",
+    phoneHintOM: "Omani number, e.g. +968 9XXX XXXX",
     recentOrdersLabel: "Recent orders",
     verifiedBadge: "Verified customer",
     errRequired: "Please fill in all required fields.",
-    errPhone: "The phone number is not valid. Include the country code, e.g. +9715XXXXXXXX",
+    errPhone: "The phone number is not valid. UAE example: +971 5X XXX XXXX",
+    errPhoneOM: "The phone number is not valid. Omani example: +968 9XXX XXXX (8 digits after 968)",
     errEmail: "The email address is not valid.",
     errAddress: "Please enter the full address (street, building, nearest landmark).",
     errWilayat: "Please type the wilayat name.",
@@ -2469,11 +2473,28 @@ function populateWilayatSelect(){
 // (priceFor يقرأ متغيّر country مباشرة) ورسوم التوصيل. ما نفرّغ السلة — نفس العطور تضل بالسلة وبس سعرها يتحدث.
 function onOrderCountryChange(e){
   country = e.target.value;
+  updatePhoneUi();
   updateAddressBlocksVisibility();
   renderShippingSummary();
   updatePayUi();
   renderCountrySelect(); // نزامن قائمة الدولة بأعلى الصفحة مع نفس الاختيار
   renderCart(); // يحدّث سلة السفلي والتخزين (localStorage) بنفس الدولة الجديدة
+}
+
+// رمز الدولة والمثال تحت خانة الهاتف يتبعون الدولة المختارة (عُمان → ‎+968، الإمارات → ‎+971).
+// لو الخانة فاضية أو فيها بس رمز الدولة الثانية، نبدّله تلقائيًا — وما نلمس رقم كتبه العميل.
+const PHONE_CC = { AE: "+971", OM: "+968" };
+function updatePhoneUi(){
+  const t = I18N[lang];
+  const om = country === "OM";
+  const hint = document.getElementById("ofPhoneHint");
+  if(hint) hint.textContent = om ? t.phoneHintOM : t.phoneHint;
+  const inp = document.getElementById("ofPhone");
+  if(!inp) return;
+  inp.placeholder = om ? "+968 9XXX XXXX" : "+971 5X XXX XXXX";
+  const cc = PHONE_CC[country] || "";
+  const v = inp.value.replace(/\s/g, "");
+  if(cc && (v === "" || v === "+" || Object.values(PHONE_CC).indexOf(v) !== -1)) inp.value = cc + " ";
 }
 
 function populateOrderCountrySelect(){
@@ -2572,7 +2593,7 @@ function applyOrderFormLabels(){
   // بعد نجاح الطلب نافذة الطلب تعرض رسالة الشكر بدل النموذج — ما فيه شي نعبّيه
   if(!document.getElementById("ofCountrySelect")) return;
   const set = (id, txt)=>{ const el = document.getElementById(id); if(el) el.textContent = txt; };
-  set("lblName", t.lblName); set("lblPhone", t.lblPhone); set("ofPhoneHint", t.phoneHint);
+  set("lblName", t.lblName); set("lblPhone", t.lblPhone); updatePhoneUi();
   set("lblEmail", t.lblEmail); set("lblCountry", t.lblCountry); set("ofCountryHint", t.ofCountryHint);
   set("lblEmirate", t.lblEmirate); set("lblWilayat", t.lblWilayat); set("lblDeliveryMethod", t.lblDeliveryMethod);
   set("lblDeliveryDoor", t.lblDeliveryDoor); set("lblDeliveryNool", t.lblDeliveryNool);
@@ -2669,7 +2690,7 @@ function validateOrderForm(){
   const t = I18N[lang];
   const g = id => document.getElementById(id);
   if(g("ofName").value.trim().length < 2) return { el: g("ofName"), msg: t.errRequired };
-  if(!normalizePhoneE164(g("ofPhone").value, country)) return { el: g("ofPhone"), msg: t.errPhone };
+  if(!normalizePhoneE164(g("ofPhone").value, country)) return { el: g("ofPhone"), msg: country === "OM" ? t.errPhoneOM : t.errPhone };
   const email = g("ofEmail").value.trim();
   if(!email) return { el: g("ofEmail"), msg: t.errRequired };
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return { el: g("ofEmail"), msg: t.errEmail };
