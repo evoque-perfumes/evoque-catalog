@@ -268,7 +268,7 @@ function registerZiinaWebhook() {
 // ---------- تنظيف وتحقق ----------
 function clean_(v, max) {
   var s = String(v == null ? "" : v)
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F‎‏‪-‮]/g, "")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200E\u200F\u202A-\u202E]/g, "")
     .replace(/[<>`]/g, "")
     .replace(/\s+/g, " ")
     .trim();
