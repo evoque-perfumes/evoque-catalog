@@ -431,6 +431,25 @@
       </div>
 
       <div id="stockCategoryWrap" style="display:none;">
+        <!-- ===== الجرد السريع بالإكسل (23 أكتوبر 2026) ===== -->
+        <div class="banner" id="stkBox" style="margin:0 0 14px; background:#FBFAF7; border-color:var(--line); color:var(--ink);">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between;">
+            <b style="font-size:15px;">📋 الجرد بالإكسل</b>
+            <span id="stkLast" style="font-size:12.5px; color:var(--muted);">آخر جرد: —</span>
+          </div>
+          <ol style="margin:8px 0 10px; padding-inline-start:20px; font-size:13px; line-height:1.9;">
+            <li>حمّل ملف الجرد (فيه كل العطور ومخزونها بالنظام).</li>
+            <li>عِد العطور واكتب العدد الفعلي في عمود «العدد الفعلي». العطر اللي ما عدّيته خلّه فاضي.</li>
+            <li>ارفع الملف هنا، راجع الفروقات، واضغط «اعتمد الجرد».</li>
+          </ol>
+          <div class="row" style="gap:8px; flex-wrap:wrap;">
+            <button type="button" class="secondary" id="stkDownloadBtn">⬇️ حمّل ملف الجرد</button>
+            <label class="secondary" for="stkFile" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; margin:0; padding:10px 14px; border:1px solid var(--line); border-radius:12px; background:#fff;">⬆️ ارفع ملف الجرد</label>
+            <input type="file" id="stkFile" accept=".xlsx,.xls,.csv" style="display:none;">
+          </div>
+          <div id="stkPreview" style="margin-top:10px;"></div>
+          <div class="status" id="stkStatus"></div>
+        </div>
         <div class="row" style="margin-bottom:6px; align-items:stretch;">
           <div class="stat-clickable" id="stockCatMissing"><div style="color:var(--muted); font-size:13px;">بياناتها ناقصة</div><b id="stockCatMissingCount" style="font-size:20px; display:block;">—</b></div>
           <div class="stat-clickable" id="stockCatOut"><div style="color:var(--muted); font-size:13px;">50 مل غير متوفر</div><b id="stockCatOutCount" style="font-size:20px; display:block; color:#9A4F2E;">—</b></div>
@@ -8296,6 +8315,137 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     if(timer) clearTimeout(timer);
     timer = setTimeout(close, 120000);
   });
+})();
+</script>
+<script>
+// ===== الجرد بالإكسل (23 أكتوبر 2026) =====
+// ملف فيه كل العطور: المعرّف + البراند + الاسم + المخزون بالنظام + "العدد الفعلي" (يعبّيه المستخدم).
+// بعد الرفع: نعرض الفروقات، والاعتماد يحدّث data.json (حجم 50 مل) ويسجّل الجرد بـ stocktakes.json
+// بالمستودع الخاص (التاريخ، كم انعد، كم طابق، الفروقات، وهل الجرد كامل ومطابق 100%).
+(function(){
+  const STK_PATH = "stocktakes.json";
+  let stkRows = null; // [{id, label, system, counted, snapshot}]
+  const el = id => document.getElementById(id);
+  function st(msg, type){ const b = el("stkStatus"); b.textContent = msg; b.className = "status" + (msg ? " show " + (type || "") : ""); }
+  function fmtD(iso){ try{ return new Date(iso).toLocaleString("ar", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }); }catch(e){ return iso; } }
+
+  async function loadLast(){
+    if(!getToken()) return;
+    try{
+      const r = await privFetch(STK_PATH);
+      if(!r.ok){ el("stkLast").textContent = "آخر جرد: ما فيه جرد مسجّل بعد"; return; }
+      const list = await r.json();
+      const last = Array.isArray(list) && list.length ? list[list.length - 1] : null;
+      if(!last){ el("stkLast").textContent = "آخر جرد: ما فيه جرد مسجّل بعد"; return; }
+      el("stkLast").innerHTML = "آخر جرد: <b>" + esc(fmtD(last.at)) + "</b> — " +
+        (last.allMatched ? "✅ المخزون مطابق 100٪" : (last.complete ? "عدّلنا " + esc(last.diffs.length) + " عطر" : "جرد جزئي (" + esc(last.counted) + " عطر)"));
+    }catch(e){}
+  }
+
+  el("stkDownloadBtn").addEventListener("click", () => {
+    if(!perfumes || !perfumes.length){ st("انتظر لين تتحمل العطور.", "err"); return; }
+    const list = perfumes.slice().sort((a, b) => (a.brand || "").localeCompare(b.brand || "") || (a.name || "").localeCompare(b.name || ""));
+    const rows = list.map(p => ({
+      "المعرّف (لا تعدّله)": p.id,
+      "البراند": p.brand || "",
+      "اسم العطر": p.name || "",
+      "المخزون بالنظام (50 مل)": stockAsQty(p.stock50),
+      "العدد الفعلي": "",
+      "ملاحظة": ""
+    }));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = [{ wch: 34 }, { wch: 22 }, { wch: 34 }, { wch: 22 }, { wch: 14 }, { wch: 24 }];
+    XLSX.utils.book_append_sheet(wb, ws, "الجرد");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
+      { "تعليمات": "اكتب عدد الحبات الموجودة فعليًا عندك (50 مل) في عمود «العدد الفعلي»." },
+      { "تعليمات": "العطر اللي ما عدّيته خلّه فاضي — ما راح يتغير." },
+      { "تعليمات": "لا تعدّل عمود المعرّف ولا تحذف صفوف." },
+      { "تعليمات": "تاريخ تحميل الملف: " + new Date().toLocaleString("ar") }
+    ]), "تعليمات");
+    XLSX.writeFile(wb, "Evoque_Stocktake_" + todayStr() + ".xlsx");
+    st("تم تحميل ملف الجرد.", "ok");
+  });
+
+  el("stkFile").addEventListener("change", async (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(!f) return;
+    try{
+      const wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
+      const sheet = wb.Sheets["الجرد"] || wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      const key = (r, words) => { const k = Object.keys(r).find(k => words.some(w => k.indexOf(w) !== -1)); return k ? r[k] : ""; };
+      const out = [], unknown = [], bad = [];
+      raw.forEach((r, i) => {
+        const id = String(key(r, ["المعرّف", "المعرف", "id"]) || "").trim();
+        const cntRaw = String(key(r, ["العدد الفعلي", "الفعلي"]) == null ? "" : key(r, ["العدد الفعلي", "الفعلي"])).trim();
+        if(!id) return;
+        const p = perfumes.find(x => x.id === id);
+        if(!p){ unknown.push(id); return; }
+        if(cntRaw === ""){ out.push({ id, p, counted: null }); return; }
+        const n = Number(cntRaw.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+        if(!Number.isFinite(n) || n < 0 || Math.floor(n) !== n){ bad.push((p.brand + " — " + p.name) + " (" + cntRaw + ")"); return; }
+        out.push({ id, p, counted: n, snapshot: Number(key(r, ["المخزون بالنظام"])) });
+      });
+      stkRows = out;
+      renderPreview(unknown, bad);
+    }catch(err){ st("ما قدرت أقرأ الملف: " + err.message, "err"); }
+  });
+
+  function renderPreview(unknown, bad){
+    const counted = stkRows.filter(r => r.counted != null);
+    const diffs = counted.filter(r => r.counted !== stockAsQty(r.p.stock50));
+    const changedSince = counted.filter(r => Number.isFinite(r.snapshot) && r.snapshot !== stockAsQty(r.p.stock50));
+    const notCounted = perfumes.length - counted.length;
+    let h = `<div style="font-size:13.5px; line-height:1.9;">انعد <b>${esc(counted.length)}</b> عطر من ${esc(perfumes.length)} — مطابق: <b>${esc(counted.length - diffs.length)}</b> — فيه فرق: <b style="color:#9A4F2E;">${esc(diffs.length)}</b>${notCounted ? ` — ما انعد: ${esc(notCounted)}` : ""}</div>`;
+    if(bad.length) h += `<div class="banner" style="margin:8px 0; background:#fdecea; border-color:#c0392b; color:#8a1c14;">⛔ أرقام غلط (لازم رقم صحيح 0 أو أكثر): ${bad.map(esc).join("، ")}</div>`;
+    if(unknown.length) h += `<div class="hint">تجاهلت ${esc(unknown.length)} صف معرّفه مب موجود بالنظام.</div>`;
+    if(changedSince.length) h += `<div class="banner" style="margin:8px 0; background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;">⚠️ ${esc(changedSince.length)} عطر تغيّر مخزونها بالنظام بعد ما حمّلت الملف (يمكن انعتمد طلب). تأكد إن عدّك صار بعد آخر بيع.</div>`;
+    if(diffs.length){
+      h += `<div class="static-list" style="display:block; margin-top:8px;">` + diffs.map(r => {
+        const sys = stockAsQty(r.p.stock50), d = r.counted - sys;
+        return `<div class="dropdown-item" style="display:flex; justify-content:space-between; gap:8px;"><span>${esc(r.p.brand)} — ${esc(r.p.name)}</span><span>النظام ${esc(sys)} ← الفعلي <b>${esc(r.counted)}</b> <span style="color:${d < 0 ? "#B3261E" : "#1F6B41"};">(${d > 0 ? "+" : ""}${esc(d)})</span></span></div>`;
+      }).join("") + `</div>`;
+    }
+    if(!bad.length && counted.length){
+      h += `<div class="row" style="margin-top:10px; gap:8px;"><button type="button" id="stkApplyBtn">✅ اعتمد الجرد${diffs.length ? " وعدّل " + diffs.length + " عطر" : " (كل شي مطابق)"}</button><button type="button" class="secondary" id="stkCancelBtn">إلغاء</button></div>`;
+    }
+    el("stkPreview").innerHTML = h;
+    const ab = el("stkApplyBtn"); if(ab) ab.addEventListener("click", apply);
+    const cb = el("stkCancelBtn"); if(cb) cb.addEventListener("click", () => { stkRows = null; el("stkPreview").innerHTML = ""; st(""); });
+  }
+
+  async function apply(){
+    const token = getToken();
+    if(!token){ st("لازم تدخل بحساب Google أول.", "err"); return; }
+    const counted = stkRows.filter(r => r.counted != null);
+    const btn = el("stkApplyBtn"); if(btn) btn.disabled = true;
+    st("جارِ اعتماد الجرد...", "info");
+    try{
+      const diffs = [];
+      const newList = await updateDataJsonWithRetry(token, (list) => list.map(p => {
+        const r = counted.find(x => x.id === p.id);
+        if(!r) return p;
+        const cur = stockAsQty(p.stock50);
+        if(cur === r.counted) return p;
+        diffs.push({ id: p.id, name: (p.brand || "") + " — " + (p.name || ""), from: cur, to: r.counted });
+        return Object.assign({}, p, { stock50: r.counted }, withStockTimestamps(p, stockAsQty(p.stock10), r.counted));
+      }), `Stocktake: stock set from physical count (${counted.length} counted)`);
+      perfumes = newList;
+      const complete = counted.length === perfumes.length;
+      const rec = { at: new Date().toISOString(), date: todayStr(), counted: counted.length, total: perfumes.length,
+        matched: counted.length - diffs.length, diffs, complete, allMatched: complete && diffs.length === 0 };
+      await updateJsonWithRetry(API_BASE_PRIV, token, STK_PATH, [], (list) => { const a = Array.isArray(list) ? list : []; a.push(rec); return a; }, `Stocktake ${rec.date}: ${diffs.length} adjusted`);
+      try{ updateStockCounts(); }catch(e){}
+      stkRows = null; el("stkPreview").innerHTML = "";
+      st(rec.allMatched ? "✅ الجرد انسجّل — المخزون مطابق 100٪." : (diffs.length ? `✅ الجرد انسجّل، وعدّلت مخزون ${diffs.length} عطر.` : "✅ الجرد انسجّل — العطور اللي انعدت كلها مطابقة."), "ok");
+      loadLast();
+    }catch(err){ st("صار خطأ: " + err.message, "err"); if(btn) btn.disabled = false; }
+  }
+
+  document.getElementById("modeStockBtn").addEventListener("click", loadLast);
+  setTimeout(loadLast, 2500);
 })();
 </script>
 </body>
