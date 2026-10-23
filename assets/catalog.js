@@ -243,15 +243,15 @@ const I18N = {
     warranty: "ضمان إيفوك إذا ما ناسبك العطر من ناحية الثبات أو الفوحان، ترجع لنا العطر خلال يومين من الاستلام، وتسترد المبلغ اللي دفعته فيه (بعد الخصم إن وُجد). الشروط: يبقى في العطر ٨٥٪ أو أكثر. التوصيل لك مجاني، وشحن الإرجاع على العميل. نرجع المبلغ خلال ٣ أيام عمل بعد استلام العطر وفحصه.",
     warrantyTitle: "ضمان إيفوك",
     paymentCOD: "الدفع عند الاستلام",
-    paymentCardLabel: "بطاقة (زينة) — بانتظار الدفع",
-    paymentCardPaid: "مدفوع بالبطاقة (زينة)",
+    paymentCardLabel: "بطاقة — بانتظار الدفع",
+    paymentCardPaid: "مدفوع بالبطاقة",
     payMethod: "طريقة الدفع",
     payCod: "الدفع عند الاستلام",
     payCodSub: "نقدًا لما يوصلك الطلب",
     payCard: "بطاقة أو Apple Pay",
-    payCardSub: "دفع آمن عبر زينة — بيانات بطاقتك ما توصلنا",
+    payCardSub: "دفع آمن ومشفّر — بيانات بطاقتك ما توصلنا",
     payCardOm: "تنخصم بالدرهم: حوالي {aed} د.إ",
-    cardNote: "بتنتقل لصفحة الدفع الآمنة حق زينة، وبعد الدفع ترجع للموقع تلقائيًا. التوصيل مجاني.",
+    cardNote: "بتنتقل لصفحة دفع آمنة، وبعد الدفع ترجع للموقع تلقائيًا. التوصيل مجاني.",
     orderSubmitCard: "ادفع الآن",
     payRedirecting: "جاري تحويلك لصفحة الدفع...",
     payErr: "ما قدرنا نفتح صفحة الدفع الحين. جرّب مرة ثانية، أو اختر الدفع عند الاستلام.",
@@ -433,15 +433,15 @@ const I18N = {
     warranty: "Evoque Guarantee: if the fragrance doesn't suit you in terms of longevity or projection, return it within 2 days of receiving it and get back what you paid for it (after any discount). Conditions: 85% or more of the fragrance must remain. Delivery to you is free; return shipping is paid by the customer. We refund the amount within 3 working days after receiving and inspecting the fragrance.",
     warrantyTitle: "Evoque Guarantee",
     paymentCOD: "Cash on delivery",
-    paymentCardLabel: "Card (Ziina) — awaiting payment",
-    paymentCardPaid: "Paid by card (Ziina)",
+    paymentCardLabel: "Card — awaiting payment",
+    paymentCardPaid: "Paid by card",
     payMethod: "Payment method",
     payCod: "Cash on delivery",
     payCodSub: "Pay in cash when your order arrives",
     payCard: "Card or Apple Pay",
-    payCardSub: "Secure checkout by Ziina — we never see your card details",
+    payCardSub: "Secure, encrypted checkout — we never see your card details",
     payCardOm: "Charged in AED: about {aed} AED",
-    cardNote: "You'll go to Ziina's secure payment page and come back here automatically. Delivery is free.",
+    cardNote: "You'll go to a secure payment page and come back here automatically. Delivery is free.",
     orderSubmitCard: "Pay now",
     payRedirecting: "Taking you to the payment page...",
     payErr: "We couldn't open the payment page right now. Try again, or choose cash on delivery.",
@@ -2858,7 +2858,7 @@ function sendPaidOrderMail(orderId){
     sessionStorage.removeItem("evoque_pay_payload");
     if(!ORDER_ENDPOINT || ORDER_ENDPOINT.indexOf("PASTE_") === 0) return;
     const t = I18N[lang];
-    const payload = Object.assign({}, saved.payload, { paymentMethod: t.paymentCardPaid || "مدفوع بالبطاقة (زينة)", orderRef: orderId });
+    const payload = Object.assign({}, saved.payload, { paymentMethod: t.paymentCardPaid || "مدفوع بالبطاقة", orderRef: orderId });
     const form = document.getElementById("orderHiddenForm");
     form.action = ORDER_ENDPOINT;
     document.getElementById("orderHiddenPayload").value = JSON.stringify(payload);
