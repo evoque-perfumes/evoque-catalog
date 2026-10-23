@@ -243,7 +243,7 @@ const I18N = {
     warranty: "ضمان إيفوك إذا ما ناسبك العطر من ناحية الثبات أو الفوحان، ترجع لنا العطر خلال يومين من الاستلام، وتسترد المبلغ اللي دفعته فيه (بعد الخصم إن وُجد). الشروط: يبقى في العطر ٨٥٪ أو أكثر. التوصيل لك مجاني، وشحن الإرجاع على العميل. نرجع المبلغ خلال ٣ أيام عمل بعد استلام العطر وفحصه.",
     warrantyTitle: "ضمان إيفوك",
     paymentCOD: "الدفع عند الاستلام",
-    codNote: "الدفع نقدًا عند الاستلام، ورسوم التوصيل تُدفع عند الاستلام.",
+    codNote: "الدفع نقدًا عند الاستلام، والتوصيل مجاني.",
     lblCity: "المدينة / المنطقة",
     lblRecentConsent: "أوافق أن يظهر اسمي الأول ومدينتي في شريط الطلبات الأخيرة",
     phoneHint: "اكتب الرقم مع رمز الدولة، مثال: ‎+9715XXXXXXXX",
@@ -343,7 +343,7 @@ const I18N = {
     lblAddress: "العنوان التفصيلي (الشارع، البناية، أقرب معلم)",
     lblNotes: "ملاحظات (اختياري)",
     lblCountry: "الدولة",
-    ofCountryHint: "تقدر تغيّر دولتك من هنا أي وقت — الأسعار والعملة ورسوم التوصيل تتحدث تلقائيًا.",
+    ofCountryHint: "تقدر تغيّر دولتك من هنا أي وقت — الأسعار والعملة تتحدث تلقائيًا.",
     lblEmirate: "الإمارة",
     lblWilayat: "الولاية",
     wilayatOtherOption: "أخرى (اكتبها)",
@@ -412,7 +412,7 @@ const I18N = {
     warranty: "Evoque Guarantee: if the fragrance doesn't suit you in terms of longevity or projection, return it within 2 days of receiving it and get back what you paid for it (after any discount). Conditions: 85% or more of the fragrance must remain. Delivery to you is free; return shipping is paid by the customer. We refund the amount within 3 working days after receiving and inspecting the fragrance.",
     warrantyTitle: "Evoque Guarantee",
     paymentCOD: "Cash on delivery",
-    codNote: "Pay in cash on delivery. Delivery fees are paid on delivery.",
+    codNote: "Pay in cash on delivery. Delivery is free.",
     lblCity: "City / Area",
     lblRecentConsent: "I agree that my first name and city may appear in the recent orders strip",
     phoneHint: "Include the country code, e.g. +9715XXXXXXXX",
@@ -512,7 +512,7 @@ const I18N = {
     lblAddress: "Detailed Address (Street, Building, Nearest Landmark)",
     lblNotes: "Notes (optional)",
     lblCountry: "Country",
-    ofCountryHint: "You can change your country here anytime — prices, currency and delivery fees update automatically.",
+    ofCountryHint: "You can change your country here anytime — prices and currency update automatically.",
     lblEmirate: "Emirate",
     lblWilayat: "Wilayat",
     wilayatOtherOption: "Other (type it)",
@@ -589,6 +589,8 @@ const OFFERS_CONFIG = [
   { size:"50", minQty:3, discountPct:15, reward:{ ar:"خصم ١٥٪ على الطلب", en:"15% off your order" } },
 ];
 
+// 23 أكتوبر 2026: "باقي N" يظهر بس لما المخزون حبتين أو أقل (قرار المالك)
+const LOW_STOCK_MAX = 2;
 function hasFreeShipping(offerStatus){
   return FREE_DELIVERY_ALL || offerStatus.unlocked.some(o => o.freeShipping);
 }
@@ -1965,7 +1967,7 @@ function renderGrid(explicitList){
       const inStock = qtyNum > 0;
       const stockNoteHtml = !inStock
         ? `<div class="stock-note out">${t.outOfStock}</div>`
-        : (qtyNum <= 5 ? `<div class="stock-note low">${t.lowStockNote.replace("{n}", qtyNum)}</div>` : "");
+        : (qtyNum <= LOW_STOCK_MAX ? `<div class="stock-note low">${t.lowStockNote.replace("{n}", qtyNum)}</div>` : "");
       return `<div class="size-row"><div class="size-pill active ${!inStock ? "disabled" : ""}" data-size="50">50ml<b>${priceHtml}</b>${stockNoteHtml}</div></div>`;
     }
 
@@ -2229,7 +2231,7 @@ function renderCart(){
   msg += `\n${t.shipSubtotal}: ${pricing.subtotal} ${cur}`;
   if(pricing.discount > 0) msg += `\n${t.shipDiscount}: -${pricing.discount} ${cur}`;
   msg += `\n${t.shipFee}: ${freeShip ? t.shipFree : estFee + " " + cur}`;
-  msg += `\n${t.shipGrandTotal}: ${estGrandTotal} ${cur} ${t.shipEstimateNote}`;
+  msg += `\n${t.shipGrandTotal}: ${estGrandTotal} ${cur}${freeShip ? "" : " " + t.shipEstimateNote}`;
   msg += `\n${t.orderMsgPayment}: ${paymentLabel(t)}`;
   if(offerStatus.unlocked.length){
     offerStatus.unlocked.forEach(o=>{ msg += `\n${t.orderMsgOfferLine}: ${o.reward[lang]}`; });

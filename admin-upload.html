@@ -7429,6 +7429,7 @@ async function loadPendingOrdersIntoPanel(){
       pendingOrders = await res.json();
       if(!Array.isArray(pendingOrders)) pendingOrders = [];
     } else if(res.status === 404){
+      if(!(await checkPrivateAccess())) throw new Error("المفتاح ما يقدر يقرا المستودع الخاص — شوف الرسالة الحمرا فوق");
       pendingOrders = [];
     } else {
       throw new Error("HTTP " + res.status);
@@ -8168,9 +8169,31 @@ loadData(); // الكتالوج العام — ما يحتاج دخول
 
 // الملفات الخاصة تنقرأ من المستودع الخاص وتحتاج مفتاح — تتحمل بعد تسجيل الدخول
 let _privateBootstrapped = false;
+// 23 أكتوبر 2026: نتأكد إن المفتاح يقدر يشوف المستودع الخاص — قبل كانت القراءة تفشل بصمت
+// وتطلع اللوحة فاضية (الطلبات الجديدة/المبيعات) بدون أي رسالة
+async function checkPrivateAccess(){
+  let msg = "";
+  try{
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${PRIV_REPO}?t=${Date.now()}`, { cache: "no-store", headers: { "Authorization": `Bearer ${getToken()}` } });
+    if(r.status === 401) msg = "المفتاح اللي وصل للوحة منتهي أو ملغي (401).";
+    else if(r.status === 404 || r.status === 403) msg = `المفتاح اللي وصل للوحة <b>ما عنده صلاحية على المستودع الخاص ${esc(PRIV_REPO)}</b> (${r.status}). عشان كذا الطلبات الجديدة والمبيعات تطلع فاضية.`;
+    else if(!r.ok) msg = "ما قدرت أتأكد من صلاحية المستودع الخاص (HTTP " + r.status + ").";
+  }catch(e){ msg = "ما قدرت أتصل بـ GitHub للتأكد من الصلاحية: " + esc(e.message); }
+  let box = document.getElementById("privAccessBanner");
+  if(!msg){ if(box) box.remove(); return true; }
+  if(!box){
+    box = document.createElement("div"); box.id = "privAccessBanner"; box.className = "banner";
+    box.style.cssText = "background:#fdecea;border-color:#c0392b;color:#8a1c14;margin:12px auto;max-width:980px;line-height:1.9;";
+    const anchor = document.querySelector(".panel") || document.body.firstElementChild;
+    anchor.parentNode.insertBefore(box, anchor);
+  }
+  box.innerHTML = "⛔ " + msg + "<br>الحل: افتح GitHub ← Settings ← Developer settings ← Fine-grained tokens ← المفتاح <b>evoque-admin</b> ← Edit ← Repository access ← تأكد إن <b>evoque-catalog</b> و<b>evoque-private</b> الاثنين مختارين ← Contents: Read and write ← Update. وتأكد إن هذا نفس المفتاح الموجود بخاصية ADMIN_GITHUB_TOKEN في سكربت Evoque Admin Auth.";
+  return false;
+}
 function bootstrapPrivateData(){
   if(!getToken() || _privateBootstrapped) return;
   _privateBootstrapped = true;
+  checkPrivateAccess();
   loadReviews();
   loadOrders();
   loadMaterials();
