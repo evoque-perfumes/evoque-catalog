@@ -71,6 +71,7 @@ var CFG = {
   SIZE: 50,
   FLAT_PRICE: { AE: 70, OM: 7 },  // احتياطي لو data.json ما انقرأ
   SITE_URL: "https://evoqueperfumes.com/",
+  EXEC_URL: "https://script.google.com/macros/s/AKfycbzkocInmosn2QLbYPUYbvY7w4Gs2TP-vsSFJqB8BlU38H0iAfRex1To6YISA1wqFYc-/exec",
   ZIINA_API: "https://api-v2.ziina.com/api",
   OMR_TO_AED_DEFAULT: 9.55
 };
@@ -253,9 +254,12 @@ function handleZiinaEvent_(intentId) {
 }
 
 // شغّلها مرة وحدة من المحرر (Run) بعد النشر: تخلي زينة ترسل إشعار لهذا السكربت لما يتغير أي دفع
+// ملاحظة: ScriptApp.getService().getUrl() من المحرر يرجّع رابط /dev (للمطوّر بس)، وزينة ما تقدر توصله.
+// لذلك نستخدم رابط النشر الحقيقي (/exec) نفسه اللي بالموقع. لو تغيّر الرابط يومًا، حط الجديد
+// بخاصية INTAKE_EXEC_URL في Script Properties.
 function registerZiinaWebhook() {
-  var url = ScriptApp.getService().getUrl();
-  if (!url) throw new Error("انشر السكربت أول (Deploy) وبعدين شغّل هذي الدالة.");
+  var url = PropertiesService.getScriptProperties().getProperty("INTAKE_EXEC_URL") || CFG.EXEC_URL;
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url)) throw new Error("رابط النشر غلط: لازم ينتهي بـ /exec");
   var res = ziinaFetch_("post", "/webhook", { url: url });
   if (!res) throw new Error("زينة رفضت تسجيل الإشعارات — تأكد من ZIINA_API_KEY.");
   console.log("تم تسجيل إشعارات زينة على: " + url);
