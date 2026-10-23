@@ -244,6 +244,7 @@ const I18N = {
     warrantyTitle: "ضمان إيفوك",
     paymentCOD: "الدفع عند الاستلام",
     paymentCardLabel: "بطاقة (زينة) — بانتظار الدفع",
+    paymentCardPaid: "مدفوع بالبطاقة (زينة)",
     payMethod: "طريقة الدفع",
     payCod: "الدفع عند الاستلام",
     payCodSub: "نقدًا لما يوصلك الطلب",
@@ -433,6 +434,7 @@ const I18N = {
     warrantyTitle: "Evoque Guarantee",
     paymentCOD: "Cash on delivery",
     paymentCardLabel: "Card (Ziina) — awaiting payment",
+    paymentCardPaid: "Paid by card (Ziina)",
     payMethod: "Payment method",
     payCod: "Cash on delivery",
     payCodSub: "Pay in cash when your order arrives",
@@ -2816,18 +2818,8 @@ async function startCardPayment(payload, submitBtn){
   const t = I18N[lang];
   const errBox = document.getElementById("ofError");
   submitBtn.textContent = t.payRedirecting;
-  const mailDone = new Promise(resolve => {
-    try{
-      if(!ORDER_ENDPOINT || ORDER_ENDPOINT.indexOf("PASTE_") === 0) return resolve();
-      const form = document.getElementById("orderHiddenForm");
-      const iframe = document.getElementById("orderHiddenFrame");
-      form.action = ORDER_ENDPOINT;
-      document.getElementById("orderHiddenPayload").value = JSON.stringify(payload);
-      iframe.onload = () => { iframe.onload = null; resolve(); };
-      setTimeout(resolve, 4000);
-      form.submit();
-    }catch(e){ resolve(); }
-  });
+  // 23 أكتوبر 2026: إيميل الطلب (ORDER_ENDPOINT) ما ينرسل قبل الدفع — كان يوصل "شكرًا على طلبك"
+  // حتى لو العميل ما كمّل الدفع. نحفظ الطلب هنا، وينرسل بعد ما نتأكد من زينة إنه مدفوع.
   let res = null;
   try{
     const r = await fetch(ORDER_QUEUE_ENDPOINT, {
@@ -2837,8 +2829,10 @@ async function startCardPayment(payload, submitBtn){
     res = await r.json();
   }catch(e){ res = null; }
   if(res && res.ok && typeof res.redirectUrl === "string" && /^https:\/\/([a-z0-9-]+\.)*ziina\.com\//i.test(res.redirectUrl)){
-    try{ sessionStorage.setItem("evoque_pay_order", res.orderId || ""); }catch(e){}
-    await mailDone;
+    try{
+      sessionStorage.setItem("evoque_pay_order", res.orderId || "");
+      sessionStorage.setItem("evoque_pay_payload", JSON.stringify({ orderId: res.orderId, payload }));
+    }catch(e){}
     location.href = res.redirectUrl;
     return;
   }
@@ -2853,6 +2847,23 @@ function payResultBody(icon, title, msg){
   const t = I18N[lang];
   return `<div class="order-success"><div class="oc-icon">${icon}</div><h4>${escapeHtml(title)}</h4>${msg ? `<p>${escapeHtml(msg)}</p>` : ""}
     <button type="button" class="order-submit-btn" id="payResultClose" style="margin-top:14px;">${escapeHtml(t.payClose)}</button></div>`;
+}
+// يرسل إيميل الطلب المعتاد (ORDER_ENDPOINT) مرة وحدة بس، بعد ما يتأكد الدفع
+function sendPaidOrderMail(orderId){
+  try{
+    const raw = sessionStorage.getItem("evoque_pay_payload");
+    if(!raw) return;
+    const saved = JSON.parse(raw);
+    if(!saved || saved.orderId !== orderId || !saved.payload) return;
+    sessionStorage.removeItem("evoque_pay_payload");
+    if(!ORDER_ENDPOINT || ORDER_ENDPOINT.indexOf("PASTE_") === 0) return;
+    const t = I18N[lang];
+    const payload = Object.assign({}, saved.payload, { paymentMethod: t.paymentCardPaid || "مدفوع بالبطاقة (زينة)", orderRef: orderId });
+    const form = document.getElementById("orderHiddenForm");
+    form.action = ORDER_ENDPOINT;
+    document.getElementById("orderHiddenPayload").value = JSON.stringify(payload);
+    form.submit();
+  }catch(e){}
 }
 async function handlePaymentReturn(){
   let params; try{ params = new URLSearchParams(location.search); }catch(e){ return; }
@@ -2880,6 +2891,7 @@ async function handlePaymentReturn(){
     if(i < tries - 1) await new Promise(r => setTimeout(r, 2500));
   }
   if(status === "paid" || status === "paid_mismatch"){
+    sendPaidOrderMail(orderId);
     cart = {}; try{ persistCartState(); }catch(e){} try{ renderAll(); }catch(e){}
     try{ sessionStorage.removeItem("evoque_pay_order"); }catch(e){}
     orderJustSucceeded = true;
