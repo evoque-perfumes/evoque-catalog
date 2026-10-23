@@ -2097,7 +2097,7 @@ function renderGrid(explicitList){
 // الدفع عند الاستلام فقط (لا تابي ولا تحويل بنكي)
 // ===== الدفع بالبطاقة عبر زينة (23 أكتوبر 2026) =====
 // "off" = مقفل، "test" = يظهر بس لما تفتح الموقع بـ ?cardtest=1 (للتجربة)، "live" = للكل
-const CARD_PAYMENTS = "off"; // 23 أكتوبر 2026: مقفل لين توافق زينة على الحساب (كان "test")
+const CARD_PAYMENTS = "test"; // 23 أكتوبر 2026: زينة رجعت — وضع تجربة (يظهر بس مع ?cardtest=1)
 const OMR_TO_AED_CARD = 9.55; // تقريبي للعرض فقط — السكربت هو اللي يحسب المبلغ الفعلي
 function cardPaymentsVisible(){
   if(CARD_PAYMENTS === "live") return true;
