@@ -3644,6 +3644,7 @@ function statusOptionsHtml(current){
 function withStatus(o, status){
   const out = Object.assign({}, o, { status });
   if(status === "delivered" && !out.deliveredAt) out.deliveredAt = todayStr();
+  if(status === "dispatched" && !out.dispatchedAt) out.dispatchedAt = todayStr(); // للإيميل اليومي: كم يوم صار له بالطريق
   return out;
 }
 function countOrderStatuses(list, getStatus, getPaid){
@@ -3906,6 +3907,7 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
       email, emirateOrWilayat: region, city, deliveryType,
       status: newStatus,
       ...(newStatus === "delivered" ? { deliveredAt: (prevRow && prevRow.deliveredAt) || date } : {}),
+      ...(prevRow && prevRow.dispatchedAt ? { dispatchedAt: prevRow.dispatchedAt } : (newStatus === "dispatched" ? { dispatchedAt: todayStr() } : {})),
       ...(prevRow && prevRow.paid ? { paid: true } : {}),
       ...(i === 0 && prevRow && prevRow.refundAmount ? { refundAmount: prevRow.refundAmount, refundDate: prevRow.refundDate, refundItems: prevRow.refundItems } : {}),
       ...(recentConsent ? { recentConsent: true } : {}),
