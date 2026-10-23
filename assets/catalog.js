@@ -2828,7 +2828,9 @@ async function startCardPayment(payload, submitBtn){
     });
     res = await r.json();
   }catch(e){ res = null; }
-  if(res && res.ok && typeof res.redirectUrl === "string" && /^https:\/\/([a-z0-9-]+\.)*ziina\.com\//i.test(res.redirectUrl)){
+  // 23 أكتوبر 2026: رابط صفحة الدفع الحقيقي (غير التجريبي) مب دايمًا على نفس النطاق، فكان يترفض هنا بالغلط.
+  // الرابط جاي من سكربتنا (اللي جابه من زينة مباشرة)، فنكتفي بإنه https.
+  if(res && res.ok && typeof res.redirectUrl === "string" && /^https:\/\/[^\s"'<>]+$/i.test(res.redirectUrl)){
     try{
       sessionStorage.setItem("evoque_pay_order", res.orderId || "");
       sessionStorage.setItem("evoque_pay_payload", JSON.stringify({ orderId: res.orderId, payload }));
@@ -2836,7 +2838,7 @@ async function startCardPayment(payload, submitBtn){
     location.href = res.redirectUrl;
     return;
   }
-  errBox.textContent = t.payErr;
+  errBox.textContent = t.payErr + (res && res.error ? " (" + String(res.error).slice(0, 30) + ")" : (res ? "" : " (net)"));
   errBox.style.display = "block";
   submitBtn.disabled = false;
   updatePayUi();

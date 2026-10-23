@@ -421,3 +421,19 @@ html[dir="ltr"] #rvPrev .icon{ transform:rotate(90deg); }  html[dir="ltr"] #rvNe
 .of-pay-opt b{ font-size:14.5px; color:var(--ink); }
 .of-pay-opt small{ font-size:12px; color:var(--muted); line-height:1.6; }
 .of-pay-marks{ font-family:'Jost',sans-serif; font-size:10.5px; letter-spacing:.5px; color:var(--muted); white-space:nowrap; direction:ltr; }
+
+/* ===== 23 أكتوبر 2026: الجوال — الصفحة كانت تكبر (تتوسع لعرض 1100px) لما تختار براند ===== */
+@media (max-width:820px){
+  /* بالترتيب العمودي، align-items:flex-start كان يخلي العمود ياخذ عرض محتواه (شريط الفلاتر الطويل) */
+  .shop-layout{ align-items:stretch; }
+  .shop-main{ width:100%; max-width:100%; }
+  .filters{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; max-width:100%; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .filters::-webkit-scrollbar{ display:none; }
+  .results-count{ max-width:100%; }
+}
+@media (max-width:640px){
+  /* قائمة البراندات: لوحة ثابتة بعرض الشاشة بدل ما تطلع برا يمين الشاشة */
+  /* الهيدر نفسه هو المرجع (sticky) — اللوحة تاخذ عرضه كامل تحت أزرار التنقل */
+  .site-nav-brands{ position:static; }
+  .brands-mega{ position:absolute; top:calc(100% - 2px); left:12px; right:12px; width:auto; transform:none; max-height:65vh; }
+}
