@@ -1783,6 +1783,7 @@ let wishlistData = {}; // آخر نسخة معروفة من wishlist.json — { 
 let pendingOrders = []; // آخر نسخة معروفة من pending-orders.json — طلبات الموقع بانتظار الاعتماد
 let oqEdits = {}; // تعديلات اسم/هاتف/عنوان يدخلها المستخدم بالفورم قبل الاعتماد (orderId -> {name,phone,address}) — تبقى بالذاكرة لين الاعتماد/إعادة التحميل
 let existingFiles = new Set();
+let cardFiles = new Set(); // بطاقات المكونات الموجودة فعليًا: assets/cards/<id>.webp
 let mode = "overview";       // "overview" | "add" | "edit" | "photo" | "stock" | "sales" | "reviews" | "bulk" | "excel" | "bank"
 let editingOriginal = null;  // العطر الأصلي قبل التعديل (null لو إضافة)
 let deleteArmed = false;
@@ -1973,13 +1974,17 @@ function renderReviewsOrdersList(){
   });
 }
 
+// 23 أكتوبر 2026: الموقع ما يستخدم صور زجاجات الماركات (assets/perfumes) بعد — صورة العطر
+// بالموقع = صورتك الخاصة (photo) أو بطاقة المكونات (assets/cards/<id>.webp). هذا اللي نعدّه.
 function hasImage(p){
-  if(p.image && p.image.indexOf("assets/perfumes/") !== -1) return true;
-  const slug = slugify(p.brand, p.name);
-  return [".jpg",".jpeg",".png",".webp"].some(ext => existingFiles.has(slug+ext));
+  return !!(p && ((p.photo && String(p.photo).trim()) || cardFiles.has(p.id + ".webp")));
 }
 
 async function loadExistingFiles(){
+  try{
+    const rc = await fetch(`${API_BASE}/assets/cards?ref=${BRANCH}&t=${Date.now()}`, {cache: "no-store"});
+    if(rc.ok){ const lc = await rc.json(); cardFiles = new Set(lc.filter(f => f.type === "file").map(f => f.name)); }
+  }catch(e){}
   try{
     const res = await fetch(`${API_BASE}/assets/perfumes?ref=${BRANCH}`, {cache: "no-store"});
     if(res.status === 404){ existingFiles = new Set(); return; }
@@ -6142,8 +6147,11 @@ function renderOilTable(){
   wrap.innerHTML = shown.map(p => {
     const e = oilEntryFor(p.id);
     const legacy = !e && Number(p.costOilPerMl) > 0;
-    const price = e ? e.price : "", grams = e ? e.grams : 100, vat = e ? !!e.vat : true;
-    const cost = e ? ocRowCostText(e.price, e.grams, e.vat) : (legacy ? `سعر قديم: ${p.costOilPerMl} AED لكل جرام (من النموذج القديم) — اكتب السعر الجديد يحل محله` : "");
+    // 23 أكتوبر 2026: العطور اللي سعرها انكتب بالنظام القديم (سعر الجرام) نعبّي خانتها تلقائيًا
+    // بنفس القيمة (سعر الجرام × 100، بدون ضريبة) عشان ما تطلع فاضية — التكلفة نفسها ما تتغير.
+    const legacyPrice = legacy ? Math.round(Number(p.costOilPerMl) * 100 * 100) / 100 : "";
+    const price = e ? e.price : legacyPrice, grams = e ? e.grams : 100, vat = e ? !!e.vat : !legacy;
+    const cost = e ? ocRowCostText(e.price, e.grams, e.vat) : (legacy ? `${ocRowCostText(legacyPrice, 100, false)} — من السعر القديم (${p.costOilPerMl} للجرام). تأكد من الرقم واضغط 💾 عشان يتثبّت.` : "");
     const total = perfumeHasCostData(p) ? `<span class="sale-row-amount">${fmt2(perfumeUnitCost(p, 50))} AED</span>` : "";
     return `<div class="sale-row oc-row" data-id="${escHtml(p.id)}">
       <div class="sale-row-top"><span class="sale-row-name">${perfumeHasCostData(p) ? "" : "⚠️ "}${escHtml(ocLabel(p))}</span>${total}</div>
@@ -8056,7 +8064,7 @@ function exportToExcel(){
   const rows = perfumes.map((p, i) => {
     const s50 = Number(p.stock50) || 0;
     const s10 = Number(p.stock10) || 0;
-    const hasImage = !!(p.image && String(p.image).trim());
+    const hasImage = !!((p.photo && String(p.photo).trim()) || cardFiles.has(p.id + ".webp"));
     const hasNotes = !!((p.accords && p.accords.trim()) || (p.notesTop && p.notesTop.trim()));
     return {
       "#": i + 1,
