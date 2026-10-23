@@ -500,3 +500,19 @@ function updatePending_(cfg, mutate, message) {
 function appendPendingOrder_(order) {
   updatePending_(props_(), function (arr) { arr.push(order); return arr; }, "New pending order " + order.orderId);
 }
+
+// ---------- فحص زينة (تشغّله من المحرر وقت التشخيص فقط) ----------
+// يسوي طلب دفع تجريبي بـ 2 درهم (test=true، بدون فلوس حقيقية) ويكتب رد زينة بالسجل.
+function testZiinaPayment() {
+  var z = ziinaCfg_();
+  console.log("المفتاح موجود؟ " + (z.key ? "نعم (" + z.key.length + " حرف)" : "لا") + " — وضع التجربة: " + z.test);
+  var res = UrlFetchApp.fetch(CFG.ZIINA_API + "/payment_intent", {
+    method: "post", muteHttpExceptions: true, followRedirects: false,
+    headers: { "Authorization": "Bearer " + z.key },
+    contentType: "application/json",
+    payload: JSON.stringify({ amount: 200, currency_code: "AED", message: "Evoque test", test: true,
+      success_url: CFG.SITE_URL + "?pay=success", cancel_url: CFG.SITE_URL + "?pay=cancel", failure_url: CFG.SITE_URL + "?pay=failed" })
+  });
+  console.log("رد زينة: " + res.getResponseCode() + " — النوع: " + (res.getHeaders()["Content-Type"] || res.getHeaders()["content-type"] || "?"));
+  console.log("أول جزء من الرد: " + String(res.getContentText()).slice(0, 400));
+}
