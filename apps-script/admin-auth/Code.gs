@@ -3,52 +3,49 @@
  * Evoque Perfumes — دخول لوحة التحكم بحساب Google (المشروع "ب": خاص)
  * ============================================================================
  * هذا السكربت هو الوحيد اللي يقدر يسلّم مفتاح لوحة التحكم لصفحة الإدارة.
- * مهم جدًا: لازم ينشر بالإعدادات التالية بالضبط، وإلا يصير بنفس خطر السكربت القديم:
  *
- *      Execute as:        Me (حسابك)
- *      Who has access:    Only myself        ← مو Anyone ولا Anyone with Google account
+ * 23 أكتوبر 2026 — صار يقبل أكثر من إيميل (قائمة مسموحة). إعدادات النشر:
  *
- * يعني جوجل نفسها تطلب تسجيل دخول، وأي حساب غير حسابك يُرفض قبل ما يشتغل كود السكربت.
- * ما فيه كلمة مرور تُخمَّن، وما فيه قفل 24 ساعة يقدر أحد يفعّله ضدك.
+ *      Execute as:        User accessing the web app   ← عشان جوجل تعطينا إيميل الداخل الحقيقي
+ *      Who has access:    Anyone with Google account   ← جوجل تطلب تسجيل دخول دايمًا
  *
- * طريقة الشغل: ضغطة "الدخول بحساب Google" بلوحة التحكم تفتح رابط هذا السكربت. السكربت
- * يتأكد إن البريد هو بريدك (OWNER_EMAIL)، ويعرض زر يفتح لوحة التحكم ومعه المفتاح داخل
- * الجزء بعد # من الرابط (هذا الجزء ما يُرسل لأي سيرفر). لوحة التحكم تقرأه وتمسحه من الرابط.
+ * أي حساب يقدر يفتح الرابط، بس الكود ما يسلّم المفتاح إلا لإيميل موجود بالقائمة
+ * (OWNER_EMAIL + ALLOWED_EMAILS). غيرهم يشوف "غير مصرّح" وبس.
  *
  * ============================================================================
- * خطوات النشر
+ * الإعدادات (Project Settings ← Script Properties)
  * ============================================================================
- * 1. https://script.google.com ← New project ← سمّه "Evoque Admin Auth" (مشروع منفصل تمامًا).
- * 2. الصق محتوى هذا الملف كامل بدل الكود الافتراضي.
- * 3. ⚙️ Project Settings ← Script Properties ← أضف:
- *      ADMIN_GITHUB_TOKEN = مفتاح GitHub (fine-grained) جديد،
- *                           Repository access: Only select repositories ← evoque-catalog و evoque-private،
- *                           Permissions ← Contents: Read and write،
- *                           Expiration: 90 يوم (حط تذكير بالجوال قبلها بأسبوع).
- *      OWNER_EMAIL        = بريد حسابك على Google (نفس الحساب اللي ينشر السكربت)
+ *      ADMIN_GITHUB_TOKEN = مفتاح GitHub (fine-grained) "evoque-admin"،
+ *                           Repository access: evoque-catalog و evoque-private،
+ *                           Permissions ← Contents: Read and write، Expiration: 90 يوم.
+ *      OWNER_EMAIL        = إيميل صاحب المتجر (يوصله تنبيه انتهاء المفتاح)
+ *      ALLOWED_EMAILS     = إيميلات إضافية مسموح لها، مفصولة بفاصلة. مثال:
+ *                           jasim.aj@gmail.com, second@gmail.com
  *      TOKEN_EXPIRES_ON   = تاريخ انتهاء المفتاح بصيغة 2027-01-15 (للتنبيه بالإيميل)
  *      ADMIN_PAGE_URL     = https://evoqueperfumes.com/admin-upload.html
- * 4. Deploy ← New deployment ← Web app:
- *      Execute as: Me
- *      Who has access: Only myself
- *    انسخ الرابط الناتج، وحطه بملف admin-upload.html مكان PASTE_ADMIN_AUTH_WEBAPP_URL
- *    (أو ابعثه لـClaude يسويها).
- * 5. (اختياري لكن أنصح فيه) شغّل الدالة installExpiryReminder مرة وحدة من المحرر:
- *    تضيف تنبيه يومي يرسل لك إيميل قبل 7 أيام من انتهاء المفتاح.
- * 6. جرّب: افتح لوحة التحكم ← "الدخول بحساب Google" ← اضغط "فتح لوحة التحكم".
- *    لو ما اشتغل الزر، ارجع لنا بلقطة شاشة للصفحة.
+ *
+ * تنبيه: كل إيميل بالقائمة ياخذ نفس الصلاحية الكاملة. لشيل أحد: امسح إيميله من
+ * ALLOWED_EMAILS، ولو تشك إنه أخذ المفتاح سوّ مفتاح جديد وبدّله.
+ *
+ * (اختياري) شغّل الدالة installExpiryReminder مرة وحدة من المحرر وانت داخل بحساب
+ * OWNER_EMAIL: تنبيه يومي يرسل لك إيميل قبل 7 و3 و1 أيام من انتهاء المفتاح.
  * ============================================================================
  */
 
+function allowedEmails_(props) {
+  var list = [props.getProperty("OWNER_EMAIL") || ""].concat(String(props.getProperty("ALLOWED_EMAILS") || "").split(/[,\s;]+/));
+  return list.map(function (e) { return String(e).trim().toLowerCase(); }).filter(function (e) { return e && e.indexOf("@") > 0; });
+}
+
 function doGet() {
   var props = PropertiesService.getScriptProperties();
-  var owner = String(props.getProperty("OWNER_EMAIL") || "").toLowerCase();
+  var allowed = allowedEmails_(props);
   var active = "";
-  try { active = String(Session.getActiveUser().getEmail() || "").toLowerCase(); } catch (e) {}
+  try { active = String(Session.getActiveUser().getEmail() || "").trim().toLowerCase(); } catch (e) {}
 
-  // خط دفاع ثاني فوق "Only myself": نتأكد من البريد صراحة
-  if (!owner || !active || active !== owner) {
-    return page_("<h2>غير مصرّح</h2><p>هذا الرابط لصاحب المتجر فقط.</p>");
+  if (!allowed.length || !active || allowed.indexOf(active) === -1) {
+    return page_("<h2>غير مصرّح</h2><p>هذا الرابط لأصحاب المتجر فقط." +
+      (active ? "" : "<br>إذا انت صاحب المتجر: افتح الرابط من متصفح داخل فيه بحساب جوجل واحد بس (أو نافذة تصفح خفي).") + "</p>");
   }
 
   var token = props.getProperty("ADMIN_GITHUB_TOKEN");
