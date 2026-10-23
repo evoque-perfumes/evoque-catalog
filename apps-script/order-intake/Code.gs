@@ -3,7 +3,8 @@
  * Evoque Perfumes — استقبال الطلبات (المشروع "أ": عام، doPost فقط)
  * ============================================================================
  * هذا السكربت هو الوحيد المكشوف للعالم، لذلك صلاحياته محدودة عمدًا:
- *   - doPost فقط. ما فيه doGet، وما يرجّع أبدًا أي مفتاح أو بيانات (الرد دايمًا "ok").
+ *   - doPost لاستقبال الطلبات، وdoGet للتحقق من حالة الدفع بالبطاقة بس. ما يرجّع أبدًا أي مفتاح
+ *     ولا بيانات عميل (الرد "ok"، أو رابط صفحة الدفع، أو حالة الدفع).
  *   - يتحقق من البيانات ويحدد أحجامها (حجم الطلب، عدد العطور، الكميات، طول كل حقل).
  *   - حقل فخ (honeypot) + حد أقصى لعدد الطلبات لكل رقم جوال وبالمجمل (LockService + CacheService).
  *   - يعيد حساب الأسعار من data.json العام، ما يثق بالأرقام اللي جاية من المتصفح.
@@ -32,6 +33,23 @@
  * 5. اختبر: اطلب طلب تجريبي من الموقع وتأكد يظهر في تبويب "الطلبات الجديدة" بلوحة التحكم.
  * 6. بعد ما كل شي يشتغل: امسح GITHUB_TOKEN القديم من Script Properties هنا، وألغِ المفتاح
  *    القديم من GitHub (Settings ← Developer settings ← Personal access tokens ← Revoke).
+ *
+ * ============================================================================
+ * الدفع بالبطاقة عبر زينة (أكتوبر 2026)
+ * ============================================================================
+ * طريقة الشغل: الموقع يرسل الطلب هنا ومعه paymentMethodCode = "card". السكربت يحسب المبلغ
+ * بنفسه (ما يثق بالمتصفح)، يسوي "طلب دفع" عند زينة، يحفظ الطلب بالطلبات الجديدة وحالة دفعه
+ * "بانتظار الدفع"، ويرجّع للموقع رابط صفحة الدفع الآمنة حق زينة. بيانات البطاقة ما تمر علينا أبدًا.
+ * الطلب يصير "مدفوع" بس لما السكربت نفسه يسأل زينة ويتأكد (رجوع العميل للموقع، أو إشعار زينة).
+ *
+ * Script Properties إضافية:
+ *      ZIINA_API_KEY = مفتاح زينة (من ziina.com/business/connect ← Other builder or custom).
+ *                      بدونه خيار البطاقة يكون مقفل والموقع يرجّع للدفع عند الاستلام.
+ *      ZIINA_TEST    = true  وقت التجربة (بطاقات زينة التجريبية، بدون فلوس حقيقية).
+ *                      امسحها أو خلها false لما تفتح الدفع الحقيقي.
+ *      OMR_TO_AED    = سعر تحويل الريال للدرهم لطلبات عُمان (افتراضي 9.55). زينة تحاسب بالدرهم.
+ * بعد ما تضيفهم: Deploy ← Manage deployments ← ✏️ ← New version ← Deploy (الرابط ما يتغير)،
+ * وبعدها من المحرر اختر الدالة registerZiinaWebhook واضغط Run مرة وحدة (تسجّل إشعارات زينة).
  * ============================================================================
  */
 
@@ -51,7 +69,10 @@ var CFG = {
   DISCOUNT_MIN_QTY: 3,
   DISCOUNT_PCT: 15,
   SIZE: 50,
-  FLAT_PRICE: { AE: 70, OM: 7 }   // احتياطي لو data.json ما انقرأ
+  FLAT_PRICE: { AE: 70, OM: 7 },  // احتياطي لو data.json ما انقرأ
+  SITE_URL: "https://evoqueperfumes.com/",
+  ZIINA_API: "https://api-v2.ziina.com/api",
+  OMR_TO_AED_DEFAULT: 9.55
 };
 
 function doPost(e) {
@@ -60,19 +81,39 @@ function doPost(e) {
     var raw = (e && e.postData && e.postData.contents) || "";
     if (raw.length === 0 || raw.length > CFG.MAX_BODY_CHARS) return ok_();
 
-    var eq = raw.indexOf("=");
-    var jsonStr = eq >= 0 ? raw.slice(eq + 1) : raw;
+    // نموذج مخفي يرسل "payload={...}"، والدفع بالبطاقة/إشعار زينة يرسلون JSON مباشرة
+    var trimmed = raw.replace(/^\s+/, "");
+    var jsonStr;
+    if (trimmed.charAt(0) === "{") jsonStr = trimmed;
+    else { var eq = raw.indexOf("="); jsonStr = eq >= 0 ? raw.slice(eq + 1) : raw; }
     var data = JSON.parse(jsonStr);
+
+    // إشعار من زينة: ما نثق بمحتواه، نستخدم رقم العملية بس ونسأل زينة بنفسنا
+    if (data && data.event && data.data && data.data.id) {
+      if (!lock.tryLock(25000)) return ok_();
+      handleZiinaEvent_(String(data.data.id));
+      return ok_();
+    }
 
     // فخ سبام: حقل مخفي لازم يوصل فاضي من أي عميل حقيقي
     if (data.hp) return ok_();
 
+    var wantsCard = data.paymentMethodCode === "card" && data.source !== "quick-whatsapp";
     var order = buildOrder_(data);
-    if (!order) return ok_();   // بيانات ناقصة أو غلط: نتجاهل بصمت (المتصفح ما يقرأ الرد أصلًا)
+    if (!order) return wantsCard ? json_({ ok: false, error: "invalid" }) : ok_();
 
-    if (!lock.tryLock(25000)) return ok_();
-    if (!rateLimitOk_(order.phone || "quick")) { console.warn("rate limit hit"); return ok_(); }
+    if (!lock.tryLock(25000)) return wantsCard ? json_({ ok: false, error: "busy" }) : ok_();
+    if (!rateLimitOk_(order.phone || "quick")) { console.warn("rate limit hit"); return wantsCard ? json_({ ok: false, error: "rate" }) : ok_(); }
 
+    if (wantsCard) {
+      var pay = createZiinaPayment_(order);
+      if (!pay) return json_({ ok: false, error: "card_unavailable" });
+      order.payment = pay.payment;
+      appendPendingOrder_(order);
+      return json_({ ok: true, orderId: order.orderId, redirectUrl: pay.redirectUrl });
+    }
+
+    order.payment = { method: "cod" };
     appendPendingOrder_(order);
     return ok_();
   } catch (err) {
@@ -86,6 +127,138 @@ function doPost(e) {
 // الرد دايمًا نفسه: ما نكشف شي للي يجرّب السكربت
 function ok_() {
   return ContentService.createTextOutput("ok").setMimeType(ContentService.MimeType.TEXT);
+}
+function json_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ---------- التحقق من الدفع (العميل رجع من صفحة زينة) ----------
+// يرجّع حالة الدفع بس (paid / awaiting / failed / canceled / unknown) — ما يرجّع أي بيانات عميل.
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.action !== "verify") return json_({ ok: false });
+  var id = String(p.order || "").slice(0, 80);
+  if (!/^pend-\d{10,16}-[a-z0-9]{4,12}$/i.test(id)) return json_({ ok: false });
+  var lock = LockService.getScriptLock();
+  try {
+    if (!lock.tryLock(25000)) return json_({ ok: true, status: "awaiting" });
+    var status = refreshPaymentStatus_(function (o) { return o.orderId === id; });
+    return json_({ ok: true, status: status || "unknown" });
+  } catch (err) {
+    console.error("verify error: " + err);
+    return json_({ ok: true, status: "awaiting" });
+  } finally {
+    try { lock.releaseLock(); } catch (e2) {}
+  }
+}
+
+// ---------- زينة ----------
+function ziinaCfg_() {
+  var p = PropertiesService.getScriptProperties();
+  var rate = Number(p.getProperty("OMR_TO_AED"));
+  return {
+    key: p.getProperty("ZIINA_API_KEY") || "",
+    test: String(p.getProperty("ZIINA_TEST") || "").toLowerCase() === "true",
+    omrToAed: rate > 5 && rate < 15 ? rate : CFG.OMR_TO_AED_DEFAULT
+  };
+}
+
+function ziinaFetch_(method, path, body) {
+  var z = ziinaCfg_();
+  var opts = { method: method, muteHttpExceptions: true, headers: { "Authorization": "Bearer " + z.key } };
+  if (body) { opts.contentType = "application/json"; opts.payload = JSON.stringify(body); }
+  var res = UrlFetchApp.fetch(CFG.ZIINA_API + path, opts);
+  var code = res.getResponseCode();
+  var json = null;
+  try { json = JSON.parse(res.getContentText()); } catch (e) {}
+  if (code < 200 || code >= 300) { console.error("ziina " + method + " " + path + " -> " + code); return null; }
+  return json;
+}
+
+// المبلغ اللي ينخصم من البطاقة بالدرهم (زينة تحاسب بالدرهم). عُمان: الريال × سعر التحويل، مقرّب لفوق.
+function cardAmountAed_(order) {
+  if (order.country !== "OM") return Math.round(order.total * 100) / 100;
+  return Math.ceil(order.total * ziinaCfg_().omrToAed * 100) / 100;
+}
+
+function createZiinaPayment_(order) {
+  var z = ziinaCfg_();
+  if (!z.key) return null;
+  var aed = cardAmountAed_(order);
+  if (!(aed >= 2)) return null;
+  var q = "order=" + encodeURIComponent(order.orderId);
+  var intent = ziinaFetch_("post", "/payment_intent", {
+    amount: Math.round(aed * 100),
+    currency_code: "AED",
+    message: "Evoque Perfumes — " + order.orderId,
+    success_url: CFG.SITE_URL + "?pay=success&" + q,
+    cancel_url: CFG.SITE_URL + "?pay=cancel&" + q,
+    failure_url: CFG.SITE_URL + "?pay=failed&" + q,
+    test: z.test
+  });
+  if (!intent || !intent.id || !intent.redirect_url) return null;
+  return {
+    redirectUrl: intent.redirect_url,
+    payment: {
+      method: "card", provider: "ziina", status: "awaiting", intentId: String(intent.id),
+      amountAED: aed, test: z.test, createdAt: new Date().toISOString()
+    }
+  };
+}
+
+function mapZiinaStatus_(s) {
+  if (s === "completed") return "paid";
+  if (s === "failed") return "failed";
+  if (s === "canceled") return "canceled";
+  return "awaiting";
+}
+
+// يسأل زينة عن حالة الدفع الفعلية ويحدّث الطلب بالطلبات الجديدة لو تغيّرت. يرجّع الحالة.
+function refreshPaymentStatus_(matchFn) {
+  var cfg = props_();
+  var file = readPending_(cfg);
+  var order = null;
+  for (var i = 0; i < file.arr.length; i++) { if (matchFn(file.arr[i])) { order = file.arr[i]; break; } }
+  if (!order || !order.payment || order.payment.method !== "card" || !order.payment.intentId) return "unknown";
+  if (order.payment.status === "paid") return "paid";
+  var intent = ziinaFetch_("get", "/payment_intent/" + encodeURIComponent(order.payment.intentId));
+  if (!intent) return order.payment.status || "awaiting";
+  var st = mapZiinaStatus_(intent.status);
+  var expectedFils = Math.round(Number(order.payment.amountAED) * 100);
+  if (st === "paid" && (Number(intent.amount) !== expectedFils || String(intent.currency_code).toUpperCase() !== "AED")) {
+    st = "paid_mismatch";   // مدفوع بس المبلغ مو نفس المتوقع — اللوحة تنبّه صاحب المتجر
+  }
+  if (st === order.payment.status) return st;
+  var intentId = order.payment.intentId;
+  updatePending_(cfg, function (arr) {
+    arr.forEach(function (o) {
+      if (o.payment && o.payment.intentId === intentId) {
+        o.payment.status = st;
+        if (st === "paid" || st === "paid_mismatch") {
+          o.payment.paidAt = new Date().toISOString();
+          if (isFinite(Number(intent.fee_amount))) o.payment.feeAED = Number(intent.fee_amount) / 100;
+          if (intent.card_details && intent.card_details.last4) o.payment.last4 = String(intent.card_details.last4).slice(-4);
+        }
+      }
+    });
+    return arr;
+  }, "Payment " + st + ": " + order.orderId);
+  return st;
+}
+
+function handleZiinaEvent_(intentId) {
+  try {
+    refreshPaymentStatus_(function (o) { return o.payment && o.payment.intentId === intentId; });
+  } catch (err) { console.error("ziina event error: " + err); }
+}
+
+// شغّلها مرة وحدة من المحرر (Run) بعد النشر: تخلي زينة ترسل إشعار لهذا السكربت لما يتغير أي دفع
+function registerZiinaWebhook() {
+  var url = ScriptApp.getService().getUrl();
+  if (!url) throw new Error("انشر السكربت أول (Deploy) وبعدين شغّل هذي الدالة.");
+  var res = ziinaFetch_("post", "/webhook", { url: url });
+  if (!res) throw new Error("زينة رفضت تسجيل الإشعارات — تأكد من ZIINA_API_KEY.");
+  console.log("تم تسجيل إشعارات زينة على: " + url);
 }
 
 // ---------- تنظيف وتحقق ----------
@@ -216,7 +389,7 @@ function buildOrder_(d) {
   if (isFinite(clientTotal) && Math.abs(clientTotal - total) > 0.5) flags.push("total-mismatch");
 
   return {
-    orderId: "pend-" + new Date().getTime() + "-" + Math.floor(Math.random() * 10000),
+    orderId: "pend-" + new Date().getTime() + "-" + Utilities.getUuid().replace(/-/g, "").slice(0, 8),
     receivedAt: new Date().toISOString(),
     status: "pending",
     source: d.source === "quick-whatsapp" ? "quick-whatsapp" : "form",
@@ -282,30 +455,34 @@ function contentsUrl_(cfg, path) {
   return "https://api.github.com/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + path;
 }
 
-function appendPendingOrder_(order) {
-  var cfg = props_();
+function readPending_(cfg) {
   if (!cfg.token || !cfg.owner || !cfg.repo) throw new Error("script properties missing");
-  for (var attempt = 1; attempt <= 3; attempt++) {
-    var res = UrlFetchApp.fetch(contentsUrl_(cfg, "pending-orders.json") + "?ref=" + cfg.branch,
-      { headers: ghHeaders_(cfg.token), muteHttpExceptions: true });
-    if (res.getResponseCode() !== 200) throw new Error("GET pending failed " + res.getResponseCode());
-    var json = JSON.parse(res.getContentText());
-    var text = Utilities.newBlob(Utilities.base64Decode(json.content.replace(/\n/g, ""))).getDataAsString();
-    var arr;
-    try { arr = JSON.parse(text); } catch (e) { arr = []; }
-    if (!Array.isArray(arr)) arr = [];
-    arr.push(order);
+  var res = UrlFetchApp.fetch(contentsUrl_(cfg, "pending-orders.json") + "?ref=" + cfg.branch,
+    { headers: ghHeaders_(cfg.token), muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) throw new Error("GET pending failed " + res.getResponseCode());
+  var json = JSON.parse(res.getContentText());
+  var text = Utilities.newBlob(Utilities.base64Decode(json.content.replace(/\n/g, ""))).getDataAsString();
+  var arr;
+  try { arr = JSON.parse(text); } catch (e) { arr = []; }
+  if (!Array.isArray(arr)) arr = [];
+  return { arr: arr, sha: json.sha };
+}
 
+// قراءة + تعديل + كتابة pending-orders.json مع إعادة المحاولة لو تعارض مع حفظ ثاني (409)
+function updatePending_(cfg, mutate, message) {
+  for (var attempt = 1; attempt <= 3; attempt++) {
+    var file = readPending_(cfg);
+    var arr = mutate(file.arr);
     var put = UrlFetchApp.fetch(contentsUrl_(cfg, "pending-orders.json"), {
       method: "put",
       headers: ghHeaders_(cfg.token),
       contentType: "application/json",
       muteHttpExceptions: true,
       payload: JSON.stringify({
-        message: "New pending order " + order.orderId,
+        message: message,
         content: Utilities.base64Encode(JSON.stringify(arr, null, 2), Utilities.Charset.UTF_8),
         branch: cfg.branch,
-        sha: json.sha
+        sha: file.sha
       })
     });
     var code = put.getResponseCode();
@@ -314,4 +491,8 @@ function appendPendingOrder_(order) {
     Utilities.sleep(400);
   }
   throw new Error("PUT pending: too many conflicts");
+}
+
+function appendPendingOrder_(order) {
+  updatePending_(props_(), function (arr) { arr.push(order); return arr; }, "New pending order " + order.orderId);
 }

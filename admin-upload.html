@@ -1310,6 +1310,7 @@
       <div class="kpi-card clickable alert" id="cost_missingCard"><div class="kpi-label">عطور بيعت بدون بيانات تكلفة (اضغط للمراجعة)</div><div class="kpi-value" id="cost_missingCount">—</div><div class="kpi-sub">تُحسب تكلفتها صفر لين تعبّي بياناتها</div></div>
       <div class="kpi-card"><div class="kpi-label">🚚 تكلفة التوصيل المجاني (AED)</div><div class="kpi-value" id="cost_deliveryCost">—</div><div class="kpi-sub" id="cost_deliverySub">محسوبة ضمن التكلفة أعلاه</div></div>
       <div class="kpi-card"><div class="kpi-label">🏷️ إجمالي الخصومات الممنوحة (AED)</div><div class="kpi-value" id="cost_discountGiven">—</div><div class="kpi-sub">مطروحة من الإيرادات أصلاً</div></div>
+      <div class="kpi-card"><div class="kpi-label">💳 رسوم البطاقات (زينة) (AED)</div><div class="kpi-value" id="cost_cardFees">—</div><div class="kpi-sub">محسوبة ضمن التكلفة أعلاه</div></div>
       <div class="kpi-card"><div class="kpi-label">🎁 تكلفة قطع الهدايا المجانية (AED)</div><div class="kpi-value" id="cost_giftCost">—</div><div class="kpi-sub">غير محتسبة بالربح أعلاه</div></div>
     </div>
 
@@ -3465,6 +3466,7 @@ function saleRowExtraHtml(g){
     const days = 2 - Math.floor((Date.now() - new Date(f.deliveredAt + "T00:00:00").getTime()) / 86400000);
     parts.push(days > 0 ? `⏳ نافذة الإرجاع: باقي ${esc(days)} ${days === 1 ? "يوم" : "أيام"}` : (days === 0 ? "⏳ نافذة الإرجاع: آخر يوم" : "⌛ انتهت نافذة الإرجاع (يومين)"));
   }
+  if(f.paymentMethod === "card") parts.push(`💳 بطاقة (زينة)${f.cardAmountAED ? " " + esc(fmtNum(f.cardAmountAED)) + " AED" : ""}${f.cardFee ? " — رسوم " + esc(f.cardFee) : ""}${f.cardTest ? " — تجريبي" : ""}`);
   const refund = g.items.reduce((a, o) => a + (Number(o.refundAmount) || 0), 0);
   if(refund > 0){
     const pcs = Object.values(refundedQtyMap(g)).reduce((a, n) => a + n, 0);
@@ -5672,7 +5674,7 @@ function computeProfitReport(){
   // الإيراد = المدفوع − المسترد، وتكلفة العطر تبقى (العطر انفتح ومستعمل) وتكلفة التوصيل تبقى.
   const result = {
     totalRevenue: 0, totalCost: 0, totalProfit: 0, margin: 0, unitsCount: 0,
-    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0, refunded: 0
+    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0, refunded: 0, cardFees: 0
   };
   if(!salesData || !salesData.length) return result;
   const missingCostIds = new Set();
@@ -5704,8 +5706,9 @@ function computeProfitReport(){
       result.giftCost += (Number(o.qty) || 0) * perfumeUnitCost(p, o.size);
     });
     g.items.forEach(o => { if(o.freeDelivery === true){ result.newOrders++; result.deliveryCost += Number(o.deliveryCost) || 0; } });
+    g.items.forEach(o => { if(!o.cardTest) result.cardFees += Number(o.cardFee) || 0; });
   });
-  result.totalCost += result.deliveryCost;
+  result.totalCost += result.deliveryCost + result.cardFees;
   result.totalProfit = result.totalRevenue - result.totalCost;
   result.margin = result.totalRevenue > 0 ? (result.totalProfit / result.totalRevenue * 100) : 0;
   result.missingCostIds = Array.from(missingCostIds);
@@ -6251,6 +6254,7 @@ function renderCostPanel(){
   document.getElementById("cost_deliveryCost").textContent = fmtNum(report.deliveryCost);
   document.getElementById("cost_deliverySub").textContent = `على ${report.newOrders} طلب بالقواعد الجديدة — محسوبة ضمن التكلفة أعلاه`;
   document.getElementById("cost_discountGiven").textContent = fmtNum(report.discountGiven);
+  const cf = document.getElementById("cost_cardFees"); if(cf) cf.textContent = fmtNum(report.cardFees);
   renderCostByPerfumeList(report.rows);
   renderCostManageList(document.getElementById("cost_manageSearch").value);
 }
@@ -7203,6 +7207,22 @@ function updateOrdersQueueBadge(){
   }
 }
 
+// ===== الدفع بالبطاقة عبر زينة (23 أكتوبر 2026) =====
+// نفس رابط سكربت استقبال الطلبات اللي بالموقع — نستخدمه بس عشان نسأله "هل انخصم المبلغ؟"
+const ORDER_INTAKE_URL = "https://script.google.com/macros/s/AKfycbzkocInmosn2QLbYPUYbvY7w4Gs2TP-vsSFJqB8BlU38H0iAfRex1To6YISA1wqFYc-/exec";
+function oqPaymentBadge(o){
+  const p = o.payment || {};
+  if(p.method !== "card") return "";
+  const test = p.test ? ` <span class="badge pending">تجريبي</span>` : "";
+  const amt = p.amountAED != null ? ` ${esc(fmtNum(p.amountAED))} AED` : "";
+  const st = p.status || "awaiting";
+  if(st === "paid") return `<div class="banner" style="margin:8px 0; background:#e8f4ec; border-color:#2e7d4f; color:#1f5a38;">💳 <b>مدفوع بالبطاقة${amt}</b>${p.last4 ? " — بطاقة تنتهي بـ " + esc(p.last4) : ""}${test}</div>`;
+  if(st === "paid_mismatch") return `<div class="banner" style="margin:8px 0; background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;">⚠️ <b>انخصم من البطاقة مبلغ مختلف عن الطلب</b> — راجع العملية في زينة قبل الاعتماد.${test}</div>`;
+  if(st === "failed" || st === "canceled") return `<div class="banner" style="margin:8px 0; background:#fdecea; border-color:#c0392b; color:#8a1c14;">❌ <b>الدفع بالبطاقة ما تم</b> — العميل ما دفع. ارفض الطلب أو كلّمه.${test}</div>`;
+  return `<div class="banner" style="margin:8px 0; background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;">⏳ <b>بطاقة — بانتظار الدفع${amt}</b>. لا تعتمد قبل ما يصير «مدفوع». <button type="button" class="secondary oq-verify-btn" style="margin-inline-start:8px; padding:6px 12px; min-height:36px;">🔄 تحقق من الدفع</button>${test}</div>`;
+}
+function oqIsUnpaidCard(o){ const p = o.payment || {}; return p.method === "card" && p.status !== "paid"; }
+
 function renderOrdersQueueList(){
   const box = document.getElementById("oq_list");
   const summary = document.getElementById("oq_summary");
@@ -7253,6 +7273,7 @@ function renderOrdersQueueList(){
       <div style="margin-top:6px; font-size:13px;">
         المجموع الفرعي: ${fmtNum(o.subtotal||0)}${(Number(o.subtotal)||0)+(Number(o.shippingFee)||0)+(Number(o.tabbyFee)||0)-(Number(o.total)||0) > 0 ? ` — خصم: ${fmtNum((Number(o.subtotal)||0)+(Number(o.shippingFee)||0)+(Number(o.tabbyFee)||0)-(Number(o.total)||0))}` : ""} — التوصيل: ${o.shippingFree ? "مجاني" : fmtNum(o.shippingFee||0)} — <b>الإجمالي: ${fmtNum(o.total||0)} ${esc(o.currency||"")}</b>
       </div>
+      ${oqPaymentBadge(o)}
       ${o.offers ? `<div style="margin-top:6px; font-size:12.5px; color:#1F6B41; font-weight:700;">🚚 ${esc(o.offers)}</div>` : ""}
       ${metaParts ? `<div style="margin-top:6px; font-size:12px; color:var(--muted);">${metaParts}</div>` : ""}
       ${custWarnHtml(normPhone(phone, ""))}
@@ -7280,6 +7301,17 @@ function renderOrdersQueueList(){
     phoneInput.addEventListener("input", syncEdits);
     addressInput.addEventListener("input", syncEdits);
 
+    const vb = card.querySelector(".oq-verify-btn");
+    if(vb) vb.addEventListener("click", async () => {
+      vb.disabled = true; vb.textContent = "جارِ التحقق...";
+      try{
+        const r = await fetch(ORDER_INTAKE_URL + "?action=verify&order=" + encodeURIComponent(orderId), { cache: "no-store" });
+        const j = await r.json();
+        oqShowStatus(j && j.status === "paid" ? "✅ تأكدنا من زينة: الطلب مدفوع." : "حالة الدفع الحين: " + ((j && j.status) || "غير معروفة"), j && j.status === "paid" ? "ok" : "info");
+      }catch(e){ oqShowStatus("ما قدرت أتحقق الحين: " + e.message, "err"); }
+      await loadPendingOrdersIntoPanel();
+    });
+
     card.querySelector(".oq-approve-btn").addEventListener("click", async () => {
       const token = getToken();
       if(!token){ oqShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
@@ -7287,6 +7319,7 @@ function renderOrdersQueueList(){
       if(!order){ oqShowStatus("الطلب ما انلقى — يمكن اتعامل معه من جلسة ثانية. حدّث القائمة.", "err"); return; }
       const items = (order.items || []).filter(it => it.perfumeId && Number(it.qty) > 0);
       if(!items.length){ oqShowStatus("هذا الطلب ما فيه عناصر صالحة للاعتماد.", "err"); return; }
+      if(oqIsUnpaidCard(order) && !confirm("⚠️ هذا الطلب اختار الدفع بالبطاقة، وزينة ما أكدت إنه انخصم المبلغ.\nاضغط «🔄 تحقق من الدفع» أول.\n\nتبا تعتمده بكل الأحوال (بيتسجل غير مدفوع)؟")) return;
 
       // 26 سبتمبر 2026: قبل الاعتماد نتأكد إن الكمية المطلوبة ما تتجاوز المخزون الحالي —
       // هذا الفحص كان ناقص تمامًا وهو سبب حادثة عميل طلب 3 قطع وما فيه إلا 2 بالمخزون.
@@ -7360,6 +7393,13 @@ function renderOrdersQueueList(){
           deliveryType: order.deliveryMethod || "",
           status: "confirmed",
           ...(order.recentConsent === true ? { recentConsent: true } : {}),
+          ...(order.payment && order.payment.method === "card" ? {
+            paymentMethod: "card",
+            ...(order.payment.status === "paid" ? { paid: true } : {}),
+            ...(i === 0 ? { ziinaIntentId: order.payment.intentId || "", cardAmountAED: Number(order.payment.amountAED) || 0,
+                            ...(isFinite(Number(order.payment.feeAED)) && order.payment.feeAED != null ? { cardFee: Number(order.payment.feeAED) } : {}),
+                            ...(order.payment.test ? { cardTest: true } : {}) } : {})
+          } : {}),
           orderId: orderKey,
           source: order.source === "quick-whatsapp" ? "quick-whatsapp" : "website"
         }));

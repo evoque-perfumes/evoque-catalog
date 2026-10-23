@@ -243,6 +243,25 @@ const I18N = {
     warranty: "ضمان إيفوك إذا ما ناسبك العطر من ناحية الثبات أو الفوحان، ترجع لنا العطر خلال يومين من الاستلام، وتسترد المبلغ اللي دفعته فيه (بعد الخصم إن وُجد). الشروط: يبقى في العطر ٨٥٪ أو أكثر. التوصيل لك مجاني، وشحن الإرجاع على العميل. نرجع المبلغ خلال ٣ أيام عمل بعد استلام العطر وفحصه.",
     warrantyTitle: "ضمان إيفوك",
     paymentCOD: "الدفع عند الاستلام",
+    paymentCardLabel: "بطاقة (زينة) — بانتظار الدفع",
+    payMethod: "طريقة الدفع",
+    payCod: "الدفع عند الاستلام",
+    payCodSub: "نقدًا لما يوصلك الطلب",
+    payCard: "بطاقة أو Apple Pay",
+    payCardSub: "دفع آمن عبر زينة — بيانات بطاقتك ما توصلنا",
+    payCardOm: "تنخصم بالدرهم: حوالي {aed} د.إ",
+    cardNote: "بتنتقل لصفحة الدفع الآمنة حق زينة، وبعد الدفع ترجع للموقع تلقائيًا. التوصيل مجاني.",
+    orderSubmitCard: "ادفع الآن",
+    payRedirecting: "جاري تحويلك لصفحة الدفع...",
+    payErr: "ما قدرنا نفتح صفحة الدفع الحين. جرّب مرة ثانية، أو اختر الدفع عند الاستلام.",
+    payChecking: "جاري التأكد من الدفع...",
+    paySuccessTitle: "تم الدفع واستلمنا طلبك",
+    paySuccessMsg: "شكرًا لك. بنتواصل معك على واتساب لتأكيد التوصيل.",
+    payPendingTitle: "الدفع قيد التأكيد",
+    payPendingMsg: "إذا انخصم المبلغ من بطاقتك فطلبك وصلنا، وبنتواصل معك على واتساب. لأي استفسار راسلنا.",
+    payCancelTitle: "ما تم الدفع",
+    payCancelMsg: "ما انخصم شي من بطاقتك. سلتك موجودة: تقدر تجرب مرة ثانية أو تختار الدفع عند الاستلام.",
+    payClose: "تمام",
     codNote: "الدفع نقدًا عند الاستلام، والتوصيل مجاني.",
     lblCity: "المدينة / المنطقة",
     lblRecentConsent: "أوافق أن يظهر اسمي الأول ومدينتي في شريط الطلبات الأخيرة",
@@ -361,6 +380,7 @@ const I18N = {
     orderSubmitBtn: "إرسال الطلب",
     orderSubmitting: "جاري الإرسال...",
     orderFormNote: "عبّي بياناتك واطلب أونلاين، وبنتواصل معك على واتساب لتأكيد الطلب. الدفع عند الاستلام.",
+    orderFormNoteCard: "بعد الدفع بنتواصل معك على واتساب لتأكيد التوصيل.",
     orderSuccessTitle: "🎉 تم استلام طلبك!",
     orderSuccessMsgPrefix: "رقم طلبك",
     orderSuccessMsg: "شكرًا لطلبك من إيفوك. بنتواصل معك على واتساب لتأكيد الطلب والتوصيل. الدفع عند الاستلام.",
@@ -412,6 +432,25 @@ const I18N = {
     warranty: "Evoque Guarantee: if the fragrance doesn't suit you in terms of longevity or projection, return it within 2 days of receiving it and get back what you paid for it (after any discount). Conditions: 85% or more of the fragrance must remain. Delivery to you is free; return shipping is paid by the customer. We refund the amount within 3 working days after receiving and inspecting the fragrance.",
     warrantyTitle: "Evoque Guarantee",
     paymentCOD: "Cash on delivery",
+    paymentCardLabel: "Card (Ziina) — awaiting payment",
+    payMethod: "Payment method",
+    payCod: "Cash on delivery",
+    payCodSub: "Pay in cash when your order arrives",
+    payCard: "Card or Apple Pay",
+    payCardSub: "Secure checkout by Ziina — we never see your card details",
+    payCardOm: "Charged in AED: about {aed} AED",
+    cardNote: "You'll go to Ziina's secure payment page and come back here automatically. Delivery is free.",
+    orderSubmitCard: "Pay now",
+    payRedirecting: "Taking you to the payment page...",
+    payErr: "We couldn't open the payment page right now. Try again, or choose cash on delivery.",
+    payChecking: "Confirming your payment...",
+    paySuccessTitle: "Payment received — your order is in",
+    paySuccessMsg: "Thank you. We'll contact you on WhatsApp to confirm delivery.",
+    payPendingTitle: "Payment being confirmed",
+    payPendingMsg: "If your card was charged, your order has reached us and we'll contact you on WhatsApp. Message us with any question.",
+    payCancelTitle: "Payment not completed",
+    payCancelMsg: "Nothing was charged. Your cart is still here: try again or choose cash on delivery.",
+    payClose: "OK",
     codNote: "Pay in cash on delivery. Delivery is free.",
     lblCity: "City / Area",
     lblRecentConsent: "I agree that my first name and city may appear in the recent orders strip",
@@ -530,6 +569,7 @@ const I18N = {
     orderSubmitBtn: "Submit Order",
     orderSubmitting: "Submitting...",
     orderFormNote: "Fill in your details and order online — we will contact you on WhatsApp to confirm. Cash on delivery.",
+    orderFormNoteCard: "After payment we'll contact you on WhatsApp to confirm delivery.",
     orderSuccessTitle: "🎉 Your order has been received!",
     orderSuccessMsgPrefix: "Order number",
     orderSuccessMsg: "Thank you for ordering from Evoque. We will contact you on WhatsApp to confirm your order and delivery. Cash on delivery.",
@@ -2055,7 +2095,24 @@ function renderGrid(explicitList){
 }
 
 // الدفع عند الاستلام فقط (لا تابي ولا تحويل بنكي)
-function paymentLabel(t){ return t.paymentCOD; }
+// ===== الدفع بالبطاقة عبر زينة (23 أكتوبر 2026) =====
+// "off" = مقفل، "test" = يظهر بس لما تفتح الموقع بـ ?cardtest=1 (للتجربة)، "live" = للكل
+const CARD_PAYMENTS = "test";
+const OMR_TO_AED_CARD = 9.55; // تقريبي للعرض فقط — السكربت هو اللي يحسب المبلغ الفعلي
+function cardPaymentsVisible(){
+  if(CARD_PAYMENTS === "live") return true;
+  if(CARD_PAYMENTS !== "test") return false;
+  try{
+    if(/[?&]cardtest=1\b/.test(location.search)) sessionStorage.setItem("evoque_cardtest", "1");
+    return sessionStorage.getItem("evoque_cardtest") === "1";
+  }catch(e){ return /[?&]cardtest=1\b/.test(location.search); }
+}
+function selectedPayMethod(){
+  if(!cardPaymentsVisible()) return "cod";
+  const r = document.querySelector('input[name="ofPay"]:checked');
+  return r && r.value === "card" ? "card" : "cod";
+}
+function paymentLabel(t){ return selectedPayMethod() === "card" ? t.paymentCardLabel : t.paymentCOD; }
 
 // ------------------------------------------------------------------
 // رقم الهاتف → صيغة E.164 (+9715XXXXXXXX). يرجّع "" لو الرقم غير صالح.
@@ -2412,6 +2469,7 @@ function onOrderCountryChange(e){
   country = e.target.value;
   updateAddressBlocksVisibility();
   renderShippingSummary();
+  updatePayUi();
   renderCountrySelect(); // نزامن قائمة الدولة بأعلى الصفحة مع نفس الاختيار
   renderCart(); // يحدّث سلة السفلي والتخزين (localStorage) بنفس الدولة الجديدة
 }
@@ -2491,6 +2549,22 @@ function renderShippingSummary(){
   `;
 }
 
+function updatePayUi(){
+  const t = I18N[lang];
+  const card = selectedPayMethod() === "card";
+  const note = document.getElementById("ofCodNote"); if(note) note.textContent = card ? t.cardNote : t.codNote;
+  const btn = document.getElementById("orderSubmitBtn"); if(btn && !btn.disabled) btn.textContent = card ? t.orderSubmitCard : t.orderSubmitBtn;
+  const fn = document.getElementById("orderFormNote"); if(fn) fn.textContent = card ? t.orderFormNoteCard : t.orderFormNote;
+  const sub = document.getElementById("lblPayCardSub");
+  if(sub){
+    if(country === "OM"){
+      const pr = computeCartPricing(cartItemsList());
+      const aed = Math.ceil(pr.afterDiscount * OMR_TO_AED_CARD);
+      sub.textContent = t.payCardSub + " · " + t.payCardOm.replace("{aed}", aed);
+    } else sub.textContent = t.payCardSub;
+  }
+}
+
 function applyOrderFormLabels(){
   const t = I18N[lang];
   // بعد نجاح الطلب نافذة الطلب تعرض رسالة الشكر بدل النموذج — ما فيه شي نعبّيه
@@ -2503,6 +2577,13 @@ function applyOrderFormLabels(){
   const wo = document.getElementById("ofWilayatOther"); if(wo) wo.placeholder = t.wilayatOtherPlaceholder;
   set("lblCity", t.lblCity); set("lblAddress", t.lblAddress); set("lblNotes", t.lblNotes);
   set("ofCodNote", t.codNote); set("lblRecentConsent", t.lblRecentConsent);
+  set("lblPayMethod", t.payMethod); set("lblPayCod", t.payCod); set("lblPayCodSub", t.payCodSub);
+  set("lblPayCard", t.payCard); set("lblPayCardSub", t.payCardSub);
+  const payBlock = document.getElementById("ofPayBlock");
+  if(payBlock){
+    payBlock.hidden = !cardPaymentsVisible();
+    document.querySelectorAll('input[name="ofPay"]').forEach(r => r.onchange = updatePayUi);
+  }
   const w = document.getElementById("ofWarranty");
   if(w){
     w.textContent = "";
@@ -2513,6 +2594,7 @@ function applyOrderFormLabels(){
   }
   set("orderModalTitle", t.orderModalTitle);
   set("orderSubmitBtn", t.orderSubmitBtn); set("orderFormNote", t.orderFormNote);
+  updatePayUi();
 
   populateOrderCountrySelect();
   populateEmirateSelect();
@@ -2651,9 +2733,11 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
   submitBtn.textContent = t.orderSubmitting;
 
   const payload = buildOrderPayload();
+  const payCard = selectedPayMethod() === "card";
   // نسخة موازية لطابور "🧾 الطلبات الجديدة" بلوحة التحكم — إرسال خلفي بحت، ما
   // يأثر إطلاقًا على إرسال الطلب الأساسي (ORDER_ENDPOINT) اللي تحته مباشرة.
-  submitOrderToQueue({ ...payload, source: "form" });
+  // الدفع بالبطاقة يرسل للطابور بطريقة ثانية (تحت) لأنه يحتاج رابط صفحة الدفع من الرد.
+  if(!payCard) submitOrderToQueue({ ...payload, source: "form" });
 
   const waMsgLines = [
     lang==="ar" ? `طلب جديد` : `New order`,
@@ -2691,6 +2775,8 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
     document.querySelector(".order-modal-foot").style.display = "none";
   }
 
+  if(payCard){ startCardPayment(payload, submitBtn); return; }
+
   if(!ORDER_ENDPOINT || ORDER_ENDPOINT.indexOf("PASTE_") === 0){
     // السكربت الخلفي لسا ما انربط — نعرض رسالة واتساب بديلة بدل ما نكسر تجربة العميل
     showError();
@@ -2723,6 +2809,89 @@ document.getElementById("orderForm").addEventListener("submit", function(e){
 });
 }
 wireOrderForm();
+
+// يرسل الطلب لسكربت الطلبات ويستلم رابط صفحة زينة، ويرسل نسخة الإيميل المعتادة (ORDER_ENDPOINT)
+// قبل التحويل. لو أي شي فشل، العميل يرجع للنموذج برسالة واضحة وسلته باقية.
+async function startCardPayment(payload, submitBtn){
+  const t = I18N[lang];
+  const errBox = document.getElementById("ofError");
+  submitBtn.textContent = t.payRedirecting;
+  const mailDone = new Promise(resolve => {
+    try{
+      if(!ORDER_ENDPOINT || ORDER_ENDPOINT.indexOf("PASTE_") === 0) return resolve();
+      const form = document.getElementById("orderHiddenForm");
+      const iframe = document.getElementById("orderHiddenFrame");
+      form.action = ORDER_ENDPOINT;
+      document.getElementById("orderHiddenPayload").value = JSON.stringify(payload);
+      iframe.onload = () => { iframe.onload = null; resolve(); };
+      setTimeout(resolve, 4000);
+      form.submit();
+    }catch(e){ resolve(); }
+  });
+  let res = null;
+  try{
+    const r = await fetch(ORDER_QUEUE_ENDPOINT, {
+      method: "POST",
+      body: JSON.stringify({ ...payload, source: "form", paymentMethodCode: "card", hp: "" })
+    });
+    res = await r.json();
+  }catch(e){ res = null; }
+  if(res && res.ok && typeof res.redirectUrl === "string" && /^https:\/\/([a-z0-9-]+\.)*ziina\.com\//i.test(res.redirectUrl)){
+    try{ sessionStorage.setItem("evoque_pay_order", res.orderId || ""); }catch(e){}
+    await mailDone;
+    location.href = res.redirectUrl;
+    return;
+  }
+  errBox.textContent = t.payErr;
+  errBox.style.display = "block";
+  submitBtn.disabled = false;
+  updatePayUi();
+}
+
+// العميل رجع من صفحة زينة (?pay=success|cancel|failed&order=...) — نسأل السكربت عن الحالة الفعلية
+function payResultBody(icon, title, msg){
+  const t = I18N[lang];
+  return `<div class="order-success"><div class="oc-icon">${icon}</div><h4>${escapeHtml(title)}</h4>${msg ? `<p>${escapeHtml(msg)}</p>` : ""}
+    <button type="button" class="order-submit-btn" id="payResultClose" style="margin-top:14px;">${escapeHtml(t.payClose)}</button></div>`;
+}
+async function handlePaymentReturn(){
+  let params; try{ params = new URLSearchParams(location.search); }catch(e){ return; }
+  const pay = params.get("pay"), orderId = params.get("order") || "";
+  if(!pay || !/^pend-\d{10,16}-[a-z0-9]{4,12}$/i.test(orderId)) return;
+  try{ history.replaceState(null, "", location.pathname + location.hash); }catch(e){}
+  const t = I18N[lang];
+  const body = document.getElementById("orderModalBody");
+  const foot = document.querySelector(".order-modal-foot");
+  const overlay = document.getElementById("orderModalOverlay");
+  function show(html){
+    body.innerHTML = html; if(foot) foot.style.display = "none"; overlay.classList.add("open");
+    const c = document.getElementById("payResultClose"); if(c) c.onclick = () => { overlay.classList.remove("open"); if(orderJustSucceeded) location.reload(); };
+  }
+  show(`<div class="order-success"><div class="oc-icon">⏳</div><h4>${escapeHtml(t.payChecking)}</h4></div>`);
+  let status = "unknown";
+  const tries = pay === "success" ? 6 : 1;
+  for(let i = 0; i < tries; i++){
+    try{
+      const r = await fetch(ORDER_QUEUE_ENDPOINT + "?action=verify&order=" + encodeURIComponent(orderId), { cache: "no-store" });
+      const j = await r.json();
+      status = (j && j.status) || "unknown";
+    }catch(e){ status = "unknown"; }
+    if(status === "paid" || status === "paid_mismatch" || status === "failed" || status === "canceled") break;
+    if(i < tries - 1) await new Promise(r => setTimeout(r, 2500));
+  }
+  if(status === "paid" || status === "paid_mismatch"){
+    cart = {}; try{ persistCartState(); }catch(e){} try{ renderAll(); }catch(e){}
+    try{ sessionStorage.removeItem("evoque_pay_order"); }catch(e){}
+    orderJustSucceeded = true;
+    show(payResultBody("✅", t.paySuccessTitle, t.paySuccessMsg));
+  } else if(pay === "success"){
+    show(payResultBody("⏳", t.payPendingTitle, t.payPendingMsg));
+  } else {
+    show(payResultBody("↩️", t.payCancelTitle, t.payCancelMsg));
+  }
+}
+if(document.readyState === "complete") setTimeout(handlePaymentReturn, 300);
+else window.addEventListener("load", () => setTimeout(handlePaymentReturn, 300));
 
 document.getElementById("btnAr").onclick = ()=> chooseLang("ar");
 document.getElementById("btnEn").onclick = ()=> chooseLang("en");
