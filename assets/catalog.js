@@ -195,6 +195,54 @@ function pickAutoBestSellers(){
   return picked;
 }
 
+// ===================================================================
+// «مختارات إيفوك» — 24 أكتوبر 2026. picks.json (عام، يكتبه الأدمن):
+//   { mode: "manual" | "sales" | "stock", manual: [ids], sales: [ids مرتبة من الأكثر مبيعًا] }
+//   manual = صاحب المتجر يختار بنفسه · sales = الأكثر مبيعًا (آخر 30 يوم، يحسبه الأدمن من الطلبات)
+//   stock  = تلقائي حسب المخزون (الطريقة القديمة، وهي الاحتياط لأي نقص)
+// الملف ما فيه أرقام مبيعات ولا أي بيانات عملاء — بس ترتيب العطور.
+// ===================================================================
+const HOME_PICKS_TOTAL = 9;
+let homePicksCfg = null;
+async function loadHomePicks(){
+  try{
+    const res = await fetch("picks.json?t=" + Math.floor(Date.now() / 600000), { cache: "no-store" });
+    if(!res.ok) return;
+    const d = await res.json();
+    if(!d || typeof d !== "object") return;
+    homePicksCfg = {
+      mode: ["manual", "sales", "stock"].indexOf(d.mode) !== -1 ? d.mode : "stock",
+      manual: Array.isArray(d.manual) ? d.manual.map(String) : [],
+      sales: Array.isArray(d.sales) ? d.sales.map(String) : []
+    };
+    if(typeof PAGE !== "undefined" && PAGE.mode === "home" && loadState === "loaded" && typeof renderBestSellers === "function") renderBestSellers();
+  }catch(e){}
+}
+function homePicksMode(){ return homePicksCfg ? homePicksCfg.mode : "stock"; }
+function pickHomePicks(){
+  const base = pickAutoBestSellers();
+  const cfg = homePicksCfg;
+  if(!cfg || cfg.mode === "stock") return base;
+  const byId = {}; perfumes.forEach(p => { byId[p.id] = p; });
+  const inStock = id => byId[id] && bsStockScore(byId[id]) > 0;
+  const out = [], seen = new Set();
+  const add = p => { if(p && !seen.has(p.id) && bsStockScore(p) > 0){ out.push(p); seen.add(p.id); } };
+  if(cfg.mode === "manual"){
+    cfg.manual.filter(inStock).forEach(id => add(byId[id]));
+    // لو اخترت أقل من 9 (أو بعضها خلص مخزونه) نكمّل من الأكثر مبيعًا ثم المخزون
+    cfg.sales.forEach(id => { if(out.length < HOME_PICKS_TOTAL) add(byId[id]); });
+    base.forEach(p => { if(out.length < HOME_PICKS_TOTAL) add(p); });
+    return out;
+  }
+  // sales: 3 من كل فئة حسب المبيعات، والناقص يتكمّل من نفس الفئة حسب المخزون
+  ["men", "women", "unisex"].forEach(g => {
+    let n = 0;
+    cfg.sales.forEach(id => { const p = byId[id]; if(n < BEST_SELLER_PICK_PER_GENDER && p && p.gender === g && !seen.has(p.id) && bsStockScore(p) > 0){ add(p); n++; } });
+    base.filter(p => p.gender === g).forEach(p => { if(n < BEST_SELLER_PICK_PER_GENDER && !seen.has(p.id)){ add(p); n++; } });
+  });
+  return out;
+}
+
 let perfumes = [];
 let reviews = []; // reviews.json — تقييمات العملاء: [{id, perfumeId, name, rating, comment, date, visible, source}]
 let lang = "ar";
@@ -406,6 +454,7 @@ const I18N = {
     bestSellersEyebrow: "مختارات",
     bestSellersTitle: "مختارات إيفوك",
     bestSellersSubtitle: "مجموعة مختارة من عطورنا — بداية حلوة لو أول مرة تطلب من عندنا.",
+    bestSellersSubtitleSales: "أكثر العطور طلبًا عند عملائنا هالشهر — بداية حلوة لو أول مرة تطلب من عندنا.",
     homeSearchPlaceholder: "ابحث عن أي عطر بالاسم أو البراند...",
     searchResultsEyebrow: "نتائج البحث",
     searchResultsTitle: "عطور مطابقة لبحثك",
@@ -598,6 +647,7 @@ const I18N = {
     bestSellersEyebrow: "Picks",
     bestSellersTitle: "Evoque Picks",
     bestSellersSubtitle: "A curated selection from our collection — a good place to start.",
+    bestSellersSubtitleSales: "Our customers' most-ordered perfumes this month — a good place to start.",
     homeSearchPlaceholder: "Search any perfume by name or brand...",
     searchResultsEyebrow: "Search Results",
     searchResultsTitle: "Fragrances Matching Your Search",
@@ -1652,7 +1702,8 @@ function renderBestSellers(){
   // الحقيقية بالضبط، بس بعرض أفقي قابل للتمرير بدل الشبكة الكاملة
   if(gridEl) gridEl.classList.add("bs-slider");
   if(bsArrows) bsArrows.style.display = "";
-  const curated = pickAutoBestSellers();
+  if(subEl && homePicksMode() === "sales") subEl.textContent = t.bestSellersSubtitleSales;
+  const curated = pickHomePicks();
   renderGrid(curated);
 }
 
@@ -2973,4 +3024,5 @@ if(!savedLang){ openLangModal(); }
 
 loadPerfumesFromSheet();
 loadRecentOrders();
+loadHomePicks();
 

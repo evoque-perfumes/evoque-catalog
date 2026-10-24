@@ -218,6 +218,18 @@
   .kpi-card.good .kpi-value{ color:var(--green); }
 
   .static-list{ border-radius:14px; background:#fff; }
+  .pk-modes{ display:grid; gap:8px; margin-top:10px; }
+  .pk-mode{ display:grid; grid-template-columns:auto 1fr; column-gap:10px; align-items:start; border:1px solid var(--line); border-radius:12px; padding:10px 12px; cursor:pointer; background:#fff; }
+  .pk-mode input{ grid-row:span 2; margin-top:4px; width:18px; height:18px; }
+  .pk-mode span{ color:var(--muted); font-size:12.5px; line-height:1.6; }
+  .pk-mode:has(input:checked){ border-color:var(--wine, #1F3B2D); box-shadow:0 0 0 2px rgba(31,59,45,.12); }
+  .pk-row{ display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .pk-row:last-child{ border-bottom:none; }
+  .pk-row .pk-n{ color:var(--muted); width:22px; text-align:center; flex:none; }
+  .pk-row .pk-name{ flex:1; min-width:0; }
+  .pk-row .pk-meta{ color:var(--muted); font-size:12px; white-space:nowrap; }
+  .pk-row .pk-out{ color:#963224; }
+  .pk-row button{ padding:4px 9px; min-height:30px; font-size:12px; }
   .sale-row, .review-row{ padding:14px; }
   .sale-row-amount{ color:var(--emerald); font-variant-numeric:tabular-nums; }
   .selected-chip{ border-radius:999px; background:var(--tint); border-color:#CBD8C6; }
@@ -296,6 +308,7 @@
     <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
     <button type="button" id="modeShippingBtn">🚚 رسوم التوصيل</button>
+    <button type="button" id="modePicksBtn">⭐ مختارات إيفوك</button>
     <button type="button" id="modeCustomersBtn">👥 العملاء</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
     <button type="button" id="modeDistBtn">🎁 توزيعات المناسبات</button>
@@ -812,6 +825,45 @@
       <button type="button" id="ship_saveBtn">احفظ رسوم التوصيل</button>
     </div>
     <div class="status" id="ship_statusBox"></div>
+  </div>
+
+  <div class="panel" id="picksPanel" style="display:none;">
+    <h2>⭐ مختارات إيفوك (الصفحة الرئيسية)</h2>
+    <small class="hint" style="margin-top:0;">
+      هذي العطور اللي تطلع في سلايدر «مختارات إيفوك» أول الموقع. اختر الطريقة واضغط «احفظ».
+      أي عطر يخلص مخزونه ينشال تلقائيًا، والناقص يتكمّل لحاله عشان السلايدر ما يطلع فاضي.
+    </small>
+    <div class="pk-modes">
+      <label class="pk-mode"><input type="radio" name="pk_mode" value="manual"> <b>⭐ أنا أختار</b><span>العطور اللي تضيفها تحت تطلع بنفس الترتيب.</span></label>
+      <label class="pk-mode"><input type="radio" name="pk_mode" value="sales"> <b>📈 الأكثر مبيعًا</b><span>النظام يختار ٣ رجالي و٣ نسائي و٣ للجنسين حسب مبيعات آخر ٣٠ يوم، ويتحدث لحاله مع كل طلب.</span></label>
+      <label class="pk-mode"><input type="radio" name="pk_mode" value="stock"> <b>📦 تلقائي حسب المخزون</b><span>الطريقة القديمة: يدوّر كل أسبوع بين العطور اللي عندك منها مخزون أكثر.</span></label>
+    </div>
+
+    <fieldset id="pk_manualBox" style="margin-top:14px;">
+      <legend>⭐ اختياراتك</legend>
+      <div class="row" style="margin:0 0 8px;">
+        <input type="text" id="pk_addInput" list="pk_addList" placeholder="اكتب اسم العطر أو البراند…" style="flex:1; min-width:200px;">
+        <datalist id="pk_addList"></datalist>
+        <button type="button" id="pk_addBtn" class="secondary">➕ أضف</button>
+      </div>
+      <div id="pk_manualList" class="static-list"></div>
+      <small class="hint">الأفضل ٩ عطور (٣ من كل فئة). إذا اخترت أقل، الباقي يتكمّل من الأكثر مبيعًا.</small>
+    </fieldset>
+
+    <div class="row" style="margin-top:12px;">
+      <button type="button" id="pk_saveBtn">احفظ المختارات</button>
+      <button type="button" id="pk_reloadBtn" class="secondary">تحميل آخر نسخة</button>
+    </div>
+    <div class="status" id="pk_statusBox"></div>
+
+    <fieldset style="margin-top:16px;">
+      <legend>👀 اللي بيطلع في الموقع</legend>
+      <div id="pk_preview" class="static-list"></div>
+    </fieldset>
+    <fieldset style="margin-top:16px;">
+      <legend>📈 الأكثر مبيعًا — آخر ٣٠ يوم (تشوفه أنت بس)</legend>
+      <div id="pk_salesList" class="static-list"></div>
+    </fieldset>
   </div>
 
   <div class="panel" id="wishlistPanel" style="display:none;">
@@ -3416,6 +3468,7 @@ function syncRecentOrders(){
     try{
       const list = buildRecentOrders();
       await updateJsonWithRetry(API_BASE, token, RECENT_JSON_PATH, [], () => list, "Update recent orders strip");
+      await pkSyncSales(token);
     }catch(e){ console.warn("recent-orders sync failed", e); slShowStatus("تحذير: ما قدرت أحدّث شريط آخر الطلبات (" + e.message + ")", "err"); }
   }, 1200);
 }
@@ -3973,6 +4026,7 @@ function setMode(newMode){
   document.getElementById("modeExcelBtn").classList.toggle("active", mode === "excel");
   document.getElementById("modeReviewsBtn").classList.toggle("active", mode === "reviews");
   document.getElementById("modeShippingBtn").classList.toggle("active", mode === "shipping");
+  document.getElementById("modePicksBtn").classList.toggle("active", mode === "picks");
   document.getElementById("modeWishlistBtn").classList.toggle("active", mode === "wishlist");
   document.getElementById("modeCustomersBtn").classList.toggle("active", mode === "customers");
   document.getElementById("modeDistBtn").classList.toggle("active", mode === "dist");
@@ -3990,6 +4044,7 @@ function setMode(newMode){
   document.getElementById("salesQuickPanel").style.display = mode === "sales" ? "block" : "none";
   document.getElementById("costPanel").style.display = mode === "cost" ? "block" : "none";
   document.getElementById("shippingPanel").style.display = mode === "shipping" ? "block" : "none";
+  document.getElementById("picksPanel").style.display = mode === "picks" ? "block" : "none";
   document.getElementById("wishlistPanel").style.display = mode === "wishlist" ? "block" : "none";
   document.getElementById("customersPanel").style.display = mode === "customers" ? "block" : "none";
   document.getElementById("distPanel").style.display = mode === "dist" ? "block" : "none";
@@ -4080,6 +4135,7 @@ document.getElementById("modeSalesBtn").addEventListener("click", () => setMode(
 document.getElementById("modeExcelBtn").addEventListener("click", () => setMode("excel"));
 document.getElementById("modeReviewsBtn").addEventListener("click", () => setMode("reviews"));
 document.getElementById("modeShippingBtn").addEventListener("click", () => { setMode("shipping"); loadShippingRatesIntoForm(); });
+document.getElementById("modePicksBtn").addEventListener("click", () => { setMode("picks"); pkLoad(); });
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
 document.getElementById("modeDistBtn").addEventListener("click", () => { setMode("dist"); loadDistributionsIntoPanel(); });
 
@@ -4087,7 +4143,7 @@ document.getElementById("modeDistBtn").addEventListener("click", () => { setMode
 const NAV_GROUPS = {
   home: ["modeOverviewBtn"],
   orders: ["modeOrdersQueueBtn", "modeSalesBtn"],
-  perfumes: ["modeEditBtn", "modeAddBtn", "modeStockBtn", "modePhotoBtn", "modeBulkPriceBtn", "modeExcelBtn"],
+  perfumes: ["modeEditBtn", "modeAddBtn", "modeStockBtn", "modePicksBtn", "modePhotoBtn", "modeBulkPriceBtn", "modeExcelBtn"],
   customers: ["modeCustomersBtn", "modeReviewsBtn", "modeWishlistBtn"],
   money: ["modeCostBtn", "modeShippingBtn"],
   dist: ["modeDistBtn"]
@@ -4125,6 +4181,141 @@ document.querySelectorAll("#subNav > button").forEach(b => b.addEventListener("c
 const _setModeOrig = setMode;
 setMode = function(m){ _setModeOrig(m); try{ navSync(); }catch(e){} };
 navSync();
+
+// ===== ⭐ مختارات إيفوك (picks.json العام) — 24 أكتوبر 2026 =====
+// manual = أنت تختار · sales = الأكثر مبيعًا آخر 30 يوم · stock = تلقائي حسب المخزون (القديم).
+// قائمة المبيعات تنحسب هنا من orders.json وتنكتب بالملف العام كترتيب عطور بس (بدون أرقام ولا بيانات عملاء)،
+// وتتحدث تلقائيًا مع كل تعديل على الطلبات (نفس توقيت شريط آخر الطلبات).
+const PICKS_JSON_PATH = "picks.json";
+const PICKS_DEFAULT = { mode: "stock", manual: [], sales: [] };
+const PK_TOTAL = 9, PK_PER_GENDER = 3;
+let pkData = JSON.parse(JSON.stringify(PICKS_DEFAULT));
+
+function pkShowStatus(msg, cls){ const b = document.getElementById("pk_statusBox"); b.textContent = msg; b.className = "status " + (cls || ""); }
+function pkDaysAgo(n){ const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); }
+function pkSalesCounts(days){
+  const from = pkDaysAgo(days), counts = {};
+  (salesData || []).forEach(o => {
+    if(o.isGift || !o.perfumeId) return;
+    const st = normStatus(o.status);
+    if(st === "cancelled" || st === "returned" || st === "refunded") return;
+    if(!o.date || o.date < from) return;
+    counts[o.perfumeId] = (counts[o.perfumeId] || 0) + (Number(o.qty) || 1);
+  });
+  return counts;
+}
+function pkSalesRanking(){
+  const c30 = pkSalesCounts(30), c90 = pkSalesCounts(90);
+  return Object.keys(c90).sort((a, b) => ((c30[b] || 0) - (c30[a] || 0)) || (c90[b] - c90[a])).slice(0, 40);
+}
+async function pkSyncSales(token){
+  try{
+    const ranking = pkSalesRanking();
+    const next = await updateJsonWithRetry(API_BASE, token, PICKS_JSON_PATH, JSON.parse(JSON.stringify(PICKS_DEFAULT)),
+      obj => Object.assign({}, PICKS_DEFAULT, obj, { sales: (salesData && salesData.length) ? ranking : (obj.sales || []) }), "Update picks: best sellers");
+    if(next) pkData = Object.assign({}, PICKS_DEFAULT, next);
+  }catch(e){ console.warn("picks sync failed", e); }
+}
+function pkStock(p){ return Number(p && p.stock50) || 0; }
+function pkLabel(p){ return p ? (p.displayName || (p.brand + " — " + p.name)) : ""; }
+function pkGenderAr(g){ return g === "men" ? "رجالي" : g === "women" ? "نسائي" : g === "unisex" ? "للجنسين" : "—"; }
+// نفس منطق الموقع بالضبط (catalog.js ← pickHomePicks) عشان المعاينة تطابق اللي يشوفه العميل.
+// الاحتياط "حسب المخزون" هنا تقريبي: أعلى مخزون بدون الدوران الأسبوعي العشوائي.
+function pkPreviewList(){
+  const byId = {}; perfumes.forEach(p => { byId[p.id] = p; });
+  const out = [], seen = new Set();
+  const add = (p, why) => { if(p && !seen.has(p.id) && pkStock(p) > 0){ out.push({ p, why }); seen.add(p.id); return true; } return false; };
+  const stockTop = g => perfumes.filter(p => p.gender === g && pkStock(p) > 0).sort((a, b) => pkStock(b) - pkStock(a));
+  const mode = pkCurrentMode();
+  if(mode === "manual"){
+    pkData.manual.forEach(id => add(byId[id], "⭐ اختيارك"));
+    pkData.sales.forEach(id => { if(out.length < PK_TOTAL) add(byId[id], "📈 تكملة من المبيعات"); });
+    ["men", "women", "unisex"].forEach(g => stockTop(g).forEach(p => { if(out.length < PK_TOTAL) add(p, "📦 تكملة من المخزون"); }));
+    return out;
+  }
+  ["men", "women", "unisex"].forEach(g => {
+    let n = 0;
+    if(mode === "sales") pkData.sales.forEach(id => { const p = byId[id]; if(n < PK_PER_GENDER && p && p.gender === g && add(p, "📈 مبيعات")) n++; });
+    stockTop(g).forEach(p => { if(n < PK_PER_GENDER && add(p, mode === "sales" ? "📦 تكملة من المخزون" : "📦 حسب المخزون (يتغير كل أسبوع)")) n++; });
+  });
+  return out;
+}
+function pkCurrentMode(){ const r = document.querySelector('input[name="pk_mode"]:checked'); return r ? r.value : pkData.mode; }
+function pkRender(){
+  document.querySelectorAll('input[name="pk_mode"]').forEach(r => { r.checked = r.value === pkData.mode; });
+  pkRenderDynamic();
+  const dl = document.getElementById("pk_addList");
+  dl.innerHTML = perfumes.slice().sort((a, b) => pkLabel(a).localeCompare(pkLabel(b))).map(p => `<option value="${esc(pkLabel(p))}"></option>`).join("");
+}
+function pkRenderDynamic(){
+  const mode = pkCurrentMode();
+  document.getElementById("pk_manualBox").style.display = mode === "manual" ? "" : "none";
+  const byId = {}; perfumes.forEach(p => { byId[p.id] = p; });
+  const ml = document.getElementById("pk_manualList");
+  ml.innerHTML = pkData.manual.length ? pkData.manual.map((id, i) => {
+    const p = byId[id], st = pkStock(p);
+    return `<div class="pk-row"><span class="pk-n">${i + 1}</span><span class="pk-name">${esc(p ? pkLabel(p) : id)}</span>
+      <span class="pk-meta ${st > 0 ? "" : "pk-out"}">${esc(pkGenderAr(p && p.gender))} · ${st > 0 ? "مخزون " + st : "خلص — ما بيطلع"}</span>
+      <button type="button" class="secondary" data-pk-up="${i}" ${i === 0 ? "disabled" : ""} title="فوق">▲</button>
+      <button type="button" class="secondary" data-pk-del="${i}" title="شيل">✕</button></div>`;
+  }).join("") : `<div class="pk-row" style="color:var(--muted)">ما اخترت شي لين الحين — أضف من فوق.</div>`;
+  const pv = pkPreviewList();
+  document.getElementById("pk_preview").innerHTML = pv.length ? pv.map((x, i) => `<div class="pk-row"><span class="pk-n">${i + 1}</span><span class="pk-name">${esc(pkLabel(x.p))}</span><span class="pk-meta">${esc(pkGenderAr(x.p.gender))} · ${esc(x.why)}</span></div>`).join("") : `<div class="pk-row">—</div>`;
+  const c30 = pkSalesCounts(30);
+  const top = Object.keys(c30).sort((a, b) => c30[b] - c30[a]).slice(0, 15);
+  document.getElementById("pk_salesList").innerHTML = top.length ? top.map((id, i) => { const p = byId[id]; return `<div class="pk-row"><span class="pk-n">${i + 1}</span><span class="pk-name">${esc(p ? pkLabel(p) : id)}</span><span class="pk-meta">${c30[id]} حبة · ${esc(pkGenderAr(p && p.gender))}${p && pkStock(p) <= 0 ? ' · <span class="pk-out">خلص</span>' : ""}</span></div>`; }).join("") : `<div class="pk-row" style="color:var(--muted)">ما في مبيعات مسجلة آخر ٣٠ يوم.</div>`;
+}
+async function pkLoad(){
+  pkShowStatus("جارِ التحميل…", "info");
+  try{
+    const token = getToken();
+    const { obj } = await getJsonWithSha(API_BASE, PICKS_JSON_PATH, JSON.parse(JSON.stringify(PICKS_DEFAULT)), token);
+    pkData = Object.assign({}, PICKS_DEFAULT, obj);
+    if(!Array.isArray(pkData.manual)) pkData.manual = [];
+    if(!Array.isArray(pkData.sales)) pkData.sales = [];
+    if(salesData && salesData.length) pkData.sales = pkSalesRanking(); // نعرض أحدث ترتيب حتى قبل الحفظ
+    pkRender();
+    document.getElementById("pk_statusBox").className = "status";
+  }catch(e){ pkRender(); pkShowStatus("ما قدرت أحمّل الإعدادات: " + e.message, "err"); }
+}
+document.getElementById("pk_reloadBtn").addEventListener("click", pkLoad);
+document.querySelectorAll('input[name="pk_mode"]').forEach(r => r.addEventListener("change", pkRenderDynamic));
+document.getElementById("pk_addBtn").addEventListener("click", () => {
+  const inp = document.getElementById("pk_addInput");
+  const v = inp.value.trim();
+  if(!v) return;
+  const p = perfumes.find(x => pkLabel(x) === v) || perfumes.find(x => pkLabel(x).toLowerCase().indexOf(v.toLowerCase()) !== -1);
+  if(!p){ pkShowStatus("ما لقيت عطر بهالاسم. اختر من القائمة اللي تطلع وأنت تكتب.", "err"); return; }
+  if(pkData.manual.indexOf(p.id) !== -1){ pkShowStatus("هذا العطر موجود في اختياراتك.", "info"); return; }
+  if(pkData.manual.length >= 12){ pkShowStatus("الحد ١٢ عطر.", "err"); return; }
+  pkData.manual.push(p.id);
+  inp.value = "";
+  document.getElementById("pk_statusBox").className = "status";
+  pkRenderDynamic();
+});
+document.getElementById("pk_addInput").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); document.getElementById("pk_addBtn").click(); } });
+document.getElementById("pk_manualList").addEventListener("click", e => {
+  const del = e.target.closest("[data-pk-del]"), up = e.target.closest("[data-pk-up]");
+  if(del){ pkData.manual.splice(Number(del.dataset.pkDel), 1); pkRenderDynamic(); }
+  if(up){ const i = Number(up.dataset.pkUp); if(i > 0){ const t = pkData.manual[i - 1]; pkData.manual[i - 1] = pkData.manual[i]; pkData.manual[i] = t; pkRenderDynamic(); } }
+});
+document.getElementById("pk_saveBtn").addEventListener("click", async () => {
+  const token = getToken();
+  if(!token){ pkShowStatus("سجّل دخول أول.", "err"); return; }
+  const mode = pkCurrentMode();
+  if(mode === "manual" && !pkData.manual.length){ pkShowStatus("اختر عطر واحد على الأقل، أو غيّر الطريقة.", "err"); return; }
+  const btn = document.getElementById("pk_saveBtn"); btn.disabled = true;
+  pkShowStatus("جارِ الحفظ…", "info");
+  try{
+    const manual = pkData.manual.slice(), sales = pkSalesRanking();
+    const next = await updateJsonWithRetry(API_BASE, token, PICKS_JSON_PATH, JSON.parse(JSON.stringify(PICKS_DEFAULT)),
+      obj => Object.assign({}, PICKS_DEFAULT, obj, { mode, manual, sales: (salesData && salesData.length) ? sales : (obj.sales || []) }), "Update home picks (" + mode + ")");
+    pkData = Object.assign({}, PICKS_DEFAULT, next);
+    pkRenderDynamic();
+    pkShowStatus("تم الحفظ ✅ — يطلع بالموقع خلال دقايق (حدّث الصفحة).", "ok");
+  }catch(e){ pkShowStatus("ما انحفظ: " + e.message, "err"); }
+  btn.disabled = false;
+});
 
 // تبويبات داخل التوزيعات
 function distShowSection(ds){
