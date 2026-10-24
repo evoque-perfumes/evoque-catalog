@@ -7,6 +7,7 @@
  * كل يوم الساعة 9 الصبح (بتوقيت الإمارات) يقرأ:
  *   - pending-orders.json  (طلبات الموقع اللي ما وافقت عليها لين الحين)
  *   - orders.json          (الطلبات المعتمدة وحالاتها)
+ *   - distributions.json   (مبيعات التوزيعات وحالاتها)
  * ويرسل لك إيميل فيه كل طلب يحتاج متابعة وكم يوم صار له.
  *
  * التركيب (مرة وحدة):
@@ -49,6 +50,10 @@ function stopDailyReport() {
 
 // ---------- قراءة الملفات من المستودع الخاص ----------
 function drReadJson_(path) {
+  var data = drReadRaw_(path);
+  return Array.isArray(data) ? data : [];
+}
+function drReadRaw_(path) {
   var p = PropertiesService.getScriptProperties();
   var token = p.getProperty("INTAKE_GITHUB_TOKEN"), owner = p.getProperty("GITHUB_OWNER"),
       repo = p.getProperty("PRIVATE_REPO"), branch = p.getProperty("GITHUB_BRANCH") || "main";
@@ -58,10 +63,9 @@ function drReadJson_(path) {
     { headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github.raw+json", "User-Agent": "evoque-daily-report" },
       muteHttpExceptions: true });
   var code = res.getResponseCode();
-  if (code === 404) return [];
+  if (code === 404) return null;
   if (code !== 200) throw new Error("GitHub " + path + " → " + code);
-  var data = JSON.parse(res.getContentText("UTF-8"));
-  return Array.isArray(data) ? data : [];
+  return JSON.parse(res.getContentText("UTF-8"));
 }
 
 // ---------- أدوات ----------
@@ -133,6 +137,8 @@ function drGroupOrders_(rows) {
 function sendDailyReport() {
   var pending = drReadJson_("pending-orders.json");
   var orders = drGroupOrders_(drReadJson_("orders.json"));
+  var distRaw = drReadRaw_("distributions.json");
+  var distSales = distRaw && Array.isArray(distRaw.sales) ? distRaw.sales : [];
   var now = Date.now();
 
   // 1) طلبات الموقع بانتظار موافقتك (نستبعد البطاقة اللي ما اكتمل دفعها — لها قسم خاص)
@@ -162,10 +168,25 @@ function sendDailyReport() {
     else if (g.status === "dispatched") { row.days = drDaysSince_(g.dispatchedAt || g.date); inTransit.push(row); }
     else if (g.status === "return_requested") { row.days = drDaysSince_(g.date); returns.push(row); }
   });
-  var byOldest = function (a, b) { return (b.days || 0) - (a.days || 0); };
-  [toApprove, notDispatched, inTransit, returns, abandonedCard].forEach(function (l) { l.sort(byOldest); });
 
-  var actionCount = toApprove.length + notDispatched.length + inTransit.length + returns.length;
+  // 5) التوزيعات — نفس الحالات بس كل عملية بيع سطر واحد
+  var distNotDispatched = [], distInTransit = [], distReturns = [];
+  distSales.forEach(function (d) {
+    var st = drNormStatus_(d.status);
+    var row = { name: d.customerName, phone: d.customerPhone, country: "AE", city: d.emirate || "",
+                qty: Number(d.qty) || 0, total: d.netTotal != null ? d.netTotal : d.total, unit: "حبة",
+                unpaid: !d.paid };
+    if (st === "new" || st === "confirmed") { row.days = drDaysSince_(d.date); distNotDispatched.push(row); }
+    else if (st === "dispatched") { row.days = drDaysSince_(d.dispatchedAt || d.date); distInTransit.push(row); }
+    else if (st === "return_requested") { row.days = drDaysSince_(d.date); distReturns.push(row); }
+  });
+
+  var byOldest = function (a, b) { return (b.days || 0) - (a.days || 0); };
+  [toApprove, notDispatched, inTransit, returns, abandonedCard, distNotDispatched, distInTransit, distReturns]
+    .forEach(function (l) { l.sort(byOldest); });
+
+  var distCount = distNotDispatched.length + distInTransit.length + distReturns.length;
+  var actionCount = toApprove.length + notDispatched.length + inTransit.length + returns.length + distCount;
   var todayAr = Utilities.formatDate(new Date(), DR.TZ, "dd/MM/yyyy");
 
   function rowHtml(r, lateDays) {
@@ -175,13 +196,13 @@ function sendDailyReport() {
       '<td style="padding:8px 6px;border-bottom:1px solid #eee">' + drEsc_(drFirstName_(r.name)) +
         (r.paidCard ? ' <span style="background:#1F6B41;color:#fff;border-radius:6px;padding:1px 6px;font-size:12px">💳 مدفوع</span>' : '') +
         '<div style="color:#777;font-size:12px">' + drEsc_(r.city) + (r.country === "OM" ? " · عُمان" : "") + '</div></td>' +
-      '<td style="padding:8px 6px;border-bottom:1px solid #eee;white-space:nowrap">' + r.qty + ' عطر<div style="color:#777;font-size:12px">' + drEsc_(r.total) + ' ' + drCur_(r.country) + '</div></td>' +
+      '<td style="padding:8px 6px;border-bottom:1px solid #eee;white-space:nowrap">' + r.qty + ' ' + (r.unit || 'عطر') + '<div style="color:#777;font-size:12px">' + drEsc_(r.total) + ' ' + drCur_(r.country) + (r.unpaid ? ' · <span style="color:#963224">ما انقبض</span>' : '') + '</div></td>' +
       '<td style="padding:8px 6px;border-bottom:1px solid #eee;white-space:nowrap;' + (late ? 'color:#963224;font-weight:bold' : 'color:#555') + '">' + (late ? '⚠️ ' : '') + drEsc_(age) + '</td>' +
       '<td style="padding:8px 6px;border-bottom:1px solid #eee">' + drWa_(r.phone) + '</td></tr>';
   }
-  function section(title, hint, list, lateDays) {
+  function section(title, hint, list, lateDays, small) {
     if (!list.length) return "";
-    return '<h3 style="margin:22px 0 4px;color:#1F3B2D;font-size:17px">' + title + ' (' + list.length + ')</h3>' +
+    return '<h3 style="margin:' + (small ? '14px' : '22px') + ' 0 4px;color:#1F3B2D;font-size:' + (small ? '15px' : '17px') + '">' + title + ' (' + list.length + ')</h3>' +
       (hint ? '<div style="color:#777;font-size:13px;margin-bottom:6px">' + hint + '</div>' : '') +
       '<table style="width:100%;border-collapse:collapse;font-size:14px">' +
       list.map(function (r) { return rowHtml(r, lateDays); }).join("") + '</table>';
@@ -190,7 +211,7 @@ function sendDailyReport() {
   var subject, body;
   if (!actionCount && !abandonedCard.length) {
     subject = "إيفوك ✅ ما في طلبات معلّقة — " + todayAr;
-    body = '<p style="font-size:16px">صباح الخير 👋</p><p style="font-size:16px">كل الطلبات مسلّمة، وما في شي يحتاج متابعة اليوم ✅</p>';
+    body = '<p style="font-size:16px">صباح الخير 👋</p><p style="font-size:16px">كل الطلبات والتوزيعات مسلّمة، وما في شي يحتاج متابعة اليوم ✅</p>';
   } else {
     subject = actionCount
       ? "إيفوك — " + actionCount + " " + (actionCount === 1 ? "طلب يحتاج" : "طلبات تحتاج") + " متابعة — " + todayAr
@@ -200,6 +221,7 @@ function sendDailyReport() {
     if (notDispatched.length) summary.push("📦 " + notDispatched.length + " ما طلعت");
     if (inTransit.length) summary.push("🚚 " + inTransit.length + " في الطريق");
     if (returns.length) summary.push("↩️ " + returns.length + " إرجاع");
+    if (distCount) summary.push("🎁 " + distCount + " توزيعات");
     body =
       '<p style="font-size:16px;margin:0 0 6px">صباح الخير 👋</p>' +
       (summary.length ? '<p style="font-size:15px;margin:0 0 4px"><b>' + summary.join(" · ") + '</b></p>' : '') +
@@ -207,7 +229,11 @@ function sendDailyReport() {
       section("📦 مؤكدة وما طلعت للتوصيل", "وافقت عليها بس حالتها لين الحين «جديد» أو «مؤكد».", notDispatched, DR.CONFIRMED_LATE_DAYS) +
       section("🚚 طلعت وما تأكد التسليم", "إذا وصلت للعميل غيّر حالتها إلى «تم التسليم».", inTransit, DR.DISPATCH_LATE_DAYS) +
       section("↩️ طلبات إرجاع", "", returns, 1) +
-      section("💳 دفع بالبطاقة ما اكتمل", "العميل فتح صفحة الدفع وما دفع. تقدر تتواصل معه أو ترفض الطلب من اللوحة.", abandonedCard, null);
+      section("💳 دفع بالبطاقة ما اكتمل", "العميل فتح صفحة الدفع وما دفع. تقدر تتواصل معه أو ترفض الطلب من اللوحة.", abandonedCard, null) +
+      (distCount ? '<h2 style="margin:30px 0 0;padding-top:14px;border-top:2px solid #E3E8E0;color:#1F3B2D;font-size:19px">🎁 التوزيعات</h2>' : '') +
+      section("📦 ما طلعت للتوصيل", "حالتها «جديد» أو «مؤكد».", distNotDispatched, DR.CONFIRMED_LATE_DAYS, true) +
+      section("🚚 طلعت وما تأكد التسليم", "إذا وصلت غيّر حالتها إلى «تم التسليم».", distInTransit, DR.DISPATCH_LATE_DAYS, true) +
+      section("↩️ طلبات إرجاع", "", distReturns, 1, true);
   }
 
   var html =
