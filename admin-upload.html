@@ -456,9 +456,14 @@
             <span id="stkLast" style="font-size:12.5px; color:var(--muted);">آخر جرد: —</span>
           </div>
           <ol style="margin:8px 0 10px; padding-inline-start:20px; font-size:13px; line-height:1.9;">
-            <li>حمّل ملف الجرد (فيه كل العطور ومخزونها بالنظام).</li>
-            <li>عِد العطور واكتب العدد الفعلي في عمود «العدد الفعلي». العطر اللي ما عدّيته خلّه فاضي.</li>
-            <li>ارفع الملف هنا، راجع الفروقات، واضغط «اعتمد الجرد».</li>
+            <li>حمّل ملف الجرد.</li>
+            <li>في عمود «الجرد» جنب كل عطر:
+              <b>✓</b> (أو <b>ص</b>) = العدد صح ·
+              <b>رقم</b> = العدد الصحيح (مثلاً 3) ·
+              <b>-1</b> = ناقص حبة عن النظام ·
+              <b>0</b> أو <b>خلص</b> = ما باقي شي ·
+              فاضي = ما عدّيته (ما يتغير).</li>
+            <li>ارفع الملف هنا، شوف الفروقات، واضغط «اعتمد الجرد».</li>
           </ol>
           <div class="row" style="gap:8px; flex-wrap:wrap;">
             <button type="button" class="secondary" id="stkDownloadBtn">⬇️ حمّل ملف الجرد</button>
@@ -8645,27 +8650,54 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     }catch(e){}
   }
 
+  // يفهم خانة الجرد: ✓/ص/صح = مطابق للنظام، رقم = العدد الفعلي، -N = ناقص عن النظام، 0/خلص = صفر، فاضي = ما انعد
+  // ("+2" ما ندعمها لأن إكسل يحوّلها لـ 2 بصمت فتنقرا كعدد مطلق)
+  const STK_OK = ["✓", "✔", "√", "☑", "✅", "✔️", "v", "ص", "صح", "تمام", "ok", "=", "."];
+  function stkParseCount(raw, sys){
+    const s = String(raw == null ? "" : raw).trim()
+      .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
+    if(s === "") return { skip: true };
+    const low = s.toLowerCase();
+    if(STK_OK.includes(low) || /^[✓✔√☑✅️\s]+$/.test(s)) return { n: sys, mark: true };
+    if(["خلص", "مافي", "ما في", "صفر"].includes(low)) return { n: 0 };
+    const rel = s.match(/^[-−]\s*(\d+)$/);
+    if(rel){ const n = sys - Number(rel[1]); return n >= 0 ? { n } : { bad: true }; }
+    if(/^\d+$/.test(s)) return { n: Number(s) };
+    return { bad: true };
+  }
+
   el("stkDownloadBtn").addEventListener("click", () => {
     if(!perfumes || !perfumes.length){ st("انتظر لين تتحمل العطور.", "err"); return; }
     const list = perfumes.slice().sort((a, b) => (a.brand || "").localeCompare(b.brand || "") || (a.name || "").localeCompare(b.name || ""));
+    // 25 أكتوبر 2026: ملف أبسط — عمود «الجرد» يقبل ✓ (صح) أو رقم أو -1 (ناقص)، والمعرّف صار آخر عمود
     const rows = list.map(p => ({
-      "المعرّف (لا تعدّله)": p.id,
       "البراند": p.brand || "",
       "اسم العطر": p.name || "",
-      "المخزون بالنظام (50 مل)": stockAsQty(p.stock50),
-      "العدد الفعلي": "",
-      "ملاحظة": ""
+      "بالنظام (50 مل)": stockAsQty(p.stock50),
+      "الجرد (✓ أو رقم)": "",
+      "ملاحظة": "",
+      "المعرّف (لا تعدّله)": p.id
     }));
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(rows);
-    ws["!cols"] = [{ wch: 34 }, { wch: 22 }, { wch: 34 }, { wch: 22 }, { wch: 14 }, { wch: 24 }];
+    ws["!cols"] = [{ wch: 20 }, { wch: 30 }, { wch: 14 }, { wch: 16 }, { wch: 20 }, { wch: 30 }];
+    ws["!views"] = [{ RTL: true, state: "frozen", ySplit: 1 }];
+    if(!wb.Workbook) wb.Workbook = {};
+    wb.Workbook.Views = [{ RTL: true }];
     XLSX.utils.book_append_sheet(wb, ws, "الجرد");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
-      { "تعليمات": "اكتب عدد الحبات الموجودة فعليًا عندك (50 مل) في عمود «العدد الفعلي»." },
-      { "تعليمات": "العطر اللي ما عدّيته خلّه فاضي — ما راح يتغير." },
-      { "تعليمات": "لا تعدّل عمود المعرّف ولا تحذف صفوف." },
-      { "تعليمات": "تاريخ تحميل الملف: " + new Date().toLocaleString("ar") }
-    ]), "تعليمات");
+    const help = XLSX.utils.json_to_sheet([
+      { "اكتب في عمود «الجرد»": "✓ أو ص أو صح", "المعنى": "العدد اللي بالنظام صح" },
+      { "اكتب في عمود «الجرد»": "رقم (مثلاً 3)", "المعنى": "هذا العدد الموجود عندك فعليًا" },
+      { "اكتب في عمود «الجرد»": "-1 أو -2", "المعنى": "ناقص حبة أو حبتين عن النظام" },
+      { "اكتب في عمود «الجرد»": "0 أو خلص", "المعنى": "ما باقي ولا حبة" },
+      { "اكتب في عمود «الجرد»": "فاضي", "المعنى": "ما عدّيته — يبقى مثل ما هو" },
+      { "اكتب في عمود «الجرد»": "نصيحة", "المعنى": "لو أغلبها صح: اكتب ✓ في أول خانة واسحبها لتحت، وبعدين غيّر اللي فيها فرق بس" },
+      { "اكتب في عمود «الجرد»": "تنبيه", "المعنى": "لا تعدّل عمود المعرّف ولا تحذف صفوف" },
+      { "اكتب في عمود «الجرد»": "تاريخ الملف", "المعنى": new Date().toLocaleString("ar") }
+    ]);
+    help["!cols"] = [{ wch: 22 }, { wch: 70 }];
+    help["!views"] = [{ RTL: true }];
+    XLSX.utils.book_append_sheet(wb, help, "طريقة الجرد");
     XLSX.writeFile(wb, "Evoque_Stocktake_" + todayStr() + ".xlsx");
     st("تم تحميل ملف الجرد.", "ok");
   });
@@ -8682,14 +8714,15 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       const out = [], unknown = [], bad = [];
       raw.forEach((r, i) => {
         const id = String(key(r, ["المعرّف", "المعرف", "id"]) || "").trim();
-        const cntRaw = String(key(r, ["العدد الفعلي", "الفعلي"]) == null ? "" : key(r, ["العدد الفعلي", "الفعلي"])).trim();
+        const cntRaw = key(r, ["الجرد", "العدد الفعلي", "الفعلي"]);
         if(!id) return;
         const p = perfumes.find(x => x.id === id);
         if(!p){ unknown.push(id); return; }
-        if(cntRaw === ""){ out.push({ id, p, counted: null }); return; }
-        const n = Number(cntRaw.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)));
-        if(!Number.isFinite(n) || n < 0 || Math.floor(n) !== n){ bad.push((p.brand + " — " + p.name) + " (" + cntRaw + ")"); return; }
-        out.push({ id, p, counted: n, snapshot: Number(key(r, ["المخزون بالنظام"])) });
+        const res = stkParseCount(cntRaw, stockAsQty(p.stock50));
+        if(res.skip){ out.push({ id, p, counted: null }); return; }
+        if(res.bad){ bad.push((p.brand + " — " + p.name) + " (" + String(cntRaw).trim() + ")"); return; }
+        const snapRaw = key(r, ["بالنظام", "المخزون بالنظام"]);
+        out.push({ id, p, counted: res.n, mark: !!res.mark, snapshot: snapRaw === "" ? NaN : Number(snapRaw) });
       });
       stkRows = out;
       renderPreview(unknown, bad);
@@ -8701,8 +8734,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     const diffs = counted.filter(r => r.counted !== stockAsQty(r.p.stock50));
     const changedSince = counted.filter(r => Number.isFinite(r.snapshot) && r.snapshot !== stockAsQty(r.p.stock50));
     const notCounted = perfumes.length - counted.length;
-    let h = `<div style="font-size:13.5px; line-height:1.9;">انعد <b>${esc(counted.length)}</b> عطر من ${esc(perfumes.length)} — مطابق: <b>${esc(counted.length - diffs.length)}</b> — فيه فرق: <b style="color:#9A4F2E;">${esc(diffs.length)}</b>${notCounted ? ` — ما انعد: ${esc(notCounted)}` : ""}</div>`;
-    if(bad.length) h += `<div class="banner" style="margin:8px 0; background:#fdecea; border-color:#c0392b; color:#8a1c14;">⛔ أرقام غلط (لازم رقم صحيح 0 أو أكثر): ${bad.map(esc).join("، ")}</div>`;
+    let h = `<div style="font-size:13.5px; line-height:1.9;">انعد <b>${esc(counted.length)}</b> عطر من ${esc(perfumes.length)} — ✓ مطابق: <b>${esc(counted.length - diffs.length)}</b> — فيه فرق: <b style="color:#9A4F2E;">${esc(diffs.length)}</b>${notCounted ? ` — ما انعد (يبقى مثل ما هو): ${esc(notCounted)}` : ""}</div>`;
+    if(bad.length) h += `<div class="banner" style="margin:8px 0; background:#fdecea; border-color:#c0392b; color:#8a1c14;">⛔ ما فهمت هذي الخانات — اكتب ✓ أو رقم أو -1 وارفع الملف مرة ثانية: ${bad.map(esc).join("، ")}</div>`;
     if(unknown.length) h += `<div class="hint">تجاهلت ${esc(unknown.length)} صف معرّفه مب موجود بالنظام.</div>`;
     if(changedSince.length) h += `<div class="banner" style="margin:8px 0; background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;">⚠️ ${esc(changedSince.length)} عطر تغيّر مخزونها بالنظام بعد ما حمّلت الملف (يمكن انعتمد طلب). تأكد إن عدّك صار بعد آخر بيع.</div>`;
     if(diffs.length){
