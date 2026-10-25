@@ -152,6 +152,11 @@
   .kpi-card .kpi-sub{color:#93897A; font-size:11.5px; margin-top:2px;}
   .ov-section-title{font-family:'El Messiri','IBM Plex Sans Arabic',serif; font-size:17px; color:var(--gold-ink); margin:22px 0 10px; font-weight:700;}
   .ov-section-title:first-child{margin-top:0;}
+  .pf-line{display:flex; justify-content:space-between; gap:10px; padding:8px 14px; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .pf-line.sub{padding-inline-start:28px; color:var(--muted); font-size:12.5px;}
+  .pf-line.head{font-weight:700; background:var(--panel-2);}
+  .pf-line.total{font-weight:700; font-size:15px; border-bottom:0;}
+  .pf-line .neg{color:#963224;} .pf-line .pos{color:#1F6B41;}
   .ov-empty-note{color:var(--muted); font-size:12.5px; background:var(--panel-2); border:1px dashed var(--line); border-radius:8px; padding:12px 14px; line-height:1.8;}
 
   /* ===================================================================
@@ -344,7 +349,7 @@
       <div class="kpi-card clickable alert" id="ov_lowCard"><div class="kpi-label">قارب على النفاد — 50 مل (اضغط للمراجعة)</div><div class="kpi-value" id="ov_low">—</div><div class="kpi-sub">قطعة وحدة متبقية بحجم 50 مل — جهّز شراء</div></div>
       <div class="kpi-card"><div class="kpi-label">عدد البراندات</div><div class="kpi-value" id="ov_brands">—</div></div>
       <div class="kpi-card"><div class="kpi-label">متوسط سعر 50مل (AED)</div><div class="kpi-value" id="ov_avgPrice">—</div></div>
-      <div class="kpi-card"><div class="kpi-label">قيمة المخزون التقديرية (AED)</div><div class="kpi-value" id="ov_stockValue">—</div><div class="kpi-sub">حسب السعر × الكمية المتوفرة</div></div>
+      <div class="kpi-card"><div class="kpi-label">قيمة المخزون بسعر البيع (AED)</div><div class="kpi-value" id="ov_stockValue">—</div><div class="kpi-sub">لو انباع كله بالسعر المعلن — مو رأس مالك ولا ربحك</div></div>
       <div class="kpi-card"><div class="kpi-label">إجمالي القطع بالمخزون الحين</div><div class="kpi-value" id="ov_stockUnits">—</div><div class="kpi-sub">مجموع كميات كل الأحجام</div></div>
       <div class="kpi-card" style="display:none;"><div class="kpi-label">إجمالي قطع 10مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits10">—</div></div>
       <div class="kpi-card"><div class="kpi-label">إجمالي قطع 50مل بالمخزون</div><div class="kpi-value" id="ov_stockUnits50">—</div></div>
@@ -356,7 +361,7 @@
       ما فيه مبيعات مسجّلة بعد. بعد كل عملية بيع تخلص بالواتساب، روح تبويب "💰 المبيعات" وسجّلها بضغطة وحدة — وبتشوف هنا إجمالي الإيرادات وأفضل عطر مبيعًا فعليًا (مب قائمة يدوية).
     </div>
     <div class="kpi-grid" id="ov_salesGrid" style="display:none;">
-      <div class="kpi-card good"><div class="kpi-label">عدد عمليات البيع المسجّلة</div><div class="kpi-value" id="ov_salesCount">—</div></div>
+      <div class="kpi-card good"><div class="kpi-label">عدد الطلبات المسجّلة</div><div class="kpi-value" id="ov_salesCount">—</div></div>
       <div class="kpi-card good"><div class="kpi-label">إجمالي القطع المباعة</div><div class="kpi-value" id="ov_salesUnits">—</div></div>
       <div class="kpi-card good"><div class="kpi-label">إجمالي الإيرادات (AED)</div><div class="kpi-value" id="ov_salesRevenue">—</div></div>
       <div class="kpi-card"><div class="kpi-label">الأكثر مبيعًا فعليًا</div><div class="kpi-value" id="ov_bestSeller" style="font-size:16px;">—</div></div>
@@ -681,7 +686,7 @@
     <div id="sl_custWarn"></div>
 
     <div class="grid2" style="margin-top:10px;">
-      <div class="field"><label for="sl_email">البريد الإلكتروني *</label><input type="email" id="sl_email" maxlength="120" autocomplete="off" placeholder="name@example.com"></div>
+      <div class="field"><label for="sl_email">البريد الإلكتروني (اختياري)</label><input type="email" id="sl_email" maxlength="120" autocomplete="off" placeholder="name@example.com"></div>
       <div class="field"><label for="sl_region">الإمارة (الإمارات) / المحافظة أو الولاية (عُمان) *</label><input type="text" id="sl_region" maxlength="60" list="sl_regionList" autocomplete="off"><datalist id="sl_regionList"></datalist></div>
     </div>
     <div class="grid2" style="margin-top:10px;">
@@ -1180,33 +1185,37 @@
 
   <div class="panel" id="costPanel" style="display:none;">
     <h2>🧮 التكلفة والأرباح</h2>
-    <small class="hint" style="margin-top:0;">
-      يحسب رأس المال والربح الصافي تلقائيًا من الطلبات الفعلية المسجّلة بالموقع (تبويب "🧾 الطلبات الجديدة" بعد اعتمادها)
-      × تكلفة التصنيع اللي تعبّيها لكل عطر من "✏️ تعديل عطر" (خانة "🧮 تكلفة التصنيع"). هدايا العروض المجانية مستبعدة من الربح
-      (نفس منطق "الأكثر مبيعًا فعليًا") لكن تكلفتها معروضة لحالها تحت.
-    </small>
 
-    <div class="ov-section-title">⚙️ إعدادات الحساب (مرة وحدة للكل)</div>
-    <small class="hint" style="margin-top:0;">
-      هذي القيم تنكتب مرة وحدة وتنطبق على كل العطور. زجاجة 50مل بنسبة زيت 33% = 16.5 جرام زيت + 33.5 مل كحول.
-      الكحول: اكتب كم دفعت وكم لتر (مثلاً 300 درهم لـ 20 لتر). الزجاجة والتغليف: سعر الحبة الوحدة. لو سجّلت مشتريات لهذي المواد تحت، النظام يعتمد على متوسط مشترياتك بدل الرقم المكتوب هنا.
-    </small>
-    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
-      <div class="field" style="min-width:110px;"><label for="cs_oilPct">نسبة الزيت (%)</label><input type="number" id="cs_oilPct" min="1" max="100" step="0.1"></div>
-      <div class="field" style="min-width:110px;"><label for="cs_alcPrice">سعر الكحول (AED)</label><input type="number" id="cs_alcPrice" min="0" step="0.01"></div>
-      <div class="field" style="min-width:90px;"><label for="cs_alcLiters">لكم لتر</label><input type="number" id="cs_alcLiters" min="0" step="0.1"></div>
-      <label style="display:flex; align-items:center; gap:6px; padding-bottom:12px; cursor:pointer;"><input type="checkbox" id="cs_alcVat" style="width:auto; margin:0;"> +5% ضريبة</label>
+    <div class="ov-section-title">📊 الملخص</div>
+    <div class="row" style="align-items:center; gap:8px; flex-wrap:wrap;">
+      <label for="pf_period" style="margin:0;">الفترة:</label>
+      <select id="pf_period" style="flex:0 1 200px;">
+        <option value="month">هالشهر</option>
+        <option value="last">الشهر الماضي</option>
+        <option value="3m">آخر 3 شهور</option>
+        <option value="all">من البداية</option>
+      </select>
     </div>
-    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
-      <div class="field" style="min-width:130px;"><label for="cs_bottle">زجاجة 50مل (AED/حبة)</label><input type="number" id="cs_bottle" min="0" step="0.01"></div>
-      <div class="field" style="min-width:130px;"><label for="cs_pack">التغليف (AED/قطعة)</label><input type="number" id="cs_pack" min="0" step="0.01"></div>
-      <div class="field" style="min-width:130px;"><label for="cs_manuf">أجرة تصنيع (AED/زجاجة)</label><input type="number" id="cs_manuf" min="0" step="0.01"></div>
-      <button type="button" id="cs_saveBtn">💾 احفظ الإعدادات</button>
+    <div class="status" id="pf_warn"></div>
+    <div id="pf_empty" class="ov-empty-note" style="display:none; margin-top:10px;">ما فيه مبيعات مسجّلة في هالفترة.</div>
+    <div class="kpi-grid" id="pf_kpiGrid" style="margin-top:10px;">
+      <div class="kpi-card"><div class="kpi-label">المبيعات</div><div class="kpi-value" id="pf_revenue">—</div><div class="kpi-sub">عطور + توزيعات، بعد الخصم</div></div>
+      <div class="kpi-card"><div class="kpi-label">التكاليف</div><div class="kpi-value" id="pf_cost">—</div><div class="kpi-sub">كل شي صرفته على هالمبيعات</div></div>
+      <div class="kpi-card good"><div class="kpi-label">الربح الصافي</div><div class="kpi-value" id="pf_profit">—</div><div class="kpi-sub" id="pf_profitSub">درهم</div></div>
+      <div class="kpi-card"><div class="kpi-label">هامش الربح</div><div class="kpi-value" id="pf_margin">—</div><div class="kpi-sub">من كل 100 درهم، كم يبقى لك</div></div>
     </div>
-    <div class="status show info" id="cs_summary" style="margin-top:8px;"></div>
-    <div class="status" id="cs_statusBox"></div>
+    <div class="static-list pf-breakdown" id="pf_breakdown" style="max-height:none;"></div>
+    <small class="hint" style="margin-top:0;">الأرقام من الطلبات المسجّلة في النظام بس. الطلبات القديمة اللي ما انسجلت ما تدخل.</small>
 
-    <div class="ov-section-title" style="margin-top:22px;">🛢️ زيوت العطور وتكلفة كل عطر</div>
+    <div class="ov-section-title" style="margin-top:22px;">🏆 العطور في هالفترة</div>
+    <div id="pf_topWrap"></div>
+    <details style="margin-top:8px;">
+      <summary style="cursor:pointer; color:var(--muted); font-size:13px;">عرض ربح كل العطور</summary>
+      <div id="cost_byPerfumeEmpty" class="ov-empty-note" style="display:none;">ما فيه بيانات كافية بعد.</div>
+      <div class="static-list" id="cost_byPerfumeList"></div>
+    </details>
+
+    <div class="ov-section-title" style="margin-top:26px;">🛢️ زيوت العطور وتكلفة كل عطر</div>
     <small class="hint" style="margin-top:0;">
       كل عطر في صف: اكتب <b>السعر اللي دفعته للزيت</b> (مثلاً سعر الـ100 جرام كامل، مو سعر الجرام) والجرامات، واضغط 💾 في نفس الصف. النظام يحسب سعر الجرام وتكلفة زجاجة 50مل كاملة. الأسعار تنحفظ في ملف المواد (materials.json) مو في بيانات العطور اللي يشوفها الزوار.
     </small>
@@ -1217,11 +1226,8 @@
 
     <div class="ov-section-title" style="margin-top:26px;">📦 مشتريات المواد الخام والمخزون</div>
     <small class="hint" style="margin-top:0;">
-      سجّلي هنا كل عملية شراء (زجاجات، كحول، تغليف) — النظام يحسب متوسط سعر الوحدة تلقائيًا من كل مشترياتك، ويطرح
-      منه اللي استُهلك فعليًا بالطلبات الحقيقية المعتمدة، عشان تعرفي كم باقي عندك بالمخزون بأي لحظة (زي "كم زجاجة فاضية
-      باقية"). تقدير الاستهلاك: كل قطعة مباعة = زجاجة وحدة من حجمها + وحدة تغليف وحدة + كحول بمقدار حجم القطعة تقريبًا
-      (تقدير تقريبي لعدم معرفة نسبة الزيت بالضبط بكل عطر — قابل للتعديل يدويًا لاحقًا لو احتجتِ دقة أكبر).
-      <b>ملاحظة:</b> تكلفة الزيت العطري لكل عطر تبقى تُدخل من نموذج "✏️ تعديل عطر" لحاله (لأن كل عطر له زيت مختلف السعر).
+      سجّل هنا كل شراء لزجاجات أو كحول أو تغليف. النظام يحسب متوسط سعر الحبة من مشترياتك ويستخدمه في تكلفة كل زجاجة،
+      ويطرح اللي انباع عشان تعرف كم باقي عندك. (سعر الزيت لكل عطر ينكتب في قسم "زيوت العطور" فوق.)
     </small>
     <div class="kpi-grid" id="mat_kpiGrid"></div>
 
@@ -1262,9 +1268,8 @@
 
     <div class="ov-section-title" style="margin-top:26px;">💵 المصاريف الشهرية العامة</div>
     <small class="hint" style="margin-top:0;">
-      لتسجيل أي مصروف عام للمشروع بدون تتبع كمية أو مخزون (مثل: أدوات ومستلزمات، شحن طلبات من مواقع تسوّق، تسويق
-      وإعلانات...). فقط التاريخ والوصف والمبلغ — بدون حسابات متوسط سعر وحدة أو مخزون متبقي (هذي خاصة بقسم المواد
-      الخام فوق).
+      أي مصروف عام للمشروع (إعلانات، أدوات، شحن مشتريات...). هذي المصاريف تنطرح من الربح الصافي في الملخص فوق.
+      <b>تنبيه:</b> الزجاج والكحول والتغليف اللي يدخل في العطر سجّلها في "المشتريات" فوق مو هنا، عشان ما تنحسب مرتين.
     </small>
     <div class="kpi-grid" id="exp_kpiGrid"></div>
 
@@ -1317,26 +1322,28 @@
       <div class="static-list" id="exp_historyList"></div>
     </div>
 
-    <div class="ov-section-title" style="margin-top:26px;">نظرة عامة على الأرباح</div>
-    <div id="cost_empty" class="ov-empty-note" style="display:none;">
-      ما فيه طلبات محتسبة بعد. لما تُعتمد أول طلبية من تبويب "🧾 الطلبات الجديدة"، الأرقام هنا بتظهر تلقائيًا.
+    <details id="cs_details" style="margin-top:26px;">
+      <summary class="ov-section-title" style="cursor:pointer; margin:0;">⚙️ إعدادات الحساب (نادرًا تحتاجها — اضغط للفتح)</summary>
+    <small class="hint" style="margin-top:0;">
+      هذي القيم تنكتب مرة وحدة وتنطبق على كل العطور. زجاجة 50مل بنسبة زيت 33% = 16.5 جرام زيت + 33.5 مل كحول.
+      الكحول: اكتب كم دفعت وكم لتر (مثلاً 300 درهم لـ 20 لتر). الزجاجة والتغليف: سعر الحبة الوحدة. لو سجّلت مشتريات لهذي المواد تحت، النظام يعتمد على متوسط مشترياتك بدل الرقم المكتوب هنا.
+    </small>
+    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="min-width:110px;"><label for="cs_oilPct">نسبة الزيت (%)</label><input type="number" id="cs_oilPct" min="1" max="100" step="0.1"></div>
+      <div class="field" style="min-width:110px;"><label for="cs_alcPrice">سعر الكحول (AED)</label><input type="number" id="cs_alcPrice" min="0" step="0.01"></div>
+      <div class="field" style="min-width:90px;"><label for="cs_alcLiters">لكم لتر</label><input type="number" id="cs_alcLiters" min="0" step="0.1"></div>
+      <label style="display:flex; align-items:center; gap:6px; padding-bottom:12px; cursor:pointer;"><input type="checkbox" id="cs_alcVat" style="width:auto; margin:0;"> +5% ضريبة</label>
     </div>
-    <div class="kpi-grid" id="cost_kpiGrid">
-      <div class="kpi-card"><div class="kpi-label">عدد القطع المحتسبة</div><div class="kpi-value" id="cost_units">—</div></div>
-      <div class="kpi-card good"><div class="kpi-label">إجمالي الإيرادات (AED)</div><div class="kpi-value" id="cost_revenue">—</div></div>
-      <div class="kpi-card"><div class="kpi-label">إجمالي التكلفة: عطور + توصيل (AED)</div><div class="kpi-value" id="cost_capital">—</div></div>
-      <div class="kpi-card good"><div class="kpi-label">صافي الربح (AED)</div><div class="kpi-value" id="cost_profit">—</div></div>
-      <div class="kpi-card"><div class="kpi-label">هامش الربح</div><div class="kpi-value" id="cost_margin">—</div></div>
-      <div class="kpi-card clickable alert" id="cost_missingCard"><div class="kpi-label">عطور بيعت بدون بيانات تكلفة (اضغط للمراجعة)</div><div class="kpi-value" id="cost_missingCount">—</div><div class="kpi-sub">تُحسب تكلفتها صفر لين تعبّي بياناتها</div></div>
-      <div class="kpi-card"><div class="kpi-label">🚚 تكلفة التوصيل المجاني (AED)</div><div class="kpi-value" id="cost_deliveryCost">—</div><div class="kpi-sub" id="cost_deliverySub">محسوبة ضمن التكلفة أعلاه</div></div>
-      <div class="kpi-card"><div class="kpi-label">🏷️ إجمالي الخصومات الممنوحة (AED)</div><div class="kpi-value" id="cost_discountGiven">—</div><div class="kpi-sub">مطروحة من الإيرادات أصلاً</div></div>
-      <div class="kpi-card"><div class="kpi-label">💳 رسوم البطاقات (زينة) (AED)</div><div class="kpi-value" id="cost_cardFees">—</div><div class="kpi-sub">محسوبة ضمن التكلفة أعلاه</div></div>
-      <div class="kpi-card"><div class="kpi-label">🎁 تكلفة قطع الهدايا المجانية (AED)</div><div class="kpi-value" id="cost_giftCost">—</div><div class="kpi-sub">غير محتسبة بالربح أعلاه</div></div>
+    <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:10px;">
+      <div class="field" style="min-width:130px;"><label for="cs_bottle">زجاجة 50مل (AED/حبة)</label><input type="number" id="cs_bottle" min="0" step="0.01"></div>
+      <div class="field" style="min-width:130px;"><label for="cs_pack">التغليف (AED/قطعة)</label><input type="number" id="cs_pack" min="0" step="0.01"></div>
+      <div class="field" style="min-width:130px;"><label for="cs_manuf">أجرة تصنيع (AED/زجاجة)</label><input type="number" id="cs_manuf" min="0" step="0.01"></div>
+      <button type="button" id="cs_saveBtn">💾 احفظ الإعدادات</button>
     </div>
+    <div class="status show info" id="cs_summary" style="margin-top:8px;"></div>
+    <div class="status" id="cs_statusBox"></div>
 
-    <div class="ov-section-title" style="margin-top:22px;">الربح حسب كل عطر</div>
-    <div id="cost_byPerfumeEmpty" class="ov-empty-note" style="display:none;">ما فيه بيانات كافية بعد.</div>
-    <div class="static-list" id="cost_byPerfumeList"></div>
+    </details>
 
     <div style="display:none;">
     <div class="ov-section-title" style="margin-top:22px;">إدارة تكلفة كل عطور الكتالوج</div>
@@ -2087,7 +2094,7 @@ function renderOverview(){
   if(salesData.length){
     el("ov_salesEmpty").style.display = "none";
     el("ov_salesGrid").style.display = "grid";
-    el("ov_salesCount").textContent = fmtNum(paidSales.length);
+    el("ov_salesCount").textContent = fmtNum(new Set(paidSales.map(o => o.orderId || o.id)).size); // طلبات مو سطور (الطلب الواحد ممكن فيه أكثر من عطر)
     const revenue = computeProfitReport().totalRevenue; // بعد الخصم والمسترد، وبدون الملغي
     el("ov_salesRevenue").textContent = fmtNum(revenue);
     const totalUnitsSold = paidSales.reduce((s,o) => s + (Number(o.qty)||0), 0);
@@ -2135,7 +2142,7 @@ function buildSalesPeriodStats(){
     const y = date.slice(0, 4);
     const orderKey = o.orderId || o.id;
     const qty = Number(o.qty) || 0;
-    const revenue = qty * (Number(o.unitPrice) || 0);
+    const revenue = Math.max(0, qty * (Number(o.unitPrice) || 0) - (Number(o.discount) || 0)); // بعد الخصم — نفس رقم "إجمالي الإيرادات"
     if(!monthMap.has(ym)) monthMap.set(ym, { orderIds: new Set(), units: 0, revenue: 0 });
     const m = monthMap.get(ym);
     m.orderIds.add(orderKey); m.units += qty; m.revenue += revenue;
@@ -2218,7 +2225,7 @@ function buildSalesCountryStats(){
     const b = buckets[bucket];
     const orderKey = o.orderId || o.id;
     const qty = Number(o.qty) || 0;
-    const revenue = qty * (Number(o.unitPrice) || 0);
+    const revenue = Math.max(0, qty * (Number(o.unitPrice) || 0) - (Number(o.discount) || 0));
     b.orderIds.add(orderKey); b.units += qty; b.revenue += revenue;
   });
   return buckets;
@@ -3743,7 +3750,7 @@ function renderSalesHistory(){
     const f0 = g.items[0] || {};
     let rulesTxt = "";
     if(f0.freeDelivery === true){
-      const perfCost = g.items.filter(o => !o.isGift).reduce((sum,o) => sum + (Number(o.qty)||0) * perfumeUnitCost(perfumes.find(x => x.id === o.perfumeId), o.size), 0);
+      const perfCost = g.items.reduce((sum,o) => sum + (Number(o.qty)||0) * perfumeUnitCostEst(perfumes.find(x => x.id === o.perfumeId), o.size).cost, 0);
       const dCost = Number(f0.deliveryCost) || 0;
       rulesTxt = `<div class="sale-row-meta">🚚 توصيل مجاني (تكلفته علينا ${fmtNum(dCost)} AED) — ربح الطلب تقريبًا <b>${fmtNum(total - perfCost - dCost)} AED</b></div>`;
     } else {
@@ -3870,7 +3877,8 @@ document.getElementById("sl_saveBtn").addEventListener("click", async () => {
   if(customer.length < 2) missing.push("الاسم الكامل");
   if(!country) missing.push("الدولة");
   if(!/^\+\d{8,15}$/.test(phone)) missing.push("رقم هاتف صحيح");
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) missing.push("بريد إلكتروني صحيح");
+  // 25 أكتوبر 2026: الإيميل صار اختياري — أغلب طلبات الواتساب (وخصوصًا القديمة) ما لها إيميل. لو انكتب لازم يكون صحيح.
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) missing.push("بريد إلكتروني صحيح (أو خله فاضي)");
   if(!region) missing.push("الإمارة / المحافظة");
   if(!city) missing.push("المدينة / المنطقة");
   if(!deliveryType) missing.push("نوع التوصيل");
@@ -4036,6 +4044,7 @@ function setMode(newMode){
   if(mode === "cost"){
     if(!document.getElementById("mat_date").value) document.getElementById("mat_date").value = todayStr();
     renderCostPanel();
+    pfLoadDist();
   }
   if(mode === "sales"){
     document.getElementById("sl_addItemWrap").style.display = "none";
@@ -5691,6 +5700,20 @@ function perfumeHasCostData(p){
   return !!oilEntryFor(p.id) || Number(p.costOilPerMl) > 0;
 }
 
+// 25 أكتوبر 2026: قبل كذا العطر اللي ما له سعر زيت كانت تكلفته تنحسب صفر (حتى الزجاجة والتغليف)،
+// فالربح يطلع منفوخ. الحين ينحسب بمتوسط سعر جرام الزيت من العطور اللي انكتب سعرها، ويتعلّم "تقديري".
+function avgOilPerGram(){
+  const vals = Object.values((materialsData && materialsData.oilCosts) || {}).map(oilPerGramOfEntry).filter(v => v > 0);
+  perfumes.forEach(p => { if(!oilEntryFor(p.id) && Number(p.costOilPerMl) > 0) vals.push(Number(p.costOilPerMl)); });
+  return vals.length ? vals.reduce((a,b) => a + b, 0) / vals.length : 0;
+}
+function perfumeUnitCostEst(p, size, avgPerG){
+  const exact = perfumeUnitCost(p, size);
+  if(exact > 0) return { cost: exact, est: false };
+  const ml = Number(size) === 50 ? 50 : 10;
+  return { cost: costBreakdown(ml, avgPerG === undefined ? avgOilPerGram() : avgPerG).total, est: true };
+}
+
 function updateFormCostPreview(){ /* الحقول القديمة مخفية — التكلفة تنضبط من تبويب التكلفة */ }
 COST_FIELD_KEYS.forEach(k => {
   const el = document.getElementById("f_" + k);
@@ -5698,19 +5721,22 @@ COST_FIELD_KEYS.forEach(k => {
 });
 
 // يحسب رأس المال/الإيرادات/الربح من الطلبات الفعلية (salesData) × تكلفة كل عطر
-function computeProfitReport(){
+function computeProfitReport(range){
   // 22 أكتوبر 2026: الحساب على مستوى الطلب. الملغي ما ينحسب أبدًا. المرتجع/المسترد:
   // الإيراد = المدفوع − المسترد، وتكلفة العطر تبقى (العطر انفتح ومستعمل) وتكلفة التوصيل تبقى.
   const result = {
     totalRevenue: 0, totalCost: 0, totalProfit: 0, margin: 0, unitsCount: 0,
-    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0, refunded: 0, cardFees: 0
+    giftCost: 0, missingCostIds: [], rows: [], deliveryCost: 0, discountGiven: 0, newOrders: 0, refunded: 0, cardFees: 0,
+    perfumeCost: 0, estCost: 0, estUnits: 0, avgOilPerG: 0
   };
   if(!salesData || !salesData.length) return result;
   const missingCostIds = new Set();
   const byPerfume = {};
+  const avgPerG = result.avgOilPerG = avgOilPerGram();
   groupSalesData().forEach(g => {
     const f = g.items[0] || {};
     if(normStatus(f.status) === "cancelled") return;
+    if(range && !((g.date || "") >= range.from && (g.date || "") <= range.to)) return;
     const paidLines = g.items.filter(o => !o.isGift);
     const sub = paidLines.reduce((a, o) => a + (Number(o.qty) || 0) * (Number(o.unitPrice) || 0), 0);
     const disc = g.items.reduce((a, o) => a + (Number(o.discount) || 0), 0);
@@ -5723,21 +5749,24 @@ function computeProfitReport(){
       const qty = Number(o.qty) || 0;
       const lineSub = qty * (Number(o.unitPrice) || 0);
       const revenue = sub > 0 ? net * (lineSub / sub) : 0;
-      const cost = qty * perfumeUnitCost(p, o.size);
-      if(p && !perfumeHasCostData(p)) missingCostIds.add(p.id);
-      result.totalRevenue += revenue; result.totalCost += cost; result.unitsCount += qty;
+      const uc = perfumeUnitCostEst(p, o.size, avgPerG);
+      const cost = qty * uc.cost;
+      if(uc.est){ missingCostIds.add(o.perfumeId); result.estCost += cost; result.estUnits += qty; }
+      result.totalRevenue += revenue; result.totalCost += cost; result.perfumeCost += cost; result.unitsCount += qty;
       const key = o.perfumeId;
-      if(!byPerfume[key]) byPerfume[key] = { id: key, brand: p ? p.brand : "؟", name: p ? p.name : o.perfumeId, units: 0, revenue: 0, cost: 0 };
+      if(!byPerfume[key]) byPerfume[key] = { id: key, brand: p ? p.brand : "؟", name: p ? p.name : o.perfumeId, units: 0, revenue: 0, cost: 0, est: false };
       byPerfume[key].units += qty; byPerfume[key].revenue += revenue; byPerfume[key].cost += cost;
+      if(uc.est) byPerfume[key].est = true;
     });
     g.items.filter(o => o.isGift).forEach(o => {
       const p = perfumes.find(x => x.id === o.perfumeId);
-      result.giftCost += (Number(o.qty) || 0) * perfumeUnitCost(p, o.size);
+      result.giftCost += (Number(o.qty) || 0) * perfumeUnitCostEst(p, o.size, avgPerG).cost;
     });
     g.items.forEach(o => { if(o.freeDelivery === true){ result.newOrders++; result.deliveryCost += Number(o.deliveryCost) || 0; } });
     g.items.forEach(o => { if(!o.cardTest) result.cardFees += Number(o.cardFee) || 0; });
   });
-  result.totalCost += result.deliveryCost + result.cardFees;
+  // الهدايا المجانية تكلفة حقيقية (زجاجة وزيت طلعت من عندك) — تنحسب ضمن التكلفة
+  result.totalCost += result.deliveryCost + result.cardFees + result.giftCost;
   result.totalProfit = result.totalRevenue - result.totalCost;
   result.margin = result.totalRevenue > 0 ? (result.totalProfit / result.totalRevenue * 100) : 0;
   result.missingCostIds = Array.from(missingCostIds);
@@ -5760,7 +5789,7 @@ function renderCostByPerfumeList(rows){
         <span class="sale-row-name">${esc(r.brand)} — ${esc(r.name)}</span>
         <span class="sale-row-amount">${fmtNum(r.profit)} AED ربح</span>
       </div>
-      <div class="sale-row-meta">${fmtNum(r.units)} قطعة — إيرادات ${fmtNum(r.revenue)} AED — تكلفة ${fmtNum(r.cost)} AED</div>
+      <div class="sale-row-meta">${fmtNum(r.units)} قطعة — إيرادات ${fmtNum(r.revenue)} AED — تكلفة ${fmtNum(r.cost)} AED${r.est ? " (تقديري — ما له سعر زيت)" : ""}</div>
     </div>
   `).join("");
 }
@@ -6141,6 +6170,10 @@ function renderCostSettingsPreview(){
   const formPerMl = liters > 0 ? price / (liters * 1000) * (vat ? 1 + (Number(st.vatPct) || 0) / 100 : 1) : 0;
   let t = `زجاجة 50مل = ${(50 * x).toFixed(1)} جرام زيت + ${(50 - 50 * x).toFixed(1)} مل كحول. سعر مل الكحول: ${formPerMl.toFixed(4)} AED.`;
   if(alc.source === "purchases") t += ` (الحين معتمد متوسط مشترياتك المسجّلة: ${alc.value.toFixed(4)} AED/مل)`;
+  // الزجاجة والتغليف: لو فيه مشتريات مسجّلة، الرقم المكتوب هنا ما ينستخدم — نقولها بوضوح
+  const b50 = materialWeightedAvgCost("bottle50"), pk = materialWeightedAvgCost("packaging");
+  if(b50 > 0) t += ` الزجاجة 50مل المعتمدة: ${fmt2(b50)} AED (متوسط مشترياتك، مو الرقم المكتوب هنا).`;
+  if(pk > 0) t += ` التغليف المعتمد: ${fmt2(pk)} AED (متوسط مشترياتك، مو الرقم المكتوب هنا).`;
   document.getElementById("cs_summary").textContent = t;
 }
 
@@ -6151,20 +6184,31 @@ function ocRowCostText(price, grams, vat){
   return `الجرام ${perG.toFixed(3)} — زيت ${fmt2(c.oil)} + كحول ${fmt2(c.alcohol)} + زجاجة ${fmt2(c.bottle)} + تغليف ${fmt2(c.pack)} + تصنيع ${fmt2(c.manuf)} = ${fmt2(c.total)} AED`;
 }
 
+let ocMissingOnly = false;
+function ocSoldUnits(){
+  const m = {};
+  (salesData || []).forEach(o => { if(isRevenueRow(o)) m[o.perfumeId] = (m[o.perfumeId] || 0) + (Number(o.qty) || 0); });
+  return m;
+}
 function renderOilTable(){
   const wrap = document.getElementById("oc_rows");
   if(!wrap) return;
   if(wrap.contains(document.activeElement)) return; // لا نمسح اللي تكتبه الحين
   const q = (document.getElementById("oc_search").value || "").trim().toLowerCase();
   const all = sortPerfumes(perfumes);
+  const sold = ocSoldUnits();
   const withData = all.filter(p => perfumeHasCostData(p));
-  const without = all.filter(p => !perfumeHasCostData(p));
+  // اللي ما لها سعر: الأكثر مبيعًا أول — عشان تعبّي المهم قبل
+  const without = all.filter(p => !perfumeHasCostData(p)).sort((a,b) => (sold[b.id] || 0) - (sold[a.id] || 0));
   let shown;
   if(q) shown = all.filter(p => (p.brand + " " + p.name).toLowerCase().includes(q)).slice(0, 40);
-  else shown = withData.concat(without.slice(0, 12));
+  else if(ocMissingOnly) shown = without.filter(p => sold[p.id] > 0);
+  else shown = without.slice(0, 12).concat(withData);
   document.getElementById("oc_more").textContent = q
     ? (shown.length ? `${shown.length} نتيجة` : "ما فيه نتائج.")
-    : `معروض ${shown.length} من ${all.length} عطر — اكتب في البحث عشان تلقى أي عطر. (⚠️ = ما انكتب له سعر زيت بعد)`;
+    : ocMissingOnly
+      ? `معروض ${shown.length} عطر انباع وما له سعر زيت — امسح البحث أو حدّث الصفحة عشان ترجع للعرض العادي.`
+      : `معروض ${shown.length} من ${all.length} عطر — اللي ما لها سعر (⚠️) فوق، الأكثر مبيعًا أول. اكتب في البحث عشان تلقى أي عطر.`;
   wrap.innerHTML = shown.map(p => {
     const e = oilEntryFor(p.id);
     const legacy = !e && Number(p.costOilPerMl) > 0;
@@ -6175,7 +6219,7 @@ function renderOilTable(){
     const cost = e ? ocRowCostText(e.price, e.grams, e.vat) : (legacy ? `${ocRowCostText(legacyPrice, 100, false)} — من السعر القديم (${p.costOilPerMl} للجرام). تأكد من الرقم واضغط 💾 عشان يتثبّت.` : "");
     const total = perfumeHasCostData(p) ? `<span class="sale-row-amount">${fmt2(perfumeUnitCost(p, 50))} AED</span>` : "";
     return `<div class="sale-row oc-row" data-id="${escHtml(p.id)}">
-      <div class="sale-row-top"><span class="sale-row-name">${perfumeHasCostData(p) ? "" : "⚠️ "}${escHtml(ocLabel(p))}</span>${total}</div>
+      <div class="sale-row-top"><span class="sale-row-name">${perfumeHasCostData(p) ? "" : "⚠️ "}${escHtml(ocLabel(p))}${sold[p.id] ? ` <small style="color:var(--muted);">· انباع ${sold[p.id]}</small>` : ""}</span>${total}</div>
       <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:8px; margin-top:6px;">
         <div class="field" style="flex:1; min-width:110px; margin:0;"><label>السعر المدفوع (AED)</label><input type="number" class="oc-price" min="0" step="0.01" value="${price}"></div>
         <div class="field" style="flex:1; min-width:90px; margin:0;"><label>جرام</label><input type="number" class="oc-grams" min="1" step="1" value="${grams}"></div>
@@ -6247,7 +6291,7 @@ function renderCostSettingsAndOil(){
   renderOilTable();
 }
 ["cs_oilPct","cs_alcPrice","cs_alcLiters","cs_alcVat","cs_bottle","cs_pack","cs_manuf"].forEach(id => document.getElementById(id).addEventListener("input", renderCostSettingsPreview));
-document.getElementById("oc_search").addEventListener("input", renderOilTable);
+document.getElementById("oc_search").addEventListener("input", () => { ocMissingOnly = false; renderOilTable(); });
 document.getElementById("cs_saveBtn").addEventListener("click", async () => {
   const token = getToken();
   if(!token){ csBox("cs_statusBox", "err", "لازم تدخل مفتاح الدخول أول."); return; }
@@ -6268,54 +6312,120 @@ document.getElementById("cs_saveBtn").addEventListener("click", async () => {
   finally{ btn.disabled = false; }
 });
 
+// ===== ملخص الأرباح (25 أكتوبر 2026) =====
+// الربح الصافي = (مبيعات العطور − تكلفتها − توصيل مجاني − رسوم بطاقات − هدايا)
+//              + (مبيعات التوزيعات − تكلفتها) − المصاريف العامة
+let pfDistSales = null; // مبيعات التوزيعات — تنقرا من distributions.json كل ما ينفتح التبويب
+function pfGetPeriod(){ try{ return localStorage.getItem("evoque_pf_period") || "month"; }catch(e){ return "month"; } }
+function pfRange(period){
+  const t = todayStr(), y = +t.slice(0,4), m = +t.slice(5,7);
+  const ym = (yy, mm) => `${yy}-${String(mm).padStart(2,"0")}`;
+  if(period === "month") return { from: ym(y, m) + "-01", to: "9999" };
+  if(period === "last"){ const d = new Date(y, m - 2, 1); const k = ym(d.getFullYear(), d.getMonth() + 1); return { from: k + "-01", to: k + "-31" }; }
+  if(period === "3m"){ const d = new Date(y, m - 3, 1); return { from: ym(d.getFullYear(), d.getMonth() + 1) + "-01", to: "9999" }; }
+  return { from: "", to: "9999" };
+}
+async function pfLoadDist(){
+  if(!getToken()) return;
+  try{
+    const res = await privFetch(DISTRIBUTIONS_JSON_PATH);
+    if(res.ok){ const o = await res.json(); pfDistSales = (o && Array.isArray(o.sales)) ? o.sales : []; }
+    else if(res.status === 404) pfDistSales = [];
+  }catch(e){ /* نخلي آخر نسخة معروفة */ }
+  if(mode === "cost") renderProfitSummary();
+}
+function pfDistReport(range){
+  const r = { revenue: 0, profit: 0, units: 0, loaded: pfDistSales !== null };
+  (pfDistSales || []).forEach(x => {
+    if(x.cancelled) return;
+    if(!((x.date || "") >= range.from && (x.date || "") <= range.to)) return;
+    r.revenue += distEffectiveRevenue(x); r.profit += distEffectiveProfit(x); r.units += Number(x.qty) || 0;
+  });
+  r.cost = r.revenue - r.profit;
+  return r;
+}
+function renderProfitSummary(){
+  const range = pfRange(pfGetPeriod());
+  const pr = computeProfitReport(range);
+  const dr = pfDistReport(range);
+  const exp = ((expensesData && expensesData.expenses) || []).filter(e => (e.date || "") >= range.from && (e.date || "") <= range.to);
+  const expTotal = exp.reduce((a, e) => a + (Number(e.amount) || 0), 0);
+  const revenue = pr.totalRevenue + dr.revenue;
+  const cost = pr.totalCost + dr.cost + expTotal;
+  const profit = revenue - cost;
+  const has = revenue > 0 || cost > 0;
+  document.getElementById("pf_empty").style.display = has ? "none" : "block";
+  document.getElementById("pf_kpiGrid").style.display = has ? "grid" : "none";
+  document.getElementById("pf_breakdown").style.display = has ? "block" : "none";
+  document.getElementById("pf_revenue").textContent = fmtNum(revenue);
+  document.getElementById("pf_cost").textContent = fmtNum(cost);
+  const pEl = document.getElementById("pf_profit");
+  pEl.textContent = fmtNum(profit);
+  pEl.parentElement.classList.toggle("good", profit >= 0);
+  pEl.parentElement.classList.toggle("alert-red", profit < 0);
+  document.getElementById("pf_profitSub").textContent = (pr.estUnits ? "تقريبي — " : "") + "درهم";
+  document.getElementById("pf_margin").textContent = revenue > 0 ? Math.round(profit / revenue * 100) + "%" : "—";
+
+  const warn = document.getElementById("pf_warn");
+  if(pr.estUnits > 0){
+    warn.className = "status show err";
+    const how = pr.avgOilPerG > 0
+      ? `حسبنا تكلفتها تقديريًا بمتوسط أسعار زيوتك (${pr.avgOilPerG.toFixed(2)} درهم للجرام)`
+      : `ما فيه ولا سعر زيت مسجّل، فحسبنا الزجاجة والتغليف والكحول بس — الربح الحقيقي أقل`;
+    warn.innerHTML = `⚠️ <b>${pr.missingCostIds.length}</b> عطر انباع في هالفترة بدون سعر زيت (${fmtNum(pr.estUnits)} قطعة). ${how}، فالربح تقريبي.
+      <button type="button" class="secondary" id="pf_fixBtn" style="margin-top:6px; padding:6px 12px; font-size:13px;">عبّي أسعار زيوتها ←</button>`;
+    document.getElementById("pf_fixBtn").addEventListener("click", () => {
+      ocMissingOnly = true;
+      document.getElementById("oc_search").value = "";
+      renderOilTable();
+      document.getElementById("oc_rows").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  } else { warn.className = "status"; warn.innerHTML = ""; }
+
+  const line = (label, val, cls) => `<div class="pf-line ${cls || ""}"><span>${label}</span><span class="${val < 0 ? "neg" : ""}">${fmtNum(val)}</span></div>`;
+  const perfProfit = pr.totalRevenue - pr.totalCost;
+  let h = line("🧴 العطور — المبيعات", pr.totalRevenue, "head");
+  h += line(`تكلفة العطور (${fmtNum(pr.unitsCount)} قطعة${pr.estUnits ? `، منها ${fmtNum(pr.estUnits)} تقديري` : ""})`, -pr.perfumeCost, "sub");
+  if(pr.giftCost) h += line("الهدايا المجانية", -pr.giftCost, "sub");
+  if(pr.deliveryCost) h += line("التوصيل المجاني", -pr.deliveryCost, "sub");
+  if(pr.cardFees) h += line("رسوم البطاقات", -pr.cardFees, "sub");
+  h += line("ربح العطور", perfProfit, "sub");
+  h += line(`🎁 التوزيعات — المبيعات (${fmtNum(dr.units)} قطعة)`, dr.revenue, "head");
+  if(!dr.loaded) h += `<div class="pf-line sub"><span>جارِ تحميل التوزيعات...</span><span></span></div>`;
+  h += line("تكلفة التوزيعات", -dr.cost, "sub");
+  h += line("ربح التوزيعات", dr.profit, "sub");
+  h += line(`💵 المصاريف العامة (${exp.length})`, -expTotal, "head");
+  h += line("= الربح الصافي", profit, "total");
+  document.getElementById("pf_breakdown").innerHTML = h;
+
+  // أكثر العطور ربحًا + أقلها ربح لكل قطعة
+  const rows = pr.rows.map(r => ({ ...r, perUnit: r.units ? r.profit / r.units : 0 }));
+  const top = rows.slice().sort((a,b) => b.profit - a.profit).slice(0, 5);
+  const low = rows.slice().sort((a,b) => a.perUnit - b.perUnit).slice(0, 5);
+  const item = (r, txt) => `<div class="sale-row"><div class="sale-row-top"><span class="sale-row-name">${esc(r.brand)} — ${esc(r.name)}</span><span class="sale-row-amount">${txt}</span></div><div class="sale-row-meta">${fmtNum(r.units)} قطعة${r.est ? " — تقديري (ما له سعر زيت)" : ""}</div></div>`;
+  document.getElementById("pf_topWrap").innerHTML = rows.length ? `
+    <small class="hint" style="margin-top:0;">💚 أكثر 5 عطور جابت لك ربح:</small>
+    <div class="static-list" style="max-height:none;">${top.map(r => item(r, fmtNum(r.profit) + " درهم")).join("")}</div>
+    <small class="hint">🔻 أقل 5 عطور ربح في الحبة الوحدة (فكّر ترفع سعرها أو تقلل الخصم عليها):</small>
+    <div class="static-list" style="max-height:none;">${low.map(r => item(r, fmtNum(r.perUnit) + " درهم للحبة")).join("")}</div>`
+    : `<div class="ov-empty-note">ما فيه عطور انباعت في هالفترة.</div>`;
+  renderCostByPerfumeList(pr.rows);
+}
+document.getElementById("pf_period").addEventListener("change", (e) => {
+  try{ localStorage.setItem("evoque_pf_period", e.target.value); }catch(err){}
+  renderProfitSummary();
+});
+
 function renderCostPanel(){
-  if(!document.getElementById("cost_units")) return; // الصفحة لسا ما خلصت تحميل
+  if(!document.getElementById("pf_kpiGrid")) return; // الصفحة لسا ما خلصت تحميل
+  document.getElementById("pf_period").value = pfGetPeriod();
   renderCostSettingsAndOil();
   renderMaterialsSection();
   renderExpensesSection();
-  const report = computeProfitReport();
-  document.getElementById("cost_empty").style.display = report.unitsCount ? "none" : "block";
-  document.getElementById("cost_kpiGrid").style.display = report.unitsCount ? "grid" : "none";
-  document.getElementById("cost_units").textContent = fmtNum(report.unitsCount);
-  document.getElementById("cost_revenue").textContent = fmtNum(report.totalRevenue);
-  document.getElementById("cost_capital").textContent = fmtNum(report.totalCost);
-  document.getElementById("cost_profit").textContent = fmtNum(report.totalProfit);
-  document.getElementById("cost_margin").textContent = report.totalRevenue > 0 ? report.margin.toFixed(1) + "%" : "—";
-  document.getElementById("cost_missingCount").textContent = fmtNum(report.missingCostIds.length);
-  document.getElementById("cost_giftCost").textContent = fmtNum(report.giftCost);
-  document.getElementById("cost_deliveryCost").textContent = fmtNum(report.deliveryCost);
-  document.getElementById("cost_deliverySub").textContent = `على ${report.newOrders} طلب بالقواعد الجديدة — محسوبة ضمن التكلفة أعلاه`;
-  document.getElementById("cost_discountGiven").textContent = fmtNum(report.discountGiven);
-  const cf = document.getElementById("cost_cardFees"); if(cf) cf.textContent = fmtNum(report.cardFees);
-  renderCostByPerfumeList(report.rows);
+  renderProfitSummary();
   renderCostManageList(document.getElementById("cost_manageSearch").value);
 }
 document.getElementById("cost_manageSearch").addEventListener("input", (e) => renderCostManageList(e.target.value));
-document.getElementById("cost_missingCard").addEventListener("click", () => {
-  const report = computeProfitReport();
-  document.getElementById("cost_manageSearch").value = "";
-  const wrap = document.getElementById("cost_manageList");
-  const list = perfumes.filter(p => report.missingCostIds.includes(p.id));
-  if(!list.length){ wrap.innerHTML = `<div class="ov-empty-note">كل العطور اللي بيعت فعليًا عندها بيانات تكلفة. 👍</div>`; return; }
-  wrap.innerHTML = list.map(p => `
-    <div class="sale-row">
-      <div class="sale-row-top">
-        <span class="sale-row-name">⚠️ ${esc(p.brand)} — ${esc(p.name)}</span>
-        <button type="button" class="secondary cost-edit-btn" data-id="${esc(p.id)}" style="padding:4px 12px; font-size:12.5px;">✏️ تعديل</button>
-      </div>
-      <div class="sale-row-meta">ما فيها بيانات تكلفة بعد — بيعت ${report.rows.find(r => r.id === p.id) ? fmtNum(report.rows.find(r => r.id === p.id).units) : 0} قطعة لين الحين</div>
-    </div>`).join("");
-  wrap.querySelectorAll(".cost-edit-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const p = perfumes.find(x => x.id === btn.dataset.id);
-      if(!p) return;
-      setMode("edit");
-      selectPerfumeForEdit(p);
-      document.getElementById("formPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  });
-  document.getElementById("cost_manageList").scrollIntoView({ behavior: "smooth", block: "start" });
-});
 
 // ===================================================================
 // حساب سعر عُمان تلقائيًا من سعر الإمارات (28 أغسطس 2026) — كل أسعار عُمان
