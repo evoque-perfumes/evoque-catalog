@@ -437,3 +437,35 @@ html[dir="ltr"] #rvPrev .icon{ transform:rotate(90deg); }  html[dir="ltr"] #rvNe
   .site-nav-brands{ position:static; }
   .brands-mega{ position:absolute; top:calc(100% - 2px); left:12px; right:12px; width:auto; transform:none; max-height:65vh; }
 }
+
+/* ---------- بطاقات العطور بالجوال: عمودين وبطاقة مختصرة (24 أكتوبر 2026) ----------
+   البطاقة كانت بعرض الشاشة كامل (~830px طول). الحين عطرين جنب بعض والتفاصيل
+   (المكونات + رابط صورة العطر الأصلي) تنفتح لما يضغط العميل على الصورة. */
+@media (max-width:640px){
+  .grid:not(.bs-slider){ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+  .grid.bs-slider{ gap:10px; }
+  .grid.bs-slider .card{ flex:0 0 min(44vw, 210px); }
+
+  .card .info{ padding:10px 10px 2px; gap:3px; }
+  .card .card-top-row{ gap:4px; }
+  .card .impressions-tag{ font-size:9px; letter-spacing:1px; }
+  .card .wishlist-heart-btn{ width:32px; height:32px; }
+  .card .wishlist-heart-btn .icon{ width:15px; height:15px; }
+  .card .brand{ font-size:11px; }
+  .card .name{ font-size:14px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .card .inspired-block{ margin:0 0 2px; }
+  .card .inspired-ar{ font-size:11.5px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .card .inspired-en{ font-size:11px; }
+  .card .orig-link, .card .notes-toggle, .card .notes-box{ display:none !important; }
+  .card .badge{ font-size:10.5px; padding:3px 8px; }
+  .card .card-rating{ font-size:10.5px; }
+
+  .card-bottom{ padding:6px 10px 10px; }
+  .card .size-row{ margin-top:4px; }
+  .card .size-pill{ padding:5px 4px; font-size:10.5px; line-height:1.35; border-radius:10px; }
+  .card .size-pill b{ font-size:12.5px; }
+  .card .add-btn{ min-height:40px; padding:8px; font-size:12.5px; }
+  .card .add-btn .icon{ width:13px; height:13px; }
+  .card .qty-stepper{ min-height:40px; padding:3px; }
+  .card .qty-stepper button{ width:34px; height:34px; }
+}
