@@ -457,13 +457,9 @@
           </div>
           <ol style="margin:8px 0 10px; padding-inline-start:20px; font-size:13px; line-height:1.9;">
             <li>حمّل ملف الجرد.</li>
-            <li>في عمود «الجرد» جنب كل عطر:
-              <b>✓</b> (أو <b>ص</b>) = العدد صح ·
-              <b>رقم</b> = العدد الصحيح (مثلاً 3) ·
-              <b>-1</b> = ناقص حبة عن النظام ·
-              <b>0</b> أو <b>خلص</b> = ما باقي شي ·
-              فاضي = ما عدّيته (ما يتغير).</li>
-            <li>ارفع الملف هنا، شوف الفروقات، واضغط «اعتمد الجرد».</li>
+            <li>في عمود «الجرد» اضغط الخانة واختار من القائمة: <b>✓ صح</b> · <b>ناقص 1</b> · <b>0 (خلص)</b> · أو العدد.
+              الخانة الفاضية = ما عدّيته.</li>
+            <li>ارفع الملف هنا، شوف الفروقات، واضغط «اعتمد الجرد». (لو عدّيت كل شي وعلّمت بس اللي فيه فرق، علّم على «الخانات الفاضية = العدد صح».)</li>
           </ol>
           <div class="row" style="gap:8px; flex-wrap:wrap;">
             <button type="button" class="secondary" id="stkDownloadBtn">⬇️ حمّل ملف الجرد</button>
@@ -1620,6 +1616,40 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 
 </script>
 <script>
+// ===== حفظ ملفات الإكسل (25 أكتوبر 2026) =====
+// كل ملف ينزل من اللوحة يفتح من اليسار لليمين (بطلب صاحب المشروع)، وممكن نضيف قائمة منسدلة
+// وتثبيت صف العناوين. SheetJS المجانية ما تكتب هذي الخصائص، فنعدّل XML الورقة داخل الملف قبل التحميل.
+// extras: { "اسم الورقة": { freezeHeader: true, dropdown: { sqref: "D2:D300", items: ["✓ صح", ...] } } }
+function xlsxSave(wb, filename, extras){
+  const u8 = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  let zip;
+  try{ zip = XLSX.CFB.read(u8, { type: "array" }); }catch(e){ XLSX.writeFile(wb, filename); return; }
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  wb.SheetNames.forEach((name, i) => {
+    const entry = XLSX.CFB.find(zip, "/xl/worksheets/sheet" + (i + 1) + ".xml");
+    if(!entry || !entry.content) return;
+    const ex = (extras && extras[name]) || {};
+    let xml = dec.decode(entry.content);
+    const pane = ex.freezeHeader ? '<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>' : "";
+    xml = xml.replace(/<sheetView\b[^>]*?(\/>|>)/, m => `<sheetView rightToLeft="0" workbookViewId="0"${pane ? `>${pane}</sheetView>` : (m.endsWith("/>") ? "/>" : ">")}`);
+    if(pane) xml = xml.replace(/(<\/sheetView>)\s*<\/sheetView>/, "$1"); // لو الوسم الأصلي كان مفتوح
+    if(ex.dropdown){
+      const items = ex.dropdown.items.map(t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;&quot;")).join(",");
+      const dv = `<dataValidations count="1"><dataValidation type="list" allowBlank="1" showInputMessage="1" showErrorMessage="0" sqref="${ex.dropdown.sqref}"><formula1>"${items}"</formula1></dataValidation></dataValidations>`;
+      const after = /<(hyperlinks|printOptions|pageMargins|pageSetup|headerFooter|rowBreaks|colBreaks|customProperties|cellWatches|ignoredErrors|smartTags|drawing|legacyDrawing|tableParts|extLst)\b/;
+      xml = after.test(xml) ? xml.replace(after, dv + "<$1") : xml.replace("</worksheet>", dv + "</worksheet>");
+    }
+    entry.content = enc.encode(xml);
+    entry.size = entry.content.length;
+  });
+  const out = XLSX.CFB.write(zip, { fileType: "zip", type: "array" });
+  const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
 // ===== حماية XSS (أكتوبر 2026) =====
 // أي نص مصدره عميل أو ملف بيانات يُدخل بـinnerHTML لازم يمر عبر esc() — هذي الصفحة
 // تحمل مفتاح الكتابة على المستودع، فأي حقن كود هنا = سيطرة على الموقع.
@@ -8094,7 +8124,7 @@ function xlsxDownloadTemplate(kind){
   const wsH = XLSX.utils.json_to_sheet(help);
   wsH["!cols"] = [{ wch: 34 }, { wch: 80 }];
   XLSX.utils.book_append_sheet(wb, wsH, "تعليمات");
-  XLSX.writeFile(wb, isUpd ? "Evoque_Update_Template.xlsx" : "Evoque_New_Perfumes_Template.xlsx");
+  xlsxSave(wb, isUpd ? "Evoque_Update_Template.xlsx" : "Evoque_New_Perfumes_Template.xlsx");
 }
 document.getElementById("xlsxTplAddBtn").addEventListener("click", () => xlsxDownloadTemplate("add"));
 document.getElementById("xlsxTplUpdBtn").addEventListener("click", () => xlsxDownloadTemplate("update"));
@@ -8430,7 +8460,7 @@ function exportToExcel(){
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(outOfStockRows), "غير متوفر");
 
   const today = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `Evoque_Inventory_${today}.xlsx`);
+  xlsxSave(wb, `Evoque_Inventory_${today}.xlsx`);
 }
 
 document.getElementById("exportExcelBtn").addEventListener("click", exportToExcel);
@@ -8658,9 +8688,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
     if(s === "") return { skip: true };
     const low = s.toLowerCase();
-    if(STK_OK.includes(low) || /^[✓✔√☑✅️\s]+$/.test(s)) return { n: sys, mark: true };
-    if(["خلص", "مافي", "ما في", "صفر"].includes(low)) return { n: 0 };
-    const rel = s.match(/^[-−]\s*(\d+)$/);
+    if(STK_OK.includes(low) || /^[✓✔√☑✅️]/.test(s) || low === "صح ✓") return { n: sys, mark: true };
+    if(["خلص", "مافي", "ما في", "صفر", "0 (خلص)"].includes(low)) return { n: 0 };
+    const rel = s.match(/^(?:[-−]|ناقص)\s*(\d+)$/);
     if(rel){ const n = sys - Number(rel[1]); return n >= 0 ? { n } : { bad: true }; }
     if(/^\d+$/.test(s)) return { n: Number(s) };
     return { bad: true };
@@ -8681,24 +8711,23 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [{ wch: 20 }, { wch: 30 }, { wch: 14 }, { wch: 16 }, { wch: 20 }, { wch: 30 }];
-    ws["!views"] = [{ RTL: true, state: "frozen", ySplit: 1 }];
-    if(!wb.Workbook) wb.Workbook = {};
-    wb.Workbook.Views = [{ RTL: true }];
     XLSX.utils.book_append_sheet(wb, ws, "الجرد");
     const help = XLSX.utils.json_to_sheet([
-      { "اكتب في عمود «الجرد»": "✓ أو ص أو صح", "المعنى": "العدد اللي بالنظام صح" },
-      { "اكتب في عمود «الجرد»": "رقم (مثلاً 3)", "المعنى": "هذا العدد الموجود عندك فعليًا" },
-      { "اكتب في عمود «الجرد»": "-1 أو -2", "المعنى": "ناقص حبة أو حبتين عن النظام" },
-      { "اكتب في عمود «الجرد»": "0 أو خلص", "المعنى": "ما باقي ولا حبة" },
+      { "اكتب في عمود «الجرد»": "اضغط الخانة", "المعنى": "تطلع قائمة: ✓ صح / ناقص 1 / ناقص 2 / ناقص 3 / 0 (خلص) / 1 إلى 15" },
+      { "اكتب في عمود «الجرد»": "✓ صح", "المعنى": "العدد اللي بالنظام صح" },
+      { "اكتب في عمود «الجرد»": "ناقص 1", "المعنى": "ناقص حبة عن النظام" },
+      { "اكتب في عمود «الجرد»": "رقم", "المعنى": "هذا العدد الموجود عندك فعليًا (تقدر تكتب أي رقم حتى لو مو في القائمة)" },
       { "اكتب في عمود «الجرد»": "فاضي", "المعنى": "ما عدّيته — يبقى مثل ما هو" },
-      { "اكتب في عمود «الجرد»": "نصيحة", "المعنى": "لو أغلبها صح: اكتب ✓ في أول خانة واسحبها لتحت، وبعدين غيّر اللي فيها فرق بس" },
+      { "اكتب في عمود «الجرد»": "أسرع طريقة", "المعنى": "اختار بس العطور اللي فيها فرق، وخل الباقي فاضي. وقت الرفع علّم على «الخانات الفاضية صح»" },
       { "اكتب في عمود «الجرد»": "تنبيه", "المعنى": "لا تعدّل عمود المعرّف ولا تحذف صفوف" },
       { "اكتب في عمود «الجرد»": "تاريخ الملف", "المعنى": new Date().toLocaleString("ar") }
     ]);
     help["!cols"] = [{ wch: 22 }, { wch: 70 }];
-    help["!views"] = [{ RTL: true }];
     XLSX.utils.book_append_sheet(wb, help, "طريقة الجرد");
-    XLSX.writeFile(wb, "Evoque_Stocktake_" + todayStr() + ".xlsx");
+    const STK_CHOICES = ["✓ صح", "ناقص 1", "ناقص 2", "ناقص 3", "0 (خلص)"].concat(Array.from({ length: 15 }, (_, i) => String(i + 1)));
+    xlsxSave(wb, "Evoque_Stocktake_" + todayStr() + ".xlsx", {
+      "الجرد": { freezeHeader: true, dropdown: { sqref: "D2:D" + (rows.length + 1), items: STK_CHOICES } }
+    });
     st("تم تحميل ملف الجرد.", "ok");
   });
 
@@ -8729,12 +8758,19 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     }catch(err){ st("ما قدرت أقرأ الملف: " + err.message, "err"); }
   });
 
+  // خيار وقت الرفع: الخانات الفاضية = العدد صح (لو عدّيت كل شي وعلّمت بس اللي فيه فرق)
+  let stkBlankOk = false, stkLastUnknown = [], stkLastBad = [];
+  function stkEffective(){
+    return stkRows.map(r => (r.counted == null && stkBlankOk) ? Object.assign({}, r, { counted: stockAsQty(r.p.stock50), mark: true }) : r);
+  }
   function renderPreview(unknown, bad){
-    const counted = stkRows.filter(r => r.counted != null);
+    stkLastUnknown = unknown; stkLastBad = bad;
+    const counted = stkEffective().filter(r => r.counted != null);
     const diffs = counted.filter(r => r.counted !== stockAsQty(r.p.stock50));
     const changedSince = counted.filter(r => Number.isFinite(r.snapshot) && r.snapshot !== stockAsQty(r.p.stock50));
     const notCounted = perfumes.length - counted.length;
     let h = `<div style="font-size:13.5px; line-height:1.9;">انعد <b>${esc(counted.length)}</b> عطر من ${esc(perfumes.length)} — ✓ مطابق: <b>${esc(counted.length - diffs.length)}</b> — فيه فرق: <b style="color:#9A4F2E;">${esc(diffs.length)}</b>${notCounted ? ` — ما انعد (يبقى مثل ما هو): ${esc(notCounted)}` : ""}</div>`;
+    h += `<label style="display:flex; align-items:center; gap:8px; margin:8px 0; cursor:pointer; font-size:13.5px;"><input type="checkbox" id="stkBlankOk" style="width:auto; margin:0;" ${stkBlankOk ? "checked" : ""}> الخانات الفاضية = العدد صح (عدّيت كل العطور وعلّمت بس اللي فيها فرق)</label>`;
     if(bad.length) h += `<div class="banner" style="margin:8px 0; background:#fdecea; border-color:#c0392b; color:#8a1c14;">⛔ ما فهمت هذي الخانات — اكتب ✓ أو رقم أو -1 وارفع الملف مرة ثانية: ${bad.map(esc).join("، ")}</div>`;
     if(unknown.length) h += `<div class="hint">تجاهلت ${esc(unknown.length)} صف معرّفه مب موجود بالنظام.</div>`;
     if(changedSince.length) h += `<div class="banner" style="margin:8px 0; background:#fff4e0; border-color:#c98a1b; color:#6b4a0e;">⚠️ ${esc(changedSince.length)} عطر تغيّر مخزونها بالنظام بعد ما حمّلت الملف (يمكن انعتمد طلب). تأكد إن عدّك صار بعد آخر بيع.</div>`;
@@ -8748,6 +8784,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       h += `<div class="row" style="margin-top:10px; gap:8px;"><button type="button" id="stkApplyBtn">✅ اعتمد الجرد${diffs.length ? " وعدّل " + diffs.length + " عطر" : " (كل شي مطابق)"}</button><button type="button" class="secondary" id="stkCancelBtn">إلغاء</button></div>`;
     }
     el("stkPreview").innerHTML = h;
+    el("stkBlankOk").addEventListener("change", (e) => { stkBlankOk = e.target.checked; renderPreview(stkLastUnknown, stkLastBad); });
     const ab = el("stkApplyBtn"); if(ab) ab.addEventListener("click", apply);
     const cb = el("stkCancelBtn"); if(cb) cb.addEventListener("click", () => { stkRows = null; el("stkPreview").innerHTML = ""; st(""); });
   }
@@ -8755,7 +8792,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   async function apply(){
     const token = getToken();
     if(!token){ st("لازم تدخل بحساب Google أول.", "err"); return; }
-    const counted = stkRows.filter(r => r.counted != null);
+    const counted = stkEffective().filter(r => r.counted != null);
     const btn = el("stkApplyBtn"); if(btn) btn.disabled = true;
     st("جارِ اعتماد الجرد...", "info");
     try{
@@ -8774,7 +8811,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         matched: counted.length - diffs.length, diffs, complete, allMatched: complete && diffs.length === 0 };
       await updateJsonWithRetry(API_BASE_PRIV, token, STK_PATH, [], (list) => { const a = Array.isArray(list) ? list : []; a.push(rec); return a; }, `Stocktake ${rec.date}: ${diffs.length} adjusted`);
       try{ updateStockCounts(); }catch(e){}
-      stkRows = null; el("stkPreview").innerHTML = "";
+      stkRows = null; stkBlankOk = false; el("stkPreview").innerHTML = "";
       st(rec.allMatched ? "✅ الجرد انسجّل — المخزون مطابق 100٪." : (diffs.length ? `✅ الجرد انسجّل، وعدّلت مخزون ${diffs.length} عطر.` : "✅ الجرد انسجّل — العطور اللي انعدت كلها مطابقة."), "ok");
       loadLast();
     }catch(err){ st("صار خطأ: " + err.message, "err"); if(btn) btn.disabled = false; }
