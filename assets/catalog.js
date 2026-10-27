@@ -1047,7 +1047,7 @@ let loadState = "loading"; // "loading" | "error" | "loaded"
 let loadErrorMsg = "";
 
 // المصدر السريع: ملف data.json ثابت بنفس نطاق الموقع، يبنيه GitHub Action كل
-// فترة من الشيت الحي (شوف scripts/build-catalog-json.js). أسرع بكثير من قراءة
+// فترة من الشيت الحي (البناء القديم من الشيت متوقف). أسرع بكثير من قراءة
 // الشيت مباشرة لأنه ملف عادي على نفس السيرفر (يستفيد من كاش الـ CDN).
 async function loadPerfumesFromJson(){
   // ملاحظة أداء (21 أغسطس 2026): كان هذا الطلب بـ cache:"no-store" فيجبر تحميل
@@ -1058,7 +1058,7 @@ async function loadPerfumesFromJson(){
   const res = await fetch("./data.json");
   if(!res.ok) throw new Error("HTTP " + res.status);
   const data = await res.json();
-  // data.json الفعلي على الريبو مصفوفة مباشرة [...] (شوف scripts/build-catalog-json.js) —
+  // data.json الفعلي على الريبو مصفوفة مباشرة [...] (البناء القديم من الشيت متوقف) —
   // نتعامل مع الشكلين احتياطًا (مصفوفة مباشرة أو {perfumes:[...]}) عشان ما ننكسر لو تغيّر لاحقًا.
   const list = Array.isArray(data) ? data : (data && Array.isArray(data.perfumes) ? data.perfumes : null);
   if(!list || list.length === 0) throw new Error("empty data.json");

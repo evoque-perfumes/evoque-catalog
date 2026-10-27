@@ -6819,8 +6819,8 @@ document.getElementById("tokenInput").addEventListener("change", () => {
 // بدل كلمة المرور القديمة (كانت ترجع مفتاح GitHub لأي شخص يخمّنها). الحين الدخول يمر
 // عبر مشروع Apps Script منفصل ينشر بخيار "Execute as me + Only myself": جوجل نفسها
 // تتحقق إن اللي دخل هو صاحب الحساب، وبعدها الصفحة تعطيك زر يفتح لوحة التحكم ومعه
-// المفتاح داخل الجزء بعد # (ما يُرسل لأي سيرفر). شوف apps-script/admin-auth/Code.gs
-const ADMIN_AUTH_URL = "https://script.google.com/macros/s/AKfycbweDBfIcx91eo3JfFJq0D69fQHHCKfsSIZjBYxJqmI-DsR_kYMzliowVuVmUDZfRQkJOA/exec"; // يُستبدل بعد نشر apps-script/admin-auth (خطوات النشر بالملف)
+// المفتاح داخل الجزء بعد # (ما يُرسل لأي سيرفر). شوف evoque-private/archive-public-repo/apps-script/admin-auth/Code.gs
+const ADMIN_AUTH_URL = "https://script.google.com/macros/s/AKfycbweDBfIcx91eo3JfFJq0D69fQHHCKfsSIZjBYxJqmI-DsR_kYMzliowVuVmUDZfRQkJOA/exec"; // نسخة الكود بالمستودع الخاص
 const TOKEN_KEY = "evoque_admin_token";
 
 function adminLoginStatus(msg, type){
@@ -6855,7 +6855,7 @@ function consumeTokenFromHash(){
 
 function startGoogleLogin(){
   if(!ADMIN_AUTH_URL || ADMIN_AUTH_URL.indexOf("PASTE_") === 0){
-    adminLoginStatus("رابط الدخول بحساب Google ما انضبط بعد. اتبع خطوات النشر بملف apps-script/admin-auth/Code.gs أو استخدم الخيار المتقدم تحت.", "err");
+    adminLoginStatus("رابط الدخول بحساب Google ما انضبط بعد. اتبع خطوات نشر سكربت الدخول أو استخدم الخيار المتقدم تحت.", "err");
     return;
   }
   location.href = ADMIN_AUTH_URL;
@@ -6928,12 +6928,9 @@ function readFormAsPerfume(existingImage){
     notesTopAR: document.getElementById("f_notesTopAR").value.trim(),
     notesMid: "", notesBase: "",
     longevity: document.getElementById("f_longevity").value.trim(),
-    sillage: document.getElementById("f_sillage").value.trim(),
-    costOilPerMl: num("f_costOilPerMl"),
-    costAlcoholPerMl: num("f_costAlcoholPerMl"),
-    costBottle50: num("f_costBottle50"), costBottle10: num("f_costBottle10"),
-    costPackaging50: num("f_costPackaging50"), costPackaging10: num("f_costPackaging10"),
-    costManufacturing50: num("f_costManufacturing50"), costManufacturing10: num("f_costManufacturing10")
+    sillage: document.getElementById("f_sillage").value.trim()
+    // 27 أكتوبر 2026: خانات التكلفة انشالت من هنا — data.json ملف عام، والتكاليف مكانها
+    // المستودع الخاص فقط (materials.json ← تبويب 🧮 التكلفة والأرباح).
   };
 }
 
@@ -6963,7 +6960,17 @@ async function getDataJsonWithSha(token){
   return { list, sha: info.sha };
 }
 
+// حارس: data.json ينشر للعامة — نشيل أي حقل تكلفة (cost*) قبل أي حفظ، مهما كان مصدره.
+function stripPrivateFields(list){
+  return (Array.isArray(list) ? list : []).map(p => {
+    if(!p || typeof p !== "object") return p;
+    const o = {};
+    Object.keys(p).forEach(k => { if(!/^cost/i.test(k)) o[k] = p[k]; });
+    return o;
+  });
+}
 async function putDataJson(list, sha, token, commitMsg){
+  list = stripPrivateFields(list);
   const body = {
     message: commitMsg,
     content: utf8ToBase64(JSON.stringify(list)),

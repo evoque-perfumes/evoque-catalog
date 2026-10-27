@@ -14,4 +14,11 @@ jobs:
           for f in orders.json pending-orders.json customers.json expenses.json materials.json distributions.json wishlist.json bank-info.json reviews-private.json; do
             if [ -e "$f" ]; then echo "::error::Private file $f must live in the private repo (evoque-private), not here."; bad=1; fi
           done
+          # data.json عام: ممنوع أي حقل تكلفة (cost*) — التكاليف مكانها المستودع الخاص
+          if node -e 'const l=require("./data.json");process.exit(l.some(p=>p&&Object.keys(p).some(k=>/^cost/i.test(k)))?0:1)'; then
+            echo "::error::data.json contains cost fields — costs must live in evoque-private only."; bad=1
+          fi
+          for d in apps-script order-queue-apps-script; do
+            if [ -e "$d" ]; then echo "::error::$d contains private emails/config — keep it in evoque-private."; bad=1; fi
+          done
           exit $bad
