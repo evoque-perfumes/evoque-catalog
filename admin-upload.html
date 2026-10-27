@@ -248,7 +248,7 @@
   @media (prefers-reduced-motion: reduce){ button{ transition:none; } }
   /* ===== تنقل من مستويين: أقسام رئيسية فوق + صفحات القسم تحتها (22 أكتوبر 2026) ===== */
   nav.groups{
-    position:sticky; top:8px; z-index:41; display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:4px;
+    position:sticky; top:8px; z-index:41; display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:4px;
     background:var(--emerald); border-radius:20px; padding:6px; margin-bottom:10px; box-shadow:0 10px 26px rgba(24,35,31,.16);
   }
   nav.groups button{
@@ -261,8 +261,8 @@
   nav.tabs#subNav button.hidden-sub{ display:none; }
   nav.tabs#subNav.single{ display:none; }
   @media (max-width:640px){
-    nav.groups{ grid-template-columns:repeat(3, minmax(0,1fr)); top:6px; }
-    nav.groups button{ min-height:44px; font-size:12.5px; }
+    nav.groups{ grid-template-columns:repeat(4, minmax(0,1fr)); top:6px; gap:3px; padding:5px; }
+    nav.groups button{ min-height:44px; font-size:11.5px; padding:6px 2px; gap:3px; }
     nav.tabs#subNav{ top:112px; }
   }
   /* تبويبات داخل التوزيعات */
@@ -270,6 +270,37 @@
   .dist-subnav button{ background:#fff; color:var(--ink); border:1.5px solid var(--line); min-height:42px; padding:8px 16px; }
   .dist-subnav button.active{ background:var(--emerald); color:#fff; border-color:var(--emerald); }
   #distPanel fieldset.dsec-hidden{ display:none; }
+  /* ✨ سيغنتشر */
+  #signaturePanel fieldset.dsec-hidden{ display:none; }
+  .sig-note{ color:var(--muted); font-size:13px; line-height:1.8; margin:8px 0; }
+  .sig-cards{ display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:12px; }
+  .sig-card{ border:1px solid var(--line); border-radius:14px; padding:12px 14px; background:#fff; }
+  .sig-card-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding-bottom:8px; margin-bottom:6px; border-bottom:1px solid var(--line); font-size:15px; }
+  .sig-price{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); margin:0; }
+  .sig-price input{ width:86px; min-height:36px; padding:4px 8px; }
+  .sig-kv{ display:flex; justify-content:space-between; gap:10px; padding:5px 0; font-size:13px; border-bottom:1px dashed rgba(0,0,0,.06); }
+  .sig-kv span{ color:var(--muted); }
+  .sig-kv.good b{ color:#1F6B41; }
+  .sig-kv.neg b{ color:#963224; }
+  .sig-del-prod{ margin-top:8px; }
+  .sig-add{ margin-top:14px; }
+  .sig-add summary{ cursor:pointer; font-weight:600; color:var(--emerald); }
+  .sig-type{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .sig-type label{ display:flex; align-items:center; gap:6px; border:1.5px solid var(--line); border-radius:12px; padding:8px 14px; cursor:pointer; margin:0; }
+  .sig-type label:has(input:checked){ border-color:var(--emerald); background:rgba(31,107,65,.06); }
+  .sig-item{ display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:8px; align-items:end; padding:8px 0; border-bottom:1px dashed var(--line); }
+  .sig-item .field{ margin:0; }
+  .sig-item .si-del{ min-height:40px; padding:6px 12px; }
+  @media (max-width:640px){ .sig-item{ grid-template-columns:1fr 1fr; } .sig-item .field:first-child{ grid-column:1 / -1; } }
+  .sig-preview{ margin-top:10px; }
+  .sig-prev-title{ font-weight:700; font-size:13px; margin-bottom:4px; }
+  .sig-prev-row{ font-size:12.5px; line-height:1.8; padding:4px 0; border-bottom:1px dashed rgba(0,0,0,.06); }
+  .sig-prev-total{ font-size:13.5px; padding-top:6px; }
+  .sig-buy{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:10px; background:#fff; }
+  .sig-buy-head{ display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; font-size:14px; }
+  .sig-buy-head span, .sig-buy-meta{ color:var(--muted); font-size:12.5px; }
+  .sig-buy-foot{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px; font-size:13px; }
+  .sig-buy-foot button{ min-height:34px; padding:4px 10px; font-size:12.5px; }
   @media (max-width:640px){ h1{ font-size:22px; } .panel{ padding:16px; } body{ padding:16px 12px 80px; } }
 </style>
 </head>
@@ -300,6 +331,7 @@
     <button type="button" data-g="customers">👥 العملاء</button>
     <button type="button" data-g="money">💰 الحسابات</button>
     <button type="button" data-g="dist">🎁 التوزيعات</button>
+    <button type="button" data-g="signature">✨ سيغنتشر</button>
   </nav>
   <nav class="tabs" id="subNav" aria-label="صفحات القسم">
     <button type="button" class="active" id="modeOverviewBtn">🏠 نظرة عامة</button>
@@ -317,6 +349,7 @@
     <button type="button" id="modeCustomersBtn">👥 العملاء</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
     <button type="button" id="modeDistBtn">🎁 توزيعات المناسبات</button>
+    <button type="button" id="modeSignatureBtn">✨ إيفوك سيغنتشر</button>
     <button type="button" id="modeOrdersQueueBtn">🧾 الطلبات الجديدة<span class="badge pending" id="oqNavBadge" style="display:none; margin-inline-start:6px;"></span></button>
   </nav>
 
@@ -831,6 +864,106 @@
       <button type="button" id="ship_saveBtn">احفظ رسوم التوصيل</button>
     </div>
     <div class="status" id="ship_statusBox"></div>
+  </div>
+
+  <div class="panel" id="signaturePanel" style="display:none;">
+    <h2>✨ إيفوك سيغنتشر — التكلفة والأرباح</h2>
+    <small class="hint" style="margin-top:0;">
+      خاص فيك بس: كل الأرقام وأسماء الموردين تنحفظ في المستودع الخاص، وما يطلع منها شي للموقع.
+      سجّل كل شراء زيت كدفعة لحالها (لأن السعر يتغير بين شراء وشراء)، والنظام يحسب تكلفة الحبة والربح.
+    </small>
+    <div class="dist-subnav" id="sigSubNav" role="tablist">
+      <button type="button" data-ss="overview" class="active">📊 الملخص</button>
+      <button type="button" data-ss="products">🧴 العطور والأرباح</button>
+      <button type="button" data-ss="buy">🛢️ مشتريات الزيت</button>
+      <button type="button" data-ss="settings">⚙️ الإعدادات</button>
+    </div>
+    <div class="status" id="sig_statusBox"></div>
+
+    <fieldset data-ss="overview">
+      <legend>📊 الملخص</legend>
+      <div class="kpi-grid" id="sig_kpis"></div>
+      <div id="sig_overviewNote" class="sig-note"></div>
+    </fieldset>
+
+    <fieldset data-ss="products">
+      <legend>🧴 العطور والأرباح (حبة ٥٠ مل)</legend>
+      <div id="sig_mixInfo" class="sig-note" style="margin-top:0;"></div>
+      <div id="sig_productCards" class="sig-cards"></div>
+      <div class="row" style="margin-top:10px;">
+        <button type="button" id="sig_savePricesBtn">💾 احفظ الأسعار</button>
+      </div>
+      <details class="sig-add">
+        <summary>➕ أضف عطر جديد للمجموعة</summary>
+        <div class="grid3" style="margin-top:10px;">
+          <div class="field"><label for="sig_newNameAr">الاسم بالعربي</label><input type="text" id="sig_newNameAr" maxlength="40" placeholder="مثال: فجر"></div>
+          <div class="field"><label for="sig_newNameEn">الاسم بالإنجليزي</label><input type="text" id="sig_newNameEn" maxlength="40" dir="ltr" placeholder="Fajr"></div>
+          <div class="field"><label for="sig_newPrice">سعر البيع (درهم)</label><input type="number" id="sig_newPrice" min="0" step="1" value="119"></div>
+        </div>
+        <button type="button" id="sig_addProductBtn" class="secondary">➕ أضف العطر</button>
+      </details>
+    </fieldset>
+
+    <fieldset data-ss="buy">
+      <legend id="sig_buyLegend">🛢️ تسجيل شراء زيت جديد</legend>
+      <div class="sig-type">
+        <label><input type="radio" name="sig_type" value="imported" checked> 🌍 مستورد (بالدولار)</label>
+        <label><input type="radio" name="sig_type" value="local"> 🇦🇪 محلي (بالدرهم)</label>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="sig_date">تاريخ الشراء</label><input type="date" id="sig_date"></div>
+        <div class="field"><label for="sig_supplier">اسم المورد</label><input type="text" id="sig_supplier" maxlength="80"></div>
+        <div class="field"><label for="sig_note">ملاحظة (اختياري)</label><input type="text" id="sig_note" maxlength="120"></div>
+      </div>
+      <div class="grid4" id="sig_importFields">
+        <div class="field"><label for="sig_rate">سعر الدولار بالدرهم</label><input type="number" id="sig_rate" step="0.0001" min="0"></div>
+        <div class="field"><label for="sig_shipping" id="sig_shippingLbl">شحن الشحنة كاملة (درهم)</label><input type="number" id="sig_shipping" step="0.01" min="0"></div>
+        <div class="field"><label for="sig_customs">الجمارك %</label><input type="number" id="sig_customs" step="0.1" min="0"></div>
+        <div class="field"><label for="sig_vat">ضريبة الاستيراد %</label><input type="number" id="sig_vat" step="0.1" min="0"></div>
+      </div>
+      <div id="sig_items"></div>
+      <button type="button" id="sig_addItemBtn" class="secondary" style="margin-top:6px;">➕ زيت ثاني في نفس الشحنة</button>
+      <div id="sig_buyPreview" class="sig-preview"></div>
+      <div class="row" style="margin-top:10px;">
+        <button type="button" id="sig_saveBuyBtn">💾 احفظ الشراء</button>
+        <button type="button" id="sig_cancelEditBtn" class="secondary" style="display:none;">إلغاء التعديل</button>
+      </div>
+    </fieldset>
+    <fieldset data-ss="buy">
+      <legend>📜 كل المشتريات</legend>
+      <div id="sig_buyList"></div>
+    </fieldset>
+
+    <fieldset data-ss="settings">
+      <legend>⚙️ الإعدادات (تنطبق على كل عطور سيغنتشر)</legend>
+      <div class="grid3">
+        <div class="field"><label for="sigs_oilPct">نسبة الزيت بالوزن %</label><input type="number" id="sigs_oilPct" step="0.1" min="1" max="100"></div>
+        <div class="field"><label for="sigs_bottleMl">حجم الحبة (مل)</label><input type="number" id="sigs_bottleMl" step="1" min="1"></div>
+        <div class="field"><label for="sigs_lossPct">هدر الخلط والتعبئة %</label><input type="number" id="sigs_lossPct" step="0.1" min="0" max="50"></div>
+        <div class="field"><label for="sigs_oilDensity">كثافة الزيت (غ/مل)</label><input type="number" id="sigs_oilDensity" step="0.001" min="0.1"></div>
+        <div class="field"><label for="sigs_alcDensity">كثافة الكحول ٩٦٪ (غ/مل)</label><input type="number" id="sigs_alcDensity" step="0.001" min="0.1"></div>
+        <div class="field"><label for="sigs_alcPrice">سعر جالون الكحول (درهم)</label><input type="number" id="sigs_alcPrice" step="0.01" min="0"></div>
+        <div class="field"><label for="sigs_alcLiters">حجم الجالون (لتر)</label><input type="number" id="sigs_alcLiters" step="0.1" min="0.1"></div>
+        <div class="field"><label for="sigs_bottle">القارورة مع الغطاء والبخاخ (درهم)</label><input type="number" id="sigs_bottle" step="0.01" min="0"></div>
+        <div class="field"><label for="sigs_pack">التغليف (درهم)</label><input type="number" id="sigs_pack" step="0.01" min="0"></div>
+        <div class="field"><label for="sigs_deliveryAE">توصيل الإمارات لكل طلب (درهم)</label><input type="number" id="sigs_deliveryAE" step="0.01" min="0"></div>
+        <div class="field"><label for="sigs_deliveryOM">توصيل عمان لكل طلب (ريال)</label><input type="number" id="sigs_deliveryOM" step="0.01" min="0"></div>
+        <div class="field"><label for="sigs_omrToAed">سعر الريال بالدرهم</label><input type="number" id="sigs_omrToAed" step="0.01" min="1"></div>
+        <div class="field"><label for="sigs_ads">الإعلانات شهريًا (درهم)</label><input type="number" id="sigs_ads" step="1" min="0"></div>
+        <div class="field"><label for="sigs_other">اشتراكات ومصاريف ثانية شهريًا</label><input type="number" id="sigs_other" step="1" min="0"></div>
+        <div class="field"><label for="sigs_discPct">خصم الكمية %</label><input type="number" id="sigs_discPct" step="0.1" min="0" max="90"></div>
+        <div class="field"><label for="sigs_discMin">الخصم من كم حبة</label><input type="number" id="sigs_discMin" step="1" min="2"></div>
+        <div class="field"><label for="sigs_cardPct">رسوم البطاقة %</label><input type="number" id="sigs_cardPct" step="0.01" min="0"></div>
+        <div class="field"><label for="sigs_cardFixed">رسوم البطاقة الثابتة (درهم)</label><input type="number" id="sigs_cardFixed" step="0.01" min="0"></div>
+        <div class="field"><label for="sigs_rate">سعر الدولار الافتراضي</label><input type="number" id="sigs_rate" step="0.0001" min="0"></div>
+        <div class="field"><label for="sigs_customs">الجمارك الافتراضية %</label><input type="number" id="sigs_customs" step="0.1" min="0"></div>
+        <div class="field"><label for="sigs_vat">ضريبة الاستيراد الافتراضية %</label><input type="number" id="sigs_vat" step="0.1" min="0"></div>
+      </div>
+      <div class="row">
+        <button type="button" id="sig_saveSettingsBtn">💾 احفظ الإعدادات</button>
+        <button type="button" id="sig_resetSettingsBtn" class="secondary">رجّع الأرقام الافتراضية</button>
+      </div>
+    </fieldset>
   </div>
 
   <div class="panel" id="picksPanel" style="display:none;">
@@ -4073,6 +4206,7 @@ function setMode(newMode){
   document.getElementById("modeWishlistBtn").classList.toggle("active", mode === "wishlist");
   document.getElementById("modeCustomersBtn").classList.toggle("active", mode === "customers");
   document.getElementById("modeDistBtn").classList.toggle("active", mode === "dist");
+  document.getElementById("modeSignatureBtn").classList.toggle("active", mode === "signature");
   document.getElementById("modeOrdersQueueBtn").classList.toggle("active", mode === "ordersQueue");
   try{ const _act = document.querySelector("nav.tabs button.active"); if(_act && _act.scrollIntoView) _act.scrollIntoView({block:"nearest", inline:"center"}); }catch(e){}
   document.getElementById("overviewPanel").style.display = mode === "overview" ? "block" : "none";
@@ -4091,6 +4225,7 @@ function setMode(newMode){
   document.getElementById("wishlistPanel").style.display = mode === "wishlist" ? "block" : "none";
   document.getElementById("customersPanel").style.display = mode === "customers" ? "block" : "none";
   document.getElementById("distPanel").style.display = mode === "dist" ? "block" : "none";
+  document.getElementById("signaturePanel").style.display = mode === "signature" ? "block" : "none";
   document.getElementById("ordersQueuePanel").style.display = mode === "ordersQueue" ? "block" : "none";
   stockCategoryActive = null;
   stockSelected = null;
@@ -4182,6 +4317,7 @@ document.getElementById("modeShippingBtn").addEventListener("click", () => { set
 document.getElementById("modePicksBtn").addEventListener("click", () => { setMode("picks"); pkLoad(); });
 document.getElementById("modeWishlistBtn").addEventListener("click", () => { setMode("wishlist"); loadWishlistIntoPanel(); });
 document.getElementById("modeDistBtn").addEventListener("click", () => { setMode("dist"); loadDistributionsIntoPanel(); });
+document.getElementById("modeSignatureBtn").addEventListener("click", () => { setMode("signature"); loadSignatureIntoPanel(); });
 
 // ===== تنقل من مستويين (22 أكتوبر 2026): 6 أقسام رئيسية، وتحت كل قسم صفحاته =====
 const NAV_GROUPS = {
@@ -4190,7 +4326,8 @@ const NAV_GROUPS = {
   perfumes: ["modeEditBtn", "modeAddBtn", "modeStockBtn", "modePicksBtn", "modePhotoBtn", "modeBulkPriceBtn", "modeExcelBtn"],
   customers: ["modeCustomersBtn", "modeReviewsBtn", "modeWishlistBtn"],
   money: ["modeCostBtn", "modeShippingBtn"],
-  dist: ["modeDistBtn"]
+  dist: ["modeDistBtn"],
+  signature: ["modeSignatureBtn"]
 };
 const NAV_LAST = {};
 function navGroupOfMode(){
@@ -4225,6 +4362,443 @@ document.querySelectorAll("#subNav > button").forEach(b => b.addEventListener("c
 const _setModeOrig = setMode;
 setMode = function(m){ _setModeOrig(m); try{ navSync(); }catch(e){} };
 navSync();
+
+// ===================================================================
+// ✨ إيفوك سيغنتشر — التكلفة والأرباح (28 أكتوبر 2026)
+// كل البيانات في المستودع الخاص (signature.json). ولا رقم ولا اسم مورد يروح للموقع العام.
+// signature.json = { settings, products:[{id,nameAr,nameEn,price}], purchases:[{id,type,date,supplier,note,
+//   rate,shippingAED,customsPct,vatPct, items:[{productId, usdPerKg, kg} | {productId, grams, priceAED}]}] }
+// ===================================================================
+const SIGNATURE_JSON_PATH = "signature.json";
+// SIG-CALC-START — دوال حساب صافية (بدون DOM) عشان تنفحص بأرقام الاختبار
+const SIG_DEFAULTS = {
+  oilPct: 35, bottleMl: 50, oilDensity: 0.95, alcDensity: 0.807, lossPct: 3,
+  alcPrice: 350, alcLiters: 20, bottle: 4, pack: 5,
+  deliveryAE: 25, deliveryOM: 2, omrToAed: 9.55,
+  ads: 1500, other: 200, discPct: 15, discMin: 4,
+  cardPct: 2.6, cardFixed: 1,
+  rate: 3.6725, customs: 5, vat: 5
+};
+function sigNum(v, d){ const n = Number(v); return isFinite(n) ? n : (d || 0); }
+function sigSettings(data){ return Object.assign({}, SIG_DEFAULTS, (data && data.settings) || {}); }
+// الخلطة لحبة وحدة
+function sigMix(st){
+  const p = sigNum(st.oilPct) / 100;
+  const loss = sigNum(st.lossPct) / 100;
+  const mixDensity = 1 / (p / sigNum(st.oilDensity, 0.95) + (1 - p) / sigNum(st.alcDensity, 0.807));
+  const mixWeight = sigNum(st.bottleMl) * mixDensity;
+  const oilG = mixWeight * p / (1 - loss);
+  const alcMl = mixWeight * (1 - p) / sigNum(st.alcDensity, 0.807) / (1 - loss);
+  const alcCost = alcMl * sigNum(st.alcPrice) / (sigNum(st.alcLiters, 20) * 1000);
+  const fixed = alcCost + sigNum(st.bottle) + sigNum(st.pack); // كل شي غير الزيت
+  return { p, mixDensity, mixWeight, oilG, alcMl, alcCost, fixed };
+}
+// كل سطر في الشراء: الوزن، تكلفة الزيت بالدرهم، حصته من الشحن (حسب الوزن)، الجمارك، الضريبة، التكلفة الواصلة
+function sigPurchaseLines(pu){
+  const imported = pu.type === "imported";
+  const rate = sigNum(pu.rate);
+  const items = (pu.items || []).map(it => {
+    const grams = imported ? sigNum(it.kg) * 1000 : sigNum(it.grams);
+    const oilAED = imported ? sigNum(it.usdPerKg) * sigNum(it.kg) * rate : sigNum(it.priceAED);
+    return { productId: it.productId, grams, oilAED, src: it };
+  });
+  const totalG = items.reduce((a, x) => a + x.grams, 0);
+  const ship = sigNum(pu.shippingAED), cus = sigNum(pu.customsPct) / 100, vat = sigNum(pu.vatPct) / 100;
+  return items.map(x => {
+    const shipShare = totalG > 0 ? ship * x.grams / totalG : 0;
+    const customs = (x.oilAED + shipShare) * cus;
+    const vatAmt = (x.oilAED + shipShare + customs) * vat;
+    const landed = x.oilAED + shipShare + customs + vatAmt;
+    return Object.assign(x, { shipShare, customs, vat: vatAmt, landed, perGram: x.grams > 0 ? landed / x.grams : 0, date: pu.date || "", purchaseId: pu.id });
+  });
+}
+function sigProductStats(productId, purchases, mix){
+  const lines = [];
+  (purchases || []).forEach(pu => sigPurchaseLines(pu).forEach(l => { if(l.productId === productId && l.grams > 0) lines.push(l); }));
+  lines.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const grams = lines.reduce((a, l) => a + l.grams, 0);
+  const landed = lines.reduce((a, l) => a + l.landed, 0);
+  const latest = lines.length ? lines[lines.length - 1] : null;
+  const latestPerGram = latest ? latest.perGram : 0;
+  const avgPerGram = grams > 0 ? landed / grams : 0;
+  const bottles = lines.reduce((a, l) => a + Math.floor(l.grams / mix.oilG + 1e-9), 0);
+  return {
+    lines, grams, landed, latestPerGram, avgPerGram, bottles,
+    unitCost: latest ? mix.oilG * latestPerGram + mix.fixed : 0,
+    unitCostAvg: grams > 0 ? mix.oilG * avgPerGram + mix.fixed : 0
+  };
+}
+function sigProfit(price, unitCost, st){
+  price = sigNum(price);
+  const dAE = sigNum(st.deliveryAE), dOM = sigNum(st.deliveryOM) * sigNum(st.omrToAed);
+  const card = price * sigNum(st.cardPct) / 100 + sigNum(st.cardFixed);
+  const uae = price - unitCost - dAE;
+  const n = Math.max(1, Math.round(sigNum(st.discMin, 4)));
+  const discPrice = price * (1 - sigNum(st.discPct) / 100);
+  const packCard = discPrice * sigNum(st.cardPct) / 100 + sigNum(st.cardFixed) / n;
+  const fixedMonthly = sigNum(st.ads) + sigNum(st.other);
+  return {
+    uae, uaeCard: uae - card, om: price - unitCost - dOM,
+    margin: price > 0 ? uae / price * 100 : 0,
+    packPerBottle: discPrice - unitCost - dAE / n, packPerBottleCard: discPrice - unitCost - dAE / n - packCard, packN: n,
+    breakEven: uae > 0 ? Math.ceil(fixedMonthly / uae) : null, fixedMonthly
+  };
+}
+// SIG-CALC-END
+
+let sigData = null;
+let sigEditingId = null;
+const sigR2 = n => (Math.round(sigNum(n) * 100) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const sigR0 = n => Math.round(sigNum(n)).toLocaleString("en-US");
+function sigShowStatus(msg, cls){ const b = document.getElementById("sig_statusBox"); b.textContent = msg; b.className = "status " + (cls || ""); }
+function sigHideStatus(){ document.getElementById("sig_statusBox").className = "status"; }
+function sigProductName(id){ const p = ((sigData && sigData.products) || []).find(x => x.id === id); return p ? (p.nameAr + (p.nameEn ? " · " + p.nameEn : "")) : id; }
+function sigSlug(s){ return String(s || "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+
+function sigShowSection(ss){
+  document.querySelectorAll("#sigSubNav button").forEach(b => b.classList.toggle("active", b.dataset.ss === ss));
+  document.querySelectorAll("#signaturePanel fieldset[data-ss]").forEach(f => f.classList.toggle("dsec-hidden", f.dataset.ss !== ss));
+  try{ localStorage.setItem("evoque_sig_tab", ss); }catch(e){}
+}
+document.querySelectorAll("#sigSubNav button").forEach(b => b.addEventListener("click", () => sigShowSection(b.dataset.ss)));
+(function(){ let ss = "overview"; try{ ss = localStorage.getItem("evoque_sig_tab") || "overview"; }catch(e){} sigShowSection(ss); })();
+
+async function loadSignatureIntoPanel(){
+  sigShowStatus("جارِ التحميل…", "info");
+  try{
+    const res = await privFetch(SIGNATURE_JSON_PATH);
+    if(res.status === 404) sigData = { settings: {}, products: [], purchases: [] };
+    else if(!res.ok) throw new Error("HTTP " + res.status);
+    else sigData = await res.json();
+    if(!sigData || typeof sigData !== "object") sigData = {};
+    sigData.settings = sigData.settings || {};
+    sigData.products = Array.isArray(sigData.products) ? sigData.products : [];
+    sigData.purchases = Array.isArray(sigData.purchases) ? sigData.purchases : [];
+    sigHideStatus();
+  }catch(e){
+    sigData = sigData || { settings: {}, products: [], purchases: [] };
+    sigShowStatus("ما قدرت أحمّل بيانات سيغنتشر من المستودع الخاص: " + e.message + " — تأكد إنك داخل بالمفتاح الجديد.", "err");
+  }
+  sigFillSettings();
+  sigResetBuyForm();
+  sigRenderAll();
+}
+async function sigSave(mutate, msg){
+  const token = getToken();
+  if(!token) throw new Error("سجّل دخول أول");
+  const next = await updateJsonWithRetry(API_BASE_PRIV, token, SIGNATURE_JSON_PATH, { settings: {}, products: [], purchases: [] }, obj => {
+    const o = Object.assign({ settings: {}, products: [], purchases: [] }, obj);
+    return mutate(o);
+  }, msg);
+  sigData = next;
+  sigRenderAll();
+  return next;
+}
+
+// ---------- الإعدادات ----------
+const SIG_SETTING_FIELDS = ["oilPct","bottleMl","lossPct","oilDensity","alcDensity","alcPrice","alcLiters","bottle","pack","deliveryAE","deliveryOM","omrToAed","ads","other","discPct","discMin","cardPct","cardFixed","rate","customs","vat"];
+function sigFillSettings(src){
+  const st = src || sigSettings(sigData);
+  SIG_SETTING_FIELDS.forEach(k => { const el = document.getElementById("sigs_" + k); if(el) el.value = st[k]; });
+}
+document.getElementById("sig_resetSettingsBtn").addEventListener("click", () => { sigFillSettings(SIG_DEFAULTS); sigShowStatus("رجعت الأرقام الافتراضية في الخانات — اضغط «احفظ الإعدادات» عشان تتثبّت.", "info"); });
+document.getElementById("sig_saveSettingsBtn").addEventListener("click", async () => {
+  const st = {};
+  for(const k of SIG_SETTING_FIELDS){
+    const v = Number(document.getElementById("sigs_" + k).value);
+    if(!isFinite(v) || v < 0){ sigShowStatus("رقم غير صحيح في الإعدادات.", "err"); return; }
+    st[k] = v;
+  }
+  if(st.oilPct <= 0 || st.oilPct >= 100 || st.bottleMl <= 0 || st.lossPct >= 50 || st.oilDensity <= 0 || st.alcDensity <= 0 || st.alcLiters <= 0){ sigShowStatus("تأكد من نسبة الزيت والحجم والكثافة والهدر.", "err"); return; }
+  sigShowStatus("جارِ الحفظ…", "info");
+  try{ await sigSave(o => Object.assign(o, { settings: st }), "Signature: update settings"); sigShowStatus("انحفظت الإعدادات ✅", "ok"); }
+  catch(e){ sigShowStatus("ما انحفظ: " + e.message, "err"); }
+});
+
+// ---------- العطور ----------
+function sigRenderProducts(){
+  const st = sigSettings(sigData), mix = sigMix(st);
+  document.getElementById("sig_mixInfo").innerHTML =
+    `كل حبة ${esc(st.bottleMl)} مل = <b>${sigR2(mix.oilG)} غ زيت</b> + <b>${sigR2(mix.alcMl)} مل كحول</b> (${sigR2(mix.alcCost)} درهم) + قارورة ${sigR2(st.bottle)} + تغليف ${sigR2(st.pack)}` +
+    ` · كثافة الخلطة ${mix.mixDensity.toFixed(4)} · وزن الخلطة ${sigR2(mix.mixWeight)} غ · الكيلو يطلع <b>${Math.floor(1000 / mix.oilG + 1e-9)} حبة</b>.`;
+  const box = document.getElementById("sig_productCards");
+  if(!sigData.products.length){ box.innerHTML = `<div class="sig-note">ما في عطور لين الحين — أضف من تحت.</div>`; return; }
+  box.innerHTML = sigData.products.map(p => {
+    const s = sigProductStats(p.id, sigData.purchases, mix);
+    const has = s.lines.length > 0;
+    const pr = sigProfit(p.price, s.unitCost, st);
+    const row = (k, v, cls) => `<div class="sig-kv ${cls || ""}"><span>${k}</span><b>${v}</b></div>`;
+    return `<div class="sig-card">
+      <div class="sig-card-head"><div><b>${esc(p.nameAr)}</b> <span dir="ltr">${esc(p.nameEn || "")}</span></div>
+        <label class="sig-price">السعر <input type="number" min="0" step="1" data-sig-price="${esc(p.id)}" value="${esc(p.price)}"> درهم</label></div>
+      ${has ? `
+      ${row("تكلفة الحبة (آخر دفعة)", sigR2(s.unitCost) + " درهم")}
+      ${s.lines.length > 1 ? row("تكلفة الحبة (متوسط كل الدفعات)", sigR2(s.unitCostAvg) + " درهم") : ""}
+      ${row("سعر جرام الزيت الواصل", sigR2(s.latestPerGram) + " درهم")}
+      ${row("حبات من الزيت المشترى", sigR0(s.bottles) + " حبة")}
+      ${row("ربح طلب حبة وحدة — الإمارات (كاش)", sigR2(pr.uae) + " درهم", pr.uae < 0 ? "neg" : "good")}
+      ${row("نفس الطلب لو دفع بالبطاقة", sigR2(pr.uaeCard) + " درهم", pr.uaeCard < 0 ? "neg" : "")}
+      ${row("ربح طلب حبة وحدة — عمان", sigR2(pr.om) + " درهم", pr.om < 0 ? "neg" : "")}
+      ${row("هامش الربح (الإمارات)", pr.margin.toFixed(1) + "٪")}
+      ${row(`ربح الحبة في طلب ${pr.packN} حبات مع خصم ${sigR0(st.discPct)}٪`, sigR2(pr.packPerBottle) + " درهم", pr.packPerBottle < 0 ? "neg" : "")}
+      ${row("حبات بالشهر تغطي المصاريف الثابتة", pr.breakEven == null ? "—" : sigR0(pr.breakEven) + " حبة (" + sigR0(pr.fixedMonthly) + " درهم)")}
+      ` : `<div class="sig-note">ما في شراء زيت مسجّل لهالعطر — سجّل الشراء من «🛢️ مشتريات الزيت» عشان تنحسب التكلفة.</div>`}
+      ${!has ? `<button type="button" class="secondary sig-del-prod" data-sig-delprod="${esc(p.id)}">🗑️ شيل العطر</button>` : ""}
+    </div>`;
+  }).join("");
+}
+document.getElementById("sig_productCards").addEventListener("click", async e => {
+  const b = e.target.closest("[data-sig-delprod]");
+  if(!b) return;
+  const id = b.dataset.sigDelprod;
+  if(!confirm("تشيل «" + sigProductName(id) + "» من القائمة؟")) return;
+  try{ await sigSave(o => Object.assign(o, { products: o.products.filter(p => p.id !== id) }), "Signature: remove product " + id); sigShowStatus("انشال ✅", "ok"); }
+  catch(err){ sigShowStatus("ما انحفظ: " + err.message, "err"); }
+});
+document.getElementById("sig_savePricesBtn").addEventListener("click", async () => {
+  const prices = {};
+  let bad = false;
+  document.querySelectorAll("[data-sig-price]").forEach(inp => { const v = Number(inp.value); if(!isFinite(v) || v <= 0) bad = true; prices[inp.dataset.sigPrice] = v; });
+  if(bad){ sigShowStatus("السعر لازم يكون رقم أكبر من صفر.", "err"); return; }
+  sigShowStatus("جارِ الحفظ…", "info");
+  try{ await sigSave(o => Object.assign(o, { products: o.products.map(p => prices[p.id] != null ? Object.assign({}, p, { price: prices[p.id] }) : p) }), "Signature: update prices"); sigShowStatus("انحفظت الأسعار ✅ (هذي أسعار الحسبة. أسعار الموقع تنضبط لما نضيف العطور للموقع)", "ok"); }
+  catch(e){ sigShowStatus("ما انحفظ: " + e.message, "err"); }
+});
+document.getElementById("sig_addProductBtn").addEventListener("click", async () => {
+  const nameAr = document.getElementById("sig_newNameAr").value.trim();
+  const nameEn = document.getElementById("sig_newNameEn").value.trim();
+  const price = Number(document.getElementById("sig_newPrice").value);
+  if(!nameAr || !nameEn){ sigShowStatus("اكتب الاسم بالعربي والإنجليزي.", "err"); return; }
+  if(!isFinite(price) || price <= 0){ sigShowStatus("اكتب سعر صحيح.", "err"); return; }
+  const base = "signature-" + (sigSlug(nameEn) || "perfume");
+  try{
+    await sigSave(o => {
+      let id = base, i = 2;
+      while(o.products.some(p => p.id === id)) id = base + "-" + (i++);
+      return Object.assign(o, { products: o.products.concat([{ id, nameAr, nameEn, price }]) });
+    }, "Signature: add product " + nameEn);
+    document.getElementById("sig_newNameAr").value = ""; document.getElementById("sig_newNameEn").value = "";
+    sigResetBuyForm();
+    sigShowStatus("انضاف العطر ✅", "ok");
+  }catch(e){ sigShowStatus("ما انحفظ: " + e.message, "err"); }
+});
+
+// ---------- المشتريات ----------
+function sigBuyType(){ const r = document.querySelector('input[name="sig_type"]:checked'); return r ? r.value : "imported"; }
+function sigItemRowHtml(it){
+  const imported = sigBuyType() === "imported";
+  const opts = sigData.products.map(p => `<option value="${esc(p.id)}" ${it && it.productId === p.id ? "selected" : ""}>${esc(p.nameAr)} · ${esc(p.nameEn || "")}</option>`).join("");
+  return `<div class="sig-item">
+    <div class="field"><label>العطر</label><select class="si-prod">${opts}</select></div>
+    ${imported
+      ? `<div class="field"><label>السعر (دولار لكل كيلو)</label><input type="number" class="si-usd" step="0.01" min="0" value="${it && it.usdPerKg != null ? esc(it.usdPerKg) : ""}"></div>
+         <div class="field"><label>الكمية (كيلو)</label><input type="number" class="si-kg" step="0.001" min="0" value="${it && it.kg != null ? esc(it.kg) : "1"}"></div>`
+      : `<div class="field"><label>المبلغ المدفوع (درهم)</label><input type="number" class="si-aed" step="0.01" min="0" value="${it && it.priceAED != null ? esc(it.priceAED) : ""}"></div>
+         <div class="field"><label>الكمية (جرام)</label><input type="number" class="si-g" step="1" min="0" value="${it && it.grams != null ? esc(it.grams) : ""}"></div>`}
+    <button type="button" class="secondary si-del" title="شيل السطر">✕</button>
+  </div>`;
+}
+function sigReadForm(){
+  const type = sigBuyType();
+  const items = Array.from(document.querySelectorAll("#sig_items .sig-item")).map(r => type === "imported"
+    ? { productId: r.querySelector(".si-prod").value, usdPerKg: Number(r.querySelector(".si-usd").value), kg: Number(r.querySelector(".si-kg").value) }
+    : { productId: r.querySelector(".si-prod").value, priceAED: Number(r.querySelector(".si-aed").value), grams: Number(r.querySelector(".si-g").value) });
+  return {
+    id: sigEditingId || ("sp-" + Date.now()),
+    type, date: document.getElementById("sig_date").value || todayStr(),
+    supplier: document.getElementById("sig_supplier").value.trim(),
+    note: document.getElementById("sig_note").value.trim(),
+    rate: type === "imported" ? Number(document.getElementById("sig_rate").value) : 0,
+    shippingAED: Number(document.getElementById("sig_shipping").value) || 0,
+    customsPct: Number(document.getElementById("sig_customs").value) || 0,
+    vatPct: Number(document.getElementById("sig_vat").value) || 0,
+    items
+  };
+}
+function sigApplyTypeUi(keepValues){
+  const imported = sigBuyType() === "imported";
+  const st = sigSettings(sigData);
+  document.getElementById("sig_rate").closest(".field").style.display = imported ? "" : "none";
+  document.getElementById("sig_shippingLbl").textContent = imported ? "شحن الشحنة كاملة (درهم)" : "شحن (درهم، اختياري)";
+  if(!keepValues){
+    document.getElementById("sig_rate").value = st.rate;
+    document.getElementById("sig_shipping").value = imported ? "" : 0;
+    document.getElementById("sig_customs").value = imported ? st.customs : 0;
+    document.getElementById("sig_vat").value = imported ? st.vat : 0;
+  }
+}
+function sigResetBuyForm(){
+  sigEditingId = null;
+  document.getElementById("sig_buyLegend").textContent = "🛢️ تسجيل شراء زيت جديد";
+  document.getElementById("sig_cancelEditBtn").style.display = "none";
+  document.querySelector('input[name="sig_type"][value="imported"]').checked = true;
+  document.getElementById("sig_date").value = todayStr();
+  document.getElementById("sig_supplier").value = ""; document.getElementById("sig_note").value = "";
+  sigApplyTypeUi(false);
+  document.getElementById("sig_items").innerHTML = sigData && sigData.products.length ? sigItemRowHtml(null) : `<div class="sig-note">أضف العطور أول من «🧴 العطور والأرباح».</div>`;
+  sigRenderPreview();
+}
+function sigRenderPreview(){
+  const box = document.getElementById("sig_buyPreview");
+  if(!sigData || !document.querySelector("#sig_items .sig-item")){ box.innerHTML = ""; return; }
+  const pu = sigReadForm(), mix = sigMix(sigSettings(sigData));
+  const lines = sigPurchaseLines(pu).filter(l => l.grams > 0);
+  if(!lines.length){ box.innerHTML = ""; return; }
+  const total = lines.reduce((a, l) => a + l.landed, 0);
+  box.innerHTML = `<div class="sig-prev-title">الحسبة قبل الحفظ</div>` + lines.map(l => `<div class="sig-prev-row">
+      <b>${esc(sigProductName(l.productId))}</b> — ${sigR0(l.grams)} غ: الزيت ${sigR2(l.oilAED)} + شحن ${sigR2(l.shipShare)} + جمارك ${sigR2(l.customs)} + ضريبة ${sigR2(l.vat)}
+      = <b>${sigR2(l.landed)} درهم</b> · الجرام ${sigR2(l.perGram)} · تكلفة الحبة <b>${sigR2(mix.oilG * l.perGram + mix.fixed)}</b> · ${Math.floor(l.grams / mix.oilG + 1e-9)} حبة</div>`).join("") +
+    `<div class="sig-prev-total">إجمالي الشراء الواصل: <b>${sigR2(total)} درهم</b></div>`;
+}
+document.querySelectorAll('input[name="sig_type"]').forEach(r => r.addEventListener("change", () => {
+  sigApplyTypeUi(false);
+  document.getElementById("sig_items").innerHTML = sigItemRowHtml(null);
+  sigRenderPreview();
+}));
+document.getElementById("sig_addItemBtn").addEventListener("click", () => {
+  if(!sigData || !sigData.products.length) return;
+  document.getElementById("sig_items").insertAdjacentHTML("beforeend", sigItemRowHtml(null));
+  sigRenderPreview();
+});
+document.getElementById("sig_items").addEventListener("click", e => {
+  const d = e.target.closest(".si-del");
+  if(d){ const rows = document.querySelectorAll("#sig_items .sig-item"); if(rows.length > 1){ d.closest(".sig-item").remove(); sigRenderPreview(); } }
+});
+["sig_items", "sig_importFields"].forEach(id => document.getElementById(id).addEventListener("input", sigRenderPreview));
+document.getElementById("sig_items").addEventListener("change", sigRenderPreview);
+document.getElementById("sig_cancelEditBtn").addEventListener("click", () => { sigResetBuyForm(); sigHideStatus(); });
+document.getElementById("sig_saveBuyBtn").addEventListener("click", async () => {
+  if(!sigData.products.length){ sigShowStatus("أضف العطور أول.", "err"); return; }
+  const pu = sigReadForm();
+  const imported = pu.type === "imported";
+  if(imported && !(pu.rate > 0)){ sigShowStatus("اكتب سعر الدولار.", "err"); return; }
+  for(const it of pu.items){
+    if(imported ? !(it.usdPerKg > 0 && it.kg > 0) : !(it.priceAED > 0 && it.grams > 0)){ sigShowStatus("كل سطر لازم يكون فيه السعر والكمية.", "err"); return; }
+  }
+  if(!pu.supplier && !confirm("ما كتبت اسم المورد. تحفظ بدونه؟")) return;
+  sigShowStatus("جارِ الحفظ…", "info");
+  try{
+    const editing = !!sigEditingId;
+    await sigSave(o => Object.assign(o, { purchases: editing ? o.purchases.map(x => x.id === pu.id ? pu : x) : o.purchases.concat([pu]) }),
+      (editing ? "Signature: edit oil purchase " : "Signature: add oil purchase ") + pu.date);
+    sigResetBuyForm();
+    sigShowStatus(editing ? "انحفظ التعديل ✅" : "انحفظ الشراء ✅", "ok");
+  }catch(e){ sigShowStatus("ما انحفظ: " + e.message, "err"); }
+});
+function sigRenderBuyList(){
+  const box = document.getElementById("sig_buyList");
+  const list = sigData.purchases.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  if(!list.length){ box.innerHTML = `<div class="sig-note">ما في مشتريات مسجّلة.</div>`; return; }
+  const mix = sigMix(sigSettings(sigData));
+  box.innerHTML = list.map(pu => {
+    const lines = sigPurchaseLines(pu), total = lines.reduce((a, l) => a + l.landed, 0);
+    return `<div class="sig-buy">
+      <div class="sig-buy-head"><b>${pu.type === "imported" ? "🌍 مستورد" : "🇦🇪 محلي"} · ${esc(pu.date)}</b>
+        <span>${esc(pu.supplier || "بدون اسم مورد")}${pu.note ? " · " + esc(pu.note) : ""}</span></div>
+      ${pu.type === "imported" ? `<div class="sig-buy-meta">الدولار ${esc(pu.rate)} · الشحن ${sigR2(pu.shippingAED)} درهم · جمارك ${esc(pu.customsPct)}٪ · ضريبة ${esc(pu.vatPct)}٪</div>`
+        : (pu.shippingAED || pu.customsPct || pu.vatPct ? `<div class="sig-buy-meta">شحن ${sigR2(pu.shippingAED)} · جمارك ${esc(pu.customsPct)}٪ · ضريبة ${esc(pu.vatPct)}٪</div>` : "")}
+      ${lines.map(l => `<div class="sig-prev-row"><b>${esc(sigProductName(l.productId))}</b> — ${sigR0(l.grams)} غ → ${sigR2(l.landed)} درهم · الجرام ${sigR2(l.perGram)} · الحبة ${sigR2(mix.oilG * l.perGram + mix.fixed)} · ${Math.floor(l.grams / mix.oilG + 1e-9)} حبة</div>`).join("")}
+      <div class="sig-buy-foot"><span>الإجمالي الواصل: <b>${sigR2(total)} درهم</b></span>
+        <span><button type="button" class="secondary" data-sig-edit="${esc(pu.id)}">✏️ تعديل</button>
+        <button type="button" class="secondary" data-sig-del="${esc(pu.id)}">🗑️ حذف</button></span></div>
+    </div>`;
+  }).join("");
+}
+document.getElementById("sig_buyList").addEventListener("click", async e => {
+  const ed = e.target.closest("[data-sig-edit]"), del = e.target.closest("[data-sig-del]");
+  if(ed){
+    const pu = sigData.purchases.find(x => x.id === ed.dataset.sigEdit);
+    if(!pu) return;
+    sigEditingId = pu.id;
+    document.querySelector(`input[name="sig_type"][value="${pu.type === "local" ? "local" : "imported"}"]`).checked = true;
+    sigApplyTypeUi(true);
+    document.getElementById("sig_date").value = pu.date || "";
+    document.getElementById("sig_supplier").value = pu.supplier || "";
+    document.getElementById("sig_note").value = pu.note || "";
+    document.getElementById("sig_rate").value = pu.rate || "";
+    document.getElementById("sig_shipping").value = pu.shippingAED || 0;
+    document.getElementById("sig_customs").value = pu.customsPct || 0;
+    document.getElementById("sig_vat").value = pu.vatPct || 0;
+    document.getElementById("sig_items").innerHTML = (pu.items || []).map(sigItemRowHtml).join("");
+    document.getElementById("sig_buyLegend").textContent = "✏️ تعديل شراء " + (pu.date || "");
+    document.getElementById("sig_cancelEditBtn").style.display = "";
+    sigRenderPreview();
+    document.getElementById("sig_buyLegend").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  if(del){
+    if(!confirm("تحذف هالشراء؟ ما ينرد.")) return;
+    const id = del.dataset.sigDel;
+    try{ await sigSave(o => Object.assign(o, { purchases: o.purchases.filter(x => x.id !== id) }), "Signature: delete oil purchase"); if(sigEditingId === id) sigResetBuyForm(); sigShowStatus("انحذف ✅", "ok"); }
+    catch(err){ sigShowStatus("ما انحذف: " + err.message, "err"); }
+  }
+});
+
+// ---------- الملخص (من الطلبات الحقيقية) ----------
+function sigSalesSummary(){
+  const st = sigSettings(sigData), mix = sigMix(st);
+  const ids = new Set(sigData.products.map(p => p.id));
+  const avgCost = {};
+  sigData.products.forEach(p => { avgCost[p.id] = sigProductStats(p.id, sigData.purchases, mix).unitCostAvg; });
+  const groups = new Map();
+  (salesData || []).forEach(o => { const k = o.orderId || o.id; if(!groups.has(k)) groups.set(k, []); groups.get(k).push(o); });
+  let bottles = 0, revenue = 0, cogs = 0, delivery = 0, fees = 0;
+  const perProduct = {};
+  groups.forEach(rows => {
+    const f = rows[0] || {};
+    const stt = normStatus(f.status);
+    if(stt === "cancelled" || stt === "returned" || stt === "refunded") return;
+    if(!rows.some(r => ids.has(r.perfumeId))) return;
+    const fx = f.country === "OM" ? sigNum(st.omrToAed) : 1;
+    const lineVal = r => r.isGift ? 0 : sigNum(r.unitPrice) * (Number(r.qty) || 1);
+    const orderVal = rows.reduce((a, r) => a + lineVal(r), 0);
+    const disc = rows.reduce((a, r) => a + sigNum(r.discount), 0) + sigNum(f.refundAmount);
+    const deliv = f.deliveryCost != null ? sigNum(f.deliveryCost) : (f.country === "OM" ? sigNum(st.deliveryOM) * fx : sigNum(st.deliveryAE));
+    const fee = sigNum(f.cardFee);
+    rows.forEach(r => {
+      if(!ids.has(r.perfumeId)) return;
+      const q = Number(r.qty) || 1, share = orderVal > 0 ? lineVal(r) / orderVal : 0;
+      bottles += q;
+      revenue += (lineVal(r) - disc * share) * fx;
+      cogs += q * (avgCost[r.perfumeId] || 0);
+      delivery += deliv * share;
+      fees += fee * share;
+      perProduct[r.perfumeId] = (perProduct[r.perfumeId] || 0) + q;
+    });
+  });
+  return { bottles, revenue, cogs, delivery, fees, profit: revenue - cogs - delivery - fees, perProduct };
+}
+function sigRenderOverview(){
+  const st = sigSettings(sigData), mix = sigMix(st);
+  let invested = 0;
+  sigData.purchases.forEach(pu => sigPurchaseLines(pu).forEach(l => { invested += l.landed; }));
+  let capacity = 0;
+  const unitCosts = [];
+  sigData.products.forEach(p => { const s = sigProductStats(p.id, sigData.purchases, mix); capacity += s.bottles; if(s.lines.length) unitCosts.push(sigProfit(p.price, s.unitCost, st).uae); });
+  const sales = sigSalesSummary();
+  const left = Math.max(0, capacity - sales.bottles);
+  const avgProfit = unitCosts.length ? unitCosts.reduce((a, b) => a + b, 0) / unitCosts.length : 0;
+  const fixedMonthly = sigNum(st.ads) + sigNum(st.other);
+  const kpi = (label, value, sub) => `<div class="kpi-card"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div>${sub ? `<div class="kpi-label">${sub}</div>` : ""}</div>`;
+  document.getElementById("sig_kpis").innerHTML =
+    kpi("إجمالي اللي دفعته في الزيت", sigR2(invested) + "", "درهم (واصل مع الشحن والجمارك والضريبة)") +
+    kpi("حبات ممكنة من الزيت", sigR0(capacity), "حبة " + esc(st.bottleMl) + " مل") +
+    kpi("حبات مبيوعة", sigR0(sales.bottles), "من الطلبات الحقيقية") +
+    kpi("الباقي (تقديري)", sigR0(left), "حبة من الزيت المتبقي") +
+    kpi("الإيراد", sigR2(sales.revenue), "درهم بعد الخصم") +
+    kpi("الربح لين الحين", sigR2(sales.profit), "بعد تكلفة الحبات والتوصيل ورسوم البطاقة") +
+    kpi("المصاريف الثابتة بالشهر", sigR0(fixedMonthly), "درهم (إعلانات + اشتراكات)") +
+    kpi("تحتاج تبيع بالشهر", avgProfit > 0 ? sigR0(Math.ceil(fixedMonthly / avgProfit)) : "—", "حبة عشان تغطي المصاريف (متوسط العطور)");
+  document.getElementById("sig_overviewNote").innerHTML = sales.bottles
+    ? ""
+    : "المبيعات والإيراد والربح تنحسب تلقائيًا من الطلبات لما عطور سيغنتشر تنضاف للموقع (المرحلة الثانية). «الربح لين الحين» ما يخصم المصاريف الثابتة الشهرية.";
+}
+function sigRenderAll(){
+  if(!sigData) return;
+  sigRenderOverview();
+  sigRenderProducts();
+  sigRenderBuyList();
+  sigRenderPreview();
+}
 
 // ===== ⭐ مختارات إيفوك (picks.json العام) — 24 أكتوبر 2026 =====
 // manual = أنت تختار · sales = الأكثر مبيعًا آخر 30 يوم · stock = تلقائي حسب المخزون (القديم).
