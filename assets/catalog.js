@@ -462,7 +462,7 @@ const I18N = {
     // ===== نصوص إعادة الهيكلة لعدة صفحات — 21 أغسطس 2026 =====
     navHome: "الرئيسية", navMen: "رجالي", navWomen: "نسائي", navUnisex: "للجنسين",
     sigNav: "سيغنتشر", sigEyebrow: "تشكيلة خاصة", sigTitle: "إيفوك سيغنتشر",
-    sigSubtitle: "تركيبات إيفوك الخاصة، بتركيز Extrait de Parfum. كل عطر له اسم وقصة.", sigConc: "التركيز",
+    sigSubtitle: "تركيبات إيفوك الخاصة، بتركيز Extrait de Parfum. كل عطر له اسم وقصة.", sigConc: "التركيز", comingSoon: "قريبًا",
     bestSellersEyebrow: "مختارات",
     bestSellersTitle: "مختارات إيفوك",
     bestSellersSubtitle: "مجموعة مختارة من عطورنا — بداية حلوة لو أول مرة تطلب من عندنا.",
@@ -657,7 +657,7 @@ const I18N = {
     // ===== Multi-page restructure strings — Aug 21, 2026 =====
     navHome: "Home", navMen: "Men", navWomen: "Women", navUnisex: "Unisex",
     sigNav: "Signature", sigEyebrow: "Private collection", sigTitle: "Evoque Signature",
-    sigSubtitle: "Evoque's own blends, in Extrait de Parfum concentration. Every scent has a name and a story.", sigConc: "Concentration",
+    sigSubtitle: "Evoque's own blends, in Extrait de Parfum concentration. Every scent has a name and a story.", sigConc: "Concentration", comingSoon: "Coming soon",
     bestSellersEyebrow: "Picks",
     bestSellersTitle: "Evoque Picks",
     bestSellersSubtitle: "A curated selection from our collection — a good place to start.",
@@ -1501,7 +1501,8 @@ function openLightbox(p){
   if(isSig(p)){
     const story = lang === "ar" ? p.descAr : p.descEn;
     if(story) rows.splice(1, 0, `<div class="sig-story">${escapeHtml(story)}</div>`);
-    if(p.concentration) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.sigConc}:</b> <span dir="ltr">${escapeHtml(p.concentration)}</span> · 50 ${lang === "ar" ? "مل" : "ml"}</div></div>`);
+    if(p.concentration) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.sigConc}:</b> <span dir="ltr">${escapeHtml(p.concentration)}</span>${p.kind === "set" ? "" : " · 50 " + (lang === "ar" ? "مل" : "ml")}</div></div>`);
+    if(p.comingSoon) rows.push(`<div class="row">${svgIcon("ic-clock")}<div><b>${t.comingSoon}</b></div></div>`);
   }
   rows.push(`<div class="row">${svgIcon("ic-shield")}<div><b>${t.warrantyTitle}:</b> ${t.warranty}</div></div>`);
   if(!isSig(p)) rows.push(`<div class="row lb-disclaimer"><div>${t.disclaimer}</div></div>`);
@@ -2085,9 +2086,10 @@ function renderGrid(explicitList){
     const bottom = document.createElement("div");
     bottom.className = "card-bottom";
     // حجم واحد فقط للبيع: 50مل. "باقي N" تظهر فقط لما المخزون الحقيقي (من الأدمن) 5 أو أقل — بدون أي تضخيم.
-    let selectedSize = (p.price50 && Number(p.stock50) > 0) ? "50" : null;
+    let selectedSize = (!p.comingSoon && p.price50 && Number(p.stock50) > 0) ? "50" : null;
 
     function sizeRowHtml(){
+      if(p.comingSoon) return `<div class="size-row"><div class="size-pill active disabled sig-soon">${t.comingSoon}</div></div>`;
       if(!p.price50) return `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${t.askPrice}</div>`;
       const shownPrice = priceFor(p, "50");
       const priceHtml = shownPrice != null ? `${shownPrice} ${currencyLabel()}` : t.askPrice;
@@ -2136,7 +2138,7 @@ function renderGrid(explicitList){
         const addBtn = document.createElement("button");
         addBtn.className = "add-btn";
         if(!selectedSize){
-          addBtn.innerHTML = `<span>${t.allOutOfStock}</span>`;
+          addBtn.innerHTML = `<span>${p.comingSoon ? t.comingSoon : t.allOutOfStock}</span>`;
           addBtn.disabled = true;
         } else {
           addBtn.disabled = false;

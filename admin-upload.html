@@ -283,6 +283,14 @@
   .sig-kv.good b{ color:#1F6B41; }
   .sig-kv.neg b{ color:#963224; }
   .sig-del-prod{ margin-top:8px; }
+  .sig-site{ border:1px solid var(--line); border-radius:14px; background:#fff; margin-bottom:10px; }
+  .sig-site > summary{ cursor:pointer; padding:12px 14px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; font-size:14.5px; }
+  .sig-site > summary span{ color:var(--muted); font-size:12.5px; }
+  .sig-site-body{ padding:0 14px 14px; }
+  .sig-site-body .grid2, .sig-site-body .grid3{ gap:8px; }
+  .sig-site-body textarea{ min-height:70px; }
+  .sig-img-prev{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .sig-img-prev img{ height:120px; border-radius:10px; border:1px solid var(--line); background:#F8F5F0; }
   .sig-ref{ display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:var(--muted); margin:0 0 6px; }
   .sig-ref input{ min-height:36px; padding:4px 8px; }
   .sig-add{ margin-top:14px; }
@@ -879,6 +887,7 @@
       <button type="button" data-ss="products">🧴 العطور والأرباح</button>
       <button type="button" data-ss="buy">🛢️ مشتريات الزيت</button>
       <button type="button" data-ss="make">🏭 التصنيع والمخزون</button>
+      <button type="button" data-ss="site">🌐 الموقع</button>
       <button type="button" data-ss="settings">⚙️ الإعدادات</button>
     </div>
     <div class="status" id="sig_statusBox"></div>
@@ -959,6 +968,17 @@
     <fieldset data-ss="make">
       <legend>📜 سجل التصنيع</legend>
       <div id="sig_mkList"></div>
+    </fieldset>
+
+    <fieldset data-ss="site">
+      <legend>🌐 صفحة سيغنتشر في الموقع</legend>
+      <div id="sig_siteStatus" class="sig-note" style="margin-top:0;"></div>
+      <div class="row" style="gap:8px; flex-wrap:wrap;">
+        <button type="button" id="sig_showAllBtn">👁️ أظهر الصفحة وكل العطور</button>
+        <button type="button" class="secondary" id="sig_hideAllBtn">🙈 أخفِ الصفحة كلها</button>
+      </div>
+      <small class="hint">الصفحة تطلع في الموقع (ورابطها «✨ سيغنتشر» فوق) لما يكون فيها عطر واحد ظاهر على الأقل. تقدر تظهر أو تخفي كل عطر لحاله من بطاقته تحت.</small>
+      <div id="sig_siteList" style="margin-top:12px;"></div>
     </fieldset>
 
     <fieldset data-ss="settings">
@@ -4930,6 +4950,239 @@ document.getElementById("sig_mkList").addEventListener("click", async e => {
   }catch(err){ sigShowStatus("ما انحذف: " + err.message, "err"); }
 });
 
+// ---------- 🌐 الموقع: تعديل عطور سيغنتشر في data.json العام (31 أكتوبر 2026) ----------
+// كل شي اللي يطلع للزبون ينعدل من هنا: الاسم، التصنيف، السعر بالدرهم والريال، القصة، المكونات، الصورة، قريبًا، ومخفي/ظاهر.
+// ملاحظة: الاسم الحقيقي (ref) واسم المورد ما يروحون هنا أبدًا — مكانهم signature.json الخاص.
+const SIG_SITE_BRAND = "EVOQUE SIGNATURE";
+function sigSiteItems(){ return (perfumes || []).filter(p => p.line === "signature"); }
+function sigSiteKey(id){ return String(id).replace(/^signature-/, ""); }
+function sigOmrFromAed(aed){ const r = sigNum(sigSettings(sigData).omrToAed, 9.55); return aed > 0 ? Math.round(aed / r * 2) / 2 : null; }
+function sigNotesOf(p){ return Object.assign({ top: "", heart: "", base: "", topAr: "", heartAr: "", baseAr: "" }, p.sigNotes || {}); }
+function sigComposeNotes(n){
+  const en = [["Top", n.top], ["Heart", n.heart], ["Base", n.base]].filter(x => x[1]).map(x => x[0] + ": " + x[1]).join(" · ");
+  const ar = [["القمة", n.topAr], ["القلب", n.heartAr], ["القاعدة", n.baseAr]].filter(x => x[1]).map(x => x[0] + ": " + x[1]).join(" · ");
+  return { notesTop: en, notesTopAR: ar };
+}
+function sigSiteStatusText(){
+  const items = sigSiteItems(), shown = items.filter(p => !p.hidden);
+  return shown.length
+    ? `👁️ الصفحة <b>ظاهرة</b> في الموقع — ${shown.length} من ${items.length} ظاهر.`
+    : `🙈 الصفحة <b>مخفية</b> — ما يشوفها أي زبون لين تظهر عطر واحد على الأقل.`;
+}
+function sigSiteCardHtml(p){
+  const n = sigNotesOf(p), key = esc(p.id);
+  const inp = (f, label, val, extra) => `<div class="field"><label>${label}</label><input type="text" data-f="${f}" value="${esc(val == null ? "" : val)}" ${extra || ""}></div>`;
+  const ta = (f, label, val, extra) => `<div class="field"><label>${label}</label><textarea data-f="${f}" ${extra || ""}>${esc(val || "")}</textarea></div>`;
+  const chk = (f, label, on) => `<label style="display:flex; align-items:center; gap:6px; margin:0; cursor:pointer;"><input type="checkbox" data-f="${f}" style="width:auto; margin:0;" ${on ? "checked" : ""}> ${label}</label>`;
+  const img = p.photoCard || p.photo;
+  return `<details class="sig-site" data-id="${key}">
+    <summary><b>${esc(p.nameAr || "")} · <span dir="ltr">${esc(p.name)}</span></b>
+      <span>${p.hidden ? "🙈 مخفي" : "👁️ ظاهر"}${p.comingSoon ? " · ⏳ قريبًا" : ""} · مخزون ${esc(stockAsQty(p.stock50))} · ${p.price50 ? esc(p.price50) + " درهم" : "بدون سعر"}</span></summary>
+    <div class="sig-site-body">
+      <div class="row" style="gap:14px; flex-wrap:wrap; margin-bottom:6px;">${chk("hidden", "🙈 مخفي من الموقع", p.hidden)} ${chk("comingSoon", "⏳ قريبًا (يطلع بدون زر شراء)", p.comingSoon)}</div>
+      <div class="grid2">${inp("nameAr", "الاسم بالعربي", p.nameAr)}${inp("name", "الاسم بالإنجليزي", p.name, 'dir="ltr"')}</div>
+      <div class="grid3">
+        <div class="field"><label>التصنيف</label><select data-f="gender">
+          <option value="unisex" ${p.gender === "unisex" ? "selected" : ""}>للجنسين</option>
+          <option value="men" ${p.gender === "men" ? "selected" : ""}>رجالي</option>
+          <option value="women" ${p.gender === "women" ? "selected" : ""}>نسائي</option></select></div>
+        <div class="field"><label>السعر (درهم)</label><input type="number" data-f="price50" min="0" step="1" value="${esc(p.price50 == null ? "" : p.price50)}"></div>
+        <div class="field"><label>السعر (ريال عماني) — يتحوّل لحاله</label><input type="number" data-f="price50Om" min="0" step="0.1" value="${esc(p.price50Om == null ? "" : p.price50Om)}"></div>
+      </div>
+      <div class="grid2">${inp("accordsAR", "العائلة (عربي) — مثال: فاكهي خشبي", p.accordsAR)}${inp("accords", "Family (English)", p.accords, 'dir="ltr"')}</div>
+      ${ta("descAr", "القصة / الوصف (عربي)", p.descAr)}
+      ${ta("descEn", "Story / description (English)", p.descEn, 'dir="ltr"')}
+      <div class="grid3">${inp("n_topAr", "القمة (عربي)", n.topAr)}${inp("n_heartAr", "القلب (عربي)", n.heartAr)}${inp("n_baseAr", "القاعدة (عربي)", n.baseAr)}</div>
+      <div class="grid3">${inp("n_top", "Top (English)", n.top, 'dir="ltr"')}${inp("n_heart", "Heart (English)", n.heart, 'dir="ltr"')}${inp("n_base", "Base (English)", n.base, 'dir="ltr"')}</div>
+      <div class="row" style="gap:14px; flex-wrap:wrap; margin:6px 0;">
+        ${chk("s_summer", "☀️ صيفي", (p.seasons || []).includes("summer"))} ${chk("s_winter", "❄️ شتوي", (p.seasons || []).includes("winter"))}
+        ${chk("d_day", "🌤️ نهاري", (p.daynight || []).includes("day"))} ${chk("d_night", "🌙 ليلي", (p.daynight || []).includes("night"))}
+      </div>
+      ${inp("concentration", "التركيز", p.concentration, 'dir="ltr"')}
+      <div class="field"><label>📷 صورة الهرم أو العطر (اختر ملف — البطاقة المربعة تتسوّى لحالها)</label><input type="file" data-f="file" accept="image/*"></div>
+      <div class="sig-img-prev" data-prev>${img ? `<img src="${esc(img)}" alt="">` : `<span class="sig-note">ما في صورة — يطلع «الصور قيد التجهيز».</span>`}</div>
+      <div class="row" style="margin-top:10px;"><button type="button" data-act="save">💾 احفظ في الموقع</button></div>
+    </div>
+  </details>`;
+}
+function sigRenderSite(force){
+  const box = document.getElementById("sig_siteList");
+  if(!box) return;
+  if(!force && (box.contains(document.activeElement) || box.querySelector("[data-pending-image]"))) return; // لا نمسح شي تكتبه الحين
+  const open = new Set(Array.from(box.querySelectorAll("details[open]")).map(d => d.dataset.id));
+  document.getElementById("sig_siteStatus").innerHTML = sigSiteStatusText();
+  const items = sigSiteItems();
+  const onSite = new Set(items.map(p => p.id));
+  const notYet = (sigData ? sigData.products : []).filter(p => !onSite.has(p.id));
+  box.innerHTML = items.map(sigSiteCardHtml).join("") +
+    (notYet.length ? `<div class="sig-note" style="margin-top:12px;"><b>عطور ما انضافت للموقع بعد:</b></div>` + notYet.map(p =>
+      `<div class="sig-buy"><div class="sig-buy-head"><b>${esc(p.nameAr)} · <span dir="ltr">${esc(p.nameEn || "")}</span></b>
+        <button type="button" class="secondary" data-act="addsite" data-id="${esc(p.id)}">➕ جهّزه للموقع (مخفي)</button></div></div>`).join("") : "");
+  box.querySelectorAll("details.sig-site").forEach(d => { if(open.has(d.dataset.id)) d.open = true; });
+}
+// ---- الصور: نسخة كاملة للتكبير + بطاقة مربعة للقائمة ----
+function sigCanvasData(canvas){
+  const webp = canvas.toDataURL("image/webp", 0.88);
+  if(webp.startsWith("data:image/webp")) return { ext: "webp", b64: webp.split(",")[1], url: webp };
+  const jpg = canvas.toDataURL("image/jpeg", 0.9); // سفاري ما يصدّر webp
+  return { ext: "jpg", b64: jpg.split(",")[1], url: jpg };
+}
+// قالب كانفا العريض (عنوان فوق + هرم): نقص العنوان ونقص الهرم بشكل مثلث على خلفية بنفس اللون.
+// أي صورة ثانية (مربعة أو طولية، مثل صورة قارورة): نقص مربع من النص.
+function sigBuildCard(src){
+  const W = 1080, card = document.createElement("canvas"); card.width = card.height = W;
+  const ctx = card.getContext("2d"), w = src.width, h = src.height;
+  const square = () => { const m = Math.min(w, h); ctx.drawImage(src, (w - m) / 2, (h - m) / 2, m, m, 0, 0, W, W); return card; };
+  if(w / h < 1.5) return square();
+  const k = w / 1920, data = src.getContext("2d").getImageData(0, 0, w, h).data;
+  const px = (x, y) => (y * w + x) * 4;
+  let br = 0, bg = 0, bb = 0, cnt = 0;
+  for(let y = Math.round(5 * k); y < Math.round(40 * k); y++) for(let x = Math.round(900 * k); x < Math.round(1000 * k); x++){ const i = px(x, y); br += data[i]; bg += data[i + 1]; bb += data[i + 2]; cnt++; }
+  br /= cnt; bg /= cnt; bb /= cnt;
+  const ink = (x, y) => { const i = px(x, y); return Math.abs(data[i] - br) + Math.abs(data[i + 1] - bg) + Math.abs(data[i + 2] - bb) > 60; };
+  const cx = Math.round(w / 2), gap = Math.max(2, Math.round(4 * k));
+  const rows = [];
+  for(let y = Math.round(320 * k); y < Math.min(h - 1, Math.round(1060 * k)); y++){
+    if(!ink(cx, y)) continue;
+    let l = cx, r = cx;
+    while(l > gap){ let any = false; for(let g = 1; g <= gap; g++) if(ink(l - g, y)){ any = true; break; } if(!any) break; l--; }
+    while(r < w - 1 - gap){ let any = false; for(let g = 1; g <= gap; g++) if(ink(r + g, y)){ any = true; break; } if(!any) break; r++; }
+    rows.push([y, l, r]);
+  }
+  if(rows.length < 50) return square();
+  const top = rows[0][0], bot = rows[rows.length - 1][0];
+  const base = rows.filter(x => x[0] > bot - 12 * k), med = a => a.slice().sort((p, q) => p - q)[Math.floor(a.length / 2)];
+  const L = med(base.map(x => x[1])), R = med(base.map(x => x[2])), ax = (L + R) / 2;
+  ctx.fillStyle = `rgb(${br | 0},${bg | 0},${bb | 0})`; ctx.fillRect(0, 0, W, W);
+  const tx = 560 * k, ty = 30 * k, tw = 800 * k, th = 275 * k, ts = 1.15 * 1920 / w * k * (W / 1080);
+  const tW = tw / k * 1.15, tH = th / k * 1.15;
+  ctx.drawImage(src, tx, ty, tw, th, (W - tW) / 2, 20, tW, tH);
+  const triW = R - L, triH = bot - top, availH = W - 20 - tH - 50, sc = Math.min(980 / triW, availH / triH);
+  const dw = triW * sc, dh = triH * sc, dx = (W - dw) / 2, dy = 20 + tH + 20;
+  ctx.save(); ctx.beginPath(); ctx.moveTo(dx + (ax - L) * sc, dy); ctx.lineTo(dx, dy + dh); ctx.lineTo(dx + dw, dy + dh); ctx.closePath(); ctx.clip();
+  ctx.drawImage(src, L, top, triW, triH, dx, dy, dw, dh); ctx.restore();
+  return card;
+}
+async function sigPrepareImages(file){
+  const bmp = await createImageBitmap(file);
+  const fw = Math.min(1920, bmp.width), fh = Math.round(bmp.height * fw / bmp.width);
+  const full = document.createElement("canvas"); full.width = fw; full.height = fh;
+  full.getContext("2d").drawImage(bmp, 0, 0, fw, fh);
+  return { full: sigCanvasData(full), card: sigCanvasData(sigBuildCard(full)) };
+}
+async function sigPutCatalogFile(path, b64, msg, token){
+  let sha = null;
+  const chk = await fetch(`${API_BASE}/${path}?ref=${BRANCH}`, { cache: "no-store", headers: { "Authorization": `Bearer ${token}` } });
+  if(chk.status === 200) sha = (await chk.json()).sha;
+  const body = { message: msg, content: b64, branch: BRANCH }; if(sha) body.sha = sha;
+  const res = await fetch(`${API_BASE}/${path}`, { method: "PUT", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if(!res.ok){ const e = await res.json().catch(() => ({})); throw new Error("رفع الصورة: " + (e.message || res.status)); }
+}
+const sigPendingImages = {}; // id -> {full, card}
+document.getElementById("sig_siteList").addEventListener("change", async e => {
+  const d = e.target.closest("details.sig-site"); if(!d) return;
+  if(e.target.dataset.f === "file" && e.target.files[0]){
+    sigShowStatus("جارِ تجهيز الصورة…", "info");
+    try{
+      const imgs = await sigPrepareImages(e.target.files[0]);
+      sigPendingImages[d.dataset.id] = imgs;
+      d.setAttribute("data-pending-image", "1");
+      d.querySelector("[data-prev]").innerHTML = `<img src="${imgs.card.url}" alt=""><img src="${imgs.full.url}" alt="">`;
+      sigShowStatus("الصورة جاهزة: يسار البطاقة اللي بتطلع في القائمة، ويمين الصورة الكاملة. اضغط «احفظ في الموقع».", "ok");
+    }catch(err){ sigShowStatus("ما قدرت أقرأ الصورة: " + err.message, "err"); }
+  }
+});
+document.getElementById("sig_siteList").addEventListener("input", e => {
+  if(e.target.dataset.f !== "price50") return;
+  const d = e.target.closest("details.sig-site"), om = d.querySelector('[data-f="price50Om"]');
+  const v = sigOmrFromAed(Number(e.target.value)); om.value = v == null ? "" : v;
+});
+document.getElementById("sig_siteList").addEventListener("click", async e => {
+  const add = e.target.closest('[data-act="addsite"]');
+  if(add){
+    const sp = sigData.products.find(x => x.id === add.dataset.id); if(!sp) return;
+    add.disabled = true;
+    try{
+      perfumes = await updateDataJsonWithRetry(getToken(), list => list.some(x => x.id === sp.id) ? list : list.concat([{
+        id: sp.id, brand: SIG_SITE_BRAND, name: String(sp.nameEn || sp.nameAr).toUpperCase(), nameAr: sp.nameAr, line: "signature", hidden: true,
+        image: "", gender: "unisex", seasons: ["summer", "winter"], daynight: ["day", "night"],
+        price50: sigNum(sp.price) || null, price10: null, price50Om: sigOmrFromAed(sigNum(sp.price)), price10Om: null,
+        price50Before: null, price10Before: null, price50OmBefore: null, price10OmBefore: null, stock50: 0, stock10: 0,
+        accords: "", accordsAR: "", notesTop: "", notesTopAR: "", notesMid: "", notesBase: "", longevity: "", sillage: "", inspiredAr: "",
+        concentration: "Extrait de Parfum", descAr: "", descEn: "", sigNotes: { top: "", heart: "", base: "", topAr: "", heartAr: "", baseAr: "" }
+      }]), "Signature: add to site (hidden) " + sp.id);
+      sigShowStatus("انضاف للموقع وهو مخفي ✅ — عبّي بياناته وصورته تحت.", "ok");
+      sigRenderSite(true);
+    }catch(err){ sigShowStatus("ما انحفظ: " + err.message, "err"); add.disabled = false; }
+    return;
+  }
+  const sv = e.target.closest('[data-act="save"]'); if(!sv) return;
+  const d = sv.closest("details.sig-site"), id = d.dataset.id;
+  const v = f => { const el = d.querySelector(`[data-f="${f}"]`); return el.type === "checkbox" ? el.checked : el.value.trim(); };
+  const nameEn = v("name").toUpperCase(), nameAr = v("nameAr");
+  if(!nameEn || !nameAr){ sigShowStatus("اكتب الاسم بالعربي والإنجليزي.", "err"); return; }
+  const price = v("price50") === "" ? null : Number(v("price50")), priceOm = v("price50Om") === "" ? null : Number(v("price50Om"));
+  if(!v("comingSoon") && !v("hidden") && !(price > 0)){ sigShowStatus("العطر الظاهر وغير «قريبًا» لازم يكون له سعر.", "err"); return; }
+  const n = { topAr: v("n_topAr"), heartAr: v("n_heartAr"), baseAr: v("n_baseAr"), top: v("n_top"), heart: v("n_heart"), base: v("n_base") };
+  const seasons = [v("s_summer") && "summer", v("s_winter") && "winter"].filter(Boolean);
+  const daynight = [v("d_day") && "day", v("d_night") && "night"].filter(Boolean);
+  const token = getToken(); sv.disabled = true;
+  try{
+    const patch = { name: nameEn, nameAr, gender: v("gender"), price50: price, price50Om: priceOm, accords: v("accords"), accordsAR: v("accordsAR"),
+      descAr: v("descAr"), descEn: v("descEn"), sigNotes: n, seasons: seasons.length ? seasons : ["summer", "winter"], daynight,
+      concentration: v("concentration"), hidden: v("hidden"), comingSoon: v("comingSoon") };
+    Object.assign(patch, sigComposeNotes(n));
+    const imgs = sigPendingImages[id];
+    if(imgs){
+      sigShowStatus("جارِ رفع الصور…", "info");
+      const key = sigSiteKey(id), stamp = Date.now();
+      await sigPutCatalogFile(`assets/signature/${key}.${imgs.full.ext}`, imgs.full.b64, "Signature image: " + key, token);
+      await sigPutCatalogFile(`assets/signature/${key}-card.${imgs.card.ext}`, imgs.card.b64, "Signature card image: " + key, token);
+      patch.photo = `assets/signature/${key}.${imgs.full.ext}?v=${stamp}`;
+      patch.photoCard = `assets/signature/${key}-card.${imgs.card.ext}?v=${stamp}`;
+    }
+    sigShowStatus("جارِ الحفظ…", "info");
+    perfumes = await updateDataJsonWithRetry(token, list => list.map(x => {
+      if(x.id !== id) return x;
+      const r = Object.assign({}, x, patch);
+      if(!r.hidden) delete r.hidden; if(!r.comingSoon) delete r.comingSoon;
+      return r;
+    }), "Signature: update site entry " + id);
+    // نفس الاسم والسعر في حسبة التكلفة (لو العطر موجود فيها)
+    if(sigData.products.some(x => x.id === id && (x.nameAr !== nameAr || x.price !== price || (x.nameEn || "").toUpperCase() !== nameEn))){
+      await sigSave(o => Object.assign(o, { products: o.products.map(x => x.id === id ? Object.assign({}, x, { nameAr, nameEn: v("name"), price: price || x.price }) : x) }), "Signature: sync name/price " + id);
+    }
+    delete sigPendingImages[id]; d.removeAttribute("data-pending-image");
+    sigShowStatus("انحفظ في الموقع ✅ — يبين خلال دقيقة أو دقيقتين.", "ok");
+    sigRenderSite(true);
+  }catch(err){ sigShowStatus("ما انحفظ: " + err.message, "err"); }
+  finally{ sv.disabled = false; }
+});
+async function sigSetAllHidden(hidden){
+  const items = sigSiteItems(); if(!items.length){ sigShowStatus("ما في عطور سيغنتشر بالموقع.", "err"); return; }
+  if(!hidden){
+    const noPrice = items.filter(p => !p.comingSoon && !(p.price50 > 0));
+    if(noPrice.length){ sigShowStatus("هذي ما لها سعر: " + noPrice.map(p => p.nameAr).join("، ") + " — حط لها سعر أو علّمها «قريبًا» أول.", "err"); return; }
+    const noImg = items.filter(p => !p.photoCard && !p.photo), noDesc = items.filter(p => !p.descAr);
+    const noStock = items.filter(p => !p.comingSoon && !(stockAsQty(p.stock50) > 0));
+    const warn = [];
+    if(noImg.length) warn.push("بدون صورة: " + noImg.map(p => p.nameAr).join("، "));
+    if(noDesc.length) warn.push("بدون قصة: " + noDesc.map(p => p.nameAr).join("، "));
+    if(noStock.length) warn.push("مخزونها صفر (بتطلع «نفدت الكمية»): " + noStock.map(p => p.nameAr).join("، "));
+    if(warn.length && !confirm(warn.join("\n") + "\n\nتظهر الصفحة بكل الأحوال؟ (تقدر تخفي أي عطر لحاله من بطاقته)")) return;
+  } else if(!confirm("تخفي صفحة سيغنتشر وكل عطورها من الموقع؟")) return;
+  try{
+    perfumes = await updateDataJsonWithRetry(getToken(), list => list.map(x => {
+      if(x.line !== "signature") return x;
+      const r = Object.assign({}, x); if(hidden) r.hidden = true; else delete r.hidden; return r;
+    }), hidden ? "Signature: hide collection" : "Signature: show collection");
+    sigShowStatus(hidden ? "انخفت الصفحة ✅" : "الصفحة ظاهرة الحين ✅ — تبين في الموقع خلال دقيقة أو دقيقتين.", "ok");
+    sigRenderSite(true);
+  }catch(err){ sigShowStatus("ما انحفظ: " + err.message, "err"); }
+}
+document.getElementById("sig_showAllBtn").addEventListener("click", () => sigSetAllHidden(false));
+document.getElementById("sig_hideAllBtn").addEventListener("click", () => sigSetAllHidden(true));
+
 function sigRenderAll(){
   if(!sigData) return;
   sigRenderOverview();
@@ -4937,6 +5190,7 @@ function sigRenderAll(){
   sigRenderBuyList();
   sigRenderPreview();
   sigRenderMake();
+  sigRenderSite();
 }
 
 // ===== ⭐ مختارات إيفوك (picks.json العام) — 24 أكتوبر 2026 =====

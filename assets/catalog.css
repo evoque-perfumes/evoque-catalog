@@ -751,3 +751,4 @@ html[lang="ar"] .teaser h2{ font-family:'El Messiri','IBM Plex Sans Arabic',sans
 /* صورة الهرم بالعرض الكامل (أفقية) بالتكبير */
 .lb-sig .lightbox-imgwrap{ aspect-ratio:16/9; background:#F8F5F0; }
 @media (min-width:680px){ .lb-sig .lightbox-box{ grid-template-columns:1.6fr 1fr; } .lb-sig .lightbox-imgwrap{ aspect-ratio:auto; } }
+.size-pill.sig-soon{ color:#B4693F; font-weight:700; justify-content:center; }
