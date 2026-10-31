@@ -283,6 +283,8 @@
   .sig-kv.good b{ color:#1F6B41; }
   .sig-kv.neg b{ color:#963224; }
   .sig-del-prod{ margin-top:8px; }
+  .sig-ref{ display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:var(--muted); margin:0 0 6px; }
+  .sig-ref input{ min-height:36px; padding:4px 8px; }
   .sig-add{ margin-top:14px; }
   .sig-add summary{ cursor:pointer; font-weight:600; color:var(--emerald); }
   .sig-type{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
@@ -876,6 +878,7 @@
       <button type="button" data-ss="overview" class="active">📊 الملخص</button>
       <button type="button" data-ss="products">🧴 العطور والأرباح</button>
       <button type="button" data-ss="buy">🛢️ مشتريات الزيت</button>
+      <button type="button" data-ss="make">🏭 التصنيع والمخزون</button>
       <button type="button" data-ss="settings">⚙️ الإعدادات</button>
     </div>
     <div class="status" id="sig_statusBox"></div>
@@ -891,7 +894,7 @@
       <div id="sig_mixInfo" class="sig-note" style="margin-top:0;"></div>
       <div id="sig_productCards" class="sig-cards"></div>
       <div class="row" style="margin-top:10px;">
-        <button type="button" id="sig_savePricesBtn">💾 احفظ الأسعار</button>
+        <button type="button" id="sig_savePricesBtn">💾 احفظ التعديلات</button>
       </div>
       <details class="sig-add">
         <summary>➕ أضف عطر جديد للمجموعة</summary>
@@ -900,6 +903,7 @@
           <div class="field"><label for="sig_newNameEn">الاسم بالإنجليزي</label><input type="text" id="sig_newNameEn" maxlength="40" dir="ltr" placeholder="Fajr"></div>
           <div class="field"><label for="sig_newPrice">سعر البيع (درهم)</label><input type="number" id="sig_newPrice" min="0" step="1" value="119"></div>
         </div>
+        <div class="field"><label for="sig_newRef">🔒 الاسم الحقيقي / اسم الزيت عند المورد (خاص فيك — ما يطلع بالموقع)</label><input type="text" id="sig_newRef" maxlength="120" placeholder="مثال: Essential — Oud Royal #A12"></div>
         <button type="button" id="sig_addProductBtn" class="secondary">➕ أضف العطر</button>
       </details>
     </fieldset>
@@ -932,6 +936,29 @@
     <fieldset data-ss="buy">
       <legend>📜 كل المشتريات</legend>
       <div id="sig_buyList"></div>
+    </fieldset>
+
+    <fieldset data-ss="make">
+      <legend>🏭 سجّل تصنيع (بعد ما تخلط وتعبّي)</legend>
+      <div class="grid3">
+        <div class="field"><label for="sig_mkProd">العطر</label><select id="sig_mkProd"></select></div>
+        <div class="field"><label for="sig_mkQty">كم حبة عبّيت؟</label><input type="number" id="sig_mkQty" min="1" step="1" inputmode="numeric"></div>
+        <div class="field"><label for="sig_mkDate">التاريخ</label><input type="date" id="sig_mkDate"></div>
+      </div>
+      <div class="row" style="gap:8px; flex-wrap:wrap; margin-top:4px;">
+        <button type="button" class="secondary" id="sig_mkAllBtn">🛢️ عبّيت كل الزيت الباقي</button>
+      </div>
+      <div class="field" style="margin-top:8px;"><label for="sig_mkNote">ملاحظة (اختياري)</label><input type="text" id="sig_mkNote" maxlength="120" placeholder="مثال: دفعة نوفمبر"></div>
+      <div id="sig_mkPreview" class="sig-preview"></div>
+      <div class="row" style="margin-top:10px;"><button type="button" id="sig_mkSaveBtn">💾 سجّل التصنيع</button></div>
+    </fieldset>
+    <fieldset data-ss="make">
+      <legend>📦 المخزون الحين</legend>
+      <div id="sig_stockCards" class="sig-cards"></div>
+    </fieldset>
+    <fieldset data-ss="make">
+      <legend>📜 سجل التصنيع</legend>
+      <div id="sig_mkList"></div>
     </fieldset>
 
     <fieldset data-ss="settings">
@@ -4366,8 +4393,10 @@ navSync();
 // ===================================================================
 // ✨ إيفوك سيغنتشر — التكلفة والأرباح (28 أكتوبر 2026)
 // كل البيانات في المستودع الخاص (signature.json). ولا رقم ولا اسم مورد يروح للموقع العام.
-// signature.json = { settings, products:[{id,nameAr,nameEn,price}], purchases:[{id,type,date,supplier,note,
-//   rate,shippingAED,customsPct,vatPct, items:[{productId, usdPerKg, kg} | {productId, grams, priceAED}]}] }
+// signature.json = { settings, products:[{id,nameAr,nameEn,price,ref}], purchases:[{id,type,date,supplier,note,
+//   rate,shippingAED,customsPct,vatPct, items:[{productId, usdPerKg, kg} | {productId, grams, priceAED}]}],
+//   productions:[{id,date,productId,bottles,oilG,note}] }
+// ref = الاسم الحقيقي / اسم الزيت عند المورد — خاص، ما ينكتب أبدًا في data.json العام.
 // ===================================================================
 const SIGNATURE_JSON_PATH = "signature.json";
 // SIG-CALC-START — دوال حساب صافية (بدون DOM) عشان تنفحص بأرقام الاختبار
@@ -4453,6 +4482,7 @@ const sigR0 = n => Math.round(sigNum(n)).toLocaleString("en-US");
 function sigShowStatus(msg, cls){ const b = document.getElementById("sig_statusBox"); b.textContent = msg; b.className = "status " + (cls || ""); }
 function sigHideStatus(){ document.getElementById("sig_statusBox").className = "status"; }
 function sigProductName(id){ const p = ((sigData && sigData.products) || []).find(x => x.id === id); return p ? (p.nameAr + (p.nameEn ? " · " + p.nameEn : "")) : id; }
+function sigProductLabel(p){ return p.nameAr + " · " + (p.nameEn || "") + (p.ref ? " — 🔒 " + p.ref : ""); }
 function sigSlug(s){ return String(s || "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
 
 function sigShowSection(ss){
@@ -4474,9 +4504,10 @@ async function loadSignatureIntoPanel(){
     sigData.settings = sigData.settings || {};
     sigData.products = Array.isArray(sigData.products) ? sigData.products : [];
     sigData.purchases = Array.isArray(sigData.purchases) ? sigData.purchases : [];
+    sigData.productions = Array.isArray(sigData.productions) ? sigData.productions : [];
     sigHideStatus();
   }catch(e){
-    sigData = sigData || { settings: {}, products: [], purchases: [] };
+    sigData = sigData || { settings: {}, products: [], purchases: [], productions: [] };
     sigShowStatus("ما قدرت أحمّل بيانات سيغنتشر من المستودع الخاص: " + e.message + " — تأكد إنك داخل بالمفتاح الجديد.", "err");
   }
   sigFillSettings();
@@ -4486,11 +4517,13 @@ async function loadSignatureIntoPanel(){
 async function sigSave(mutate, msg){
   const token = getToken();
   if(!token) throw new Error("سجّل دخول أول");
-  const next = await updateJsonWithRetry(API_BASE_PRIV, token, SIGNATURE_JSON_PATH, { settings: {}, products: [], purchases: [] }, obj => {
-    const o = Object.assign({ settings: {}, products: [], purchases: [] }, obj);
+  const next = await updateJsonWithRetry(API_BASE_PRIV, token, SIGNATURE_JSON_PATH, { settings: {}, products: [], purchases: [], productions: [] }, obj => {
+    const o = Object.assign({ settings: {}, products: [], purchases: [], productions: [] }, obj);
+    if(!Array.isArray(o.productions)) o.productions = [];
     return mutate(o);
   }, msg);
   sigData = next;
+  if(!Array.isArray(sigData.productions)) sigData.productions = [];
   sigRenderAll();
   return next;
 }
@@ -4531,6 +4564,7 @@ function sigRenderProducts(){
     return `<div class="sig-card">
       <div class="sig-card-head"><div><b>${esc(p.nameAr)}</b> <span dir="ltr">${esc(p.nameEn || "")}</span></div>
         <label class="sig-price">السعر <input type="number" min="0" step="1" data-sig-price="${esc(p.id)}" value="${esc(p.price)}"> درهم</label></div>
+      <label class="sig-ref">🔒 الاسم الحقيقي / عند المورد <input type="text" maxlength="120" data-sig-ref="${esc(p.id)}" value="${esc(p.ref || "")}" placeholder="خاص فيك — ما يطلع بالموقع"></label>
       ${has ? `
       ${row("تكلفة الحبة (آخر دفعة)", sigR2(s.unitCost) + " درهم")}
       ${s.lines.length > 1 ? row("تكلفة الحبة (متوسط كل الدفعات)", sigR2(s.unitCostAvg) + " درهم") : ""}
@@ -4560,14 +4594,22 @@ document.getElementById("sig_savePricesBtn").addEventListener("click", async () 
   let bad = false;
   document.querySelectorAll("[data-sig-price]").forEach(inp => { const v = Number(inp.value); if(!isFinite(v) || v <= 0) bad = true; prices[inp.dataset.sigPrice] = v; });
   if(bad){ sigShowStatus("السعر لازم يكون رقم أكبر من صفر.", "err"); return; }
+  const refs = {};
+  document.querySelectorAll("[data-sig-ref]").forEach(inp => { refs[inp.dataset.sigRef] = inp.value.trim(); });
   sigShowStatus("جارِ الحفظ…", "info");
-  try{ await sigSave(o => Object.assign(o, { products: o.products.map(p => prices[p.id] != null ? Object.assign({}, p, { price: prices[p.id] }) : p) }), "Signature: update prices"); sigShowStatus("انحفظت الأسعار ✅ (هذي أسعار الحسبة. أسعار الموقع تنضبط لما نضيف العطور للموقع)", "ok"); }
+  try{ await sigSave(o => Object.assign(o, { products: o.products.map(p => {
+      const u = Object.assign({}, p);
+      if(prices[p.id] != null) u.price = prices[p.id];
+      if(refs[p.id] != null) u.ref = refs[p.id];
+      return u;
+    }) }), "Signature: update products"); sigShowStatus("انحفظت التعديلات ✅ (هذي أسعار الحسبة. أسعار الموقع تنضبط لما نضيف العطور للموقع)", "ok"); }
   catch(e){ sigShowStatus("ما انحفظ: " + e.message, "err"); }
 });
 document.getElementById("sig_addProductBtn").addEventListener("click", async () => {
   const nameAr = document.getElementById("sig_newNameAr").value.trim();
   const nameEn = document.getElementById("sig_newNameEn").value.trim();
   const price = Number(document.getElementById("sig_newPrice").value);
+  const ref = document.getElementById("sig_newRef").value.trim();
   if(!nameAr || !nameEn){ sigShowStatus("اكتب الاسم بالعربي والإنجليزي.", "err"); return; }
   if(!isFinite(price) || price <= 0){ sigShowStatus("اكتب سعر صحيح.", "err"); return; }
   const base = "signature-" + (sigSlug(nameEn) || "perfume");
@@ -4575,9 +4617,9 @@ document.getElementById("sig_addProductBtn").addEventListener("click", async () 
     await sigSave(o => {
       let id = base, i = 2;
       while(o.products.some(p => p.id === id)) id = base + "-" + (i++);
-      return Object.assign(o, { products: o.products.concat([{ id, nameAr, nameEn, price }]) });
+      return Object.assign(o, { products: o.products.concat([{ id, nameAr, nameEn, price, ref }]) });
     }, "Signature: add product " + nameEn);
-    document.getElementById("sig_newNameAr").value = ""; document.getElementById("sig_newNameEn").value = "";
+    document.getElementById("sig_newNameAr").value = ""; document.getElementById("sig_newNameEn").value = ""; document.getElementById("sig_newRef").value = "";
     sigResetBuyForm();
     sigShowStatus("انضاف العطر ✅", "ok");
   }catch(e){ sigShowStatus("ما انحفظ: " + e.message, "err"); }
@@ -4587,7 +4629,7 @@ document.getElementById("sig_addProductBtn").addEventListener("click", async () 
 function sigBuyType(){ const r = document.querySelector('input[name="sig_type"]:checked'); return r ? r.value : "imported"; }
 function sigItemRowHtml(it){
   const imported = sigBuyType() === "imported";
-  const opts = sigData.products.map(p => `<option value="${esc(p.id)}" ${it && it.productId === p.id ? "selected" : ""}>${esc(p.nameAr)} · ${esc(p.nameEn || "")}</option>`).join("");
+  const opts = sigData.products.map(p => `<option value="${esc(p.id)}" ${it && it.productId === p.id ? "selected" : ""}>${esc(sigProductLabel(p))}</option>`).join("");
   return `<div class="sig-item">
     <div class="field"><label>العطر</label><select class="si-prod">${opts}</select></div>
     ${imported
@@ -4771,19 +4813,19 @@ function sigRenderOverview(){
   const st = sigSettings(sigData), mix = sigMix(st);
   let invested = 0;
   sigData.purchases.forEach(pu => sigPurchaseLines(pu).forEach(l => { invested += l.landed; }));
-  let capacity = 0;
   const unitCosts = [];
-  sigData.products.forEach(p => { const s = sigProductStats(p.id, sigData.purchases, mix); capacity += s.bottles; if(s.lines.length) unitCosts.push(sigProfit(p.price, s.unitCost, st).uae); });
+  sigData.products.forEach(p => { const s = sigProductStats(p.id, sigData.purchases, mix); if(s.lines.length) unitCosts.push(sigProfit(p.price, s.unitCost, st).uae); });
   const sales = sigSalesSummary();
-  const left = Math.max(0, capacity - sales.bottles);
+  let ready = 0, canMake = 0;
+  sigData.products.forEach(p => { const k = sigStockOf(p.id, mix, sales.perProduct); ready += k.ready; canMake += k.canMake; });
   const avgProfit = unitCosts.length ? unitCosts.reduce((a, b) => a + b, 0) / unitCosts.length : 0;
   const fixedMonthly = sigNum(st.ads) + sigNum(st.other);
   const kpi = (label, value, sub) => `<div class="kpi-card"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div>${sub ? `<div class="kpi-label">${sub}</div>` : ""}</div>`;
   document.getElementById("sig_kpis").innerHTML =
     kpi("إجمالي اللي دفعته في الزيت", sigR2(invested) + "", "درهم (واصل مع الشحن والجمارك والضريبة)") +
-    kpi("حبات ممكنة من الزيت", sigR0(capacity), "حبة " + esc(st.bottleMl) + " مل") +
+    kpi("حبات جاهزة للبيع", sigR0(ready), "المخزون الحين (من التصنيع ناقص المبيعات)") +
     kpi("حبات مبيوعة", sigR0(sales.bottles), "من الطلبات الحقيقية") +
-    kpi("الباقي (تقديري)", sigR0(left), "حبة من الزيت المتبقي") +
+    kpi("الزيت الباقي يكفي", sigR0(canMake), "حبة ثانية لما تصنّعها") +
     kpi("الإيراد", sigR2(sales.revenue), "درهم بعد الخصم") +
     kpi("الربح لين الحين", sigR2(sales.profit), "بعد تكلفة الحبات والتوصيل ورسوم البطاقة") +
     kpi("المصاريف الثابتة بالشهر", sigR0(fixedMonthly), "درهم (إعلانات + اشتراكات)") +
@@ -4792,12 +4834,107 @@ function sigRenderOverview(){
     ? ""
     : "المبيعات والإيراد والربح تنحسب تلقائيًا من الطلبات لما عطور سيغنتشر تنضاف للموقع (المرحلة الثانية). «الربح لين الحين» ما يخصم المصاريف الثابتة الشهرية.";
 }
+// ---------- التصنيع والمخزون (31 أكتوبر 2026) ----------
+// التصنيع يسجّل كم حبة انعبّت من كل عطر (ويحجز زيتها). المخزون الجاهز:
+//  - لو العطر موجود بالموقع (data.json): نفس مخزون الموقع stock50 — التصنيع يزيده، وكل طلب ينقصه تلقائيًا (نفس باقي العطور).
+//  - لو لسا مو بالموقع: المصنّع ناقص المبيوع من الطلبات.
+function sigOnSite(id){ return (perfumes || []).find(p => p.id === id) || null; }
+function sigStockOf(productId, mix, soldMap){
+  const s = sigProductStats(productId, sigData.purchases, mix);
+  const made = (sigData.productions || []).filter(x => x.productId === productId);
+  const madeBottles = made.reduce((a, x) => a + sigNum(x.bottles), 0);
+  const usedG = made.reduce((a, x) => a + sigNum(x.oilG), 0);
+  const oilLeft = Math.max(0, s.grams - usedG);
+  const sold = (soldMap || {})[productId] || 0;
+  const site = sigOnSite(productId);
+  return { boughtG: s.grams, usedG, oilLeft, canMake: Math.floor(oilLeft / mix.oilG + 1e-9), madeBottles, sold,
+    onSite: !!site, ready: site ? stockAsQty(site.stock50) : Math.max(0, madeBottles - sold) };
+}
+function sigRenderMake(){
+  const st = sigSettings(sigData), mix = sigMix(st), sold = sigSalesSummary().perProduct;
+  const prodSel = document.getElementById("sig_mkProd");
+  const prevSel = prodSel.value;
+  prodSel.innerHTML = sigData.products.map(p => `<option value="${esc(p.id)}">${esc(sigProductLabel(p))}</option>`).join("");
+  if(prevSel && sigData.products.some(p => p.id === prevSel)) prodSel.value = prevSel;
+  if(!document.getElementById("sig_mkDate").value) document.getElementById("sig_mkDate").value = todayStr();
+  const box = document.getElementById("sig_stockCards");
+  box.innerHTML = sigData.products.length ? sigData.products.map(p => {
+    const k = sigStockOf(p.id, mix, sold);
+    const row = (a, b, cls) => `<div class="sig-kv ${cls || ""}"><span>${a}</span><b>${b}</b></div>`;
+    return `<div class="sig-card">
+      <div class="sig-card-head"><div><b>${esc(p.nameAr)}</b> <span dir="ltr">${esc(p.nameEn || "")}</span></div></div>
+      ${p.ref ? `<div class="sig-note" style="margin:0 0 4px;">🔒 ${esc(p.ref)}</div>` : ""}
+      ${row("✅ جاهز للبيع", sigR0(k.ready) + " حبة", k.ready > 0 ? "good" : "neg")}
+      ${row("انعبّى لين الحين", sigR0(k.madeBottles) + " حبة")}
+      ${row("انباع", sigR0(k.sold) + " حبة")}
+      ${row("🛢️ زيت باقي", sigR0(k.oilLeft) + " غ — يكفي " + sigR0(k.canMake) + " حبة", k.canMake > 0 ? "" : "neg")}
+      <div class="sig-note" style="margin:6px 0 0;">${k.onSite ? "🌐 العطر موجود بالموقع: المخزون نفس مخزون الموقع، وكل طلب ينقصه تلقائيًا." : "العطر لسا مو بالموقع: المخزون = اللي انعبّى ناقص اللي انباع."}</div>
+    </div>`;
+  }).join("") : `<div class="sig-note">أضف العطور أول من «🧴 العطور والأرباح».</div>`;
+  const list = (sigData.productions || []).slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  document.getElementById("sig_mkList").innerHTML = list.length ? list.map(x => `<div class="sig-buy">
+      <div class="sig-buy-head"><b>🏭 ${esc(x.date)} · ${esc(sigProductName(x.productId))}</b><span>${sigR0(x.bottles)} حبة · ${sigR0(x.oilG)} غ زيت${x.note ? " · " + esc(x.note) : ""}</span></div>
+      <div class="sig-buy-foot"><span></span><button type="button" class="secondary" data-sig-mkdel="${esc(x.id)}">🗑️ حذف</button></div>
+    </div>`).join("") : `<div class="sig-note">ما في تصنيع مسجّل لين الحين.</div>`;
+  sigRenderMakePreview();
+}
+function sigRenderMakePreview(){
+  const box = document.getElementById("sig_mkPreview");
+  const id = document.getElementById("sig_mkProd").value, n = Math.floor(sigNum(document.getElementById("sig_mkQty").value));
+  if(!id || !(n > 0)){ box.innerHTML = ""; return; }
+  const mix = sigMix(sigSettings(sigData)), k = sigStockOf(id, mix, sigSalesSummary().perProduct);
+  const oil = n * mix.oilG, alc = n * mix.alcMl;
+  const over = oil > k.oilLeft + 0.5;
+  box.innerHTML = `<div class="sig-prev-row">${sigR0(n)} حبة = <b>${sigR0(oil)} غ زيت</b> + ${sigR0(alc)} مل كحول · بعدها يصير الجاهز <b>${sigR0(k.ready + n)} حبة</b> والزيت الباقي ${sigR0(Math.max(0, k.oilLeft - oil))} غ</div>` +
+    (over ? `<div class="status show err" style="margin-top:6px;">⚠️ الزيت المسجّل لهالعطر يكفي ${sigR0(k.canMake)} حبة بس. لو اشتريت زيت ما سجّلته، سجّله أول في «🛢️ مشتريات الزيت».</div>` : "");
+}
+["sig_mkProd", "sig_mkQty"].forEach(id => document.getElementById(id).addEventListener("input", sigRenderMakePreview));
+document.getElementById("sig_mkProd").addEventListener("change", sigRenderMakePreview);
+document.getElementById("sig_mkAllBtn").addEventListener("click", () => {
+  const id = document.getElementById("sig_mkProd").value;
+  if(!id) return;
+  const k = sigStockOf(id, sigMix(sigSettings(sigData)), sigSalesSummary().perProduct);
+  if(!(k.canMake > 0)){ sigShowStatus("ما في زيت باقي مسجّل لهالعطر.", "err"); return; }
+  document.getElementById("sig_mkQty").value = k.canMake;
+  sigRenderMakePreview();
+});
+document.getElementById("sig_mkSaveBtn").addEventListener("click", async () => {
+  const id = document.getElementById("sig_mkProd").value, n = Math.floor(sigNum(document.getElementById("sig_mkQty").value));
+  if(!id){ sigShowStatus("أضف العطور أول.", "err"); return; }
+  if(!(n > 0)){ sigShowStatus("اكتب كم حبة عبّيت.", "err"); return; }
+  const mix = sigMix(sigSettings(sigData)), k = sigStockOf(id, mix, sigSalesSummary().perProduct);
+  if(n * mix.oilG > k.oilLeft + 0.5 && !confirm(`الزيت المسجّل يكفي ${k.canMake} حبة بس، وأنت كاتب ${n}. تسجّل بكل الأحوال؟`)) return;
+  const rec = { id: "mk-" + Date.now(), date: document.getElementById("sig_mkDate").value || todayStr(), productId: id, bottles: n,
+    oilG: Math.round(n * mix.oilG * 100) / 100, note: document.getElementById("sig_mkNote").value.trim() };
+  sigShowStatus("جارِ الحفظ…", "info");
+  try{
+    await sigSave(o => Object.assign(o, { productions: o.productions.concat([rec]) }), `Signature: production ${rec.date} ${id} x${n}`);
+    let siteMsg = "";
+    if(sigOnSite(id)){ await applySalesStockDelta(getToken(), { [id + "|50"]: -n }); siteMsg = " وانضاف لمخزون الموقع"; sigRenderAll(); }
+    document.getElementById("sig_mkQty").value = ""; document.getElementById("sig_mkNote").value = "";
+    sigRenderMakePreview();
+    sigShowStatus(`انسجّل ✅ ${n} حبة ${sigProductName(id)}${siteMsg}.`, "ok");
+  }catch(e){ sigShowStatus("ما انحفظ: " + e.message, "err"); }
+});
+document.getElementById("sig_mkList").addEventListener("click", async e => {
+  const b = e.target.closest("[data-sig-mkdel]");
+  if(!b) return;
+  const rec = (sigData.productions || []).find(x => x.id === b.dataset.sigMkdel);
+  if(!rec || !confirm(`تحذف تصنيع ${rec.bottles} حبة ${sigProductName(rec.productId)} (${rec.date})؟${sigOnSite(rec.productId) ? " بينقص من مخزون الموقع بعد." : ""}`)) return;
+  try{
+    await sigSave(o => Object.assign(o, { productions: o.productions.filter(x => x.id !== rec.id) }), "Signature: delete production " + rec.id);
+    if(sigOnSite(rec.productId)){ await applySalesStockDelta(getToken(), { [rec.productId + "|50"]: sigNum(rec.bottles) }); sigRenderAll(); }
+    sigShowStatus("انحذف ✅", "ok");
+  }catch(err){ sigShowStatus("ما انحذف: " + err.message, "err"); }
+});
+
 function sigRenderAll(){
   if(!sigData) return;
   sigRenderOverview();
   sigRenderProducts();
   sigRenderBuyList();
   sigRenderPreview();
+  sigRenderMake();
 }
 
 // ===== ⭐ مختارات إيفوك (picks.json العام) — 24 أكتوبر 2026 =====
