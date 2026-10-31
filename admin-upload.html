@@ -4482,7 +4482,8 @@ const sigR0 = n => Math.round(sigNum(n)).toLocaleString("en-US");
 function sigShowStatus(msg, cls){ const b = document.getElementById("sig_statusBox"); b.textContent = msg; b.className = "status " + (cls || ""); }
 function sigHideStatus(){ document.getElementById("sig_statusBox").className = "status"; }
 function sigProductName(id){ const p = ((sigData && sigData.products) || []).find(x => x.id === id); return p ? (p.nameAr + (p.nameEn ? " · " + p.nameEn : "")) : id; }
-function sigProductLabel(p){ return p.nameAr + " · " + (p.nameEn || "") + (p.ref ? " — 🔒 " + p.ref : ""); }
+// العربي والإنجليزي بنفس السطر يتلخبط ترتيبهم بالقائمة — نعزل كل جزء إنجليزي (\u2068…\u2069) عشان يطلع بالترتيب الصحيح
+function sigProductLabel(p){ const iso = t => "\u2068" + t + "\u2069"; return p.nameAr + (p.nameEn ? " · " + iso(p.nameEn) : "") + (p.ref ? " — 🔒 " + iso(p.ref) : ""); }
 function sigSlug(s){ return String(s || "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
 
 function sigShowSection(ss){
