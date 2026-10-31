@@ -1694,6 +1694,7 @@
         <div class="field" style="display:none"><label for="f_stock10">10مل — الكمية</label><input type="number" id="f_stock10" min="0" step="1" value="1"></div>
       </div>
       <small class="hint" style="margin-top:0;">0 = نفدت الكمية (الموقع يعرض "نفدت الكمية" تلقائيًا). أي رقم أكبر من صفر = متوفر.</small>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer;"><input type="checkbox" id="f_hidden" style="width:auto; margin:0;"> 🙈 مخفي من الموقع (ما يطلع للزباين، ويبقى هنا بلوحة التحكم)</label>
     </fieldset>
 
     <small class="hint" style="margin-top:0;">🧮 التكلفة (الزيت والكحول والزجاجة) تنضبط كلها من تبويب "🧮 التكلفة والأرباح" — مو من هنا.</small>
@@ -6500,6 +6501,7 @@ function fillForm(p){
   document.getElementById("f_inspiredAr").value = p.inspiredAr || "";
   document.getElementById("f_photo").value = p.photo || "";
   document.getElementById("f_collection").value = p.collection || "";
+  document.getElementById("f_hidden").checked = !!p.hidden;
   document.getElementById("f_gender").value = p.gender || "unisex";
   document.querySelectorAll(".f_season").forEach(cb => cb.checked = (p.seasons||[]).includes(cb.value));
   document.getElementById("f_price50").value = p.price50 ?? "";
@@ -7610,6 +7612,9 @@ function updateSaveBtnState(){
 }
 ["f_brand","f_name"].forEach(id => document.getElementById(id).addEventListener("input", updateSaveBtnState));
 
+const FORM_MANAGED_KEYS = ["id","brand","name","displayName","inspiredBy","inspiredAr","photo","collection","hidden","image","seasons","gender",
+  "price50","price10","price50Om","price10Om","price50Before","price10Before","price50OmBefore","price10OmBefore",
+  "stock50","stock10","stock50UpdatedAt","stock10UpdatedAt","accords","accordsAR","notesTop","notesTopAR","notesMid","notesBase","longevity","sillage"];
 function readFormAsPerfume(existingImage){
   const num = id => {
     const v = document.getElementById(id).value;
@@ -7625,6 +7630,7 @@ function readFormAsPerfume(existingImage){
     ...(document.getElementById("f_inspiredAr").value.trim() ? { inspiredAr: document.getElementById("f_inspiredAr").value.trim() } : {}),
     ...(document.getElementById("f_photo").value.trim() ? { photo: document.getElementById("f_photo").value.trim() } : {}),
     ...(document.getElementById("f_collection").value.trim() ? { collection: document.getElementById("f_collection").value.trim() } : {}),
+    ...(document.getElementById("f_hidden").checked ? { hidden: true } : {}),
     image: existingImage || "",
     seasons: Array.from(document.querySelectorAll(".f_season:checked")).map(cb => cb.value),
     gender: document.getElementById("f_gender").value,
@@ -9215,6 +9221,13 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     // 3) تجهيز السجل الجديد
     const newRecord = readFormAsPerfume(imagePath);
     newRecord.id = newSlug;
+    // 31 أكتوبر 2026: النموذج ما يغطي كل الحقول (الليل/النهار، عطور سيغنتشر، الوصف...) —
+    // قبل كذا كانت تنمسح مع أي تعديل. الحين نحافظ على أي حقل النموذج ما يتحكم فيه.
+    if(editingOriginal){
+      const managed = new Set(FORM_MANAGED_KEYS.concat(COST_FIELD_KEYS));
+      Object.keys(editingOriginal).forEach(k => { if(!managed.has(k) && !(k in newRecord)) newRecord[k] = editingOriginal[k]; });
+      if(editingOriginal.line === "signature") newRecord.id = editingOriginal.id; // معرّف سيغنتشر مربوط بملف التكلفة والتصنيع — ما يتغير
+    }
     // طابع "آخر تحديث مخزون" — لو عطر جديد كليًا نختم وقت الإضافة مباشرة، ولو
     // تعديل عطر موجود نحافظ على الطابع القديم إلا لو الكمية فعليًا تغيّرت.
     if(!editingOriginal){

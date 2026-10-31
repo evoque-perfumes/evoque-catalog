@@ -13,9 +13,19 @@ function arNorm(s){
     .replace(/[\u064B-\u0652\u0640]/g, "").replace(/[إأآٱ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
     .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
-function searchHay(p){ return arNorm([p.brand, p.name, p.inspiredAr, p.displayName].filter(Boolean).join(" ")); }
+function searchHay(p){ return arNorm([p.brand, p.name, p.nameAr, p.inspiredAr, p.displayName].filter(Boolean).join(" ")); }
+// ===== إيفوك سيغنتشر (31 أكتوبر 2026) — عطور باسم إيفوك الخاص =====
+// line:"signature" بـ data.json. ما نعرض لها "مستوحى من" ولا رابط العطر الأصلي ولا تنبيه "انطباع عطري".
+// صفحتها = index.html?brand=EVOQUE%20SIGNATURE (نفس فلتر البراند) — signature.html يحوّل لها.
+const SIG_BRAND = "EVOQUE SIGNATURE";
+function isSig(p){ return !!p && p.line === "signature"; }
+function sigDisplayName(p){ return (lang === "ar" && p.nameAr) ? `${escapeHtml(p.nameAr)} · <span dir="ltr">${escapeHtml(p.name)}</span>` : escapeHtml(p.name); }
 function origSearchUrl(p){ return "https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(toTitleCase(p.brand) + " " + toTitleCase(p.name) + " perfume"); }
 function inspiredBlockHtml(p, t){
+  if(isSig(p)){
+    const fam = lang === "ar" ? p.accordsAR : p.accords;
+    return fam ? `<div class="inspired-block sig-family">✨ ${escapeHtml(fam)}</div>` : "";
+  }
   const en = p.inspiredBy ? p.inspiredBy : toTitleCase(p.brand) + " " + toTitleCase(p.name);
   const arLine = (lang === "ar" && p.inspiredAr) ? `<div class="inspired-ar">${t.inspiredBy} <b>${escapeHtml(p.inspiredAr)}</b></div>` : "";
   const enLine = p.displayName ? `<div class="inspired-en">${lang === "ar" && p.inspiredAr ? "" : t.inspiredBy + " "}<span dir="ltr">${escapeHtml(en)}</span></div>` : "";
@@ -23,7 +33,7 @@ function inspiredBlockHtml(p, t){
       <a class="orig-link" href="${escapeHtml(origSearchUrl(p))}" target="_blank" rel="noopener nofollow">${t.origLink} <span aria-hidden="true">↗</span></a>
     </div>`;
 }
-function productImage(p){ return p.photo ? p.photo : "assets/cards/" + encodeURIComponent(p.id) + ".webp"; }
+function productImage(p){ return p.photoCard || p.photo || ("assets/cards/" + encodeURIComponent(p.id) + ".webp"); }
 const COMING_SOON_IMAGE = "assets/coming-soon.jpg"; // صورة "الصور قيد التجهيز" الموحدة — 29 أغسطس 2026
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbxz93KyzZTa0Y4_HNaGZfK1wh-i4a6bLhH9koUAHnUSn2Ged0PC110kIMuAOqVCDeyM/exec";
@@ -451,6 +461,8 @@ const I18N = {
     lightboxHint: "اضغط على الصورة لتكبيرها وقراءة التفاصيل",
     // ===== نصوص إعادة الهيكلة لعدة صفحات — 21 أغسطس 2026 =====
     navHome: "الرئيسية", navMen: "رجالي", navWomen: "نسائي", navUnisex: "للجنسين",
+    sigNav: "سيغنتشر", sigEyebrow: "تشكيلة خاصة", sigTitle: "إيفوك سيغنتشر",
+    sigSubtitle: "تركيبات إيفوك الخاصة، بتركيز Extrait de Parfum. كل عطر له اسم وقصة.", sigConc: "التركيز",
     bestSellersEyebrow: "مختارات",
     bestSellersTitle: "مختارات إيفوك",
     bestSellersSubtitle: "مجموعة مختارة من عطورنا — بداية حلوة لو أول مرة تطلب من عندنا.",
@@ -644,6 +656,8 @@ const I18N = {
     lightboxHint: "Tap the image to zoom in and read the details",
     // ===== Multi-page restructure strings — Aug 21, 2026 =====
     navHome: "Home", navMen: "Men", navWomen: "Women", navUnisex: "Unisex",
+    sigNav: "Signature", sigEyebrow: "Private collection", sigTitle: "Evoque Signature",
+    sigSubtitle: "Evoque's own blends, in Extrait de Parfum concentration. Every scent has a name and a story.", sigConc: "Concentration",
     bestSellersEyebrow: "Picks",
     bestSellersTitle: "Evoque Picks",
     bestSellersSubtitle: "A curated selection from our collection — a good place to start.",
@@ -1062,7 +1076,7 @@ async function loadPerfumesFromJson(){
   // نتعامل مع الشكلين احتياطًا (مصفوفة مباشرة أو {perfumes:[...]}) عشان ما ننكسر لو تغيّر لاحقًا.
   const list = Array.isArray(data) ? data : (data && Array.isArray(data.perfumes) ? data.perfumes : null);
   if(!list || list.length === 0) throw new Error("empty data.json");
-  perfumes = list;
+  perfumes = list.filter(p => !p.hidden); // hidden:true = مخفي من الموقع (يبقى بلوحة التحكم)
 }
 
 // ------------------------------------------------------------------
@@ -1471,19 +1485,26 @@ function openLightbox(p){
   const sillageDisplay = translateForDisplay(p.sillage);
   const lbImg = document.getElementById("lightboxImg");
   lbImg.style.opacity = "1";
-  lbImg.src = productImage(p);
+  lbImg.src = p.photo || productImage(p);
+  document.getElementById("lightboxOverlay").classList.toggle("lb-sig", isSig(p));
   lbImg.onerror = function(){ lbImg.onerror = null; lbImg.src = COMING_SOON_IMAGE; };
   lbImg.alt = t.imgAlt; // بدون أسماء علامات تجارية بنص الصورة البديل
   document.getElementById("lightboxBrand").textContent = toTitleCase(p.brand);
-  document.getElementById("lightboxName").textContent = toTitleCase(p.name);
+  if(isSig(p)) document.getElementById("lightboxName").innerHTML = sigDisplayName(p);
+  else document.getElementById("lightboxName").textContent = toTitleCase(p.name);
   const rows = [];
-  if(accordsDisplay) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.accordsLabel}:</b> ${accordsDisplay}</div></div>`);
+  if(accordsDisplay && !isSig(p)) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.accordsLabel}:</b> ${accordsDisplay}</div></div>`);
   if(notesTopDisplay) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.top}:</b> ${notesTopDisplay}</div></div>`);
   if(longevityDisplay) rows.push(`<div class="row">${svgIcon("ic-clock")}<div><b>${t.longevity}:</b> ${longevityDisplay}</div></div>`);
   if(sillageDisplay) rows.push(`<div class="row">${svgIcon("ic-wind")}<div><b>${t.sillage}:</b> ${sillageDisplay}</div></div>`);
   rows.unshift(inspiredBlockHtml(p, t));
+  if(isSig(p)){
+    const story = lang === "ar" ? p.descAr : p.descEn;
+    if(story) rows.splice(1, 0, `<div class="sig-story">${escapeHtml(story)}</div>`);
+    if(p.concentration) rows.push(`<div class="row">${svgIcon("ic-sparkle")}<div><b>${t.sigConc}:</b> <span dir="ltr">${escapeHtml(p.concentration)}</span> · 50 ${lang === "ar" ? "مل" : "ml"}</div></div>`);
+  }
   rows.push(`<div class="row">${svgIcon("ic-shield")}<div><b>${t.warrantyTitle}:</b> ${t.warranty}</div></div>`);
-  rows.push(`<div class="row lb-disclaimer"><div>${t.disclaimer}</div></div>`);
+  if(!isSig(p)) rows.push(`<div class="row lb-disclaimer"><div>${t.disclaimer}</div></div>`);
   document.getElementById("lightboxDetails").innerHTML = rows.join("");
   renderReviewsSection(p);
   document.getElementById("lightboxOverlay").classList.add("open");
@@ -1588,7 +1609,8 @@ function renderSiteNav(){
   // الجنس بالشريط الجانبي بنفس صفحة النتائج (index.html)، بدل ٣ صفحات منفصلة.
   // صفحات men.html/women.html/unisex.html القديمة باقية شغالة لأي رابط قديم
   // محفوظ عند أحد (بحث Google، مفضلة متصفح...)، بس ما تربط من أي مكان بالموقع بعد الحين.
-  const linksHtml = `<a class="site-nav-link" href="index.html">${t.navHome}</a>`;
+  const linksHtml = `<a class="site-nav-link" href="index.html">${t.navHome}</a>` +
+    (perfumes.some(isSig) ? `<a class="site-nav-link sig-nav" href="index.html?brand=${encodeURIComponent(SIG_BRAND)}">✨ ${t.sigNav}</a>` : "");
 
   // قائمة "البراندات" المنسدلة بالهيدر (3 سبتمبر 2026) — تعرض كل البراندات الأصلية
   // بالكتالوج، وكل رابط ينقل لصفحة الرئيسية مفلترة على هذا البراند مباشرة
@@ -1674,6 +1696,14 @@ function renderBestSellers(){
   if(eyebrowEl) eyebrowEl.textContent = isSearching ? t.searchResultsEyebrow : t.bestSellersEyebrow;
   if(titleEl) titleEl.textContent = isSearching ? t.searchResultsTitle : t.bestSellersTitle;
   if(subEl) subEl.textContent = isSearching ? t.searchResultsSubtitle : t.bestSellersSubtitle;
+  // صفحة سيغنتشر = فلتر براند EVOQUE SIGNATURE بعنوان ووصف خاص
+  const sigPage = selectedBrand === SIG_BRAND && !searchQuery.trim();
+  document.getElementById("bestSellersHead").classList.toggle("sig-head", sigPage);
+  if(sigPage){
+    if(eyebrowEl) eyebrowEl.textContent = t.sigEyebrow;
+    if(titleEl) titleEl.textContent = t.sigTitle;
+    if(subEl) subEl.textContent = t.sigSubtitle;
+  }
   // نخفي بطاقات "تسوّق حسب التصنيف" أثناء البحث الفعلي — الزائر جاي يدور
   // بالاسم مباشرة، مو يتصفّح تصنيفات، ونرجعها لما يمسح البحث.
   if(categoryNavWrap) categoryNavWrap.style.display = isSearching ? "none" : "";
@@ -1681,6 +1711,7 @@ function renderBestSellers(){
   // يدويًا — يظهر بس لما نكون فعليًا نعرض نتائج مفلترة (14 سبتمبر 2026)
   const shopLayout = document.getElementById("shopLayout");
   if(shopLayout) shopLayout.classList.toggle("no-sidebar", !isSearching);
+  if(shopLayout && sigPage) shopLayout.classList.add("no-sidebar"); // سيغنتشر ٥ عطور بس — الشريط الجانبي يزحم الجوال بدون فايدة
 
   const gridEl = document.getElementById("grid");
   const bsArrows = document.getElementById("bsArrows");
@@ -1998,13 +2029,13 @@ function renderGrid(explicitList){
     // يغطي جزء منها بشكل غير متوقع. صف صغير أعلى بطاقة المعلومات، جنب "Impressions".
     info.innerHTML = `
       <div class="card-top-row">
-        <div class="impressions-tag">${t.impressionTag}</div>
+        <div class="impressions-tag${isSig(p) ? " sig-tag" : ""}">${isSig(p) ? "✨ Evoque Signature" : t.impressionTag}</div>
         <button type="button" class="wishlist-heart-btn${myWishlist.has(p.id) ? " active" : ""}" aria-label="${myWishlist.has(p.id) ? t.wishlistRemoveTitle : t.wishlistAddTitle}" title="${myWishlist.has(p.id) ? t.wishlistRemoveTitle : t.wishlistAddTitle}">${svgIcon("ic-heart")}</button>
       </div>
-      ${p.displayName ? "" : `<div class="name-row">
+      ${p.displayName || isSig(p) ? "" : `<div class="name-row">
         <div class="brand" title="${lang==="ar" ? "عرض كل عطور هذا البراند" : "Show all perfumes from this brand"}">${toTitleCase(p.brand)}</div>
       </div>`}
-      <div class="name">${p.displayName ? escapeHtml(p.displayName) : toTitleCase(p.name)}</div>
+      <div class="name">${isSig(p) ? sigDisplayName(p) : p.displayName ? escapeHtml(p.displayName) : toTitleCase(p.name)}</div>
       ${inspiredBlockHtml(p, t)}
       ${cardRating ? `<div class="card-rating">${starsHtml(cardRating.avg)}<span>${cardRating.avg.toFixed(1)} (${cardRating.count})</span></div>` : ""}
       ${genderLabel ? `<div class="badge-row"><span class="badge badge-gender">${svgIcon(ICONS[p.gender])}${genderLabel}</span></div>` : ""}

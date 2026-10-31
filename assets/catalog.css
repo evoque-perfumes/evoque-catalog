@@ -741,3 +741,13 @@ html[lang="ar"] .teaser h2{ font-family:'El Messiri','IBM Plex Sans Arabic',sans
 .teaser-tiles{ display:flex; justify-content:center; gap:8px; margin-top:16px; }
 .teaser-tiles i{ width:22px; height:22px; border-radius:4px; background:#1D4E7A; }
 .teaser-tiles i:nth-child(2){ background:#A3472F; } .teaser-tiles i:nth-child(3){ background:#3E5A47; } .teaser-tiles i:nth-child(4){ background:#A9BBA4; }
+
+/* ===== إيفوك سيغنتشر (31 أكتوبر 2026) ===== */
+.impressions-tag.sig-tag{ color:#B4693F; font-weight:600; letter-spacing:.02em; }
+.inspired-block.sig-family{ color:#B4693F; font-size:13px; margin-top:4px; }
+.sig-story{ font-size:14.5px; line-height:1.9; color:var(--ink, #1f2a24); margin:6px 0 4px; }
+.site-nav-link.sig-nav{ color:#B4693F; }
+#bestSellersHead.sig-head h2{ letter-spacing:.04em; }
+/* صورة الهرم بالعرض الكامل (أفقية) بالتكبير */
+.lb-sig .lightbox-imgwrap{ aspect-ratio:16/9; background:#F8F5F0; }
+@media (min-width:680px){ .lb-sig .lightbox-box{ grid-template-columns:1.6fr 1fr; } .lb-sig .lightbox-imgwrap{ aspect-ratio:auto; } }
