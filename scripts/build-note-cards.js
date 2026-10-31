@@ -24,6 +24,9 @@ const a = src.indexOf("const TERM_AR = {");
 const b = src.indexOf("function applyTermDict");
 const bEnd = src.indexOf("\n}\n", b) + 3;
 const tr = new Function(src.slice(a, bEnd) + "\nreturn applyTermDict;")();
+// نفس دالة عرض الأسماء بالموقع (YSL، Hermès، "Y Le Parfum"...) عشان البطاقة تطابق الموقع
+const tc0 = src.indexOf("// TITLE-CASE-START"), tc1 = src.indexOf("// TITLE-CASE-END");
+const toTitleCase = new Function(src.slice(tc0, tc1) + "\nreturn toTitleCase;")();
 const arText = (t) => (t ? tr(t).replace(/\s*;\s*/g, "؛ ").replace(/\s*,\s*/g, "، ") : "");
 
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -42,8 +45,8 @@ function sillageParts(p){
 }
 
 function html(p){
-  const title = p.displayName || p.name;
-  const inspired = p.inspiredBy || [p.brand, p.name].filter(Boolean).join(" ");
+  const title = p.displayName || toTitleCase(p.name);
+  const inspired = p.inspiredBy || [toTitleCase(p.brand), toTitleCase(p.name)].filter(Boolean).join(" ");
   // مكونات: نعرض الهرم (أعلى/قلب/قاعدة) فقط لو البيانات موجودة، وإلا قائمة وحدة "المكونات"
   const tiers = [];
   const add = (en, ar, labEn, labAr) => { if (en) tiers.push({ en, ar: ar || arText(en), labEn, labAr }); };
@@ -95,7 +98,8 @@ h1{font-family:${/[؀-ۿ]/.test(title) ? "M" : "C"},T,sans-serif;font-weight:${/
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const data = JSON.parse(fs.readFileSync(path.join(ROOT, "data.json"), "utf8"));
-  const list = (Array.isArray(data) ? data : data.perfumes || []).filter(p => !ONLY || p.id === ONLY);
+  // عطور سيغنتشر لها صورها الخاصة (assets/signature) — ما نسوي لها بطاقة "مستوحى من"
+  const list = (Array.isArray(data) ? data : data.perfumes || []).filter(p => p.line !== "signature" && (!ONLY || p.id === ONLY));
   let manifest = {}; try { manifest = JSON.parse(fs.readFileSync(MANIFEST, "utf8")); } catch (e) {}
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1350 } });

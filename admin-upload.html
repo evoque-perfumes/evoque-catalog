@@ -2082,6 +2082,8 @@ let mode = "overview";       // "overview" | "add" | "edit" | "photo" | "stock" 
 let editingOriginal = null;  // العطر الأصلي قبل التعديل (null لو إضافة)
 let deleteArmed = false;
 
+// يلقى العطر من البراند+الاسم: بالمعرّف، أو بالاسم الحالي (لو الاسم انصلح إملائيًا والمعرّف بقى القديم)
+function findPerfumeBySlug(slug){ return perfumes.find(p => p.id === slug) || perfumes.find(p => slugify(p.brand, p.name) === slug) || null; }
 function slugify(brand, name){
   let s = `${brand} ${name}`.trim().toLowerCase();
   s = s.normalize("NFKD").replace(/[̀-ͯ]/g, "");
@@ -8888,7 +8890,7 @@ function matchBulkFiles(fileList){
   imageFiles.forEach(file => {
     const { brand, name } = filenameToBrandName(file.name);
     const slug = slugify(brand, name);
-    const perfume = perfumes.find(p => p.id === slug);
+    const perfume = findPerfumeBySlug(slug);
     if(perfume) bulkMatched.push({ file, perfume });
     else bulkUnmatchedFiles.push({ file, guessBrand: brand, guessName: name });
   });
@@ -9120,7 +9122,7 @@ function xlsxProcessRows(rawRows){
       return { valid:false, reason:"البراند أو اسم العطر فاضي", rowNum:i+2, brand, name };
     }
     const slug = slugify(brand, name);
-    if(perfumes.some(p => p.id === slug)){
+    if(findPerfumeBySlug(slug)){
       return { valid:false, reason:"عطر موجود أصلًا بالكتالوج (هذا الوضع لعطور جديدة بس)", rowNum:i+2, brand, name };
     }
     if(seenInFile.has(slug)){
@@ -9275,7 +9277,7 @@ function xlsxProcessUpdateRows(rawRows){
       return { valid:false, reason:"البراند أو اسم العطر فاضي", rowNum:i+2, brand, name };
     }
     const slug = slugify(brand, name);
-    const existing = perfumes.find(p => p.id === slug);
+    const existing = findPerfumeBySlug(slug);
     if(!existing){
       return { valid:false, reason:"ما انلقى عطر بنفس البراند والاسم بالكتالوج الحالي", rowNum:i+2, brand, name };
     }
@@ -9296,7 +9298,7 @@ function xlsxProcessUpdateRows(rawRows){
     if(Object.keys(patch).length === 0){
       return { valid:false, reason:"ما فيه أي خانة معبّاة لتحديثها بهذا الصف", rowNum:i+2, brand, name };
     }
-    return { valid:true, id: slug, brand, name, patch, rowNum:i+2 };
+    return { valid:true, id: existing.id, brand, name, patch, rowNum:i+2 };
   }).filter(Boolean);
 }
 
@@ -9480,7 +9482,8 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     if(editingOriginal){
       const managed = new Set(FORM_MANAGED_KEYS.concat(COST_FIELD_KEYS));
       Object.keys(editingOriginal).forEach(k => { if(!managed.has(k) && !(k in newRecord)) newRecord[k] = editingOriginal[k]; });
-      if(editingOriginal.line === "signature") newRecord.id = editingOriginal.id; // معرّف سيغنتشر مربوط بملف التكلفة والتصنيع — ما يتغير
+      // المعرّف ما يتغير مع تعديل الاسم: الطلبات القديمة والتكاليف والتقييمات وصورة البطاقة كلها مربوطة فيه
+      newRecord.id = editingOriginal.id;
     }
     // طابع "آخر تحديث مخزون" — لو عطر جديد كليًا نختم وقت الإضافة مباشرة، ولو
     // تعديل عطر موجود نحافظ على الطابع القديم إلا لو الكمية فعليًا تغيّرت.

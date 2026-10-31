@@ -280,10 +280,24 @@ function currencyLabel(){
 
 // نحول اسم البراند/العطر لصيغة Title Case (أول حرف كل كلمة كبير والباقي صغير) بدل الأحرف الكبيرة بالكامل
 // القيمة الأصلية بالشيت تبقى ALL CAPS زي ما هي (ما نغيّرها بالمصدر ولا بالفلترة/المطابقة) — هذا تنسيق عرض فقط
+// TITLE-CASE-START (ينقرا بعد من scripts/build-note-cards.js — لا تغيّر الوسم)
+// 31 أكتوبر 2026: الأسماء صارت مكتوبة بشكلها الصحيح بـ data.json (مثل "Y Le Parfum")، فنعرضها زي ما هي.
+// النص اللي كله أحرف كبيرة (البراندات، أو اسم انكتب كابيتل) نحوله — مع أسماء براندات لها كتابة خاصة.
+const BRAND_DISPLAY = {
+  "YSL":"YSL", "DOLCE&GABBANA":"Dolce&Gabbana", "HERMES":"Hermès", "LANCOME":"Lancôme", "BOND NO 9":"Bond No. 9",
+  "FREDERIC MALLE":"Frédéric Malle", "MATIERE PREMIERE":"Matière Première", "INITIO PARFUMS PRIVES":"Initio Parfums Privés",
+  "STEPHANE HUMBERT LUCAS 777":"Stéphane Humbert Lucas 777", "UNIQUE'E LUXURY":"Unique'e Luxury", "THE SPIRIT OF DUBAI":"The Spirit of Dubai",
+  "ATYAB AL-SHEIKH":"Atyab Al-Sheikh", "BOADICEA THE VICTORIOUS":"Boadicea the Victorious", "GIARDINI DI TOSCANA":"Giardini di Toscana",
+  "PARFUMS DE MARLY":"Parfums de Marly", "VAN CLEEF & ARPELS":"Van Cleef & Arpels", "VIKTOR & ROLF":"Viktor&Rolf",
+  "ADYAN BY ANFAR":"Adyan by Anfar", "EVOQUE SIGNATURE":"Evoque Signature"
+};
 function toTitleCase(str){
   if(!str) return "";
-  return str.toLowerCase().split(" ").map(w => w.length ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(" ");
+  if(/\p{Ll}/u.test(str)) return str; // فيه أحرف صغيرة = مكتوب بشكله الصحيح، نخليه
+  if(BRAND_DISPLAY[str]) return BRAND_DISPLAY[str];
+  return str.toLowerCase().split(" ").map(w => /^(edp|edt|vip|ii|iii|iv|xi|xii|xxv)$/.test(w) ? w.toUpperCase() : (w.length ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(" ");
 }
+// TITLE-CASE-END
 
 function svgIcon(id, cls){ return `<svg class="icon ${cls||''}"><use href="#${id}"/></svg>`; }
 
@@ -1902,7 +1916,7 @@ function matches(p){
     if(q && !searchHay(p).includes(q)) return false;
   }
   if(activeFilter==="all") return true;
-  if(activeFilter==="night" || activeFilter==="day") return p.daynight.includes(activeFilter);
+  if(activeFilter==="night" || activeFilter==="day") return (p.daynight || []).includes(activeFilter);
   if(activeFilter==="men" || activeFilter==="women" || activeFilter==="unisex") return p.gender === activeFilter;
   return p.seasons.includes(activeFilter) || p.seasons.includes("all");
 }
@@ -1924,7 +1938,7 @@ function matchesExceptGender(p, genderKey){
   }
   if(activeFilter!=="all"){
     if(activeFilter==="night" || activeFilter==="day"){
-      if(!p.daynight.includes(activeFilter)) return false;
+      if(!(p.daynight || []).includes(activeFilter)) return false;
     } else {
       if(!(p.seasons.includes(activeFilter) || p.seasons.includes("all"))) return false;
     }

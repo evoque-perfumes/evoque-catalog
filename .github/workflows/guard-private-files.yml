@@ -11,7 +11,7 @@ jobs:
       - name: Fail if private data files are present
         run: |
           bad=0
-          for f in orders.json pending-orders.json customers.json expenses.json materials.json distributions.json wishlist.json bank-info.json reviews-private.json; do
+          for f in orders.json pending-orders.json customers.json expenses.json materials.json distributions.json wishlist.json bank-info.json reviews-private.json signature.json stocktakes.json; do
             if [ -e "$f" ]; then echo "::error::Private file $f must live in the private repo (evoque-private), not here."; bad=1; fi
           done
           # data.json عام: ممنوع أي حقل تكلفة (cost*) — التكاليف مكانها المستودع الخاص
