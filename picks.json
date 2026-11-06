@@ -2,9 +2,9 @@
   "mode": "sales",
   "manual": [],
   "sales": [
+    "creed-aventus",
     "marc-antoine-barrois-ganymede",
     "dior-sauvage-elixir",
-    "creed-aventus",
     "escentric-molecules-escentric-02-extrait",
     "diptyque-do-son-eau-de-parfum",
     "xerjoff-40-knots",
@@ -14,7 +14,6 @@
     "louis-vuitton-imagination",
     "xerjoff-accento",
     "hugo-boss-bottled-absolu",
-    "oman-luxury-wanderlust",
     "dior-miss-dior-parfum",
     "essential-parfums-bois-imperial",
     "ysl-libre",
@@ -25,14 +24,13 @@
     "maison-crivelli-oud-stallion",
     "guerlain-les-absolus-d-orient-patchouli-ardent",
     "giorgio-armani-my-way",
+    "oman-luxury-wanderlust",
     "lancome-idole",
     "ysl-tuxedo",
     "nishane-hacivat",
     "frederic-malle-promise",
     "nishane-favonius",
     "amouage-guidance-46",
-    "amouage-purpose-50",
-    "louis-vuitton-les-sables-roses",
     "escentric-molecules-molecule-01-iris",
     "oman-luxury-overdose",
     "yves-saint-laurent-y-iced-cologne",
@@ -41,6 +39,8 @@
     "parfums-de-marly-althair",
     "atyab-al-sheikh-charisma",
     "parfums-de-marly-valaya",
-    "memo-paris-african-leather"
+    "memo-paris-african-leather",
+    "hermes-terre-d-harmes",
+    "xerjoff-erba-pura"
   ]
 }
