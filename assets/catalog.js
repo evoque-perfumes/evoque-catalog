@@ -709,9 +709,19 @@ const I18N = {
 // 18 أكتوبر 2026 (طلب صاحب المتجر): التوصيل مجاني لكل الطلبات، ومن 3 عطور 50مل
 // فأكثر خصم 15% على المجموع. التوصيل تكلفة على المتجر (تُسجَّل بلوحة التحكم).
 const FREE_DELIVERY_ALL = true;
-const OFFERS_CONFIG = [
-  { size:"50", minQty:3, discountPct:15, reward:{ ar:"خصم ١٥٪ على الطلب", en:"15% off your order" } },
-];
+// 7 نوفمبر 2026: نسبة الخصم وأقل عدد عطور صاروا يتعدلون من لوحة التحكم (🚚 التوصيل والخصم)
+// وينحفظون في shipping-rates.json → offers. هذي القيم الافتراضية لو الملف ما انقرأ.
+let OFFERS_CONFIG = [];
+const arDigits = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+function applyOffersSetting(o){
+  const pct = Number(o && o.discountPct), min = Math.round(Number(o && o.minQty));
+  if(!(pct >= 0 && pct <= 90) || !(min >= 1 && min <= 20)) return;
+  OFFERS_CONFIG = pct > 0 ? [{ size:"50", minQty:min, discountPct:pct, reward:{ ar:`خصم ${arDigits(pct)}٪ على الطلب`, en:`${pct}% off your order` } }] : [];
+  I18N.ar.shipDiscount = `خصم ${arDigits(pct)}٪ (${arDigits(min)} عطور فأكثر)`;
+  I18N.en.shipDiscount = `${pct}% off (${min}+ perfumes)`;
+  window.EVOQUE_OFFERS = { discountPct: pct, minQty: min }; // يقرأها home-motion.js لنصوص العروض
+}
+applyOffersSetting({ discountPct: 15, minQty: 3 });
 
 // 23 أكتوبر 2026: "باقي N" يظهر بس لما المخزون حبتين أو أقل (قرار المالك)
 const LOW_STOCK_MAX = 2;
@@ -1126,6 +1136,7 @@ async function loadShippingRatesFromJson(){
        om && typeof om.door === "number" && typeof om.nool === "number"){
       SHIPPING_RATES = { AE: { standard: ae.standard, western: ae.western }, OM: { door: om.door, nool: om.nool } };
     }
+    if(data && data.offers) applyOffersSetting(data.offers);
   }catch(e){
     // نكمل بالقيم الافتراضية بصمت — مو ميزة أساسية توقف الموقع
   }

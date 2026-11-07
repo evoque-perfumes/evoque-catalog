@@ -6,5 +6,9 @@
   "OM": {
     "door": 2,
     "nool": 1
+  },
+  "offers": {
+    "discountPct": 15,
+    "minQty": 3
   }
 }

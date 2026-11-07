@@ -351,10 +351,10 @@
     <button type="button" id="modeStockBtn">📊 المخزون</button>
     <button type="button" id="modeBulkPriceBtn">💲 تعديل الأسعار بالجملة</button>
     <button type="button" id="modeSalesBtn">💰 المبيعات</button>
-    <button type="button" id="modeCostBtn">🧮 التكلفة والأرباح</button>
+    <button type="button" id="modeCostBtn">📊 البزنس والأرباح</button>
     <button type="button" id="modeReviewsBtn">⭐ التقييمات</button>
     <button type="button" id="modeExcelBtn">📥 استيراد إكسل</button>
-    <button type="button" id="modeShippingBtn">🚚 رسوم التوصيل</button>
+    <button type="button" id="modeShippingBtn">🚚 التوصيل والخصم</button>
     <button type="button" id="modePicksBtn">⭐ مختارات إيفوك</button>
     <button type="button" id="modeCustomersBtn">👥 العملاء</button>
     <button type="button" id="modeWishlistBtn">❤️ المفضلة</button>
@@ -395,6 +395,13 @@
 
   <div class="panel" id="overviewPanel">
     <h2>نظرة عامة على المتجر</h2>
+    <div class="banner" id="bk_box" style="margin:0 0 14px; background:#FBFAF7; border-color:var(--line); color:var(--ink);">
+      <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between;">
+        <b style="font-size:15px;">🗄️ الحفظ والنسخة الاحتياطية</b>
+        <button type="button" class="secondary" id="bk_downloadBtn">⬇️ نزّل نسخة احتياطية كاملة</button>
+      </div>
+      <div id="bk_status" style="font-size:13px; line-height:1.9; margin-top:6px;">جارِ التحقق…</div>
+    </div>
 
     <div class="ov-section-title">الكتالوج</div>
     <div class="kpi-grid">
@@ -844,7 +851,7 @@
   </div>
 
   <div class="panel" id="shippingPanel" style="display:none;">
-    <h2>رسوم التوصيل</h2>
+    <h2>التوصيل والخصم</h2>
     <small class="hint" style="margin-top:0;">
       هذي الأرقام هي اللي يشوفها العميل بالموقع فورًا (نموذج الطلب، ملخص السلة، رسالة واتساب السريعة) —
       عدّلها هنا أي وقت بدون ما تحتاج تلمس أي كود. اضغط "تحميل آخر نسخة" لو فتحت هذا الوضع بعد فترة،
@@ -870,8 +877,23 @@
       </div>
     </fieldset>
 
+    <fieldset style="margin-top:16px;">
+      <legend>🏷️ خصم الكمية (يتغيّر بالموقع كله: السلة، الشريط فوق، صفحة الشروط، والطلب)</legend>
+      <div class="grid2">
+        <div class="field"><label for="ship_offer_pct">نسبة الخصم %</label>
+          <select id="ship_offer_pct">
+            <option value="0">بدون خصم</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option>
+            <option value="20">20%</option><option value="25">25%</option><option value="30">30%</option>
+          </select></div>
+        <div class="field"><label for="ship_offer_min">من كم عطر (50 مل)؟</label>
+          <select id="ship_offer_min"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+      </div>
+      <small class="hint" id="ship_offer_hint" style="margin-top:0;"></small>
+      <small class="hint" style="color:#9C6B1F;">⚠️ أول مرة قبل ما تغيّر الخصم: لازم يتحدّث سكربت «استقبال الطلبات» في Google (سطر واحد). لين يتحدّث، طلبات الموقع تنحسب على 15% مهما كتبت هنا.</small>
+    </fieldset>
+
     <div class="row">
-      <button type="button" id="ship_saveBtn">احفظ رسوم التوصيل</button>
+      <button type="button" id="ship_saveBtn">احفظ التوصيل والخصم</button>
     </div>
     <div class="status" id="ship_statusBox"></div>
   </div>
@@ -1417,7 +1439,7 @@
   </div>
 
   <div class="panel" id="costPanel" style="display:none;">
-    <h2>🧮 التكلفة والأرباح</h2>
+    <h2>📊 البزنس والأرباح — كل المنتجات بمكان واحد</h2>
 
     <div class="ov-section-title">📊 الملخص</div>
     <div class="row" style="align-items:center; gap:8px; flex-wrap:wrap;">
@@ -3206,7 +3228,8 @@ document.getElementById("sl_clearCartBtn").addEventListener("click", () => {
 // تلقائي، وبدون تكلفة توصيل. التوصيل المجاني يكلّف المتجر، فنسجّل تكلفته على الطلب ونطرحها من الربح.
 const NEW_RULES_START = "2026-10-18";
 const LEGACY_PRICE_50 = 50;
-const NEW_DISC_MIN_QTY = 3, NEW_DISC_PCT = 15;
+// 7 نوفمبر 2026: نسبة الخصم وأقل عدد من إعداد «🚚 التوصيل والخصم» (shipping-rates.json → offers)
+const slOffer = () => shipOffers(shippingRatesData);
 const OMR_TO_AED_EQ = 10; // نفس معادلة اللوحة: 1 ريال عُماني = 10 بالحسابات (سعر عُمان = سعر الإمارات ÷ 10)
 let slDiscountTouched = false, slCostTouched = false, slRatesLoaded = false;
 
@@ -3218,8 +3241,9 @@ function slPaidSubtotal50(items){
   return (items || []).reduce((s, it) => s + ((!it.isGift && String(it.size) === "50") ? (Number(it.qty) || 0) * (Number(it.unitPrice) || 0) : 0), 0);
 }
 function slAutoDiscountFor(items){
-  if(slPaidQty50(items) < NEW_DISC_MIN_QTY) return 0;
-  const raw = slPaidSubtotal50(items) * NEW_DISC_PCT / 100;
+  const of = slOffer();
+  if(!(of.discountPct > 0) || slPaidQty50(items) < of.minQty) return 0;
+  const raw = slPaidSubtotal50(items) * of.discountPct / 100;
   // نفس تقريب الموقع: الإمارات رقم صحيح، عُمان لخانتين عشريتين بالريال
   return document.getElementById("sl_country").value === "OM"
     ? Math.round(raw / OMR_TO_AED_EQ * 100) / 100 * OMR_TO_AED_EQ
@@ -3253,14 +3277,14 @@ function slApplyRules(){
   document.getElementById("sl_deliveryBox").style.display = legacy ? "none" : "";
   document.getElementById("sl_legacyHint").textContent = legacy
     ? "الطلب القديم: السعر 50 للعطر، بدون خصم تلقائي، وبدون تكلفة توصيل. تقدر تعدّل أي رقم يدويًا."
-    : "القواعد الجديدة: السعر 70، توصيل مجاني للعميل (يُسجَّل كتكلفة علينا)، وخصم 15% تلقائي من 3 عطور.";
+    : `القواعد الجديدة: السعر 70، توصيل مجاني للعميل (يُسجَّل كتكلفة علينا)، وخصم ${slOffer().discountPct}% تلقائي من ${slOffer().minQty} عطور.`;
   const dHint = document.getElementById("sl_discountHint");
   const auto = slAutoDiscountFor(salesCart);
   if(!slDiscountTouched){
     document.getElementById("sl_discount").value = (!legacy && auto > 0) ? auto : "";
   }
-  dHint.textContent = (!legacy && slPaidQty50(salesCart) >= NEW_DISC_MIN_QTY)
-    ? `خصم ${NEW_DISC_PCT}% تلقائي (${slPaidQty50(salesCart)} عطور) = ${fmtNum(auto)} AED — تقدر تغيّره.`
+  dHint.textContent = (!legacy && slOffer().discountPct > 0 && slPaidQty50(salesCart) >= slOffer().minQty)
+    ? `خصم ${slOffer().discountPct}% تلقائي (${slPaidQty50(salesCart)} عطور) = ${fmtNum(auto)} AED — تقدر تغيّره.`
     : "";
   if(!legacy){
     const dv = document.getElementById("sl_delivery").value;
@@ -6904,6 +6928,8 @@ function avgOilPerGram(){
   return vals.length ? vals.reduce((a,b) => a + b, 0) / vals.length : 0;
 }
 function perfumeUnitCostEst(p, size, avgPerG){
+  // 7 نوفمبر 2026: عطور سيغنتشر تكلفتها من signature.json (متوسط تكلفة الحبة الواصلة)، مو من متوسط زيوت المستوحاة
+  if(p && p.line === "signature" && pfSigCost[p.id] > 0) return { cost: pfSigCost[p.id], est: false };
   const exact = perfumeUnitCost(p, size);
   if(exact > 0) return { cost: exact, est: false };
   const ml = Number(size) === 50 ? 50 : 10;
@@ -7512,6 +7538,9 @@ document.getElementById("cs_saveBtn").addEventListener("click", async () => {
 // الربح الصافي = (مبيعات العطور − تكلفتها − توصيل مجاني − رسوم بطاقات − هدايا)
 //              + (مبيعات التوزيعات − تكلفتها) − المصاريف العامة
 let pfDistSales = null; // مبيعات التوزيعات — تنقرا من distributions.json كل ما ينفتح التبويب
+let pfDistPurchases = [];  // مشتريات التوزيعات (للكاش اللي طلع)
+let pfSigData = null;      // signature.json (تكلفة الحبة + مشتريات الزيت)
+let pfSigCost = {};        // id -> متوسط تكلفة حبة سيغنتشر
 function pfGetPeriod(){ try{ return localStorage.getItem("evoque_pf_period") || "month"; }catch(e){ return "month"; } }
 function pfRange(period){
   const t = todayStr(), y = +t.slice(0,4), m = +t.slice(5,7);
@@ -7525,9 +7554,17 @@ async function pfLoadDist(){
   if(!getToken()) return;
   try{
     const res = await privFetch(DISTRIBUTIONS_JSON_PATH);
-    if(res.ok){ const o = await res.json(); pfDistSales = (o && Array.isArray(o.sales)) ? o.sales : []; }
+    if(res.ok){ const o = await res.json(); pfDistSales = (o && Array.isArray(o.sales)) ? o.sales : []; pfDistPurchases = (o && Array.isArray(o.purchases)) ? o.purchases : []; }
     else if(res.status === 404) pfDistSales = [];
   }catch(e){ /* نخلي آخر نسخة معروفة */ }
+  try{
+    const r2 = await privFetch(SIGNATURE_JSON_PATH);
+    if(r2.ok){
+      pfSigData = await r2.json();
+      const mix = sigMix(sigSettings(pfSigData)); pfSigCost = {};
+      (pfSigData.products || []).forEach(p => { const c = sigProductStats(p.id, pfSigData.purchases || [], mix).unitCostAvg; if(c > 0) pfSigCost[p.id] = c; });
+    }
+  }catch(e){}
   if(mode === "cost") renderProfitSummary();
 }
 function pfDistReport(range){
@@ -7539,6 +7576,26 @@ function pfDistReport(range){
   });
   r.cost = r.revenue - r.profit;
   return r;
+}
+// الكاش اللي طلع فعلًا بالفترة (مشتريات كل الأقسام + المصاريف) — غير «التكلفة» فوق اللي تنحسب على المبيوع بس
+function pfCashHtml(range, exp, expTotal, line){
+  const inR = d => (d || "") >= range.from && (d || "") <= range.to;
+  const mat = ((materialsData && materialsData.purchases) || []).filter(x => inR(x.date)).reduce((a, x) => a + (Number(x.totalPrice) || 0), 0);
+  const dist = (pfDistPurchases || []).filter(x => inR(x.date)).reduce((a, x) => a + (Number(x.totalPrice) || 0), 0);
+  let sigOil = 0;
+  ((pfSigData && pfSigData.purchases) || []).filter(x => inR(x.date)).forEach(pu => sigPurchaseLines(pu).forEach(l => { sigOil += l.landed; }));
+  const total = mat + dist + sigOil + expTotal;
+  const orders = groupSalesData().filter(g => normStatus((g.items[0] || {}).status) !== "cancelled" && inR(g.date)).length;
+  const distOrders = (pfDistSales || []).filter(x => !x.cancelled && inR(x.date)).length;
+  let h = `<div class="pf-line head" style="margin-top:10px; background:transparent;"><span>💸 الفلوس اللي طلعت في هالفترة (مشتريات + مصاريف)</span><span></span></div>`;
+  h += line("زجاج وتغليف وكحول (المستوحاة)", -mat, "sub");
+  if(sigOil || pfSigData) h += line("زيوت سيغنتشر (واصلة مع الشحن والجمارك)", -sigOil, "sub");
+  h += line("مواد التوزيعات", -dist, "sub");
+  h += line("مصاريف عامة", -expTotal, "sub");
+  h += line("= مجموع اللي طلع", -total, "total");
+  h += `<div class="pf-line sub"><span>🧾 عدد الطلبات: عطور ${fmtNum(orders)} · توزيعات ${fmtNum(distOrders)}</span><span></span></div>`;
+  h += `<div class="pf-line sub" style="border-bottom:0;"><span>الفرق بين «الربح» و«اللي طلع»: المشتريات تنحسب كتكلفة لما تنباع، مو يوم شرائها — فلو اشتريت مخزون كبير، الكاش يطلع أكثر من التكلفة.</span><span></span></div>`;
+  return h;
 }
 function renderProfitSummary(){
   const range = pfRange(pfGetPeriod());
@@ -7580,19 +7637,32 @@ function renderProfitSummary(){
 
   const line = (label, val, cls) => `<div class="pf-line ${cls || ""}"><span>${label}</span><span class="${val < 0 ? "neg" : ""}">${fmtNum(val)}</span></div>`;
   const perfProfit = pr.totalRevenue - pr.totalCost;
-  let h = line("🧴 العطور — المبيعات", pr.totalRevenue, "head");
-  h += line(`تكلفة العطور (${fmtNum(pr.unitsCount)} قطعة${pr.estUnits ? `، منها ${fmtNum(pr.estUnits)} تقديري` : ""})`, -pr.perfumeCost, "sub");
-  if(pr.giftCost) h += line("الهدايا المجانية", -pr.giftCost, "sub");
-  if(pr.deliveryCost) h += line("التوصيل المجاني", -pr.deliveryCost, "sub");
-  if(pr.cardFees) h += line("رسوم البطاقات", -pr.cardFees, "sub");
-  h += line("ربح العطور", perfProfit, "sub");
+  // 7 نوفمبر 2026: بزنس واحد بثلاث منتجات — نفصل المستوحاة عن سيغنتشر من صفوف العطور
+  const isSigId = id => { const p = perfumes.find(x => x.id === id); return !!(p && p.line === "signature") || String(id).startsWith("signature-"); };
+  const sigRows = pr.rows.filter(r => isSigId(r.id)), insRows = pr.rows.filter(r => !isSigId(r.id));
+  const sum = (a, k) => a.reduce((t, r) => t + (r[k] || 0), 0);
+  const ins = { rev: sum(insRows, "revenue"), cost: sum(insRows, "cost"), units: sum(insRows, "units") };
+  const sig = { rev: sum(sigRows, "revenue"), cost: sum(sigRows, "cost"), units: sum(sigRows, "units") };
+  const shared = pr.giftCost + pr.deliveryCost + pr.cardFees;
+  let h = line(`🧴 العطور المستوحاة — المبيعات (${fmtNum(ins.units)} قطعة)`, ins.rev, "head");
+  h += line(`تكلفة العطور${pr.estUnits ? ` (منها ${fmtNum(pr.estUnits)} قطعة تقديري)` : ""}`, -ins.cost, "sub");
+  h += line("ربح المستوحاة", ins.rev - ins.cost, "sub");
+  if(sig.units || sig.rev){
+    h += line(`✨ سيغنتشر — المبيعات (${fmtNum(sig.units)} قطعة)`, sig.rev, "head");
+    h += line("تكلفة سيغنتشر (من حسبة الزيت المستورد)", -sig.cost, "sub");
+    h += line("ربح سيغنتشر", sig.rev - sig.cost, "sub");
+  }
   h += line(`🎁 التوزيعات — المبيعات (${fmtNum(dr.units)} قطعة)`, dr.revenue, "head");
   if(!dr.loaded) h += `<div class="pf-line sub"><span>جارِ تحميل التوزيعات...</span><span></span></div>`;
   h += line("تكلفة التوزيعات", -dr.cost, "sub");
   h += line("ربح التوزيعات", dr.profit, "sub");
-  h += line(`💵 المصاريف العامة (${exp.length})`, -expTotal, "head");
+  h += line("➖ مصاريف مشتركة", -(shared + expTotal), "head");
+  if(pr.deliveryCost) h += line("التوصيل المجاني", -pr.deliveryCost, "sub");
+  if(pr.cardFees) h += line("رسوم البطاقات", -pr.cardFees, "sub");
+  if(pr.giftCost) h += line("الهدايا المجانية", -pr.giftCost, "sub");
+  h += line(`المصاريف العامة (${exp.length})`, -expTotal, "sub");
   h += line("= الربح الصافي", profit, "total");
-  document.getElementById("pf_breakdown").innerHTML = h;
+  document.getElementById("pf_breakdown").innerHTML = h + pfCashHtml(range, exp, expTotal, line);
 
   // أكثر العطور ربحًا + أقلها ربح لكل قطعة
   const rows = pr.rows.map(r => ({ ...r, perUnit: r.units ? r.profit / r.units : 0 }));
@@ -8341,7 +8411,24 @@ function fillShippingForm(obj){
   document.getElementById("ship_ae_western").value = (typeof ae.western === "number") ? ae.western : SHIPPING_DEFAULTS.AE.western;
   document.getElementById("ship_om_door").value = (typeof om.door === "number") ? om.door : SHIPPING_DEFAULTS.OM.door;
   document.getElementById("ship_om_nool").value = (typeof om.nool === "number") ? om.nool : SHIPPING_DEFAULTS.OM.nool;
+  const of = shipOffers(obj);
+  document.getElementById("ship_offer_pct").value = String(of.discountPct);
+  document.getElementById("ship_offer_min").value = String(of.minQty);
+  shipOfferHint();
 }
+// خصم الكمية: shipping-rates.json → offers (نفس الملف اللي يقرأه الموقع وسكربت استقبال الطلبات)
+function shipOffers(obj){
+  const o = (obj && obj.offers) || {};
+  const pct = Number(o.discountPct), min = Math.round(Number(o.minQty));
+  return { discountPct: pct >= 0 && pct <= 90 ? pct : 15, minQty: min >= 1 && min <= 20 ? min : 3 };
+}
+function shipOfferHint(){
+  const pct = Number(document.getElementById("ship_offer_pct").value), min = Number(document.getElementById("ship_offer_min").value);
+  document.getElementById("ship_offer_hint").textContent = pct > 0
+    ? `الزبون اللي يطلب ${min} عطور أو أكثر ياخذ خصم ${pct}% على الطلب كامل. مثال: ${min} × 70 = ${min * 70} درهم ← يدفع ${Math.round(min * 70 * (1 - pct / 100))} درهم.`
+    : "بدون خصم كمية — يختفي من الموقع كله.";
+}
+["ship_offer_pct", "ship_offer_min"].forEach(id => document.getElementById(id).addEventListener("change", shipOfferHint));
 
 function readShippingForm(){
   return {
@@ -8352,6 +8439,10 @@ function readShippingForm(){
     OM: {
       door: Number(document.getElementById("ship_om_door").value) || 0,
       nool: Number(document.getElementById("ship_om_nool").value) || 0
+    },
+    offers: {
+      discountPct: Number(document.getElementById("ship_offer_pct").value) || 0,
+      minQty: Number(document.getElementById("ship_offer_min").value) || 3
     }
   };
 }
@@ -8385,9 +8476,9 @@ document.getElementById("ship_saveBtn").addEventListener("click", async () => {
   try{
     shipShowStatus("جارِ الحفظ والنشر...", "info");
     const formData = readShippingForm();
-    const updated = await updateShippingRatesWithRetry(token, () => formData, "Update shipping rates");
+    const updated = await updateShippingRatesWithRetry(token, (obj) => Object.assign({}, obj, formData), "Update shipping rates and quantity discount");
     shippingRatesData = updated;
-    shipShowStatus("تم الحفظ! رسوم التوصيل محدّثة على الموقع الحين.", "ok");
+    shipShowStatus("تم الحفظ! التوصيل والخصم يتحدثون بالموقع خلال دقيقة أو دقيقتين.", "ok");
   }catch(e){
     shipShowStatus("صار خطأ: " + e.message, "err");
   }finally{
@@ -9808,6 +9899,59 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
   document.getElementById("modeStockBtn").addEventListener("click", loadLast);
   setTimeout(loadLast, 2500);
+})();
+</script>
+<script>
+// ===== 🗄️ الحفظ والنسخة الاحتياطية (7 نوفمبر 2026) =====
+// كل حفظ من اللوحة ينحفظ في GitHub مع تاريخ كامل. هنا نعرض آخر حفظ، ونسمح بتنزيل نسخة كاملة لجهاز صاحب المشروع
+// (ملف zip فيه كل الملفات الخاصة + ملفات الموقع) — نسخة برا GitHub لو صار أي شي للحساب.
+(function(){
+  const BK_PRIV = ["orders.json","customers.json","expenses.json","materials.json","distributions.json","signature.json","stocktakes.json","reviews-private.json","wishlist.json","pending-orders.json","bank-info.json"];
+  const BK_PUB = ["data.json","shipping-rates.json","picks.json","reviews.json"];
+  const KEY = "evoque_last_backup";
+  const el = id => document.getElementById(id);
+  const fmt = iso => { try{ return new Date(iso).toLocaleString("ar", { weekday:"long", day:"numeric", month:"long", hour:"2-digit", minute:"2-digit" }); }catch(e){ return iso; } };
+  const daysSince = iso => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  async function lastCommit(repo){
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${repo}/commits?per_page=1&sha=${BRANCH}`, { cache: "no-store", headers: { "Authorization": `Bearer ${getToken()}` } });
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json(); return j[0] ? { at: j[0].commit.committer.date, msg: j[0].commit.message.split("\n")[0] } : null;
+  }
+  async function refresh(){
+    if(!getToken()){ el("bk_status").textContent = "سجّل دخول عشان تشوف آخر حفظ."; return; }
+    let h = "";
+    try{
+      const c = await lastCommit(PRIV_REPO);
+      h += c ? `✅ آخر حفظ لبياناتك (طلبات، مصاريف…): <b>${esc(fmt(c.at))}</b>` + (daysSince(c.at) >= 2 ? ` — <span style="color:#9C6B1F;">من ${daysSince(c.at)} أيام. لو سجّلت شي بعدها وما يطلع، يعني الحفظ ما نجح — كلّم Claude.</span>` : "") : "ما لقيت أي حفظ.";
+    }catch(e){
+      h += `<span style="color:#B23A2E;">⛔ ما قدرت أتأكد من آخر حفظ (${esc(e.message)}). إذا الخطأ 401، مفتاح الدخول انتهى — والحفظ بيفشل لين تجدده.</span>`;
+    }
+    let lb = null; try{ lb = localStorage.getItem(KEY); }catch(e){}
+    h += "<br>" + (lb
+      ? `⬇️ آخر نسخة نزّلتها لجهازك: <b>${esc(fmt(lb))}</b>` + (daysSince(lb) >= 7 ? ` — <span style="color:#9C6B1F;">صار لها أكثر من أسبوع، نزّل وحدة جديدة.</span>` : "")
+      : `⬇️ <span style="color:#9C6B1F;">ما نزّلت نسخة احتياطية لجهازك من هالمتصفح. نزّل وحدة واحفظها في Google Drive أو الإيميل (مرة بالأسبوع تكفي).</span>`);
+    el("bk_status").innerHTML = h;
+  }
+  async function download(){
+    const btn = el("bk_downloadBtn"); btn.disabled = true;
+    el("bk_status").textContent = "جارِ تجهيز النسخة…";
+    try{
+      const cfb = XLSX.CFB.utils.cfb_new(); const enc = new TextEncoder(); const missing = [];
+      for(const f of BK_PRIV){ const r = await privFetch(f); if(r.ok) XLSX.CFB.utils.cfb_add(cfb, "private/" + f, enc.encode(await r.text())); else if(r.status !== 404) missing.push(f); }
+      for(const f of BK_PUB){ const r = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${f}?t=${Date.now()}`, { cache: "no-store" }); if(r.ok) XLSX.CFB.utils.cfb_add(cfb, "site/" + f, enc.encode(await r.text())); else missing.push(f); }
+      XLSX.CFB.utils.cfb_add(cfb, "README.txt", enc.encode("نسخة احتياطية من Evoque — " + new Date().toLocaleString("ar") + "\nprivate/ = البيانات الخاصة (طلبات، عملاء، تكاليف...)\nsite/ = ملفات الموقع (العطور، الأسعار...)\nاحفظ الملف بمكان آمن ولا ترسله لأحد — فيه بيانات العملاء والبنك.\n"));
+      const out = XLSX.CFB.write(cfb, { fileType: "zip", type: "array" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([out], { type: "application/zip" }));
+      a.download = "Evoque_Backup_" + todayStr() + ".zip"; document.body.appendChild(a); a.click(); a.remove();
+      try{ localStorage.setItem(KEY, new Date().toISOString()); }catch(e){}
+      await refresh();
+      if(missing.length) el("bk_status").innerHTML += `<br><span style="color:#B23A2E;">ما قدرت أجيب: ${esc(missing.join("، "))}</span>`;
+    }catch(e){ el("bk_status").textContent = "صار خطأ: " + e.message; }
+    finally{ btn.disabled = false; }
+  }
+  el("bk_downloadBtn").addEventListener("click", download);
+  document.getElementById("modeOverviewBtn").addEventListener("click", refresh);
+  setTimeout(refresh, 2000);
 })();
 </script>
 </body>

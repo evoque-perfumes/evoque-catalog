@@ -42,6 +42,23 @@
     }
   };
   var DATA = [], STATS = {n:0,b:0,p:50,po:5};
+  // 7 نوفمبر 2026: نصوص الخصم (الشريط العلوي + قسم العروض) من إعداد لوحة التحكم (shipping-rates.json → offers)
+  function applyOfferTexts(o){
+    var pct = Number(o && o.discountPct), min = Math.round(Number(o && o.minQty));
+    if(!(pct >= 0 && pct <= 90) || !(min >= 1)) return;
+    var ar = function(n){ return String(n).replace(/\d/g, function(d){ return "٠١٢٣٤٥٦٧٨٩"[d]; }); };
+    if(pct > 0){
+      T.ar.ann = "توصيل مجاني لكل الطلبات · خصم " + ar(pct) + "٪ عند شراء " + ar(min) + " عطور أو أكثر";
+      T.ar.o2t = "خصم " + ar(pct) + "٪"; T.ar.o2s = "عند شراء " + ar(min) + " عطور أو أكثر";
+      T.en.ann = "Free delivery on every order · " + pct + "% off when you buy " + min + " or more";
+      T.en.o2t = pct + "% off"; T.en.o2s = "When you buy " + min + " perfumes or more";
+    } else {
+      T.ar.ann = "توصيل مجاني لكل الطلبات"; T.en.ann = "Free delivery on every order";
+    }
+    var offer = document.querySelector('.offer [data-t="o2t"]');
+    if(offer && offer.closest(".offer")) offer.closest(".offer").style.display = pct > 0 ? "" : "none";
+  }
+  fetch("shipping-rates.json").then(function(r){ return r.json(); }).then(function(d){ if(d && d.offers){ applyOfferTexts(d.offers); applyText(); } }).catch(function(){});
   function applyText(){
     var t = T[lang()];
     $$("[data-t]").forEach(function(el){ var k = el.getAttribute("data-t"); if(t[k] != null) el.textContent = t[k]; });
