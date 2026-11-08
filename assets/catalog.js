@@ -1127,7 +1127,8 @@ async function loadReviewsFromJson(){
 // ------------------------------------------------------------------
 async function loadShippingRatesFromJson(){
   try{
-    const res = await fetch("./shipping-rates.json");
+    // 8 نوفمبر 2026: بدون كاش — عشان تغيير الخصم أو التوصيل من اللوحة يبين خلال دقيقة
+    const res = await fetch("./" + "shipping-rates.json?t=" + Math.floor(Date.now() / 60000), { cache: "no-store" });
     if(!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
     const ae = data && data.AE;

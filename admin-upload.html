@@ -3252,6 +3252,7 @@ function slAutoDiscountFor(items){
 async function slEnsureRates(){
   if(slRatesLoaded) return;
   try{
+    if(getToken()){ try{ shippingRatesData = (await getShippingRatesWithSha(getToken())).obj; slRatesLoaded = true; slApplyRules(); return; }catch(e){} }
     const res = await fetch(SHIPPING_JSON_RAW_URL, { cache: "no-store" });
     if(res.ok){ shippingRatesData = await res.json(); slRatesLoaded = true; }
   }catch(e){ /* نكمل بالقيم الافتراضية */ }
@@ -8451,6 +8452,9 @@ function readShippingForm(){
 async function loadShippingRatesIntoForm(){
   try{
     shipShowStatus("جارِ التحميل...", "info");
+    // 8 نوفمبر 2026: لو داخل، نقرا من GitHub API مباشرة (أحدث نسخة دايمًا). رابط raw فيه كاش 5 دقايق،
+    // فكان يطلع الخصم القديم بعد الحفظ — ولو انحفظ النموذج وهو قديم يرجّع القيمة القديمة.
+    if(getToken()){ try{ shippingRatesData = (await getShippingRatesWithSha(getToken())).obj; fillShippingForm(shippingRatesData); document.getElementById("ship_statusBox").className = "status"; return; }catch(e){} }
     const res = await fetch(SHIPPING_JSON_RAW_URL, { cache: "no-store" });
     if(res.ok){
       shippingRatesData = await res.json();

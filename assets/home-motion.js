@@ -58,7 +58,7 @@
     var offer = document.querySelector('.offer [data-t="o2t"]');
     if(offer && offer.closest(".offer")) offer.closest(".offer").style.display = pct > 0 ? "" : "none";
   }
-  fetch("shipping-rates.json").then(function(r){ return r.json(); }).then(function(d){ if(d && d.offers){ applyOfferTexts(d.offers); applyText(); } }).catch(function(){});
+  fetch("shipping-rates.json?t=" + Math.floor(Date.now() / 60000), { cache: "no-store" }).then(function(r){ return r.json(); }).then(function(d){ if(d && d.offers){ applyOfferTexts(d.offers); applyText(); } }).catch(function(){});
   function applyText(){
     var t = T[lang()];
     $$("[data-t]").forEach(function(el){ var k = el.getAttribute("data-t"); if(t[k] != null) el.textContent = t[k]; });
