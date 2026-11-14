@@ -811,6 +811,7 @@
       <div class="stat">💸 مسترد<b id="sl_stat_refunded">—</b></div>
       <div class="stat">⛔ ملغي<b id="sl_stat_cancelled">—</b></div>
       <div class="stat">💰 باقي استلام المبلغ<b id="sl_stat_unpaid">—</b></div>
+      <div class="stat">💵 فلوس باقية عند الزباين<b id="sl_stat_owed">—</b></div>
     </div>
 
     <div class="ov-section-title" style="margin-top:26px;">آخر الطلبات المسجّلة</div>
@@ -830,6 +831,7 @@
       <select id="sl_filterPaid" style="width:auto;">
         <option value="all">كل حالات الدفع</option>
         <option value="unpaid">💰 باقي له الدفع</option>
+        <option value="deposit">💵 دافع عربون</option>
         <option value="paid">✅ تم استلام المبلغ</option>
       </select>
     </div>
@@ -1123,6 +1125,7 @@
         <div class="stat">💸 مسترد<b id="dist_ov_refunded">—</b></div>
         <div class="stat">⛔ ملغي<b id="dist_ov_cancelled">—</b></div>
         <div class="stat">💰 باقي استلام المبلغ<b id="dist_ov_unpaid">—</b></div>
+        <div class="stat">💵 فلوس باقية عند الزباين<b id="dist_ov_owed">—</b></div>
       </div>
     </fieldset>
 
@@ -1350,6 +1353,7 @@
         <select id="dist_filterPaid" style="width:auto;">
           <option value="all">كل حالات الدفع</option>
           <option value="unpaid">💰 باقي له الدفع</option>
+          <option value="deposit">💵 دافع عربون</option>
           <option value="paid">✅ تم استلام المبلغ</option>
         </select>
       </div>
@@ -3950,6 +3954,31 @@ function withStatus(o, status){
   if(status === "dispatched" && !out.dispatchedAt) out.dispatchedAt = todayStr(); // للإيميل اليومي: كم يوم صار له بالطريق
   return out;
 }
+// ===== الدفع: ما دفع / عربون / دفع كامل (14 نوفمبر 2026) =====
+// paid:true = دفع كامل. paidAmount = اللي استلمته لين الحين (العربون). الباقي = المجموع − paidAmount.
+function payState(paid, paidAmount){ return paid ? "full" : (Number(paidAmount) > 0 ? "deposit" : "none"); }
+function payOwed(total, paid, paidAmount){ return paid ? 0 : Math.max(0, (Number(total) || 0) - (Number(paidAmount) || 0)); }
+function paySelectHtml(cls, attr, id, paid, paidAmount, total){
+  const st = payState(paid, paidAmount), col = st === "full" ? "#1F6B41" : st === "deposit" ? "#9C6B1F" : "var(--muted)";
+  const owedTxt = st === "deposit" ? `<span style="font-size:12px; color:#9C6B1F;">دفع ${fmtNum(paidAmount)} — الباقي <b>${fmtNum(payOwed(total, paid, paidAmount))}</b> AED</span>` : "";
+  return `<select class="${cls}" ${attr}="${esc(id)}" data-total="${esc(total)}" data-paid-amount="${esc(Number(paidAmount) || 0)}" style="width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; color:${col};">
+      <option value="none" ${st === "none" ? "selected" : ""}>⏳ ما دفع</option>
+      <option value="deposit" ${st === "deposit" ? "selected" : ""}>💵 عربون${st === "deposit" ? " (" + fmtNum(paidAmount) + ")" : ""}</option>
+      <option value="full" ${st === "full" ? "selected" : ""}>✅ دفع كامل</option>
+    </select>${owedTxt}`;
+}
+// يرجّع {paid, paidAmount} حسب الاختيار، أو null لو ألغى
+function askPayment(choice, total, current){
+  if(choice === "full") return { paid: true, paidAmount: Number(total) || 0 };
+  if(choice === "none") return { paid: false, paidAmount: 0 };
+  const v = prompt(`كم دفع الزبون كعربون؟ (المجموع ${fmtNum(total)} AED)`, Number(current) > 0 ? String(current) : "");
+  if(v === null) return null;
+  const n = Number(String(v).replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d.]/g, ""));
+  if(!(n > 0)){ alert("اكتب مبلغ أكبر من صفر."); return null; }
+  if(n >= Number(total)) return { paid: true, paidAmount: Number(total) || n };
+  return { paid: false, paidAmount: n };
+}
+function payStatusText(p){ return p.paid ? "تم تأكيد الدفع الكامل." : (p.paidAmount > 0 ? `انسجل عربون ${fmtNum(p.paidAmount)} AED.` : "انشال تأكيد الدفع."); }
 function countOrderStatuses(list, getStatus, getPaid){
   const counts = { total: 0, unpaid: 0 };
   ORDER_STATUSES.forEach(x => counts[x[0]] = 0);
@@ -3981,14 +4010,19 @@ async function slUpdateOrderStatus(orderId, status){
     slShowStatus("صار خطأ بتحديث حالة الطلب: " + err.message, "err");
   }
 }
-async function slUpdateOrderPaid(orderId, paid){
+async function slUpdateOrderPaid(orderId, pay){
   const token = getToken();
   if(!token){ slShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
   try{
-    const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.map(o => (o.orderId || o.id) === orderId ? Object.assign({}, o, { paid }) : o), `Update order paid: ${orderId} -> ${paid}`);
+    const updatedList = await updateOrdersJsonWithRetry(token, (list) => list.map(o => {
+      if((o.orderId || o.id) !== orderId) return o;
+      const r = Object.assign({}, o, { paid: pay.paid });
+      if(pay.paidAmount > 0 && !pay.paid) r.paidAmount = pay.paidAmount; else delete r.paidAmount;
+      return r;
+    }), `Update order payment: ${orderId} -> ${pay.paid ? "paid" : pay.paidAmount > 0 ? "deposit " + pay.paidAmount : "unpaid"}`);
     salesData = updatedList;
     renderSalesHistory();
-    slShowStatus(paid ? "تم تأكيد استلام المبلغ." : "تم إلغاء تأكيد الاستلام.", "ok");
+    slShowStatus(payStatusText(pay), "ok");
   }catch(err){
     slShowStatus("صار خطأ بتحديث حالة الدفع: " + err.message, "err");
   }
@@ -3996,6 +4030,13 @@ async function slUpdateOrderPaid(orderId, paid){
 function renderSalesStatusOverview(){
   const counts = countOrderStatuses(groupSalesData(), g => (g.items[0] && g.items[0].status), g => !!(g.items[0] && g.items[0].paid));
   setStatusStats("sl_stat", counts);
+  let owed = 0;
+  groupSalesData().forEach(g => {
+    const f = g.items[0] || {}; if(normStatus(f.status) === "cancelled") return;
+    const total = Math.max(0, g.items.reduce((a, o) => a + (Number(o.qty) || 0) * (Number(o.unitPrice) || 0), 0) - g.items.reduce((a, o) => a + (Number(o.discount) || 0), 0));
+    owed += payOwed(total, f.paid, f.paidAmount);
+  });
+  const ow = document.getElementById("sl_stat_owed"); if(ow) ow.textContent = fmtNum(owed) + " AED";
 }
 
 function renderSalesHistory(){
@@ -4014,6 +4055,7 @@ function renderSalesHistory(){
   let filtered = groups;
   if(slFilterStatus !== "all") filtered = filtered.filter(g => normStatus(g.items[0] && g.items[0].status) === slFilterStatus);
   if(slFilterPaid === "unpaid") filtered = filtered.filter(g => !(g.items[0] && g.items[0].paid));
+  else if(slFilterPaid === "deposit") filtered = filtered.filter(g => payState(g.items[0] && g.items[0].paid, g.items[0] && g.items[0].paidAmount) === "deposit");
   else if(slFilterPaid === "paid") filtered = filtered.filter(g => !!(g.items[0] && g.items[0].paid));
   if(filtered.length === 0){
     wrap.style.display = "none";
@@ -4072,9 +4114,7 @@ function renderSalesHistory(){
         <select class="sale-row-status-select" data-key="${esc(g.key)}" style="color:${orderStatusColor(status)};">
           ${statusOptionsHtml(status)}
         </select>
-        <label class="sale-row-paid-label" style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
-          <input type="checkbox" class="sale-row-paid-check" data-key="${esc(g.key)}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
-        </label>
+        ${paySelectHtml("sale-row-pay-select", "data-key", g.key, paid, g.items[0] && g.items[0].paidAmount, total)}
         <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
         <button type="button" class="secondary sl-history-refund-btn">↩️ إرجاع عطر / استرداد</button>
         ${normStatus(status) !== "cancelled" ? `<button type="button" class="secondary sl-history-cancel-btn">⛔ إلغاء الطلب</button>` : ""}
@@ -4088,10 +4128,11 @@ function renderSalesHistory(){
       slUpdateOrderStatus(key, e.target.value);
     });
   });
-  wrap.querySelectorAll(".sale-row-paid-check").forEach(chk => {
-    chk.addEventListener("change", (e) => {
-      const key = e.target.dataset.key;
-      slUpdateOrderPaid(key, e.target.checked);
+  wrap.querySelectorAll(".sale-row-pay-select").forEach(sel => {
+    sel.addEventListener("change", (e) => {
+      const el = e.target, pay = askPayment(el.value, Number(el.dataset.total), Number(el.dataset.paidAmount));
+      if(!pay){ renderSalesHistory(); return; }
+      slUpdateOrderPaid(el.dataset.key, pay);
     });
   });
   wrap.querySelectorAll(".sl-history-edit-btn").forEach(btn => {
@@ -5879,19 +5920,21 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       }
     }
 
-    async function distUpdateSalePaid(saleId, paid){
+    async function distUpdateSalePaid(saleId, pay){
       const token = getToken();
       if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
       try{
         const updated = await updateDistributionsWithRetry(token, (obj) => {
           const idx = (obj.sales||[]).findIndex(s => s.id === saleId);
           if(idx === -1) throw new Error("العملية ماعادت موجودة. حدّث الصفحة.");
-          obj.sales[idx] = Object.assign({}, obj.sales[idx], { paid });
+          const r = Object.assign({}, obj.sales[idx], { paid: pay.paid });
+          if(pay.paidAmount > 0 && !pay.paid) r.paidAmount = pay.paidAmount; else delete r.paidAmount;
+          obj.sales[idx] = r;
           return obj;
-        }, "Update distribution sale paid: " + saleId + " -> " + paid);
+        }, "Update distribution sale payment: " + saleId + " -> " + (pay.paid ? "paid" : pay.paidAmount > 0 ? "deposit " + pay.paidAmount : "unpaid"));
         distributionsData = updated;
         distRenderSalesLog();
-        distShowStatus(paid ? "تم تأكيد استلام المبلغ." : "تم إلغاء تأكيد الاستلام.", "ok");
+        distShowStatus(payStatusText(pay), "ok");
       }catch(e){
         distShowStatus("صار خطأ: " + e.message, "err");
       }
@@ -5911,6 +5954,8 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
   document.getElementById("dist_ov_latest").textContent = sorted[0] ? sorted[0].date : "—";
   const counts = countOrderStatuses(activeSales, s => s.status, s => !!s.paid);
   setStatusStats("dist_ov", counts);
+  const owed = activeSales.reduce((a, x) => a + payOwed(Number(x.netTotal !== undefined ? x.netTotal : x.total) || 0, x.paid, x.paidAmount), 0);
+  const ow = document.getElementById("dist_ov_owed"); if(ow) ow.textContent = owed.toFixed(2) + " AED";
 }
 
 // المخزون بالسالب = ناقص (انسجلت طلبات قبل ما توصل الشحنة)
@@ -5941,6 +5986,7 @@ function distRenderSalesLog(){
       if(distFilterStatus !== "all") filteredSales = filteredSales.filter(s => normStatus(s.status) === distFilterStatus);
       if(distFilterPaid === "unpaid") filteredSales = filteredSales.filter(s => !s.paid);
       else if(distFilterPaid === "paid") filteredSales = filteredSales.filter(s => !!s.paid);
+      else if(distFilterPaid === "deposit") filteredSales = filteredSales.filter(s => payState(s.paid, s.paidAmount) === "deposit");
       if(filteredSales.length === 0){
         log.innerHTML = `<div class="hint">ما فيه عمليات مطابقة لهذا الفلتر.</div>`;
         return;
@@ -5966,9 +6012,7 @@ function distRenderSalesLog(){
             <select class="dist-sale-status-select" data-id="${esc(s.id)}" style="width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; color:${orderStatusColor(status)};">
               ${statusOptionsHtml(status)}
             </select>
-            <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:${paid ? "#1F6B41" : "var(--muted)"}; font-weight:${paid ? "700" : "400"};">
-              <input type="checkbox" class="dist-sale-paid-check" data-id="${esc(s.id)}" ${paid ? "checked" : ""} style="width:auto; margin:0;"> 💰 تم استلام المبلغ
-            </label>`;
+            ${paySelectHtml("dist-sale-pay-select", "data-id", s.id, paid, s.paidAmount, Number(s.netTotal !== undefined ? s.netTotal : s.total) || 0)}`;
         return `
         <div style="border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; ${rowStyle}">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
@@ -5992,9 +6036,11 @@ function distRenderSalesLog(){
           distUpdateSaleStatus(e.target.dataset.id, e.target.value);
         });
       });
-      log.querySelectorAll(".dist-sale-paid-check").forEach(chk => {
-        chk.addEventListener("change", (e) => {
-          distUpdateSalePaid(e.target.dataset.id, e.target.checked);
+      log.querySelectorAll(".dist-sale-pay-select").forEach(sel => {
+        sel.addEventListener("change", (e) => {
+          const el = e.target, pay = askPayment(el.value, Number(el.dataset.total), Number(el.dataset.paidAmount));
+          if(!pay){ distRenderSalesLog(); return; }
+          distUpdateSalePaid(el.dataset.id, pay);
         });
       });
     }
