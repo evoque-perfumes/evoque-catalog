@@ -5913,6 +5913,13 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
   setStatusStats("dist_ov", counts);
 }
 
+// المخزون بالسالب = ناقص (انسجلت طلبات قبل ما توصل الشحنة)
+function distStockShow(id, v){
+  const el = document.getElementById(id); if(!el) return;
+  const n = Number(v) || 0;
+  el.textContent = n < 0 ? `ناقص ${-n} ⚠️` : n;
+  el.style.color = n < 0 ? "#B23A2E" : "";
+}
 function distRenderSalesLog(){
       distRenderOverviewStats(); // نحدّث أرقام النظرة العامة (فوق) كل ما نعيد رسم سجل المبيعات — يشمل تغيير الحالة أو تأكيد الدفع
       const sales = distributionsData.sales || [];
@@ -5945,7 +5952,8 @@ function distRenderSalesLog(){
           + (s.themeSurcharge ? ` (ثيم ${Number(s.themeSurcharge).toFixed(2)} غير محتسب بالربح)` : "");
         const costVal = Number(s.orderCost) || 0;
         const profitVal = distEffectiveProfit(s);
-        const cancelledTxt = s.cancelled ? " — ⛔ ملغاة" : "";
+        const cancelledTxt = (s.cancelled ? " — ⛔ ملغاة" : "") + (Array.isArray(s.shortAtSave) && s.shortAtSave.length && !s.cancelled
+          ? ` — <span style="color:#9C6B1F;">⚠️ انسجل وفيه نقص: ${s.shortAtSave.map(x => esc(x.label) + " " + esc(x.short)).join("، ")}</span>` : "");
         const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
         const status = s.status || "";
         const paid = !!s.paid;
@@ -6074,20 +6082,20 @@ function distRenderSalesLog(){
     function distFillForm(){
       document.getElementById("dist_stockBlack").value = distributionsData.stock.black || 0;
       document.getElementById("dist_stockWhite").value = distributionsData.stock.white || 0;
-      document.getElementById("dist_stockBlackDisplay").textContent = distributionsData.stock.black || 0;
-      document.getElementById("dist_stockWhiteDisplay").textContent = distributionsData.stock.white || 0;
+      distStockShow("dist_stockBlackDisplay", distributionsData.stock.black);
+      distStockShow("dist_stockWhiteDisplay", distributionsData.stock.white);
       document.getElementById("dist_stockBottlesEmpty").value = distributionsData.stock.bottlesEmpty || 0;
-      document.getElementById("dist_stockBottlesEmptyDisplay").textContent = distributionsData.stock.bottlesEmpty || 0;
+      distStockShow("dist_stockBottlesEmptyDisplay", distributionsData.stock.bottlesEmpty);
       document.getElementById("dist_stockBottlesReady").value = distributionsData.stock.bottlesReady || 0;
-      document.getElementById("dist_stockBottlesReadyDisplay").textContent = distributionsData.stock.bottlesReady || 0;
+      distStockShow("dist_stockBottlesReadyDisplay", distributionsData.stock.bottlesReady);
       document.getElementById("dist_stockBagsPerfume").value = distributionsData.stock.bagsPerfume || 0;
-      document.getElementById("dist_stockBagsPerfumeDisplay").textContent = distributionsData.stock.bagsPerfume || 0;
+      distStockShow("dist_stockBagsPerfumeDisplay", distributionsData.stock.bagsPerfume);
       document.getElementById("dist_stockBagsPackaging").value = distributionsData.stock.bagsPackaging || 0;
-      document.getElementById("dist_stockBagsPackagingDisplay").textContent = distributionsData.stock.bagsPackaging || 0;
+      distStockShow("dist_stockBagsPackagingDisplay", distributionsData.stock.bagsPackaging);
       document.getElementById("dist_stockPins").value = distributionsData.stock.pins || 0;
-      document.getElementById("dist_stockPinsDisplay").textContent = distributionsData.stock.pins || 0;
+      distStockShow("dist_stockPinsDisplay", distributionsData.stock.pins);
       document.getElementById("dist_stockBoxes").value = distributionsData.stock.boxes || 0;
-      document.getElementById("dist_stockBoxesDisplay").textContent = distributionsData.stock.boxes || 0;
+      distStockShow("dist_stockBoxesDisplay", distributionsData.stock.boxes);
       document.getElementById("dist_stockOilGDisplay").textContent = (distributionsData.stock.oilG || 0).toFixed(1);
       document.getElementById("dist_stockAlcoholMlDisplay").textContent = (distributionsData.stock.alcoholMl || 0).toFixed(1);
 
@@ -6344,6 +6352,39 @@ function distRenderSalesLog(){
       if(qty <= 0){ distShowStatus("لازم تكتب كمية أكبر من صفر.", "err"); return; }
 
       const editingId = distEditingSaleId;
+      // 14 نوفمبر 2026: لو المخزون ما يكفي، ما نرفض الطلب — نعرض كل الناقص ويختار يكمّل (المخزون يصير بالسالب
+      // ويتغطى من الشحنة الجاية) أو يلغي. قبل كذا كان يرفض الطلب كامل.
+      const distNeeds = (stock, oldEntry) => {
+        const st = Object.assign({}, stock || {});
+        if(oldEntry){ // تعديل: نرجّع اللي أخذته العملية القديمة أول
+          const ob = distSaleColorBreakdown(oldEntry);
+          st.black = (st.black || 0) + (ob.black || 0); st.white = (st.white || 0) + (ob.white || 0);
+          st.bottlesReady = (st.bottlesReady || 0) + Number(oldEntry.bottlesUsed || 0);
+          st.bagsPerfume = (st.bagsPerfume || 0) + Number((oldEntry.bagsPerfumeUsed !== undefined ? oldEntry.bagsPerfumeUsed : oldEntry.bagsUsed) || 0);
+          st.pins = (st.pins || 0) + Number(oldEntry.pinsUsed || 0);
+          st.bagsPackaging = (st.bagsPackaging || 0) + Number(oldEntry.bagsPackagingUsed || 0);
+          st.boxes = (st.boxes || 0) + Number(oldEntry.boxesUsed || 0);
+        }
+        const need = [];
+        const add = (label, have, want) => { if(want > (have || 0)) need.push({ label, have: have || 0, want, short: want - (have || 0) }); };
+        if(mixedColors){ add("مسكة أسود", st.black, qtyBlack); add("مسكة " + distColorNameAr("white"), st.white, qtyWhite); }
+        else add("مسكة " + distColorNameAr(color), st[color], qty);
+        add("زجاجات جاهزة", st.bottlesReady, bottlesUsed);
+        add("كيس العطر", st.bagsPerfume, bagsPerfumeUsed);
+        add("دبابيس", st.pins, pinsUsed);
+        add("كيس التغليف", st.bagsPackaging, bagsPackagingUsed);
+        add("بوكسات التغليف", st.boxes, boxesUsed);
+        return need;
+      };
+      const oldLocal = editingId ? (distributionsData.sales || []).find(x => x.id === editingId) : null;
+      const shortLocal = distNeeds(distributionsData.stock, oldLocal);
+      let allowShort = false;
+      if(shortLocal.length){
+        const msg = "⚠️ المخزون ما يكفي هالطلب:\n\n" + shortLocal.map(x => `• ${x.label}: عندك ${x.have}، والطلب يحتاج ${x.want} — ناقص ${x.short}`).join("\n") +
+          "\n\nتبي تسجّل الطلب بكل الأحوال؟\n(المخزون بيصير بالسالب، ويتغطى لما تسجّل الشحنة الجاية)";
+        if(!confirm(msg)){ distShowStatus("ما انسجل — عدّل الكمية أو سجّل الشحنة أول.", "info"); return; }
+        allowShort = true;
+      }
       const btn = document.getElementById("dist_logSaleBtn");
       btn.disabled = true;
       try{
@@ -6362,22 +6403,9 @@ function distRenderSalesLog(){
             obj.stock.bagsPackaging = (obj.stock.bagsPackaging || 0) + Number(oldEntry.bagsPackagingUsed || 0);
             obj.stock.boxes = (obj.stock.boxes || 0) + Number(oldEntry.boxesUsed || 0);
           }
-          if(mixedColors){
-            const curBlack = obj.stock.black || 0;
-            const curWhite = obj.stock.white || 0;
-            const shortages = [];
-            if(qtyBlack > curBlack) shortages.push("أسود: بس " + curBlack + " متوفر");
-            if(qtyWhite > curWhite) shortages.push("بيج: بس " + curWhite + " متوفر");
-            if(shortages.length) throw new Error("المخزون ما يكفي — " + shortages.join("، ") + ". عدّل الكمية أو حدّث المخزون أول.");
-          } else {
-            const curColorStock = obj.stock[color] || 0;
-            if(qty > curColorStock) throw new Error("المخزون الحالي (" + distColorNameAr(color) + ") بس " + curColorStock + " قطعة — عدّل الكمية أو حدّث المخزون أول.");
-          }
-          if(bottlesUsed > (obj.stock.bottlesReady||0)) throw new Error("المخزون الحالي من الزجاجات الجاهزة بس " + (obj.stock.bottlesReady||0) + ".");
-          if(bagsPerfumeUsed > (obj.stock.bagsPerfume||0)) throw new Error("المخزون الحالي من كيس العطر بس " + (obj.stock.bagsPerfume||0) + ".");
-          if(pinsUsed > (obj.stock.pins||0)) throw new Error("المخزون الحالي من الدبابيس بس " + (obj.stock.pins||0) + ".");
-          if(bagsPackagingUsed > (obj.stock.bagsPackaging||0)) throw new Error("المخزون الحالي من كيس التغليف بس " + (obj.stock.bagsPackaging||0) + ".");
-          if(boxesUsed > (obj.stock.boxes||0)) throw new Error("المخزون الحالي من بوكسات التغليف بس " + (obj.stock.boxes||0) + ".");
+          // المخزون هنا بعد إرجاع العملية القديمة (لو تعديل) — فنحسب الناقص بدون oldEntry
+          const shortNow = distNeeds(obj.stock, null);
+          if(shortNow.length && !allowShort) throw new Error("المخزون تغيّر وصار ناقص: " + shortNow.map(x => `${x.label} (ناقص ${x.short})`).join("، ") + " — جرّب مرة ثانية.");
 
           const r = distComputeTotal(qty, withTheme);
           const netTotal = Math.max(0, r.total - discount);
@@ -6393,6 +6421,7 @@ function distRenderSalesLog(){
 
           const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsPerfumeUsed, pinsUsed, bagsPackagingUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
           if(mixedColors) saleEntry.colorBreakdown = { black: qtyBlack, white: qtyWhite };
+          if(shortNow.length) saleEntry.shortAtSave = shortNow.map(x => ({ label: x.label, short: x.short }));
           if(editingId) saleEntry.editedAt = new Date().toISOString();
 
           if(mixedColors){
