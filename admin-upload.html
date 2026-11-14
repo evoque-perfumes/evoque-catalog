@@ -1310,6 +1310,16 @@
         </label>
       </div>
       <div class="field"><label for="dist_saleDiscount">خصم للعميل (اختياري) — درهم</label><input type="number" id="dist_saleDiscount" min="0" step="0.5" value="0"></div>
+      <div class="grid2">
+        <div class="field"><label for="dist_saleDeliveryType">🚚 التوصيل (ينضاف للمجموع)</label>
+          <select id="dist_saleDeliveryType">
+            <option value="standard">توصيل عادي</option>
+            <option value="western">المنطقة الغربية (أبوظبي)</option>
+            <option value="pickup">استلام من عندي (بدون توصيل)</option>
+            <option value="custom">مبلغ ثاني</option>
+          </select></div>
+        <div class="field"><label for="dist_saleDeliveryFee">رسوم التوصيل — درهم</label><input type="number" id="dist_saleDeliveryFee" min="0" step="0.5"></div>
+      </div>
       <small class="hint" style="margin-top:10px;">المواد المستخدمة بهالطلبية (تُخصم من المخزون وتُحسب بيها تكلفة الطلبية) — الزجاجات وكيس العطر والدبابيس تتعبى تلقائيًا بعدد القطع، وتقدر تعدّلها. كيس التغليف والبوكس دايمًا يدوي.</small>
       <div class="grid2">
         <div class="field"><label for="dist_saleBottlesUsed">عدد الزجاجات الجاهزة المستخدمة</label><input type="number" id="dist_saleBottlesUsed" min="0" step="1" value="1"></div>
@@ -5550,10 +5560,23 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
     // يعكس المبلغ الحقيقي المُحصَّل من كل عميل، والتصحيح يصير بس بعرض الإحصائيات.
     function distEffectiveRevenue(s){
       const raw = Number(s.netTotal !== undefined ? s.netTotal : s.total) || 0;
-      return raw - (Number(s.themeSurcharge) || 0);
+      return raw - (Number(s.themeSurcharge) || 0) - (Number(s.deliveryFee) || 0);
     }
     function distEffectiveProfit(s){
-      return (Number(s.orderProfit) || 0) - (Number(s.themeSurcharge) || 0);
+      return (Number(s.orderProfit) || 0) - (Number(s.themeSurcharge) || 0) - (Number(s.deliveryFee) || 0);
+    }
+    // 14 نوفمبر 2026: رسوم التوصيل تنضاف للمبلغ المطلوب من العميل (netTotal = اللي يحوّله)، بس ما تنحسب
+    // إيراد ولا ربح — تروح لشركة التوصيل (نفس فكرة رسوم الثيم). الأسعار من «🚚 التوصيل والخصم».
+    function distDeliveryRate(type){
+      const ae = ((typeof shippingRatesData !== "undefined" && shippingRatesData && shippingRatesData.AE) || SHIPPING_DEFAULTS.AE);
+      if(type === "western") return Number(ae.western) || 0;
+      if(type === "pickup") return 0;
+      return Number(ae.standard) || 0;
+    }
+    function distReadDeliveryFee(){
+      const t = document.getElementById("dist_saleDeliveryType").value;
+      if(t !== "custom"){ const v = distDeliveryRate(t); document.getElementById("dist_saleDeliveryFee").value = v; return v; }
+      return Math.max(0, Number(document.getElementById("dist_saleDeliveryFee").value) || 0);
     }
 
     // عدد الزجاجات (15مل) اللي تطلع من دفعة خلط واحدة (1000 جرام زيت + 2000 مل كحول = 3000مل)
@@ -5639,6 +5662,8 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       document.getElementById("dist_saleQty").value = sale.qty;
       document.getElementById("dist_saleTheme").checked = !!sale.withTheme;
       document.getElementById("dist_saleDiscount").value = sale.discount || 0;
+      document.getElementById("dist_saleDeliveryType").value = sale.deliveryType || (Number(sale.deliveryFee) > 0 ? "custom" : "pickup");
+      document.getElementById("dist_saleDeliveryFee").value = Number(sale.deliveryFee) || 0;
       document.getElementById("dist_saleBottlesUsed").value = (sale.bottlesUsed !== undefined ? sale.bottlesUsed : sale.qty);
       document.getElementById("dist_saleBagsPerfumeUsed").value = (sale.bagsPerfumeUsed !== undefined ? sale.bagsPerfumeUsed : (sale.bagsUsed !== undefined ? sale.bagsUsed : sale.qty));
       document.getElementById("dist_salePinsUsed").value = (sale.pinsUsed !== undefined ? sale.pinsUsed : sale.qty);
@@ -5662,6 +5687,7 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       distToggleSaleMixedColors();
       document.getElementById("dist_saleQty").value = 1;
       document.getElementById("dist_saleDiscount").value = 0;
+      document.getElementById("dist_saleDeliveryType").value = "standard";
       document.getElementById("dist_saleBagsPackagingUsed").value = 0;
       document.getElementById("dist_saleBoxesUsed").value = 0;
       document.getElementById("dist_saleNote").value = "";
@@ -5995,7 +6021,8 @@ function distRenderSalesLog(){
         const who = [s.customerName, s.customerPhone, s.emirate].filter(Boolean).map(esc).join(" — ");
         const shownTotal = distEffectiveRevenue(s);
         const discountTxt = (s.discount ? ` (خصم ${Number(s.discount).toFixed(2)})` : "")
-          + (s.themeSurcharge ? ` (ثيم ${Number(s.themeSurcharge).toFixed(2)} غير محتسب بالربح)` : "");
+          + (s.themeSurcharge ? ` (ثيم ${Number(s.themeSurcharge).toFixed(2)} غير محتسب بالربح)` : "")
+          + (Number(s.deliveryFee) > 0 ? ` — 🚚 المطلوب من العميل شامل التوصيل (${Number(s.deliveryFee).toFixed(0)}): <b>${Number(s.netTotal).toFixed(2)}</b>` : "");
         const costVal = Number(s.orderCost) || 0;
         const profitVal = distEffectiveProfit(s);
         const cancelledTxt = (s.cancelled ? " — ⛔ ملغاة" : "") + (Array.isArray(s.shortAtSave) && s.shortAtSave.length && !s.cancelled
@@ -6079,11 +6106,13 @@ function distRenderSalesLog(){
         return;
       }
       const r = distComputeTotal(qty, withTheme);
-      const netTotal = Math.max(0, r.total - discount);
+      const deliveryFee = distReadDeliveryFee();
+      const netTotal = Math.max(0, r.total - discount) + deliveryFee;
       let txt = `السعر: ${r.base.toFixed(2)} درهم`;
       if(withTheme) txt += ` + رسوم ثيم (${r.runs} دفعة × ${(distributionsData.config.themeFeePerRun||0).toFixed(2)}) = ${r.themeSurcharge.toFixed(2)} درهم`;
       if(discount > 0) txt += ` − خصم ${discount.toFixed(2)} درهم`;
-      txt += ` — الإجمالي المطلوب من العميل: ${netTotal.toFixed(2)} درهم`;
+      txt += deliveryFee > 0 ? ` + توصيل ${deliveryFee.toFixed(2)} درهم` : " (بدون توصيل)";
+      txt += ` — الإجمالي المطلوب من العميل (شامل التوصيل): ${netTotal.toFixed(2)} درهم`;
       document.getElementById("dist_saleComputedPrice").textContent = txt;
 
       const costs = distComputeAllCosts(distributionsData.purchases);
@@ -6097,10 +6126,10 @@ function distRenderSalesLog(){
       // رسوم الثيم (لو فيها) ما تُحتسب بالربح — مبلغ يُحصَّل من العميل ويُدفع كامل لمطبعة
       // خارجية بدون أي هامش للمتجر (3 أكتوبر 2026). تبقى محسوبة بـ"الإجمالي المطلوب من
       // العميل" أعلاه لأنها فعلاً لازم تُدفع، بس ما تدخل بالربح الصافي المعروض هنا.
-      const orderProfit = netTotal - orderCost - r.themeSurcharge;
+      const orderProfit = netTotal - orderCost - r.themeSurcharge - deliveryFee;
       document.getElementById("dist_saleOrderCost").textContent = `تكلفة المواد لهالطلبية: ${orderCost.toFixed(2)} درهم (زجاجات ${bottlesUsed}×${readyBottleCost.toFixed(2)} + كيس عطر ${bagsPerfumeUsed}×${(Number(costs.bagPerfume)||0).toFixed(2)} + دبابيس ${pinsUsed}×${(Number(costs.pin)||0).toFixed(2)} + مسكة ${qty}×${(Number(costs.handle)||0).toFixed(2)} + كيس تغليف ${bagsPackagingUsed}×${(Number(costs.bagPackaging)||0).toFixed(2)} + بوكس ${boxesUsed}×${(Number(costs.box)||0).toFixed(2)})`;
       const profitEl = document.getElementById("dist_saleOrderProfit");
-      profitEl.textContent = `الربح الصافي لهالطلبية: ${orderProfit.toFixed(2)} درهم` + (r.themeSurcharge > 0 ? ` (رسوم الثيم ${r.themeSurcharge.toFixed(2)} درهم غير محتسبة بالربح)` : "");
+      profitEl.textContent = `الربح الصافي لهالطلبية: ${orderProfit.toFixed(2)} درهم` + (r.themeSurcharge > 0 || deliveryFee > 0 ? ` (${[r.themeSurcharge > 0 ? "رسوم الثيم" : "", deliveryFee > 0 ? "التوصيل" : ""].filter(Boolean).join(" و")} ما تنحسب بالربح)` : "");
       profitEl.style.color = orderProfit >= 0 ? "#1F6B41" : "#963224";
     }
 
@@ -6219,6 +6248,8 @@ function distRenderSalesLog(){
     document.getElementById("dist_saleQtyWhite").addEventListener("input", distSyncSaleMixedQty);
     document.getElementById("dist_saleTheme").addEventListener("change", distUpdateComputedPrice);
     document.getElementById("dist_saleDiscount").addEventListener("input", distUpdateComputedPrice);
+    document.getElementById("dist_saleDeliveryType").addEventListener("change", distUpdateComputedPrice);
+    document.getElementById("dist_saleDeliveryFee").addEventListener("input", () => { document.getElementById("dist_saleDeliveryType").value = "custom"; distUpdateComputedPrice(); });
     document.getElementById("dist_saleBottlesUsed").addEventListener("input", distUpdateComputedPrice);
     document.getElementById("dist_saleBagsPerfumeUsed").addEventListener("input", distUpdateComputedPrice);
     document.getElementById("dist_salePinsUsed").addEventListener("input", distUpdateComputedPrice);
@@ -6390,6 +6421,8 @@ function distRenderSalesLog(){
       const customerPhone = document.getElementById("dist_saleCustomerPhone").value.trim();
       const emirate = document.getElementById("dist_saleEmirate").value.trim();
       const discount = Number(document.getElementById("dist_saleDiscount").value) || 0;
+      const deliveryType = document.getElementById("dist_saleDeliveryType").value;
+      const deliveryFee = distReadDeliveryFee();
       const bottlesUsed = Number(document.getElementById("dist_saleBottlesUsed").value) || 0;
       const bagsPerfumeUsed = Number(document.getElementById("dist_saleBagsPerfumeUsed").value) || 0;
       const pinsUsed = Number(document.getElementById("dist_salePinsUsed").value) || 0;
@@ -6454,7 +6487,7 @@ function distRenderSalesLog(){
           if(shortNow.length && !allowShort) throw new Error("المخزون تغيّر وصار ناقص: " + shortNow.map(x => `${x.label} (ناقص ${x.short})`).join("، ") + " — جرّب مرة ثانية.");
 
           const r = distComputeTotal(qty, withTheme);
-          const netTotal = Math.max(0, r.total - discount);
+          const netTotal = Math.max(0, r.total - discount) + deliveryFee;
           const costs0 = distComputeAllCosts(obj.purchases);
           const readyBottleCost0 = distReadyBottleCost(costs0);
           const orderCost = (bottlesUsed * readyBottleCost0)
@@ -6467,6 +6500,7 @@ function distRenderSalesLog(){
 
           const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsPerfumeUsed, pinsUsed, bagsPackagingUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
           if(mixedColors) saleEntry.colorBreakdown = { black: qtyBlack, white: qtyWhite };
+          saleEntry.deliveryType = deliveryType; saleEntry.deliveryFee = deliveryFee;
           if(shortNow.length) saleEntry.shortAtSave = shortNow.map(x => ({ label: x.label, short: x.short }));
           if(editingId) saleEntry.editedAt = new Date().toISOString();
 
@@ -6498,6 +6532,7 @@ function distRenderSalesLog(){
         document.getElementById("dist_logSaleBtn").textContent = "✅ سجّل البيع واخصم من المخزون";
         document.getElementById("dist_saleQty").value = 1;
         document.getElementById("dist_saleDiscount").value = 0;
+        document.getElementById("dist_saleDeliveryType").value = "standard";
         document.getElementById("dist_saleBagsPackagingUsed").value = 0;
         document.getElementById("dist_saleBoxesUsed").value = 0;
         document.getElementById("dist_saleNote").value = "";
