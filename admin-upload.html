@@ -283,6 +283,9 @@
   .sig-kv.good b{ color:#1F6B41; }
   .sig-kv.neg b{ color:#963224; }
   .sig-del-prod{ margin-top:8px; }
+  .sh-prev-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start; margin-top:8px; }
+  .sh-canvas, #sh_current img{ width:min(100%, 300px); height:auto; border-radius:12px; border:1px solid var(--line); background:#fff; }
+  #sh_current .sig-note{ margin:0 0 4px; }
   .sig-site-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
   .sig-site-status{ font-size:14px; }
   .sig-site-top-btns{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -511,7 +514,28 @@
     <div class="row" style="gap:10px; margin-bottom:0;">
       <button type="button" class="ghost active" id="photoSubSingleBtn">📷 صورة واحدة</button>
       <button type="button" class="ghost" id="photoSubBulkBtn">📦 دفعة صور (مجلد كامل)</button>
+      <button type="button" class="ghost" id="photoSubShadowBtn">🫙 زجاجة إيفوك + ظل الأصلي</button>
     </div>
+  </div>
+
+  <div class="panel" id="shadowPanel" style="display:none;">
+    <h3 style="margin-top:0;">🫙 صورة زجاجة إيفوك مع ظل العطر الأصلي</h3>
+    <div class="sig-note" style="margin-top:0;">اختر العطر، وارفع أي صورة لزجاجة العطر الأصلي (أحسن شي على خلفية بيضا أو سادة). اللوحة تشيل الخلفية وتحوّل الزجاجة لظل بدون اسم ولا شعار، وتحطه صغير تحت يمين زجاجة إيفوك. هالصورة تطلع في قائمة الموقع، وبطاقة المكونات تبقى لما الزبون يفتح العطر.</div>
+    <div class="grid2">
+      <div class="field"><label for="sh_perfume">العطر</label><select id="sh_perfume"></select></div>
+      <div class="field"><label>صورة زجاجة العطر الأصلي</label>
+        <label class="sig-file-btn">📷 اختر الصورة<input type="file" id="sh_file" accept="image/*" hidden></label></div>
+    </div>
+    <div class="field" id="sh_tolWrap" style="display:none;"><label for="sh_tol">قص الخلفية: لو بقى شي من الخلفية زِد، ولو انقص من الزجاجة نقّص</label><input type="range" id="sh_tol" min="8" max="120" value="42"></div>
+    <div class="sh-prev-row">
+      <canvas id="sh_canvas" width="1080" height="1350" class="sh-canvas" style="display:none;"></canvas>
+      <div id="sh_current"></div>
+    </div>
+    <div class="row" style="gap:8px; flex-wrap:wrap; margin-top:10px;">
+      <button type="button" id="sh_saveBtn" disabled>💾 احفظ في الموقع</button>
+      <button type="button" class="secondary" id="sh_removeBtn" style="display:none;">🗑️ شيل الصورة من هالعطر</button>
+    </div>
+    <div id="sh_status" class="status" style="display:none;"></div>
   </div>
 
   <div class="panel" id="editSearchWrap" style="display:none;">
@@ -10164,6 +10188,196 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   document.getElementById("modeOverviewBtn").addEventListener("click", refresh);
   setTimeout(refresh, 2000);
 })();
+</script>
+
+<script>
+// ===== صورة زجاجة إيفوك + ظل العطر الأصلي (14 نوفمبر 2026) =====
+// الظل = شكل الزجاجة بلون واحد بدون أي اسم أو شعار. الصورة تنحفظ assets/shadow/<id>.webp والحقل shadowCard بـ data.json.
+const SH_W = 1080, SH_H = 1350;
+function shBottleSvg(){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 440"><defs>'+
+  '<linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".18" stop-color="#fff" stop-opacity=".07"/><stop offset=".6" stop-color="#fff" stop-opacity=".03"/><stop offset=".88" stop-color="#fff" stop-opacity=".13"/><stop offset="1" stop-color="#fff" stop-opacity=".42"/></linearGradient>'+
+  '<linearGradient id="l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6F9A86"/><stop offset=".45" stop-color="#2B5244"/><stop offset="1" stop-color="#12261F"/></linearGradient>'+
+  '<linearGradient id="c" x1="0" x2="1"><stop offset="0" stop-color="#18231F"/><stop offset=".28" stop-color="#2B5244"/><stop offset=".62" stop-color="#12261F"/><stop offset="1" stop-color="#0F1814"/></linearGradient>'+
+  '<linearGradient id="k" x1="0" x2="1"><stop offset="0" stop-color="#56625B"/><stop offset=".3" stop-color="#DDE6DA"/><stop offset=".58" stop-color="#B8653F"/><stop offset="1" stop-color="#56625B"/></linearGradient>'+
+  '<clipPath id="b"><rect x="54" y="164" width="192" height="248" rx="27"/></clipPath></defs>'+
+  '<rect x="50" y="160" width="200" height="256" rx="30" fill="#DDE6DA" fill-opacity=".25"/>'+
+  '<g clip-path="url(#b)"><path d="M-110 214 q40 -14 80 0 t80 0 t80 0 t80 0 t80 0 V440 H-110 Z" fill="url(#l)"/>'+
+  '<rect x="66" y="176" width="13" height="212" rx="6.5" fill="#fff" opacity=".22"/><rect x="222" y="190" width="6" height="170" rx="3" fill="#fff" opacity=".14"/></g>'+
+  '<rect x="84" y="252" width="132" height="112" rx="8" fill="#F5F3EE"/>'+
+  '<rect x="50" y="160" width="200" height="256" rx="30" fill="url(#g)" stroke="#F5F3EE" stroke-opacity=".5" stroke-width="1.5"/>'+
+  '<rect x="124" y="112" width="52" height="26" fill="url(#g)" stroke="#F5F3EE" stroke-opacity=".4"/>'+
+  '<rect x="110" y="132" width="80" height="34" rx="7" fill="url(#k)"/>'+
+  '<rect x="100" y="34" width="100" height="100" rx="14" fill="url(#c)"/>'+
+  '<rect x="111" y="46" width="8" height="78" rx="4" fill="#fff" opacity=".17"/></svg>';
+}
+function shLoadImg(src){ return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("ما قدرت أفتح الصورة")); i.src = src; }); }
+let shAssets = null;
+async function shGetAssets(){
+  if(!shAssets) shAssets = Promise.all([
+    shLoadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(shBottleSvg())),
+    // نجيب الشعار كـ blob عشان الصورة تنحفظ بدون مشكلة tainted canvas
+    fetch("assets/brand/evoque-logo-main-transparent.png").then(r => r.ok ? r.blob() : Promise.reject()).then(b => shLoadImg(URL.createObjectURL(b))).catch(() => null)
+  ]);
+  return shAssets;
+}
+// يشيل الخلفية: لو الصورة شفافة ياخذ الشفافية، وإلا يعبّي من الأطراف كل لون قريب من لون الخلفية
+function shSilhouette(img, tol){
+  const M = 900, sc = Math.min(1, M / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * sc)), h = Math.max(1, Math.round(img.naturalHeight * sc));
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const cx = cv.getContext("2d"); cx.drawImage(img, 0, 0, w, h);
+  const d = cx.getImageData(0, 0, w, h).data, N = w * h, fg = new Uint8Array(N);
+  let transparentEdge = 0, edge = [];
+  for(let x = 0; x < w; x++){ edge.push(x, (h - 1) * w + x); }
+  for(let y = 0; y < h; y++){ edge.push(y * w, y * w + w - 1); }
+  edge.forEach(i => { if(d[i * 4 + 3] < 200) transparentEdge++; });
+  if(transparentEdge > edge.length * 0.5){
+    for(let i = 0; i < N; i++) fg[i] = d[i * 4 + 3] > 110 ? 1 : 0;
+  } else {
+    // لون الخلفية = الوسيط من الأطراف
+    const med = k => { const a = edge.map(i => d[i * 4 + k]).sort((p, q) => p - q); return a[a.length >> 1]; };
+    const bg = [med(0), med(1), med(2)], t2 = tol * tol * 3;
+    const isBg = i => { const r = d[i*4] - bg[0], g = d[i*4+1] - bg[1], b = d[i*4+2] - bg[2]; return r*r + g*g + b*b <= t2; };
+    const seen = new Uint8Array(N), st = [];
+    edge.forEach(i => { if(!seen[i] && isBg(i)){ seen[i] = 1; st.push(i); } });
+    while(st.length){
+      const i = st.pop(), x = i % w;
+      const nb = [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i - w, i + w];
+      for(const j of nb){ if(j >= 0 && j < N && !seen[j] && isBg(j)){ seen[j] = 1; st.push(j); } }
+    }
+    for(let i = 0; i < N; i++) fg[i] = seen[i] ? 0 : 1;
+  }
+  // نخلي أكبر قطعة (الزجاجة) واللي قريبة منها بالحجم، ونشيل النقط الصغيرة
+  const lab = new Int32Array(N), sizes = [0]; let id = 0;
+  for(let s0 = 0; s0 < N; s0++){
+    if(!fg[s0] || lab[s0]) continue;
+    id++; let n = 0; const st = [s0]; lab[s0] = id;
+    while(st.length){ const i = st.pop(), x = i % w; n++;
+      const nb = [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i - w, i + w];
+      for(const j of nb){ if(j >= 0 && j < N && fg[j] && !lab[j]){ lab[j] = id; st.push(j); } } }
+    sizes.push(n);
+  }
+  const big = Math.max(0, ...sizes); if(big < N * 0.01) return null;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  const out = document.createElement("canvas"); out.width = w; out.height = h;
+  const oc = out.getContext("2d"), od = oc.createImageData(w, h);
+  for(let i = 0; i < N; i++){
+    if(!lab[i] || sizes[lab[i]] < big * 0.06) continue;
+    const x = i % w, y = (i / w) | 0;
+    if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y;
+    od.data[i*4] = 0x2A; od.data[i*4+1] = 0x33; od.data[i*4+2] = 0x2F; od.data[i*4+3] = 255;
+  }
+  oc.putImageData(od, 0, 0);
+  const cw = x1 - x0 + 1, ch = y1 - y0 + 1, fin = document.createElement("canvas"); fin.width = cw; fin.height = ch;
+  fin.getContext("2d").drawImage(out, x0, y0, cw, ch, 0, 0, cw, ch);
+  return { canvas: fin, cover: (x1 - x0) * (y1 - y0) / N };
+}
+async function shCompose(canvas, sil){
+  const [bottle, logo] = await shGetAssets();
+  const c = canvas.getContext("2d");
+  const bg = c.createLinearGradient(0, 0, 0, SH_H); bg.addColorStop(0, "#F7F5F0"); bg.addColorStop(1, "#ECE6DC");
+  c.fillStyle = bg; c.fillRect(0, 0, SH_W, SH_H);
+  const glow = c.createRadialGradient(470, 640, 40, 470, 640, 560); glow.addColorStop(0, "rgba(111,154,134,.20)"); glow.addColorStop(1, "rgba(111,154,134,0)");
+  c.fillStyle = glow; c.fillRect(0, 0, SH_W, SH_H);
+  const ground = (cx, cy, rx) => { c.save(); c.filter = "blur(14px)"; c.fillStyle = "rgba(0,0,0,.22)"; c.beginPath(); c.ellipse(cx, cy, rx, rx * 0.09, 0, 0, Math.PI * 2); c.fill(); c.restore(); };
+  // زجاجة إيفوك كبيرة
+  const bw = 730, bh = bw * 440 / 300, bx = 110, by = 1200 - bh * 416 / 440;
+  ground(bx + bw / 2, 1202, bw * 0.36);
+  c.drawImage(bottle, bx, by, bw, bh);
+  if(logo){ const k = bw / 300, lw = 118 * k, lh = lw * logo.naturalHeight / logo.naturalWidth, ly = by + 308 * k - lh / 2;
+    c.drawImage(logo, bx + 150 * k - lw / 2, ly, lw, lh); }
+  // ظل العطر الأصلي صغير تحت يمين
+  if(sil){
+    const maxH = 470, maxW = 300, r = Math.min(maxH / sil.height, maxW / sil.width);
+    const sw = sil.width * r, sh = sil.height * r, sx = 1020 - sw, sy = 1206 - sh;
+    ground(sx + sw / 2, 1208, Math.max(60, sw * 0.5));
+    c.save(); c.globalAlpha = 0.9; c.drawImage(sil, sx, sy, sw, sh); c.restore();
+  }
+}
+const shState = { img: null, sil: null };
+function shStatus(msg, cls){ const b = document.getElementById("sh_status"); b.style.display = msg ? "" : "none"; b.textContent = msg || ""; b.className = "status " + (cls || ""); }
+function shFillSelect(){
+  const sel = document.getElementById("sh_perfume"), keep = sel.value;
+  const sold = {}; (salesData || []).forEach(o => { if(o.status !== "cancelled" && o.perfumeId) sold[o.perfumeId] = (sold[o.perfumeId] || 0) + (Number(o.qty) || 1); });
+  const list = (perfumes || []).filter(p => p.line !== "signature" && p.kind !== "set");
+  const name = p => `${p.brand ? p.brand + " — " : ""}${p.name}${p.shadowCard ? "  ✅" : ""}${p.hidden ? "  (مخفي)" : ""}`;
+  const top = list.filter(p => sold[p.id]).sort((a, b) => sold[b.id] - sold[a.id]).slice(0, 15);
+  const rest = list.filter(p => !top.includes(p)).sort((a, b) => name(a).localeCompare(name(b), "en", {sensitivity: "base"}));
+  sel.innerHTML = `<option value="">— اختر العطر —</option><optgroup label="⭐ الأكثر مبيعًا">${top.map(p => `<option value="${esc(p.id)}">${esc(name(p))} · ${sold[p.id]} زجاجة</option>`).join("")}</optgroup><optgroup label="كل العطور">${rest.map(p => `<option value="${esc(p.id)}">${esc(name(p))}</option>`).join("")}</optgroup>`;
+  sel.value = keep;
+}
+function shShowCurrent(){
+  const p = (perfumes || []).find(x => x.id === document.getElementById("sh_perfume").value);
+  const box = document.getElementById("sh_current");
+  box.innerHTML = p && p.shadowCard ? `<div class="sig-note">الصورة الحالية بالموقع:</div><img src="${esc(p.shadowCard)}" alt="">` : "";
+  document.getElementById("sh_removeBtn").style.display = p && p.shadowCard ? "" : "none";
+}
+async function shRedraw(){
+  if(!shState.img) return;
+  const tol = Number(document.getElementById("sh_tol").value);
+  shState.sil = shSilhouette(shState.img, tol);
+  const cv = document.getElementById("sh_canvas"); cv.style.display = "";
+  await shCompose(cv, shState.sil ? shState.sil.canvas : null);
+  const okSel = !!document.getElementById("sh_perfume").value;
+  document.getElementById("sh_saveBtn").disabled = !(shState.sil && okSel);
+  if(!shState.sil) shStatus("ما لقيت الزجاجة في الصورة — جرّب تزيد أو تنقص قص الخلفية، أو صورة خلفيتها سادة.", "err");
+  else if(shState.sil.cover > 0.92) shStatus("الظاهر إن الخلفية ما انشالت (الظل مربّع) — زِد قص الخلفية أو استخدم صورة خلفيتها بيضا.", "err");
+  else shStatus(okSel ? "شوف الصورة: لو الظل مضبوط اضغط «احفظ في الموقع»." : "اختر العطر من القائمة فوق.", okSel ? "ok" : "info");
+}
+function shShowPanel(on){
+  document.getElementById("shadowPanel").style.display = on ? "block" : "none";
+  document.getElementById("photoSubShadowBtn").classList.toggle("active", on);
+  if(on){
+    shFillSelect(); shShowCurrent();
+    if(!(salesData || []).length && getToken()) privFetch(ORDERS_JSON_PATH).then(r => r.ok ? r.json() : []).then(j => { if(Array.isArray(j) && j.length){ salesData = j; shFillSelect(); } }).catch(() => {});
+  }
+}
+document.getElementById("photoSubShadowBtn").addEventListener("click", () => {
+  ["photoSubSingleBtn", "photoSubBulkBtn"].forEach(id => document.getElementById(id).classList.remove("active"));
+  ["bulkPanel", "quickPhotoPanel", "editSearchWrap", "progressStatsWrap"].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = "none"; });
+  document.getElementById("hideUploadedRow").style.display = "none";
+  document.getElementById("selectedChipWrap").innerHTML = "";
+  shShowPanel(true);
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[id^='mode'], #photoSubSingleBtn, #photoSubBulkBtn");
+  if(b) shShowPanel(false);
+}, true);
+document.getElementById("sh_perfume").addEventListener("change", () => { shShowCurrent(); shRedraw(); });
+document.getElementById("sh_tol").addEventListener("input", () => { clearTimeout(shRedraw._t); shRedraw._t = setTimeout(shRedraw, 120); });
+document.getElementById("sh_file").addEventListener("change", async e => {
+  const f = e.target.files[0]; if(!f) return;
+  try{
+    const url = URL.createObjectURL(f);
+    shState.img = await shLoadImg(url);
+    document.getElementById("sh_tolWrap").style.display = "";
+    await shRedraw();
+  }catch(err){ shStatus(err.message, "err"); }
+});
+document.getElementById("sh_saveBtn").addEventListener("click", async () => {
+  const id = document.getElementById("sh_perfume").value, token = getToken();
+  if(!id || !shState.sil) return;
+  const btn = document.getElementById("sh_saveBtn"); btn.disabled = true; shStatus("جارِ الحفظ…", "info");
+  try{
+    const blob = await new Promise(ok => document.getElementById("sh_canvas").toBlob(ok, "image/webp", 0.86));
+    const b64 = await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.readAsDataURL(blob); });
+    const path = `assets/shadow/${id}.webp`;
+    await sigPutCatalogFile(path, b64, `Shadow card: ${id}`, token);
+    const val = `${path}?v=${Date.now().toString(36)}`;
+    perfumes = await updateDataJsonWithRetry(token, list => list.map(x => x.id === id ? Object.assign({}, x, { shadowCard: val }) : x), `Shadow card on: ${id}`);
+    shFillSelect(); shShowCurrent();
+    shStatus("انحفظت ✅ — تطلع بالموقع خلال دقيقة أو دقيقتين. اختر العطر اللي بعده وارفع صورته.", "ok");
+    document.getElementById("sh_file").value = "";
+  }catch(err){ shStatus("ما انحفظت: " + err.message, "err"); btn.disabled = false; }
+});
+document.getElementById("sh_removeBtn").addEventListener("click", async () => {
+  const id = document.getElementById("sh_perfume").value; if(!id || !confirm("تشيل صورة الظل من هالعطر؟ بترجع بطاقة المكونات مكانها.")) return;
+  try{
+    perfumes = await updateDataJsonWithRetry(getToken(), list => list.map(x => { if(x.id !== id) return x; const r = Object.assign({}, x); delete r.shadowCard; return r; }), `Shadow card off: ${id}`);
+    shFillSelect(); shShowCurrent(); shStatus("انشالت ✅", "ok");
+  }catch(err){ shStatus("ما انشالت: " + err.message, "err"); }
+});
 </script>
 </body>
 </html>

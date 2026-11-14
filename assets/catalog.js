@@ -33,7 +33,9 @@ function inspiredBlockHtml(p, t){
       <a class="orig-link" href="${escapeHtml(origSearchUrl(p))}" target="_blank" rel="noopener nofollow">${t.origLink} <span aria-hidden="true">↗</span></a>
     </div>`;
 }
-function productImage(p){ return p.photoCard || p.photo || ("assets/cards/" + encodeURIComponent(p.id) + ".webp"); }
+function noteCardImage(p){ return "assets/cards/" + encodeURIComponent(p.id) + ".webp"; }
+// shadowCard = زجاجة إيفوك + ظل العطر الأصلي (بالقائمة). لما يفتح العطر تطلع بطاقة المكونات.
+function productImage(p){ return p.photoCard || p.photo || p.shadowCard || noteCardImage(p); }
 const COMING_SOON_IMAGE = "assets/coming-soon.jpg"; // صورة "الصور قيد التجهيز" الموحدة — 29 أغسطس 2026
 // رابط Google Apps Script Web App لاستقبال الطلبات (نموذج الطلب) — يُستبدل بعد نشر السكربت، راجع دليل الإعداد
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbxz93KyzZTa0Y4_HNaGZfK1wh-i4a6bLhH9koUAHnUSn2Ged0PC110kIMuAOqVCDeyM/exec";
@@ -1511,7 +1513,7 @@ function openLightbox(p){
   const sillageDisplay = translateForDisplay(p.sillage);
   const lbImg = document.getElementById("lightboxImg");
   lbImg.style.opacity = "1";
-  lbImg.src = p.photo || productImage(p);
+  lbImg.src = p.photo || (p.shadowCard && !p.photoCard ? noteCardImage(p) : productImage(p));
   document.getElementById("lightboxOverlay").classList.toggle("lb-sig", isSig(p));
   lbImg.onerror = function(){ lbImg.onerror = null; lbImg.src = COMING_SOON_IMAGE; };
   lbImg.alt = t.imgAlt; // بدون أسماء علامات تجارية بنص الصورة البديل
