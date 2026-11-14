@@ -1289,6 +1289,7 @@
         <div class="field"><label for="dist_saleEmirate">الإمارة / المنطقة (اختياري)</label><input type="text" id="dist_saleEmirate" placeholder="مثال: دبي"></div>
         <div class="field"><label for="dist_saleDate">التاريخ</label><input type="date" id="dist_saleDate"></div>
       </div>
+      <div class="field"><label for="dist_saleDueDate">📅 متى لازم تطلع الطلبية؟ (اختياري — لو الزبون ما يبيها على طول)</label><input type="date" id="dist_saleDueDate"></div>
       <div class="grid2">
         <div class="field" id="dist_saleColorField"><label for="dist_saleColor">لون المسكة</label>
           <select id="dist_saleColor"><option value="black">أسود</option><option value="white">بيج</option></select>
@@ -5670,6 +5671,7 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       document.getElementById("dist_saleBagsPackagingUsed").value = sale.bagsPackagingUsed || 0;
       document.getElementById("dist_saleBoxesUsed").value = sale.boxesUsed || 0;
       document.getElementById("dist_saleNote").value = sale.note || "";
+      document.getElementById("dist_saleDueDate").value = sale.dueDate || "";
       distLastAutoQty = null;
       document.getElementById("dist_saleEditBanner").style.display = "flex";
       document.getElementById("dist_logSaleBtn").textContent = "💾 حفظ التعديل";
@@ -5691,6 +5693,7 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       document.getElementById("dist_saleBagsPackagingUsed").value = 0;
       document.getElementById("dist_saleBoxesUsed").value = 0;
       document.getElementById("dist_saleNote").value = "";
+      document.getElementById("dist_saleDueDate").value = "";
       document.getElementById("dist_saleCustomerName").value = "";
       document.getElementById("dist_saleCustomerPhone").value = "";
       document.getElementById("dist_saleEmirate").value = "";
@@ -5984,6 +5987,17 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
   const ow = document.getElementById("dist_ov_owed"); if(ow) ow.textContent = owed.toFixed(2) + " AED";
 }
 
+// 📅 موعد تطليع طلبية التوزيعات (اختياري) — يطلع بالسجل وبالإيميل اليومي
+function distDueHtml(s){
+  if(!s.dueDate || s.cancelled) return "";
+  const st = normStatus(s.status);
+  if(st !== "new" && st !== "confirmed") return "";
+  const days = Math.round((new Date(s.dueDate + "T00:00:00") - new Date(todayStr() + "T00:00:00")) / 86400000);
+  let d; try{ d = new Date(s.dueDate + "T00:00:00").toLocaleDateString("ar", { weekday: "long", day: "numeric", month: "long" }); }catch(e){ d = s.dueDate; }
+  const txt = days < 0 ? `⚠️ متأخرة ${-days} ${-days === 1 ? "يوم" : "أيام"}` : days === 0 ? "⚠️ لازم تطلع اليوم" : days === 1 ? "بكرة" : days === 2 ? "باقي يومين" : `باقي ${days} أيام`;
+  const col = days <= 0 ? "#B23A2E" : days <= 2 ? "#9C6B1F" : "var(--muted)";
+  return ` — <span style="color:${col}; font-weight:600;">📅 تطلع ${esc(d)} (${txt})</span>`;
+}
 // المخزون بالسالب = ناقص (انسجلت طلبات قبل ما توصل الشحنة)
 function distStockShow(id, v){
   const el = document.getElementById(id); if(!el) return;
@@ -6030,6 +6044,7 @@ function distRenderSalesLog(){
         const rowStyle = s.cancelled ? "opacity:0.55; text-decoration:line-through;" : "";
         const status = s.status || "";
         const paid = !!s.paid;
+        const dueTxt = distDueHtml(s);
         const deleteBtnHtml = `<button type="button" class="secondary dist-delete-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑️ حذف نهائي</button>`;
         const editCancelHtml = s.cancelled
           ? `<span style="font-size:12px; color:#963224; font-weight:700;">ملغاة</span>`
@@ -6044,7 +6059,7 @@ function distRenderSalesLog(){
         <div style="border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; ${rowStyle}">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
             <div>
-              <div style="font-weight:600;">${esc(s.date)} — ${distSaleColorLabel(s)} × ${esc(s.qty)} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${cancelledTxt}</div>
+              <div style="font-weight:600;">${esc(s.date)} — ${distSaleColorLabel(s)} × ${esc(s.qty)} ${s.withTheme ? "(مع ثيم)" : "(بدون ثيم)"}${cancelledTxt}${dueTxt}</div>
               ${who ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${esc(who)}</div>` : ""}
               ${s.note ? `<div style="color:var(--muted); font-size:12px; margin-top:2px;">${esc(s.note)}</div>` : ""}
               <div style="margin-top:4px; font-size:12px;">الإيراد: <b>${Number(shownTotal).toFixed(2)}</b> AED${discountTxt} — التكلفة: <b>${costVal.toFixed(2)}</b> AED — الربح: <b style="color:${profitVal >= 0 ? "#1F6B41" : "#963224"};">${profitVal.toFixed(2)}</b> AED</div>
@@ -6416,6 +6431,7 @@ function distRenderSalesLog(){
       const qty = mixedColors ? (qtyBlack + qtyWhite) : (Number(document.getElementById("dist_saleQty").value) || 0);
       const withTheme = document.getElementById("dist_saleTheme").checked;
       const date = document.getElementById("dist_saleDate").value || todayStr();
+      const dueDate = document.getElementById("dist_saleDueDate").value || "";
       const note = document.getElementById("dist_saleNote").value.trim();
       const customerName = document.getElementById("dist_saleCustomerName").value.trim();
       const customerPhone = document.getElementById("dist_saleCustomerPhone").value.trim();
@@ -6501,6 +6517,7 @@ function distRenderSalesLog(){
           const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsPerfumeUsed, pinsUsed, bagsPackagingUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
           if(mixedColors) saleEntry.colorBreakdown = { black: qtyBlack, white: qtyWhite };
           saleEntry.deliveryType = deliveryType; saleEntry.deliveryFee = deliveryFee;
+          if(dueDate) saleEntry.dueDate = dueDate;
           if(shortNow.length) saleEntry.shortAtSave = shortNow.map(x => ({ label: x.label, short: x.short }));
           if(editingId) saleEntry.editedAt = new Date().toISOString();
 
@@ -6536,6 +6553,7 @@ function distRenderSalesLog(){
         document.getElementById("dist_saleBagsPackagingUsed").value = 0;
         document.getElementById("dist_saleBoxesUsed").value = 0;
         document.getElementById("dist_saleNote").value = "";
+        document.getElementById("dist_saleDueDate").value = "";
         document.getElementById("dist_saleCustomerName").value = "";
         document.getElementById("dist_saleCustomerPhone").value = "";
         document.getElementById("dist_saleEmirate").value = "";
