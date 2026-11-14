@@ -1761,7 +1761,9 @@ function renderBestSellers(){
   if(gridEl) gridEl.classList.add("bs-slider");
   if(bsArrows) bsArrows.style.display = "";
   if(subEl && homePicksMode() === "sales") subEl.textContent = t.bestSellersSubtitleSales;
-  const curated = pickHomePicks();
+  // سيغنتشر الظاهرة أول السلايدر، وبعدها الأكثر مبيعًا
+  const sigFirst = perfumes.filter(p => isSig(p) && p.kind !== "set");
+  const curated = sigFirst.concat(pickHomePicks().filter(p => !isSig(p)));
   renderGrid(curated);
 }
 
@@ -1964,9 +1966,10 @@ function matchesExceptGender(p, genderKey){
 // لو ما انمرر شي، السلوك القديم بالضبط: perfumes.filter(matches) + الترقيم المعتاد.
 // نرتّب بحيث المتوفر أولاً والنافذ بعده (ترتيب ثابت — ما نغيّر الترتيب الداخلي). النافذ يبقى ظاهراً.
 function sortInStockFirst(list){
-  const inStock = [], out = [];
-  list.forEach(p => ((Number(p.stock50) || 0) > 0 ? inStock : out).push(p));
-  return inStock.concat(out);
+  // عطور إيفوك سيغنتشر أول (قراره 14 نوفمبر 2026)، بعدها المتوفر، بعدها النافد
+  const sig = [], inStock = [], out = [];
+  list.forEach(p => (isSig(p) ? sig : (Number(p.stock50) || 0) > 0 ? inStock : out).push(p));
+  return sig.concat(inStock, out);
 }
 
 function renderGrid(explicitList){
