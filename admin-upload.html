@@ -520,7 +520,7 @@
 
   <div class="panel" id="shadowPanel" style="display:none;">
     <h3 style="margin-top:0;">🫙 صورة زجاجة إيفوك مع ظل العطر الأصلي</h3>
-    <div class="sig-note" style="margin-top:0;">اختر العطر، وارفع أي صورة لزجاجة العطر الأصلي (أحسن شي على خلفية بيضا أو سادة). اللوحة تشيل الخلفية وتحوّل الزجاجة لظل بدون اسم ولا شعار، وتحطه صغير تحت يمين زجاجة إيفوك. هالصورة تطلع في قائمة الموقع، وبطاقة المكونات تبقى لما الزبون يفتح العطر.</div>
+    <div class="sig-note" style="margin-top:0;">اختر العطر، وارفع أي صورة لزجاجة العطر الأصلي (أحسن شي على خلفية بيضا أو سادة). اللوحة تشيل الخلفية وتحط الزجاجة الأصلية ورا زجاجة إيفوك على اليمين، مموّهة كأنها بعيدة عن الكاميرا (الاسم ما ينقرى). هالصورة تطلع في قائمة الموقع، وبطاقة المكونات تبقى لما الزبون يفتح العطر.</div>
     <div class="grid2">
       <div class="field"><label for="sh_perfume">العطر</label><select id="sh_perfume"></select></div>
       <div class="field"><label>صورة زجاجة العطر الأصلي</label>
@@ -528,7 +528,7 @@
     </div>
     <div class="grid2">
       <div class="field"><label for="sh_style">شكل العطر الأصلي</label><select id="sh_style"><option value="blur">📷 صورته مموّهة (الاسم ما ينقرى)</option><option value="shadow">🫙 ظل بلون واحد</option></select></div>
-      <div class="field" id="sh_blurWrap"><label for="sh_blur">قوة التمويه: زِد لين ما تقدر تقرا الاسم</label><input type="range" id="sh_blur" min="9" max="24" value="14"></div>
+      <div class="field" id="sh_blurWrap"><label for="sh_blur">قوة التمويه: زِد لين ما تقدر تقرا الاسم</label><input type="range" id="sh_blur" min="7" max="20" value="10"></div>
     </div>
     <div class="field" id="sh_tolWrap" style="display:none;"><label for="sh_tol">قص الخلفية: لو بقى شي من الخلفية زِد، ولو انقص من الزجاجة نقّص</label><input type="range" id="sh_tol" min="8" max="120" value="42"></div>
     <div class="sh-prev-row">
@@ -10221,6 +10221,7 @@ async function shGetAssets(){
   if(!shAssets) shAssets = Promise.all([
     shLoadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(shBottleSvg())),
     // نجيب الشعار كـ blob عشان الصورة تنحفظ بدون مشكلة tainted canvas
+    fetch("assets/brand/evoque-scene-inspired.webp").then(r => r.ok ? r.blob() : Promise.reject()).then(b => shLoadImg(URL.createObjectURL(b))).catch(() => null),
     fetch("assets/brand/evoque-logo-main-transparent.png").then(r => r.ok ? r.blob() : Promise.reject()).then(b => shLoadImg(URL.createObjectURL(b))).catch(() => null)
   ]);
   return shAssets;
@@ -10290,8 +10291,23 @@ function shSilhouette(img, tol){
   return { canvas: fin, photo, cover: (x1 - x0) * (y1 - y0) / N };
 }
 async function shCompose(canvas, sil, style, blurPx){
-  const [bottle, logo] = await shGetAssets();
+  const [bottle, scene, logo] = await shGetAssets();
   const c = canvas.getContext("2d");
+  if(scene){
+    // الخلفية = صورة زجاجة إيفوك الاحترافية (16 نوفمبر 2026)، والأصلي ورا يمينها مموّه كأنه بعيد عن الكاميرا
+    c.drawImage(scene, 0, 0, SH_W, SH_H);
+    if(!sil) return;
+    const S = sil.canvas, r = Math.min(335 / S.height, 250 / S.width), sw = S.width * r, sh = S.height * r;
+    const cx = 678, base = 1068, sx = cx - sw / 2, sy = base - sh;
+    c.save(); c.filter = "blur(8px)"; c.fillStyle = "rgba(70,45,25,.28)"; c.beginPath(); c.ellipse(cx, base + 2, sw * 0.5, 9, 0, 0, Math.PI * 2); c.fill(); c.restore();
+    if(style === "blur" && sil.photo){
+      const pad = blurPx * 3, t = document.createElement("canvas"); t.width = Math.ceil(sw + pad * 2); t.height = Math.ceil(sh + pad * 2);
+      const tc = t.getContext("2d"); tc.filter = `blur(${blurPx}px)`; tc.drawImage(sil.photo, pad, pad, sw, sh);
+      tc.filter = "none"; tc.globalCompositeOperation = "source-atop"; tc.fillStyle = "rgba(214,180,150,.12)"; tc.fillRect(0, 0, t.width, t.height);
+      c.drawImage(t, sx - pad, sy - pad);
+    } else { c.save(); c.globalAlpha = 0.85; c.filter = "blur(2px)"; c.drawImage(S, sx, sy, sw, sh); c.restore(); }
+    return;
+  }
   const bg = c.createLinearGradient(0, 0, 0, SH_H); bg.addColorStop(0, "#F7F5F0"); bg.addColorStop(1, "#ECE6DC");
   c.fillStyle = bg; c.fillRect(0, 0, SH_W, SH_H);
   const glow = c.createRadialGradient(470, 640, 40, 470, 640, 560); glow.addColorStop(0, "rgba(111,154,134,.20)"); glow.addColorStop(1, "rgba(111,154,134,0)");
