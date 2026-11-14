@@ -283,13 +283,44 @@
   .sig-kv.good b{ color:#1F6B41; }
   .sig-kv.neg b{ color:#963224; }
   .sig-del-prod{ margin-top:8px; }
-  .sig-site{ border:1px solid var(--line); border-radius:14px; background:#fff; margin-bottom:10px; }
-  .sig-site > summary{ cursor:pointer; padding:12px 14px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; font-size:14.5px; }
-  .sig-site > summary span{ color:var(--muted); font-size:12.5px; }
-  .sig-site-body{ padding:0 14px 14px; }
+  .sig-site-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .sig-site-status{ font-size:14px; }
+  .sig-site-top-btns{ display:flex; gap:8px; flex-wrap:wrap; }
+  .sig-site{ border:1px solid var(--line); border-radius:14px; background:#fff; margin-bottom:10px; overflow:hidden; }
+  .sig-site[open]{ border-color:var(--emerald); box-shadow:0 6px 18px rgba(24,35,31,.06); }
+  .sig-site > summary{ cursor:pointer; padding:10px 12px; display:flex; align-items:center; gap:12px; list-style:none; }
+  .sig-site > summary::-webkit-details-marker{ display:none; }
+  .sig-site-thumb{ width:54px; height:54px; flex:0 0 54px; border-radius:10px; background:#F8F5F0; display:flex; align-items:center; justify-content:center; overflow:hidden; font-size:22px; }
+  .sig-site-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .sig-site-name{ flex:1; min-width:0; font-size:15px; }
+  .sig-site-name > span[dir]{ color:var(--muted); font-size:13px; }
+  .sig-site-badges{ display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
+  .sig-badge{ font-size:11.5px; padding:2px 8px; border-radius:999px; background:#F1EFEA; color:#555; }
+  .sig-badge.on{ background:rgba(31,107,65,.1); color:#1F6B41; }
+  .sig-badge.off{ background:#F1EFEA; color:#777; }
+  .sig-badge.soon{ background:rgba(180,105,63,.12); color:#9C5A33; }
+  .sig-badge.warn{ background:rgba(178,58,46,.1); color:#963224; }
+  .sig-site-quick{ display:flex; gap:6px; flex-wrap:wrap; }
+  .sig-site-quick button{ min-height:36px; padding:6px 12px; font-size:12.5px; }
+  @media (max-width:640px){ .sig-site > summary{ flex-wrap:wrap; } .sig-site-quick{ width:100%; } .sig-site-quick button{ flex:1; } }
+  .sig-site-body{ padding:4px 14px 14px; border-top:1px solid var(--line); }
+  .sig-sec{ padding:12px 0 4px; border-bottom:1px dashed var(--line); }
+  .sig-sec:last-of-type{ border-bottom:0; }
+  .sig-sec h4{ margin:0 0 8px; font-size:14px; color:var(--emerald); }
+  .sig-notes{ display:grid; grid-template-columns:auto 1fr 1fr; gap:8px; align-items:center; }
+  .sig-notes-h{ font-size:12px; color:var(--muted); }
+  .sig-notes b{ font-size:13px; }
+  .sig-notes input{ margin:0; }
+  @media (max-width:640px){ .sig-notes{ grid-template-columns:1fr; } .sig-notes > span:empty, .sig-notes-h{ display:none; } }
+  .sig-chks{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+  .sig-chk{ display:inline-flex; align-items:center; gap:6px; border:1.5px solid var(--line); border-radius:999px; padding:6px 12px; cursor:pointer; margin:0; font-size:13px; }
+  .sig-chk input{ width:auto; margin:0; }
+  .sig-chk:has(input:checked){ border-color:var(--emerald); background:rgba(31,107,65,.06); }
+  .sig-img-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .sig-file-btn{ display:inline-flex; align-items:center; gap:6px; cursor:pointer; border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin:0; background:#fff; }
   .sig-site-body .grid2, .sig-site-body .grid3{ gap:8px; }
   .sig-site-body textarea{ min-height:70px; }
-  .sig-img-prev{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .sig-img-prev{ display:flex; gap:8px; flex-wrap:wrap; }
   .sig-img-prev img{ height:120px; border-radius:10px; border:1px solid var(--line); background:#F8F5F0; }
   .sig-ref{ display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:var(--muted); margin:0 0 6px; }
   .sig-ref input{ min-height:36px; padding:4px 8px; }
@@ -996,12 +1027,14 @@
 
     <fieldset data-ss="site">
       <legend>🌐 صفحة سيغنتشر في الموقع</legend>
-      <div id="sig_siteStatus" class="sig-note" style="margin-top:0;"></div>
-      <div class="row" style="gap:8px; flex-wrap:wrap;">
-        <button type="button" id="sig_showAllBtn">👁️ أظهر الصفحة وكل العطور</button>
-        <button type="button" class="secondary" id="sig_hideAllBtn">🙈 أخفِ الصفحة كلها</button>
+      <div class="sig-site-top">
+        <div id="sig_siteStatus" class="sig-site-status"></div>
+        <div class="sig-site-top-btns">
+          <button type="button" id="sig_showAllBtn">👁️ أظهر الكل</button>
+          <button type="button" class="secondary" id="sig_hideAllBtn">🙈 أخفِ الكل</button>
+        </div>
       </div>
-      <small class="hint">الصفحة تطلع في الموقع (ورابطها «✨ سيغنتشر» فوق) لما يكون فيها عطر واحد ظاهر على الأقل. تقدر تظهر أو تخفي كل عطر لحاله من بطاقته تحت.</small>
+      <div class="sig-note" style="margin:8px 0 0;">الصفحة ورابط «✨ سيغنتشر» يطلعون بالموقع لما يكون فيها عطر واحد ظاهر على الأقل. تقدر تظهر أو تخفي أي عطر بضغطة من صفّه تحت، وتضغط على اسمه عشان تعدّل تفاصيله.</div>
       <div id="sig_siteList" style="margin-top:12px;"></div>
     </fieldset>
 
@@ -5050,39 +5083,83 @@ function sigSiteStatusText(){
 }
 function sigSiteCardHtml(p){
   const n = sigNotesOf(p), key = esc(p.id);
-  const inp = (f, label, val, extra) => `<div class="field"><label>${label}</label><input type="text" data-f="${f}" value="${esc(val == null ? "" : val)}" ${extra || ""}></div>`;
-  const ta = (f, label, val, extra) => `<div class="field"><label>${label}</label><textarea data-f="${f}" ${extra || ""}>${esc(val || "")}</textarea></div>`;
-  const chk = (f, label, on) => `<label style="display:flex; align-items:center; gap:6px; margin:0; cursor:pointer;"><input type="checkbox" data-f="${f}" style="width:auto; margin:0;" ${on ? "checked" : ""}> ${label}</label>`;
+  const inp = (f, val, extra) => `<input type="text" data-f="${f}" value="${esc(val == null ? "" : val)}" ${extra || ""}>`;
+  const fld = (label, html) => `<div class="field"><label>${label}</label>${html}</div>`;
+  const chk = (f, label, on) => `<label class="sig-chk"><input type="checkbox" data-f="${f}" ${on ? "checked" : ""}> ${label}</label>`;
   const img = p.photoCard || p.photo;
+  const stock = stockAsQty(p.stock50);
+  const badge = (txt, cls) => `<span class="sig-badge ${cls}">${txt}</span>`;
+  const badges = (p.hidden ? badge("🙈 مخفي", "off") : badge("👁️ ظاهر", "on")) +
+    (p.comingSoon ? badge("⏳ قريبًا", "soon") : "") +
+    badge("📦 " + stock, stock > 0 ? "on" : "off") +
+    badge(p.price50 ? esc(p.price50) + " درهم" : "بدون سعر", p.price50 ? "" : "warn");
   return `<details class="sig-site" data-id="${key}">
-    <summary><b>${esc(p.nameAr || "")} · <span dir="ltr">${esc(p.name)}</span></b>
-      <span>${p.hidden ? "🙈 مخفي" : "👁️ ظاهر"}${p.comingSoon ? " · ⏳ قريبًا" : ""} · مخزون ${esc(stockAsQty(p.stock50))} · ${p.price50 ? esc(p.price50) + " درهم" : "بدون سعر"}</span></summary>
+    <summary>
+      <span class="sig-site-thumb">${img ? `<img src="${esc(img)}" alt="">` : "🖼️"}</span>
+      <span class="sig-site-name"><b>${esc(p.nameAr || "")}</b> <span dir="ltr">${esc(p.name)}</span><span class="sig-site-badges">${badges}</span></span>
+      <span class="sig-site-quick">
+        <button type="button" class="${p.hidden ? "" : "secondary"}" data-quick="hidden">${p.hidden ? "👁️ أظهر" : "🙈 أخفِ"}</button>
+        <button type="button" class="secondary" data-quick="comingSoon">${p.comingSoon ? "🛒 فعّل الشراء" : "⏳ قريبًا"}</button>
+      </span>
+    </summary>
     <div class="sig-site-body">
-      <div class="row" style="gap:14px; flex-wrap:wrap; margin-bottom:6px;">${chk("hidden", "🙈 مخفي من الموقع", p.hidden)} ${chk("comingSoon", "⏳ قريبًا (يطلع بدون زر شراء)", p.comingSoon)}</div>
-      <div class="grid2">${inp("nameAr", "الاسم بالعربي", p.nameAr)}${inp("name", "الاسم بالإنجليزي", p.name, 'dir="ltr"')}</div>
-      <div class="grid3">
-        <div class="field"><label>التصنيف</label><select data-f="gender">
-          <option value="unisex" ${p.gender === "unisex" ? "selected" : ""}>للجنسين</option>
-          <option value="men" ${p.gender === "men" ? "selected" : ""}>رجالي</option>
-          <option value="women" ${p.gender === "women" ? "selected" : ""}>نسائي</option></select></div>
-        <div class="field"><label>السعر (درهم)</label><input type="number" data-f="price50" min="0" step="1" value="${esc(p.price50 == null ? "" : p.price50)}"></div>
-        <div class="field"><label>السعر (ريال عماني) — يتحوّل لحاله</label><input type="number" data-f="price50Om" min="0" step="0.1" value="${esc(p.price50Om == null ? "" : p.price50Om)}"></div>
+      <div class="sig-sec"><h4>📝 الاسم والسعر</h4>
+        <div class="grid2">${fld("الاسم بالعربي", inp("nameAr", p.nameAr))}${fld("الاسم بالإنجليزي", inp("name", p.name, 'dir="ltr"'))}</div>
+        <div class="grid3">
+          ${fld("التصنيف", `<select data-f="gender">
+            <option value="unisex" ${p.gender === "unisex" ? "selected" : ""}>للجنسين</option>
+            <option value="men" ${p.gender === "men" ? "selected" : ""}>رجالي</option>
+            <option value="women" ${p.gender === "women" ? "selected" : ""}>نسائي</option></select>`)}
+          ${fld("السعر (درهم)", `<input type="number" data-f="price50" min="0" step="1" value="${esc(p.price50 == null ? "" : p.price50)}">`)}
+          ${fld("السعر (ريال عماني) — يتحوّل لحاله", `<input type="number" data-f="price50Om" min="0" step="0.1" value="${esc(p.price50Om == null ? "" : p.price50Om)}">`)}
+        </div>
       </div>
-      <div class="grid2">${inp("accordsAR", "العائلة (عربي) — مثال: فاكهي خشبي", p.accordsAR)}${inp("accords", "Family (English)", p.accords, 'dir="ltr"')}</div>
-      ${ta("descAr", "القصة / الوصف (عربي)", p.descAr)}
-      ${ta("descEn", "Story / description (English)", p.descEn, 'dir="ltr"')}
-      <div class="grid3">${inp("n_topAr", "القمة (عربي)", n.topAr)}${inp("n_heartAr", "القلب (عربي)", n.heartAr)}${inp("n_baseAr", "القاعدة (عربي)", n.baseAr)}</div>
-      <div class="grid3">${inp("n_top", "Top (English)", n.top, 'dir="ltr"')}${inp("n_heart", "Heart (English)", n.heart, 'dir="ltr"')}${inp("n_base", "Base (English)", n.base, 'dir="ltr"')}</div>
-      <div class="row" style="gap:14px; flex-wrap:wrap; margin:6px 0;">
-        ${chk("s_summer", "☀️ صيفي", (p.seasons || []).includes("summer"))} ${chk("s_winter", "❄️ شتوي", (p.seasons || []).includes("winter"))}
-        ${chk("d_day", "🌤️ نهاري", (p.daynight || []).includes("day"))} ${chk("d_night", "🌙 ليلي", (p.daynight || []).includes("night"))}
+      <div class="sig-sec"><h4>📖 الوصف</h4>
+        <div class="grid2">${fld("العائلة (عربي) — مثال: فاكهي خشبي", inp("accordsAR", p.accordsAR))}${fld("Family (English)", inp("accords", p.accords, 'dir="ltr"'))}</div>
+        ${fld("القصة (عربي)", `<textarea data-f="descAr">${esc(p.descAr || "")}</textarea>`)}
+        ${fld("Story (English)", `<textarea data-f="descEn" dir="ltr">${esc(p.descEn || "")}</textarea>`)}
       </div>
-      ${inp("concentration", "التركيز", p.concentration, 'dir="ltr"')}
-      <div class="field"><label>📷 صورة الهرم أو العطر (اختر ملف — البطاقة المربعة تتسوّى لحالها)</label><input type="file" data-f="file" accept="image/*"></div>
-      <div class="sig-img-prev" data-prev>${img ? `<img src="${esc(img)}" alt="">` : `<span class="sig-note">ما في صورة — يطلع «الصور قيد التجهيز».</span>`}</div>
-      <div class="row" style="margin-top:10px;"><button type="button" data-act="save">💾 احفظ في الموقع</button></div>
+      <div class="sig-sec"><h4>🌿 المكونات</h4>
+        <div class="sig-notes">
+          <span></span><span class="sig-notes-h">عربي</span><span class="sig-notes-h">English</span>
+          <b>القمة</b>${inp("n_topAr", n.topAr)}${inp("n_top", n.top, 'dir="ltr"')}
+          <b>القلب</b>${inp("n_heartAr", n.heartAr)}${inp("n_heart", n.heart, 'dir="ltr"')}
+          <b>القاعدة</b>${inp("n_baseAr", n.baseAr)}${inp("n_base", n.base, 'dir="ltr"')}
+        </div>
+      </div>
+      <div class="sig-sec"><h4>🗓️ الموسم والتركيز</h4>
+        <div class="sig-chks">${chk("s_summer", "☀️ صيفي", (p.seasons || []).includes("summer"))}${chk("s_winter", "❄️ شتوي", (p.seasons || []).includes("winter"))}${chk("d_day", "🌤️ نهاري", (p.daynight || []).includes("day"))}${chk("d_night", "🌙 ليلي", (p.daynight || []).includes("night"))}</div>
+        ${fld("التركيز", inp("concentration", p.concentration, 'dir="ltr"'))}
+      </div>
+      <div class="sig-sec"><h4>📷 الصورة</h4>
+        <div class="sig-img-row">
+          <div class="sig-img-prev" data-prev>${img ? `<img src="${esc(img)}" alt="">` : `<span class="sig-note">ما في صورة — يطلع «الصور قيد التجهيز».</span>`}</div>
+          <label class="secondary sig-file-btn">📷 اختر صورة الهرم أو العطر<input type="file" data-f="file" accept="image/*" hidden></label>
+        </div>
+        <div class="sig-note" style="margin:6px 0 0;">البطاقة المربعة اللي تطلع بالقائمة تتسوّى لحالها من الصورة.</div>
+      </div>
+      <div class="sig-sec"><h4>⚙️ الحالة</h4>
+        <div class="sig-chks">${chk("hidden", "🙈 مخفي من الموقع", p.hidden)}${chk("comingSoon", "⏳ قريبًا (بدون زر شراء)", p.comingSoon)}</div>
+      </div>
+      <div class="row" style="margin-top:12px;"><button type="button" data-act="save">💾 احفظ في الموقع</button></div>
     </div>
   </details>`;
+}
+// زر سريع بصف العطر: أظهر/أخفِ أو قريبًا — بدون ما تفتح البطاقة
+async function sigQuickToggle(id, field){
+  const p = sigSiteItems().find(x => x.id === id); if(!p) return;
+  const next = !p[field];
+  if(field === "hidden" && !next && !p.comingSoon && !(p.price50 > 0)){ sigShowStatus(`«${p.nameAr}» ما له سعر — حط له سعر أو خله «قريبًا» قبل ما تظهره.`, "err"); return; }
+  if(field === "comingSoon" && !next && !(stockAsQty(p.stock50) > 0) && !confirm(`«${p.nameAr}» مخزونه صفر — بيطلع «نفدت الكمية». تكمل؟`)) return;
+  sigShowStatus("جارِ الحفظ…", "info");
+  try{
+    perfumes = await updateDataJsonWithRetry(getToken(), list => list.map(x => {
+      if(x.id !== id) return x;
+      const r = Object.assign({}, x); if(next) r[field] = true; else delete r[field]; return r;
+    }), `Signature: ${field} ${next ? "on" : "off"} ${id}`);
+    sigShowStatus(`«${p.nameAr}» ${field === "hidden" ? (next ? "انخفى" : "صار ظاهر") : (next ? "صار «قريبًا»" : "صار متاح للشراء")} ✅ — يبين بالموقع خلال دقيقة.`, "ok");
+    sigRenderSite(true);
+  }catch(err){ sigShowStatus("ما انحفظ: " + err.message, "err"); }
 }
 function sigRenderSite(force){
   const box = document.getElementById("sig_siteList");
@@ -5177,6 +5254,8 @@ document.getElementById("sig_siteList").addEventListener("input", e => {
   const v = sigOmrFromAed(Number(e.target.value)); om.value = v == null ? "" : v;
 });
 document.getElementById("sig_siteList").addEventListener("click", async e => {
+  const q = e.target.closest("[data-quick]");
+  if(q){ e.preventDefault(); e.stopPropagation(); const d = q.closest("details.sig-site"); sigQuickToggle(d.dataset.id, q.dataset.quick); return; }
   const add = e.target.closest('[data-act="addsite"]');
   if(add){
     const sp = sigData.products.find(x => x.id === add.dataset.id); if(!sp) return;
