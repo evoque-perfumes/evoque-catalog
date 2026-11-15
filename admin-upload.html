@@ -1207,6 +1207,7 @@
       <div class="stats" id="dist_stockStats">
         <div class="stat">مسكة سوداء متوفرة<b id="dist_stockBlackDisplay">—</b></div>
         <div class="stat">مسكة بيج متوفرة<b id="dist_stockWhiteDisplay">—</b></div>
+        <span id="dist_stockExtraDisplay" style="display:contents;"></span>
         <div class="stat">زجاجات فارغة متوفرة<b id="dist_stockBottlesEmptyDisplay">—</b></div>
         <div class="stat">زجاجات جاهزة للبيع<b id="dist_stockBottlesReadyDisplay">—</b></div>
         <div class="stat">كيس للعطر متوفر<b id="dist_stockBagsPerfumeDisplay">—</b></div>
@@ -1219,6 +1220,7 @@
       <div class="grid2" style="margin-top:12px;">
         <div class="field"><label for="dist_stockBlack">تعديل مخزون — مسكة سوداء</label><input type="number" id="dist_stockBlack" min="0" step="1"></div>
         <div class="field"><label for="dist_stockWhite">تعديل مخزون — مسكة بيج</label><input type="number" id="dist_stockWhite" min="0" step="1"></div>
+        <span id="dist_stockExtraEdit" style="display:contents;"></span>
       </div>
       <div class="grid2">
         <div class="field"><label for="dist_stockBottlesEmpty">تعديل مخزون — زجاجات فارغة</label><input type="number" id="dist_stockBottlesEmpty" min="0" step="1"></div>
@@ -1371,12 +1373,12 @@
       </div>
       <div class="field">
         <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-          <input type="checkbox" id="dist_saleMixedColors" style="width:auto; margin:0;"> نفس الطلبية فيها أكثر من لون مسكة (أسود وبيج مع بعض)
+          <input type="checkbox" id="dist_saleMixedColors" style="width:auto; margin:0;"> نفس الطلبية فيها أكثر من لون مسكة (مثلًا أسود وبيج مع بعض)
         </label>
       </div>
       <div class="grid2" id="dist_saleMixedFields" style="display:none;">
-        <div class="field"><label for="dist_saleQtyBlack">عدد الأسود</label><input type="number" id="dist_saleQtyBlack" min="0" step="1" value="0"></div>
-        <div class="field"><label for="dist_saleQtyWhite">عدد البيج</label><input type="number" id="dist_saleQtyWhite" min="0" step="1" value="0"></div>
+        <div class="field"><label for="dist_saleQtyBlack">عدد الأسود</label><input type="number" id="dist_saleQtyBlack" data-color="black" min="0" step="1" value="0"></div>
+        <div class="field"><label for="dist_saleQtyWhite">عدد البيج</label><input type="number" id="dist_saleQtyWhite" data-color="white" min="0" step="1" value="0"></div>
       </div>
       <div class="field">
         <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
@@ -5618,30 +5620,67 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       return newObj;
     }
 
-    function distColorNameAr(c){ return c === "black" ? "أسود" : "بيج"; }
+    // 15 نوفمبر 2026: ألوان المسكة صارت قائمة تقدر تزيد عليها (config.extraColors) — أسود وبيج ثابتين
+    const DIST_BASE_COLORS = [{ key: "black", name: "أسود" }, { key: "white", name: "بيج" }];
+    function distExtraColors(){ return ((distributionsData && distributionsData.config && distributionsData.config.extraColors) || []).filter(c => c && c.key && !c.hidden); }
+    function distColors(){ return DIST_BASE_COLORS.concat(distExtraColors()); }
+    function distColorNameAr(c){
+      const all = DIST_BASE_COLORS.concat((distributionsData && distributionsData.config && distributionsData.config.extraColors) || []);
+      const x = all.find(k => k.key === c); return x ? x.name : (c || "—");
+    }
 
     function distSaleColorBreakdown(sale){
-      if(sale.colorBreakdown) return { black: Number(sale.colorBreakdown.black)||0, white: Number(sale.colorBreakdown.white)||0 };
-      const b = { black: 0, white: 0 };
-      if(sale.color === "black") b.black = Number(sale.qty)||0;
-      else if(sale.color === "white") b.white = Number(sale.qty)||0;
+      const b = {};
+      if(sale.colorBreakdown){ Object.keys(sale.colorBreakdown).forEach(k => { b[k] = Number(sale.colorBreakdown[k]) || 0; }); return b; }
+      if(sale.color) b[sale.color] = Number(sale.qty) || 0;
       return b;
     }
 
     function distApplyColorStockDelta(stock, breakdown, sign){
-      stock.black = (stock.black || 0) + sign * breakdown.black;
-      stock.white = (stock.white || 0) + sign * breakdown.white;
+      Object.keys(breakdown).forEach(k => { stock[k] = (stock[k] || 0) + sign * (Number(breakdown[k]) || 0); });
     }
 
     function distSaleColorLabel(sale){
       if(sale.colorBreakdown){
-        const bd = sale.colorBreakdown;
-        const parts = [];
-        if(bd.black) parts.push("أسود×" + bd.black);
-        if(bd.white) parts.push("بيج×" + bd.white);
+        const parts = Object.keys(sale.colorBreakdown).filter(k => Number(sale.colorBreakdown[k]) > 0).map(k => distColorNameAr(k) + "×" + sale.colorBreakdown[k]);
         return parts.length ? parts.join(" + ") : "—";
       }
       return distColorNameAr(sale.color);
+    }
+    function distReadMixed(){
+      const mix = {};
+      document.querySelectorAll("#dist_saleMixedFields input[data-color]").forEach(i => { const v = Number(i.value) || 0; if(v > 0) mix[i.dataset.color] = v; });
+      return mix;
+    }
+    function distSetMixed(bd){ document.querySelectorAll("#dist_saleMixedFields input[data-color]").forEach(i => { i.value = (bd && Number(bd[i.dataset.color])) || 0; }); }
+    // يرسم كل أماكن الألوان: قوائم البيع والشراء، خانات الطلبية المختلطة، المخزون
+    function distRenderColorUI(){
+      const extras = distExtraColors(), st = (distributionsData && distributionsData.stock) || {};
+      const opts = distColors().map(c => `<option value="${esc(c.key)}">${esc(c.name)}</option>`).join("");
+      const saleSel = document.getElementById("dist_saleColor"), purSel = document.getElementById("dist_purchaseHandleColor");
+      const sv = saleSel.value, pv = purSel.value;
+      saleSel.innerHTML = opts; if(distColors().some(c => c.key === sv)) saleSel.value = sv;
+      purSel.innerHTML = opts + `<option value="__new">➕ أضف لون جديد…</option>`; if(distColors().some(c => c.key === pv)) purSel.value = pv;
+      const mixWrap = document.getElementById("dist_saleMixedFields");
+      mixWrap.querySelectorAll("[data-extra]").forEach(el => el.remove());
+      extras.forEach(c => mixWrap.insertAdjacentHTML("beforeend", `<div class="field" data-extra><label>عدد ${esc(c.name)}</label><input type="number" data-color="${esc(c.key)}" min="0" step="1" value="0"></div>`));
+      mixWrap.querySelectorAll("[data-extra] input").forEach(i => i.addEventListener("input", distSyncSaleMixedQty));
+      document.getElementById("dist_stockExtraDisplay").innerHTML = extras.map(c => `<div class="stat">مسكة ${esc(c.name)} متوفرة<b data-extra-show="${esc(c.key)}">—</b></div>`).join("");
+      extras.forEach(c => { const el = document.querySelector(`[data-extra-show="${c.key}"]`); if(el){ el.id = "dist_stockX_" + c.key; distStockShow(el.id, st[c.key]); } });
+      document.getElementById("dist_stockExtraEdit").innerHTML = extras.map(c => `<div class="field"><label>تعديل مخزون — مسكة ${esc(c.name)}</label><input type="number" data-extra-stock="${esc(c.key)}" min="0" step="1" value="${Number(st[c.key]) || 0}"></div>`).join("");
+    }
+    async function distAddColorPrompt(){
+      const name = (prompt("اسم اللون الجديد للمسكة (مثال: ذهبي):") || "").trim();
+      if(!name) return null;
+      if(distColors().some(c => c.name === name)){ alert("هاللون موجود."); return distColors().find(c => c.name === name).key; }
+      const token = getToken(); if(!token){ alert("لازم تدخل مفتاح الدخول أول."); return null; }
+      const key = "c" + Date.now().toString(36);
+      distributionsData = await updateDistributionsWithRetry(token, obj => {
+        obj.config = obj.config || {}; obj.config.extraColors = (obj.config.extraColors || []).concat([{ key, name }]);
+        obj.stock = obj.stock || {}; if(obj.stock[key] === undefined) obj.stock[key] = 0; return obj;
+      }, "Add distribution handle color: " + name);
+      distRenderColorUI(); distShowStatus(`انضاف لون «${name}» ✅ — يطلع الحين بالمشتريات والبيع والمخزون.`, "ok");
+      return key;
     }
 
     function distToggleSaleMixedColors(){
@@ -5655,9 +5694,8 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
     }
 
     function distSyncSaleMixedQty(){
-      const blk = Number(document.getElementById("dist_saleQtyBlack").value) || 0;
-      const wht = Number(document.getElementById("dist_saleQtyWhite").value) || 0;
-      document.getElementById("dist_saleQty").value = blk + wht;
+      const mix = distReadMixed();
+      document.getElementById("dist_saleQty").value = Object.values(mix).reduce((a, v) => a + v, 0);
       distSyncMaterialsDefaults();
       distUpdateComputedPrice();
     }
@@ -5734,7 +5772,7 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       if(material === "pin") return "pins";
       if(material === "oil") return "oilG";
       if(material === "alcohol") return "alcoholMl";
-      if(material === "handle") return (color === "black" || color === "white") ? color : null; // مسكة: العداد حسب اللون (يشارك نفس عدادات المخزون black/white)
+      if(material === "handle") return distColors().some(c => c.key === color) || color === "black" || color === "white" ? color : null; // مسكة: العداد حسب اللون
       return null;
     }
 
@@ -5777,8 +5815,7 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       const distSaleEditMixed = !!sale.colorBreakdown;
       document.getElementById("dist_saleMixedColors").checked = distSaleEditMixed;
       document.getElementById("dist_saleColor").value = sale.color || "black";
-      document.getElementById("dist_saleQtyBlack").value = distSaleEditMixed ? sale.colorBreakdown.black : 0;
-      document.getElementById("dist_saleQtyWhite").value = distSaleEditMixed ? sale.colorBreakdown.white : 0;
+      distSetMixed(distSaleEditMixed ? sale.colorBreakdown : null);
       distToggleSaleMixedColors();
       document.getElementById("dist_saleQty").value = sale.qty;
       document.getElementById("dist_saleTheme").checked = !!sale.withTheme;
@@ -5804,8 +5841,7 @@ document.querySelectorAll("#distSubNav button").forEach(b => b.addEventListener(
       document.getElementById("dist_saleEditBanner").style.display = "none";
       document.getElementById("dist_logSaleBtn").textContent = "✅ سجّل البيع واخصم من المخزون";
       document.getElementById("dist_saleMixedColors").checked = false;
-      document.getElementById("dist_saleQtyBlack").value = 0;
-      document.getElementById("dist_saleQtyWhite").value = 0;
+      distSetMixed(null);
       distToggleSaleMixedColors();
       document.getElementById("dist_saleQty").value = 1;
       document.getElementById("dist_saleDiscount").value = 0;
@@ -6291,6 +6327,7 @@ function distRenderSalesLog(){
     }
 
     function distFillForm(){
+      distRenderColorUI();
       document.getElementById("dist_stockBlack").value = distributionsData.stock.black || 0;
       document.getElementById("dist_stockWhite").value = distributionsData.stock.white || 0;
       distStockShow("dist_stockBlackDisplay", distributionsData.stock.black);
@@ -6429,6 +6466,12 @@ function distRenderSalesLog(){
       }
     });
     document.getElementById("dist_purchaseMaterial").addEventListener("change", distUpdatePurchaseComputedUnit);
+    document.getElementById("dist_purchaseHandleColor").addEventListener("change", async e => {
+      if(e.target.value !== "__new") return;
+      e.target.value = "black";
+      try{ const k = await distAddColorPrompt(); if(k) document.getElementById("dist_purchaseHandleColor").value = k; }
+      catch(err){ distShowStatus("ما انضاف اللون: " + err.message, "err"); }
+    });
     document.getElementById("dist_purchaseQty").addEventListener("input", distUpdatePurchaseComputedUnit);
     document.getElementById("dist_purchaseTotalPrice").addEventListener("input", distUpdatePurchaseComputedUnit);
     document.getElementById("dist_fillQty").addEventListener("input", distUpdateFillPreview);
@@ -6493,7 +6536,10 @@ function distRenderSalesLog(){
         const updated = await updateDistributionsWithRetry(token, (obj) => {
           const oilG = obj.stock ? obj.stock.oilG : undefined;
           const alcoholMl = obj.stock ? obj.stock.alcoholMl : undefined;
-          obj.stock = { black, white, bottlesEmpty, bottlesReady, bagsPerfume, bagsPackaging, pins, boxes, oilG: oilG || 0, alcoholMl: alcoholMl || 0 };
+          const extraStock = {};
+          document.querySelectorAll("[data-extra-stock]").forEach(i => { extraStock[i.dataset.extraStock] = Number(i.value) || 0; });
+          (obj.config && obj.config.extraColors || []).forEach(c => { if(extraStock[c.key] === undefined && obj.stock) extraStock[c.key] = obj.stock[c.key] || 0; });
+          obj.stock = Object.assign({ black, white, bottlesEmpty, bottlesReady, bagsPerfume, bagsPackaging, pins, boxes, oilG: oilG || 0, alcoholMl: alcoholMl || 0 }, extraStock);
           return obj;
         }, "Update distributions stock");
         distributionsData = updated;
@@ -6546,10 +6592,9 @@ function distRenderSalesLog(){
       const token = getToken();
       if(!token){ distShowStatus("لازم تدخل مفتاح الدخول أول.", "err"); return; }
       const mixedColors = document.getElementById("dist_saleMixedColors").checked;
-      const qtyBlack = mixedColors ? (Number(document.getElementById("dist_saleQtyBlack").value) || 0) : 0;
-      const qtyWhite = mixedColors ? (Number(document.getElementById("dist_saleQtyWhite").value) || 0) : 0;
+      const mix = mixedColors ? distReadMixed() : {};
       const color = mixedColors ? null : document.getElementById("dist_saleColor").value;
-      const qty = mixedColors ? (qtyBlack + qtyWhite) : (Number(document.getElementById("dist_saleQty").value) || 0);
+      const qty = mixedColors ? Object.values(mix).reduce((a, v) => a + v, 0) : (Number(document.getElementById("dist_saleQty").value) || 0);
       const withTheme = document.getElementById("dist_saleTheme").checked;
       const date = document.getElementById("dist_saleDate").value || todayStr();
       const dueDate = document.getElementById("dist_saleDueDate").value || "";
@@ -6574,7 +6619,7 @@ function distRenderSalesLog(){
         const st = Object.assign({}, stock || {});
         if(oldEntry){ // تعديل: نرجّع اللي أخذته العملية القديمة أول
           const ob = distSaleColorBreakdown(oldEntry);
-          st.black = (st.black || 0) + (ob.black || 0); st.white = (st.white || 0) + (ob.white || 0);
+          Object.keys(ob).forEach(k => { st[k] = (st[k] || 0) + (ob[k] || 0); });
           st.bottlesReady = (st.bottlesReady || 0) + Number(oldEntry.bottlesUsed || 0);
           st.bagsPerfume = (st.bagsPerfume || 0) + Number((oldEntry.bagsPerfumeUsed !== undefined ? oldEntry.bagsPerfumeUsed : oldEntry.bagsUsed) || 0);
           st.pins = (st.pins || 0) + Number(oldEntry.pinsUsed || 0);
@@ -6583,7 +6628,7 @@ function distRenderSalesLog(){
         }
         const need = [];
         const add = (label, have, want) => { if(want > (have || 0)) need.push({ label, have: have || 0, want, short: want - (have || 0) }); };
-        if(mixedColors){ add("مسكة أسود", st.black, qtyBlack); add("مسكة " + distColorNameAr("white"), st.white, qtyWhite); }
+        if(mixedColors){ Object.keys(mix).forEach(k => add("مسكة " + distColorNameAr(k), st[k], mix[k])); }
         else add("مسكة " + distColorNameAr(color), st[color], qty);
         add("زجاجات جاهزة", st.bottlesReady, bottlesUsed);
         add("كيس العطر", st.bagsPerfume, bagsPerfumeUsed);
@@ -6641,7 +6686,7 @@ function distRenderSalesLog(){
           const orderProfit = netTotal - orderCost;
 
           const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsPerfumeUsed, pinsUsed, bagsPackagingUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
-          if(mixedColors) saleEntry.colorBreakdown = { black: qtyBlack, white: qtyWhite };
+          if(mixedColors) saleEntry.colorBreakdown = Object.assign({}, mix);
           saleEntry.deliveryType = deliveryType; saleEntry.deliveryFee = deliveryFee;
           if(prevSale && Number(prevSale.unitPrice) > 0) saleEntry.unitPrice = Number(prevSale.unitPrice);
           if(prevSale && withTheme && Number(prevSale.themeUnit) > 0){ saleEntry.themeUnit = Number(prevSale.themeUnit); saleEntry.themeRuns = r.runs; }
@@ -6650,8 +6695,7 @@ function distRenderSalesLog(){
           if(editingId) saleEntry.editedAt = new Date().toISOString();
 
           if(mixedColors){
-            obj.stock.black = (obj.stock.black || 0) - qtyBlack;
-            obj.stock.white = (obj.stock.white || 0) - qtyWhite;
+            Object.keys(mix).forEach(k => { obj.stock[k] = (obj.stock[k] || 0) - mix[k]; });
           } else {
             obj.stock[color] = (obj.stock[color] || 0) - qty;
           }
@@ -6669,7 +6713,7 @@ function distRenderSalesLog(){
             obj.sales.push(saleEntry);
           }
           return obj;
-        }, editingId ? ("Edit distribution sale: " + editingId) : ("Log distribution sale: " + (mixedColors ? ("mixed black:" + qtyBlack + " white:" + qtyWhite) : color) + " x" + qty));
+        }, editingId ? ("Edit distribution sale: " + editingId) : ("Log distribution sale: " + (mixedColors ? ("mixed " + Object.keys(mix).map(k => k + ":" + mix[k]).join(" ")) : color) + " x" + qty));
 
         distributionsData = updated;
         distEditingSaleId = null;
@@ -6686,8 +6730,7 @@ function distRenderSalesLog(){
         document.getElementById("dist_saleCustomerPhone").value = "";
         document.getElementById("dist_saleEmirate").value = "";
         document.getElementById("dist_saleMixedColors").checked = false;
-        document.getElementById("dist_saleQtyBlack").value = 0;
-        document.getElementById("dist_saleQtyWhite").value = 0;
+        distSetMixed(null);
         distToggleSaleMixedColors();
         distLastAutoQty = null;
         distFillForm();
