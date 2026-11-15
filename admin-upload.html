@@ -4187,6 +4187,7 @@ function renderSalesHistory(){
           ${statusOptionsHtml(status)}
         </select>
         ${paySelectHtml("sale-row-pay-select", "data-key", g.key, paid, g.items[0] && g.items[0].paidAmount, total)}
+        <button type="button" class="secondary inv-order-btn" data-key="${esc(g.key)}">🧾 فاتورة PDF</button>
         <button type="button" class="secondary sl-history-edit-btn">✏️ تعديل الطلب</button>
         <button type="button" class="secondary sl-history-refund-btn">↩️ إرجاع عطر / استرداد</button>
         ${normStatus(status) !== "cancelled" ? `<button type="button" class="secondary sl-history-cancel-btn">⛔ إلغاء الطلب</button>` : ""}
@@ -6155,7 +6156,8 @@ function distRenderSalesLog(){
         const deleteBtnHtml = `<button type="button" class="secondary dist-delete-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">🗑️ حذف نهائي</button>`;
         const editCancelHtml = s.cancelled
           ? `<span style="font-size:12px; color:#963224; font-weight:700;">ملغاة</span>`
-          : `<button type="button" class="secondary dist-edit-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
+          : `<button type="button" class="secondary inv-dist-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px;">🧾 فاتورة PDF</button>
+             <button type="button" class="secondary dist-edit-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px;">✏️ تعديل</button>
              <button type="button" class="secondary dist-cancel-sale-btn" data-id="${esc(s.id)}" style="padding:4px 10px; font-size:12px; color:#963224;">❌ إلغاء</button>`;
         const statusPaidHtml = s.cancelled ? "" : `
             <select class="dist-sale-status-select" data-id="${esc(s.id)}" style="width:auto; padding:5px 10px; font-size:12px; margin:0; font-weight:600; border-radius:6px; color:${orderStatusColor(status)};">
@@ -10416,6 +10418,149 @@ document.getElementById("sh_removeBtn").addEventListener("click", async () => {
     perfumes = await updateDataJsonWithRetry(getToken(), list => list.map(x => { if(x.id !== id) return x; const r = Object.assign({}, x); delete r.shadowCard; return r; }), `Shadow card off: ${id}`);
     shFillSelect(); shShowCurrent(); shStatus("انشالت ✅", "ok");
   }catch(err){ shStatus("ما انشالت: " + err.message, "err"); }
+});
+</script>
+
+<script>
+// ===== الفواتير PDF (15 نوفمبر 2026) — تصميم «أبيض فاخر» =====
+// الفاتورة تنرسم على صفحة A4 داخل المتصفح وتنحفظ PDF (بدون أي مكتبة خارجية)، وبالجوال تطلع قائمة المشاركة (واتساب...).
+// رقم الفاتورة ثابت لكل طلب: EV-سنة شهر يوم-آخر 4 أرقام من رقم الطلب (نفس الرقم بإيميل طلبات الموقع).
+function invNumber(prefix, key, date){
+  const digits = String(key || "").replace(/\D/g, ""), d = String(date || "").replace(/\D/g, "").slice(2, 8);
+  return `${prefix}-${d || "000000"}-${digits.slice(-4).padStart(4, "0")}`;
+}
+function invDateAr(ymd){
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(ymd || "")); if(!m) return ymd || "";
+  const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  return `${Number(m[3])} ${months[Number(m[2]) - 1]} ${m[1]}`;
+}
+const INV_BRAND_DISPLAY = {
+  "YSL":"YSL", "DOLCE&GABBANA":"Dolce&Gabbana", "HERMES":"Hermès", "LANCOME":"Lancôme", "BOND NO 9":"Bond No. 9",
+  "FREDERIC MALLE":"Frédéric Malle", "MATIERE PREMIERE":"Matière Première", "INITIO PARFUMS PRIVES":"Initio Parfums Privés",
+  "STEPHANE HUMBERT LUCAS 777":"Stéphane Humbert Lucas 777", "UNIQUE'E LUXURY":"Unique'e Luxury", "THE SPIRIT OF DUBAI":"The Spirit of Dubai",
+  "ATYAB AL-SHEIKH":"Atyab Al-Sheikh", "BOADICEA THE VICTORIOUS":"Boadicea the Victorious", "GIARDINI DI TOSCANA":"Giardini di Toscana",
+  "PARFUMS DE MARLY":"Parfums de Marly", "VAN CLEEF & ARPELS":"Van Cleef & Arpels", "VIKTOR & ROLF":"Viktor&Rolf",
+  "ADYAN BY ANFAR":"Adyan by Anfar", "EVOQUE SIGNATURE":"Evoque Signature"
+};
+function invTitle(t){ t = String(t || ""); if(INV_BRAND_DISPLAY[t]) return INV_BRAND_DISPLAY[t]; if(/\p{Ll}/u.test(t)) return t; return t.toLowerCase().replace(/(^|[\s\-'’(])([a-zà-ÿ])/g, (a, b, c) => b + c.toUpperCase()); }
+function invPayText(paid, paidAmount, total){
+  if(paid) return { text: "مدفوع بالكامل", ok: true };
+  if(Number(paidAmount) > 0) return { text: `عربون مدفوع ${fmtNum(paidAmount)} د.إ — المتبقي ${fmtNum(Math.max(0, total - Number(paidAmount)))} د.إ`, ok: false };
+  return { text: "غير مدفوع — الدفع عند الاستلام", ok: false };
+}
+function invFromOrder(key){
+  const g = groupSalesData().find(x => x.key === key); if(!g) return null;
+  const items = g.items.map(o => {
+    const p = perfumes.find(x => x.id === o.perfumeId), qty = Number(o.qty) || 1, unit = Number(o.unitPrice) || 0;
+    const name = p ? (p.displayName || invTitle(p.name)) : o.perfumeId;
+    const sub = p ? (p.line === "signature" ? "إيفوك سيغنتشر" : "مستوحى من " + invTitle(p.brand)) : "";
+    return { name, sub: o.isGift ? (sub ? sub + " · هدية 🎁" : "هدية 🎁") : sub, size: (o.size || 50) + " مل", qty, total: o.isGift ? 0 : unit * qty };
+  });
+  const subtotal = items.reduce((s, x) => s + x.total, 0), discount = g.items.reduce((s, o) => s + (Number(o.discount) || 0), 0);
+  const total = Math.max(0, subtotal - discount), f0 = g.items[0] || {};
+  return { no: invNumber("EV", key, g.date), date: invDateAr(g.date), customer: g.customer || "", phone: g.phone || "",
+    place: [g.region || g.city, g.countryLabel].filter(Boolean).join("، "), items,
+    lines: [["المجموع", subtotal]].concat(discount > 0 ? [["الخصم", -discount]] : []).concat([["التوصيل", f0.freeDelivery === true ? "مجاني" : null]]).filter(l => l[1] !== null),
+    total, pay: invPayText(f0.paid, f0.paidAmount, total) };
+}
+function invFromDist(id){
+  const s = (distributionsData.sales || []).find(x => x.id === id); if(!s) return null;
+  const qty = Number(s.qty) || 0, base = Number(s.base) || 0;
+  const items = [{ name: "توزيعات عطر للمناسبات", sub: distSaleColorLabel(s).replace(/<[^>]*>/g, "") + (s.withTheme ? " · مع ثيم" : ""), size: "—", qty, total: base }];
+  if(Number(s.themeSurcharge) > 0) items.push({ name: "تصميم الثيم", sub: "", size: "—", qty: 1, total: Number(s.themeSurcharge) });
+  const subtotal = items.reduce((a, x) => a + x.total, 0), discount = Number(s.discount) || 0, fee = Number(s.deliveryFee) || 0;
+  const total = Number(s.netTotal !== undefined ? s.netTotal : s.total) || Math.max(0, subtotal - discount + fee);
+  return { no: invNumber("EVD", s.id, s.date), date: invDateAr(s.date), customer: s.customerName || "", phone: s.customerPhone || "", place: s.emirate || "",
+    items, lines: [["المجموع", subtotal]].concat(discount > 0 ? [["الخصم", -discount]] : []).concat([["التوصيل", fee > 0 ? fee : "مجاني"]]),
+    total, pay: invPayText(s.paid, s.paidAmount, total), due: s.dueDate ? invDateAr(s.dueDate) : "" };
+}
+let invLogo = null;
+async function invAssets(){
+  if(!invLogo) invLogo = fetch("assets/brand/evoque-logo-main-transparent.png").then(r => r.ok ? r.blob() : Promise.reject()).then(b => shLoadImg(URL.createObjectURL(b))).catch(() => null);
+  try{ await Promise.all(["400 20px 'IBM Plex Sans Arabic'", "600 20px 'IBM Plex Sans Arabic'", "700 20px 'IBM Plex Sans Arabic'", "700 40px 'El Messiri'"].map(f => document.fonts.load(f, "فاتورة"))); }catch(e){}
+  return invLogo;
+}
+async function invDraw(d){
+  const S = 2, W = 794, H = 1123, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
+  const c = cv.getContext("2d"); c.scale(S, S); c.fillStyle = "#fff"; c.fillRect(0, 0, W, H);
+  const F = (w, px, fam) => `${w} ${px}px ${fam || "'IBM Plex Sans Arabic'"}, Tahoma, sans-serif`;
+  const R = W - 70, L = 70;
+  const txt = (t, x, y, font, color, align, dir) => { c.font = font; c.fillStyle = color; c.textAlign = align || "right"; c.direction = dir || "rtl"; c.fillText(String(t), x, y); };
+  const money = v => typeof v === "number" ? (v < 0 ? "− " : "") + fmtNum(Math.abs(v)) + " د.إ" : v;
+  const logo = await invAssets();
+  if(logo){ const lh = 104, lw = lh * logo.naturalWidth / logo.naturalHeight; c.drawImage(logo, W / 2 - lw / 2, 50, lw, lh); }
+  c.fillStyle = "#D9CFBF"; c.fillRect(L, 186, R - L, 1);
+  txt("فاتورة", R, 252, F(700, 32, "'El Messiri'"), "#1F3D33");
+  txt("INVOICE", R, 278, F(600, 11), "#B4693F", "right", "ltr");
+  txt(d.no, L, 236, F(500, 13), "#5E6A64", "left", "ltr");
+  txt(d.date, L, 258, F(400, 13), "#5E6A64", "left");
+  // العميل
+  c.fillStyle = "#F7F3EC"; c.beginPath(); c.roundRect(L, 300, R - L, d.due ? 96 : 76, 14); c.fill();
+  txt([d.customer, d.phone ? "⁦" + d.phone + "⁩" : "", d.place].filter(Boolean).join("  ·  "), R - 22, 332, F(600, 14), "#1C2622");
+  txt("● " + d.pay.text, R - 22, 360, F(600, 13), d.pay.ok ? "#2E7D57" : "#B4693F");
+  if(d.due) txt("موعد التسليم: " + d.due, R - 22, 384, F(400, 12.5), "#5E6A64");
+  // الجدول
+  let y = d.due ? 440 : 420;
+  const col = { n: R, name: R - 30, size: 330, qty: 230, price: L };
+  [["#", col.n, "right"], ["المنتج", col.name, "right"], ["الحجم", col.size, "center"], ["الكمية", col.qty, "center"], ["السعر", col.price, "left"]].forEach(h => txt(h[0], h[1], y, F(600, 11.5), "#9A8F7E", h[2]));
+  y += 12; c.fillStyle = "#1F3D33"; c.fillRect(L, y, R - L, 1);
+  const rowH = Math.max(42, Math.min(64, (H - 330 - y) / Math.max(1, d.items.length)));
+  d.items.forEach((it, i) => {
+    const top = y, mid = top + rowH / 2;
+    txt(i + 1, col.n, mid + 5, F(500, 15, "'Cormorant Garamond', serif"), "#B4693F");
+    txt(it.name, col.name, it.sub ? mid - 2 : mid + 5, F(700, 14), "#1C2622");
+    if(it.sub) txt(it.sub, col.name, mid + 17, F(400, 11.5), "#7A857F");
+    txt(it.size, col.size, mid + 5, F(400, 13.5), "#1C2622", "center");
+    txt(it.qty, col.qty, mid + 5, F(400, 13.5), "#1C2622", "center");
+    txt(it.total ? fmtNum(it.total) + " د.إ" : "هدية", col.price, mid + 5, F(500, 13.5), "#1C2622", "left");
+    y += rowH; c.fillStyle = "#EFE8DC"; c.fillRect(L, y, R - L, 1);
+  });
+  // المجاميع
+  y += 34; const TW = 290, TR = R, TL = R - TW;
+  d.lines.forEach(l => { txt(l[0], TR, y, F(400, 14), l[1] < 0 ? "#B4693F" : "#1C2622"); txt(money(l[1]), TL, y, F(500, 14), l[1] < 0 ? "#B4693F" : "#1C2622", "left"); y += 30; });
+  c.fillStyle = "#1F3D33"; c.beginPath(); c.roundRect(TL, y - 8, TW, 52, 12); c.fill();
+  txt("الإجمالي", TR - 16, y + 25, F(700, 18), "#F5F1E8"); txt(money(d.total), TL + 16, y + 25, F(700, 18), "#F5F1E8", "left");
+  // التذييل
+  txt("THANK YOU", W / 2, H - 90, F(600, 12), "#B4693F", "center", "ltr");
+  txt("شكرًا لثقتك — نتمنى العطر يعجبك", W / 2, H - 66, F(400, 12.5), "#8B948F", "center");
+  txt("واتساب ⁦+971 52 227 5255⁩  ·  evoqueperfumes.com", W / 2, H - 44, F(400, 12), "#8B948F", "center");
+  return cv;
+}
+// PDF بصفحة وحدة فيها صورة الفاتورة (JPEG)
+async function invPdf(cv){
+  const jpg = await new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.92)), img = new Uint8Array(await jpg.arrayBuffer());
+  const pw = 595.28, ph = 841.89, enc = new TextEncoder(), parts = [], offs = []; let len = 0;
+  const add = x => { const b = typeof x === "string" ? enc.encode(x) : x; parts.push(b); len += b.length; };
+  const obj = (n, body) => { offs[n] = len; add(`${n} 0 obj\n`); body(); add("\nendobj\n"); };
+  add("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  obj(1, () => add("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2, () => add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
+  obj(3, () => add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`));
+  obj(4, () => { add(`<< /Type /XObject /Subtype /Image /Width ${cv.width} /Height ${cv.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.length} >>\nstream\n`); add(img); add("\nendstream"); });
+  const content = `q ${pw} 0 0 ${ph} 0 0 cm /Im0 Do Q`;
+  obj(5, () => add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`));
+  const xref = len; add(`xref\n0 6\n0000000000 65535 f \n${[1,2,3,4,5].map(n => String(offs[n]).padStart(10, "0") + " 00000 n \n").join("")}trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  return new Blob(parts, { type: "application/pdf" });
+}
+async function invOpen(d, btn){
+  if(!d){ alert("ما لقيت الطلب."); return; }
+  const old = btn ? btn.textContent : ""; if(btn){ btn.disabled = true; btn.textContent = "⏳ جارِ التجهيز…"; }
+  try{
+    const cv = await invDraw(d), pdf = await invPdf(cv), name = `Evoque-${d.no}.pdf`;
+    const file = new File([pdf], name, { type: "application/pdf" });
+    const mobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if(mobile && navigator.canShare && navigator.canShare({ files: [file] })){
+      try{ await navigator.share({ files: [file], title: "فاتورة " + d.no }); return; }catch(e){ if(e && e.name === "AbortError") return; }
+    }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(pdf); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  }catch(err){ alert("ما قدرت أطلع الفاتورة: " + err.message); }
+  finally{ if(btn){ btn.disabled = false; btn.textContent = old; } }
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".inv-order-btn, .inv-dist-btn"); if(!b) return;
+  e.preventDefault();
+  invOpen(b.classList.contains("inv-order-btn") ? invFromOrder(b.dataset.key) : invFromDist(b.dataset.id), b);
 });
 </script>
 </body>
