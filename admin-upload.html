@@ -10484,7 +10484,7 @@ function invFromDist(id){
   const runs = Math.max(1, Math.ceil(qty / cap));
   const rows = [{ key: "dist", name: "توزيعات", sub: distSaleColorLabel(s).replace(/<[^>]*>/g, ""), qty,
     unit: Number(s.unitPrice) || (qty ? Math.round((Number(s.base) || 0) / qty * 100) / 100 : 0) }];
-  if(s.withTheme || Number(s.themeSurcharge) > 0) rows.push({ key: "theme", name: "ثيم / تاق", sub: `لكل ${cap} حبة`, qty: Number(s.themeRuns) || runs,
+  if(s.withTheme || Number(s.themeSurcharge) > 0) rows.push({ key: "theme", name: "ثيم / تاق", sub: "", qty: Number(s.themeRuns) || runs,
     unit: Number(s.themeUnit) || Math.round((Number(s.themeSurcharge) || 0) / runs * 100) / 100 });
   return { kind: "dist", ref: id, no: invNumber("EVD", s.id, s.date), date: invDateAr(s.date), customer: s.customerName || "", phone: s.customerPhone || "",
     place: s.emirate || "", country: "AE", rows, discount: Number(s.discount) || 0, delivery: Number(s.deliveryFee) || 0,
