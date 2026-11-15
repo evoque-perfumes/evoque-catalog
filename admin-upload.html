@@ -283,6 +283,18 @@
   .sig-kv.good b{ color:#1F6B41; }
   .sig-kv.neg b{ color:#963224; }
   .sig-del-prod{ margin-top:8px; }
+  .inv-modal{ position:fixed; inset:0; background:rgba(15,25,20,.5); z-index:9999; display:flex; align-items:flex-start; justify-content:center; overflow:auto; padding:24px 10px; }
+  .inv-box{ background:#fff; border-radius:18px; padding:18px; width:min(680px,100%); box-shadow:0 20px 50px rgba(0,0,0,.25); }
+  .inv-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:16px; }
+  .inv-head button{ min-height:34px; padding:4px 12px; }
+  .inv-row{ display:grid; grid-template-columns:1fr 70px 90px 90px 40px; gap:6px; align-items:center; padding:6px 0; border-bottom:1px solid var(--line); }
+  .inv-row input{ margin:0; padding:8px; }
+  .inv-row small{ display:block; color:var(--muted); font-size:11px; margin-top:2px; }
+  .inv-row-h{ font-size:12px; color:var(--muted); font-weight:600; }
+  .inv-line{ font-weight:600; font-size:13px; }
+  .inv-row button{ min-height:32px; padding:2px 6px; }
+  .inv-sum{ background:#F7F3EC; border-radius:12px; padding:12px 14px; margin-top:10px; line-height:1.9; font-size:14px; }
+  @media (max-width:560px){ .inv-row{ grid-template-columns:1fr 56px 72px; } .inv-row > span:nth-child(4), .inv-row > span:nth-child(5){ display:none; } }
   .sh-prev-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start; margin-top:8px; }
   .sh-canvas, #sh_current img{ width:min(100%, 300px); height:auto; border-radius:12px; border:1px solid var(--line); background:#fff; }
   #sh_current .sig-note{ margin:0 0 4px; }
@@ -6612,6 +6624,11 @@ function distRenderSalesLog(){
           if(shortNow.length && !allowShort) throw new Error("المخزون تغيّر وصار ناقص: " + shortNow.map(x => `${x.label} (ناقص ${x.short})`).join("، ") + " — جرّب مرة ثانية.");
 
           const r = distComputeTotal(qty, withTheme);
+          // 15 نوفمبر 2026: لو الطلب انعدّل سعره من الفاتورة (سعر حبة/ثيم خاص بالعميل) نحافظ عليه وقت تعديل الطلب
+          const prevSale = editingId ? (obj.sales || []).find(x => x.id === editingId) : null;
+          if(prevSale && Number(prevSale.unitPrice) > 0){ r.base = Math.round(qty * Number(prevSale.unitPrice) * 100) / 100; }
+          if(prevSale && withTheme && Number(prevSale.themeUnit) > 0){ r.themeSurcharge = Math.round(r.runs * Number(prevSale.themeUnit) * 100) / 100; }
+          r.total = r.base + r.themeSurcharge;
           const netTotal = Math.max(0, r.total - discount) + deliveryFee;
           const costs0 = distComputeAllCosts(obj.purchases);
           const readyBottleCost0 = distReadyBottleCost(costs0);
@@ -6626,6 +6643,8 @@ function distRenderSalesLog(){
           const saleEntry = { id: editingId || ("dist_" + Date.now()), date, color, qty, withTheme, base: r.base, themeSurcharge: r.themeSurcharge, total: r.total, discount, netTotal, bottlesUsed, bagsPerfumeUsed, pinsUsed, bagsPackagingUsed, boxesUsed, orderCost, orderProfit, note, customerName, customerPhone, emirate };
           if(mixedColors) saleEntry.colorBreakdown = { black: qtyBlack, white: qtyWhite };
           saleEntry.deliveryType = deliveryType; saleEntry.deliveryFee = deliveryFee;
+          if(prevSale && Number(prevSale.unitPrice) > 0) saleEntry.unitPrice = Number(prevSale.unitPrice);
+          if(prevSale && withTheme && Number(prevSale.themeUnit) > 0){ saleEntry.themeUnit = Number(prevSale.themeUnit); saleEntry.themeRuns = r.runs; }
           if(dueDate) saleEntry.dueDate = dueDate;
           if(shortNow.length) saleEntry.shortAtSave = shortNow.map(x => ({ label: x.label, short: x.short }));
           if(editingId) saleEntry.editedAt = new Date().toISOString();
@@ -10443,36 +10462,44 @@ const INV_BRAND_DISPLAY = {
   "ADYAN BY ANFAR":"Adyan by Anfar", "EVOQUE SIGNATURE":"Evoque Signature"
 };
 function invTitle(t){ t = String(t || ""); if(INV_BRAND_DISPLAY[t]) return INV_BRAND_DISPLAY[t]; if(/\p{Ll}/u.test(t)) return t; return t.toLowerCase().replace(/(^|[\s\-'’(])([a-zà-ÿ])/g, (a, b, c) => b + c.toUpperCase()); }
-function invPayText(paid, paidAmount, total){
-  if(paid) return { text: "مدفوع بالكامل", ok: true };
-  if(Number(paidAmount) > 0) return { text: `عربون مدفوع ${fmtNum(paidAmount)} د.إ — المتبقي ${fmtNum(Math.max(0, total - Number(paidAmount)))} د.إ`, ok: false };
-  return { text: "غير مدفوع — الدفع عند الاستلام", ok: false };
-}
+function invMoney(v){ return (v < 0 ? "− " : "") + fmtNum(Math.abs(Math.round(v * 100) / 100)) + " د.إ"; }
+// ---- تجهيز بيانات الفاتورة (قابلة للتعديل قبل التنزيل) ----
 function invFromOrder(key){
   const g = groupSalesData().find(x => x.key === key); if(!g) return null;
-  const items = g.items.map(o => {
-    const p = perfumes.find(x => x.id === o.perfumeId), qty = Number(o.qty) || 1, unit = Number(o.unitPrice) || 0;
-    const name = p ? (p.displayName || invTitle(p.name)) : o.perfumeId;
+  const f0 = g.items[0] || {};
+  const rows = g.items.map(o => {
+    const p = perfumes.find(x => x.id === o.perfumeId);
     const sub = p ? (p.line === "signature" ? "إيفوك سيغنتشر" : "مستوحى من " + invTitle(p.brand)) : "";
-    return { name, sub: o.isGift ? (sub ? sub + " · هدية 🎁" : "هدية 🎁") : sub, size: (o.size || 50) + " مل", qty, total: o.isGift ? 0 : unit * qty };
+    return { name: (p ? (p.displayName || invTitle(p.name)) : o.perfumeId) + ` (${o.size || 50} مل)`, sub: o.isGift ? (sub ? sub + " · هدية" : "هدية") : sub,
+      qty: Number(o.qty) || 1, unit: o.isGift ? 0 : (Number(o.unitPrice) || 0) };
   });
-  const subtotal = items.reduce((s, x) => s + x.total, 0), discount = g.items.reduce((s, o) => s + (Number(o.discount) || 0), 0);
-  const total = Math.max(0, subtotal - discount), f0 = g.items[0] || {};
-  return { no: invNumber("EV", key, g.date), date: invDateAr(g.date), customer: g.customer || "", phone: g.phone || "",
-    place: [g.region || g.city, g.countryLabel].filter(Boolean).join("، "), items,
-    lines: [["المجموع", subtotal]].concat(discount > 0 ? [["الخصم", -discount]] : []).concat([["التوصيل", f0.freeDelivery === true ? "مجاني" : null]]).filter(l => l[1] !== null),
-    total, pay: invPayText(f0.paid, f0.paidAmount, total) };
+  return { kind: "order", ref: key, no: invNumber("EV", key, g.date), date: invDateAr(g.date), customer: g.customer || "", phone: g.phone || "",
+    place: [g.region || g.city, g.countryLabel].filter(Boolean).join("، "), country: g.country === "OM" ? "OM" : "AE", rows,
+    discount: g.items.reduce((s, o) => s + (Number(o.discount) || 0), 0), delivery: f0.freeDelivery === true ? 0 : 0,
+    paid: !!f0.paid, paidAmount: Number(f0.paidAmount) || 0, due: "" };
 }
 function invFromDist(id){
   const s = (distributionsData.sales || []).find(x => x.id === id); if(!s) return null;
-  const qty = Number(s.qty) || 0, base = Number(s.base) || 0;
-  const items = [{ name: "توزيعات عطر للمناسبات", sub: distSaleColorLabel(s).replace(/<[^>]*>/g, "") + (s.withTheme ? " · مع ثيم" : ""), size: "—", qty, total: base }];
-  if(Number(s.themeSurcharge) > 0) items.push({ name: "تصميم الثيم", sub: "", size: "—", qty: 1, total: Number(s.themeSurcharge) });
-  const subtotal = items.reduce((a, x) => a + x.total, 0), discount = Number(s.discount) || 0, fee = Number(s.deliveryFee) || 0;
-  const total = Number(s.netTotal !== undefined ? s.netTotal : s.total) || Math.max(0, subtotal - discount + fee);
-  return { no: invNumber("EVD", s.id, s.date), date: invDateAr(s.date), customer: s.customerName || "", phone: s.customerPhone || "", place: s.emirate || "",
-    items, lines: [["المجموع", subtotal]].concat(discount > 0 ? [["الخصم", -discount]] : []).concat([["التوصيل", fee > 0 ? fee : "مجاني"]]),
-    total, pay: invPayText(s.paid, s.paidAmount, total), due: s.dueDate ? invDateAr(s.dueDate) : "" };
+  const qty = Number(s.qty) || 0, cap = Number(distributionsData.config.runCapacity) || 25;
+  const runs = Math.max(1, Math.ceil(qty / cap));
+  const rows = [{ key: "dist", name: "توزيعات", sub: distSaleColorLabel(s).replace(/<[^>]*>/g, ""), qty,
+    unit: Number(s.unitPrice) || (qty ? Math.round((Number(s.base) || 0) / qty * 100) / 100 : 0) }];
+  if(s.withTheme || Number(s.themeSurcharge) > 0) rows.push({ key: "theme", name: "ثيم / تاق", sub: `لكل ${cap} حبة`, qty: Number(s.themeRuns) || runs,
+    unit: Number(s.themeUnit) || Math.round((Number(s.themeSurcharge) || 0) / runs * 100) / 100 });
+  return { kind: "dist", ref: id, no: invNumber("EVD", s.id, s.date), date: invDateAr(s.date), customer: s.customerName || "", phone: s.customerPhone || "",
+    place: s.emirate || "", country: "AE", rows, discount: Number(s.discount) || 0, delivery: Number(s.deliveryFee) || 0,
+    paid: !!s.paid, paidAmount: Number(s.paidAmount) || 0, due: s.dueDate ? invDateAr(s.dueDate) : "" };
+}
+function invTotals(d){
+  const subtotal = d.rows.reduce((a, r) => a + (Number(r.qty) || 0) * (Number(r.unit) || 0), 0);
+  const total = Math.max(0, subtotal - (Number(d.discount) || 0)) + (Number(d.delivery) || 0);
+  const paidAmt = d.paid ? total : Math.min(total, Number(d.paidAmount) || 0);
+  return { subtotal, total, paidAmt, remaining: Math.max(0, total - paidAmt) };
+}
+let invBankCache = null;
+async function invBank(country){
+  if(!invBankCache) invBankCache = privFetch("bank-info.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
+  const b = await invBankCache; return (b && (b[country] || b.AE)) || null;
 }
 let invLogo = null;
 async function invAssets(){
@@ -10480,50 +10507,79 @@ async function invAssets(){
   try{ await Promise.all(["400 20px 'IBM Plex Sans Arabic'", "600 20px 'IBM Plex Sans Arabic'", "700 20px 'IBM Plex Sans Arabic'", "700 40px 'El Messiri'"].map(f => document.fonts.load(f, "فاتورة"))); }catch(e){}
   return invLogo;
 }
+// ---- رسم الفاتورة A4 ----
 async function invDraw(d){
   const S = 2, W = 794, H = 1123, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
   const c = cv.getContext("2d"); c.scale(S, S); c.fillStyle = "#fff"; c.fillRect(0, 0, W, H);
   const F = (w, px, fam) => `${w} ${px}px ${fam || "'IBM Plex Sans Arabic'"}, Tahoma, sans-serif`;
-  const R = W - 70, L = 70;
-  const txt = (t, x, y, font, color, align, dir) => { c.font = font; c.fillStyle = color; c.textAlign = align || "right"; c.direction = dir || "rtl"; c.fillText(String(t), x, y); };
-  const money = v => typeof v === "number" ? (v < 0 ? "− " : "") + fmtNum(Math.abs(v)) + " د.إ" : v;
+  const R = W - 70, L = 70, t = invTotals(d);
+  const txt = (s, x, y, font, color, align, dir) => { c.font = font; c.fillStyle = color; c.textAlign = align || "right"; c.direction = dir || "rtl"; c.fillText(String(s), x, y); };
   const logo = await invAssets();
-  if(logo){ const lh = 104, lw = lh * logo.naturalWidth / logo.naturalHeight; c.drawImage(logo, W / 2 - lw / 2, 50, lw, lh); }
-  c.fillStyle = "#D9CFBF"; c.fillRect(L, 186, R - L, 1);
-  txt("فاتورة", R, 252, F(700, 32, "'El Messiri'"), "#1F3D33");
-  txt("INVOICE", R, 278, F(600, 11), "#B4693F", "right", "ltr");
-  txt(d.no, L, 236, F(500, 13), "#5E6A64", "left", "ltr");
-  txt(d.date, L, 258, F(400, 13), "#5E6A64", "left");
-  // العميل
-  c.fillStyle = "#F7F3EC"; c.beginPath(); c.roundRect(L, 300, R - L, d.due ? 96 : 76, 14); c.fill();
-  txt([d.customer, d.phone ? "⁦" + d.phone + "⁩" : "", d.place].filter(Boolean).join("  ·  "), R - 22, 332, F(600, 14), "#1C2622");
-  txt("● " + d.pay.text, R - 22, 360, F(600, 13), d.pay.ok ? "#2E7D57" : "#B4693F");
-  if(d.due) txt("موعد التسليم: " + d.due, R - 22, 384, F(400, 12.5), "#5E6A64");
-  // الجدول
-  let y = d.due ? 440 : 420;
-  const col = { n: R, name: R - 30, size: 330, qty: 230, price: L };
-  [["#", col.n, "right"], ["المنتج", col.name, "right"], ["الحجم", col.size, "center"], ["الكمية", col.qty, "center"], ["السعر", col.price, "left"]].forEach(h => txt(h[0], h[1], y, F(600, 11.5), "#9A8F7E", h[2]));
+  if(logo){ const lh = 96, lw = lh * logo.naturalWidth / logo.naturalHeight; c.drawImage(logo, W / 2 - lw / 2, 44, lw, lh); }
+  c.fillStyle = "#D9CFBF"; c.fillRect(L, 168, R - L, 1);
+  txt("فاتورة", R, 228, F(700, 30, "'El Messiri'"), "#1F3D33");
+  txt("INVOICE", R, 252, F(600, 11), "#B4693F", "right", "ltr");
+  txt(d.no, L, 212, F(500, 13), "#5E6A64", "left", "ltr");
+  txt(d.date, L, 234, F(400, 13), "#5E6A64", "left");
+  const payTxt = d.paid ? "مدفوع بالكامل" : t.paidAmt > 0 ? `عربون مدفوع ${invMoney(t.paidAmt)}` : "غير مدفوع";
+  const boxH = d.due ? 92 : 72;
+  c.fillStyle = "#F7F3EC"; c.beginPath(); c.roundRect(L, 272, R - L, boxH, 14); c.fill();
+  txt([d.customer, d.phone ? "⁦" + d.phone + "⁩" : "", d.place].filter(Boolean).join("  ·  "), R - 22, 302, F(600, 14), "#1C2622");
+  txt("● " + payTxt, R - 22, 328, F(600, 13), d.paid ? "#2E7D57" : "#B4693F");
+  if(d.due) txt("موعد التسليم: " + d.due, R - 22, 352, F(400, 12.5), "#5E6A64");
+  let y = 272 + boxH + 44;
+  const col = { n: R, name: R - 30, qty: 330, unit: 220, total: L };
+  [["#", col.n, "right"], ["البند", col.name, "right"], ["العدد", col.qty, "center"], ["سعر الحبة", col.unit, "center"], ["المجموع", col.total, "left"]].forEach(h => txt(h[0], h[1], y, F(600, 11.5), "#9A8F7E", h[2]));
   y += 12; c.fillStyle = "#1F3D33"; c.fillRect(L, y, R - L, 1);
-  const rowH = Math.max(42, Math.min(64, (H - 330 - y) / Math.max(1, d.items.length)));
-  d.items.forEach((it, i) => {
-    const top = y, mid = top + rowH / 2;
-    txt(i + 1, col.n, mid + 5, F(500, 15, "'Cormorant Garamond', serif"), "#B4693F");
-    txt(it.name, col.name, it.sub ? mid - 2 : mid + 5, F(700, 14), "#1C2622");
-    if(it.sub) txt(it.sub, col.name, mid + 17, F(400, 11.5), "#7A857F");
-    txt(it.size, col.size, mid + 5, F(400, 13.5), "#1C2622", "center");
-    txt(it.qty, col.qty, mid + 5, F(400, 13.5), "#1C2622", "center");
-    txt(it.total ? fmtNum(it.total) + " د.إ" : "هدية", col.price, mid + 5, F(500, 13.5), "#1C2622", "left");
+  const rowH = Math.max(40, Math.min(60, 360 / Math.max(1, d.rows.length)));
+  d.rows.forEach((r, i) => {
+    const mid = y + rowH / 2, line = (Number(r.qty) || 0) * (Number(r.unit) || 0);
+    txt(i + 1, col.n, mid + 5, F(500, 14), "#B4693F");
+    txt(r.name, col.name, r.sub ? mid - 2 : mid + 5, F(700, 14), "#1C2622");
+    if(r.sub) txt(r.sub, col.name, mid + 17, F(400, 11.5), "#7A857F");
+    txt(fmtNum(r.qty), col.qty, mid + 5, F(400, 13.5), "#1C2622", "center");
+    txt(line ? invMoney(Number(r.unit) || 0) : "—", col.unit, mid + 5, F(400, 13.5), "#1C2622", "center");
+    txt(line ? invMoney(line) : "هدية", col.total, mid + 5, F(600, 13.5), "#1C2622", "left");
     y += rowH; c.fillStyle = "#EFE8DC"; c.fillRect(L, y, R - L, 1);
   });
   // المجاميع
-  y += 34; const TW = 290, TR = R, TL = R - TW;
-  d.lines.forEach(l => { txt(l[0], TR, y, F(400, 14), l[1] < 0 ? "#B4693F" : "#1C2622"); txt(money(l[1]), TL, y, F(500, 14), l[1] < 0 ? "#B4693F" : "#1C2622", "left"); y += 30; });
-  c.fillStyle = "#1F3D33"; c.beginPath(); c.roundRect(TL, y - 8, TW, 52, 12); c.fill();
-  txt("الإجمالي", TR - 16, y + 25, F(700, 18), "#F5F1E8"); txt(money(d.total), TL + 16, y + 25, F(700, 18), "#F5F1E8", "left");
-  // التذييل
-  txt("THANK YOU", W / 2, H - 90, F(600, 12), "#B4693F", "center", "ltr");
-  txt("شكرًا لثقتك — نتمنى العطر يعجبك", W / 2, H - 66, F(400, 12.5), "#8B948F", "center");
-  txt("واتساب ⁦+971 52 227 5255⁩  ·  evoqueperfumes.com", W / 2, H - 44, F(400, 12), "#8B948F", "center");
+  y += 32; const TW = 300, TR = R, TL = R - TW;
+  const lines = [["المجموع", invMoney(t.subtotal), "#1C2622"]];
+  if(Number(d.discount) > 0) lines.push(["الخصم", invMoney(-Number(d.discount)), "#B4693F"]);
+  lines.push(["التوصيل", Number(d.delivery) > 0 ? invMoney(Number(d.delivery)) : "مجاني", "#1C2622"]);
+  lines.forEach(l => { txt(l[0], TR, y, F(400, 14), l[2]); txt(l[1], TL, y, F(500, 14), l[2], "left"); y += 28; });
+  c.fillStyle = "#1F3D33"; c.beginPath(); c.roundRect(TL, y - 6, TW, 50, 12); c.fill();
+  txt("الإجمالي", TR - 16, y + 26, F(700, 18), "#F5F1E8"); txt(invMoney(t.total), TL + 16, y + 26, F(700, 18), "#F5F1E8", "left");
+  y += 62;
+  if(!d.paid && t.paidAmt > 0){
+    txt("المدفوع (عربون)", TR, y + 6, F(500, 14), "#2E7D57"); txt(invMoney(t.paidAmt), TL, y + 6, F(600, 14), "#2E7D57", "left"); y += 30;
+    c.fillStyle = "#FBEFE6"; c.beginPath(); c.roundRect(TL, y - 14, TW, 44, 10); c.fill();
+    txt("المتبقي", TR - 14, y + 14, F(700, 16), "#963224"); txt(invMoney(t.remaining), TL + 14, y + 14, F(700, 16), "#963224", "left"); y += 44;
+  }
+  // ختم مدفوع
+  if(d.paid){
+    c.save(); c.translate(L + 150, y - 70); c.rotate(-0.2); c.strokeStyle = "rgba(46,125,87,.85)"; c.lineWidth = 3;
+    c.beginPath(); c.roundRect(-105, -36, 210, 72, 12); c.stroke(); c.lineWidth = 1; c.beginPath(); c.roundRect(-97, -28, 194, 56, 8); c.stroke();
+    txt("مدفوع ✓", 0, 2, F(700, 26), "rgba(46,125,87,.9)", "center"); txt("PAID", 0, 22, F(600, 11), "rgba(46,125,87,.9)", "center", "ltr");
+    c.restore();
+  }
+  // بيانات البنك
+  if(d.showBank && d.bank){
+    const b = d.bank, by = Math.max(y + 18, 0), bh = 128;
+    c.strokeStyle = "#D9CFBF"; c.lineWidth = 1; c.beginPath(); c.roundRect(L, by, R - L, bh, 14); c.stroke();
+    txt("بيانات التحويل البنكي", R - 20, by + 28, F(700, 14), "#1F3D33");
+    const kv = [["البنك", b.bankName], ["اسم الحساب", b.accountName], ["رقم الحساب", b.accountNumber], ["IBAN", b.iban], ["SWIFT", b.swift]].filter(x => x[1]);
+    kv.forEach((x, i) => {
+      const colX = i % 2 === 0 ? R - 20 : W / 2 - 10, rowY = by + 56 + Math.floor(i / 2) * 26;
+      txt(x[0] + ":", colX, rowY, F(400, 12), "#7A857F");
+      c.font = F(400, 12); const lw = c.measureText(x[0] + ":  ").width;
+      txt(x[1], colX - lw, rowY, F(600, 12.5), "#1C2622", "right", /[A-Za-z0-9]/.test(x[1]) && !/[؀-ۿ]/.test(x[1]) ? "ltr" : "rtl");
+    });
+    if(!d.paid) txt(`المبلغ المطلوب تحويله: ${invMoney(t.remaining)}`, L + 20, by + 28, F(700, 13), "#B4693F", "left");
+  }
+  txt("THANK YOU", W / 2, H - 86, F(600, 12), "#B4693F", "center", "ltr");
+  txt("شكرًا لثقتك — نتمنى يعجبك", W / 2, H - 62, F(400, 12.5), "#8B948F", "center");
+  txt("واتساب ⁦+971 52 227 5255⁩  ·  evoqueperfumes.com", W / 2, H - 40, F(400, 12), "#8B948F", "center");
   return cv;
 }
 // PDF بصفحة وحدة فيها صورة الفاتورة (JPEG)
@@ -10532,7 +10588,7 @@ async function invPdf(cv){
   const pw = 595.28, ph = 841.89, enc = new TextEncoder(), parts = [], offs = []; let len = 0;
   const add = x => { const b = typeof x === "string" ? enc.encode(x) : x; parts.push(b); len += b.length; };
   const obj = (n, body) => { offs[n] = len; add(`${n} 0 obj\n`); body(); add("\nendobj\n"); };
-  add("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  add("%PDF-1.4\n");
   obj(1, () => add("<< /Type /Catalog /Pages 2 0 R >>"));
   obj(2, () => add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
   obj(3, () => add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`));
@@ -10542,25 +10598,108 @@ async function invPdf(cv){
   const xref = len; add(`xref\n0 6\n0000000000 65535 f \n${[1,2,3,4,5].map(n => String(offs[n]).padStart(10, "0") + " 00000 n \n").join("")}trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
   return new Blob(parts, { type: "application/pdf" });
 }
-async function invOpen(d, btn){
+async function invDeliver(d){
+  const cv = await invDraw(d), pdf = await invPdf(cv), name = `Evoque-${d.no}${d.paid ? "-paid" : ""}.pdf`;
+  const file = new File([pdf], name, { type: "application/pdf" });
+  if(/Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })){
+    try{ await navigator.share({ files: [file], title: "فاتورة " + d.no }); return; }catch(e){ if(e && e.name === "AbortError") return; }
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(pdf); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+// ---- نافذة تعديل الفاتورة ----
+function invEditor(d){
   if(!d){ alert("ما لقيت الطلب."); return; }
-  const old = btn ? btn.textContent : ""; if(btn){ btn.disabled = true; btn.textContent = "⏳ جارِ التجهيز…"; }
-  try{
-    const cv = await invDraw(d), pdf = await invPdf(cv), name = `Evoque-${d.no}.pdf`;
-    const file = new File([pdf], name, { type: "application/pdf" });
-    const mobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-    if(mobile && navigator.canShare && navigator.canShare({ files: [file] })){
-      try{ await navigator.share({ files: [file], title: "فاتورة " + d.no }); return; }catch(e){ if(e && e.name === "AbortError") return; }
-    }
-    const a = document.createElement("a"); a.href = URL.createObjectURL(pdf); a.download = name; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-  }catch(err){ alert("ما قدرت أطلع الفاتورة: " + err.message); }
-  finally{ if(btn){ btn.disabled = false; btn.textContent = old; } }
+  document.getElementById("invModal")?.remove();
+  const m = document.createElement("div"); m.id = "invModal"; m.className = "inv-modal";
+  const delivOpts = [["0", "مجاني / بدون"], ["25", "25 درهم"], ["custom", "مبلغ آخر"]];
+  const delSel = Number(d.delivery) === 0 ? "0" : Number(d.delivery) === 25 ? "25" : "custom";
+  m.innerHTML = `<div class="inv-box">
+    <div class="inv-head"><b>🧾 فاتورة ${esc(d.no)}</b><button type="button" class="secondary" data-x>✕</button></div>
+    <div class="sig-note" style="margin-top:0;">${esc(d.customer || "بدون اسم")} — عدّل أي رقم، والمجموع يتحدث لحاله.${d.kind === "dist" ? " التعديلات تنحفظ بالطلب (وتأثر على الحسابات)." : " تعديل الأرقام هنا للفاتورة بس — حالة الدفع تنحفظ بالطلب."}</div>
+    <div class="inv-rows"></div>
+    ${d.kind === "order" ? `<button type="button" class="secondary" data-addrow style="margin-top:6px;">➕ سطر</button>` : ""}
+    <div class="grid2" style="margin-top:12px;">
+      <div class="field"><label>الخصم (درهم)</label><input type="number" min="0" step="0.5" data-f="discount" value="${Number(d.discount) || 0}"></div>
+      <div class="field"><label>التوصيل</label><div style="display:flex; gap:6px;"><select data-f="delSel">${delivOpts.map(o => `<option value="${o[0]}" ${o[0] === delSel ? "selected" : ""}>${o[1]}</option>`).join("")}</select>
+        <input type="number" min="0" step="1" data-f="delivery" value="${Number(d.delivery) || 0}" style="${delSel === "custom" ? "" : "display:none;"} max-width:110px;"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>الدفع</label><select data-f="pay"><option value="none" ${!d.paid && !d.paidAmount ? "selected" : ""}>غير مدفوع</option><option value="deposit" ${!d.paid && d.paidAmount > 0 ? "selected" : ""}>عربون</option><option value="full" ${d.paid ? "selected" : ""}>مدفوع بالكامل ✓</option></select></div>
+      <div class="field" data-depwrap style="${!d.paid && d.paidAmount > 0 ? "" : "display:none;"}"><label>مبلغ العربون</label><input type="number" min="0" step="1" data-f="paidAmount" value="${Number(d.paidAmount) || 0}"></div>
+    </div>
+    <label class="sig-chk" style="margin-top:4px;"><input type="checkbox" data-f="bank" ${d.paid ? "" : "checked"}> 🏦 أضف بيانات البنك</label>
+    <div class="inv-sum"></div>
+    <div class="row" style="gap:8px; margin-top:12px; flex-wrap:wrap;"><button type="button" data-go>📄 احفظ ونزّل الفاتورة</button><button type="button" class="secondary" data-x>إلغاء</button></div>
+    <div class="status" data-st style="display:none;"></div>
+  </div>`;
+  document.body.appendChild(m);
+  const $ = q => m.querySelector(q);
+  const drawRows = () => {
+    $(".inv-rows").innerHTML = `<div class="inv-row inv-row-h"><span>البند</span><span>العدد</span><span>سعر الحبة</span><span>المجموع</span><span></span></div>` + d.rows.map((r, i) => `<div class="inv-row" data-i="${i}">
+      <span><input type="text" data-r="name" value="${esc(r.name)}" ${d.kind === "dist" ? "readonly" : ""}>${r.sub ? `<small>${esc(r.sub)}</small>` : ""}</span>
+      <span><input type="number" min="0" step="1" data-r="qty" value="${r.qty}"></span>
+      <span><input type="number" min="0" step="0.25" data-r="unit" value="${r.unit}"></span>
+      <span class="inv-line">${invMoney((Number(r.qty) || 0) * (Number(r.unit) || 0))}</span>
+      <span>${d.kind === "order" && d.rows.length > 1 ? `<button type="button" class="secondary" data-del="${i}">🗑️</button>` : ""}</span></div>`).join("");
+  };
+  const read = () => {
+    m.querySelectorAll(".inv-row[data-i]").forEach(el => { const r = d.rows[+el.dataset.i]; r.name = el.querySelector('[data-r="name"]').value; r.qty = Number(el.querySelector('[data-r="qty"]').value) || 0; r.unit = Number(el.querySelector('[data-r="unit"]').value) || 0; el.querySelector(".inv-line").textContent = invMoney(r.qty * r.unit); });
+    d.discount = Number($('[data-f="discount"]').value) || 0;
+    const ds = $('[data-f="delSel"]').value; $('[data-f="delivery"]').style.display = ds === "custom" ? "" : "none";
+    d.delivery = ds === "custom" ? (Number($('[data-f="delivery"]').value) || 0) : Number(ds);
+    const pv = $('[data-f="pay"]').value; $("[data-depwrap]").style.display = pv === "deposit" ? "" : "none";
+    d.paid = pv === "full"; d.paidAmount = pv === "deposit" ? (Number($('[data-f="paidAmount"]').value) || 0) : 0;
+    d.showBank = $('[data-f="bank"]').checked;
+    const t = invTotals(d);
+    $(".inv-sum").innerHTML = `المجموع <b>${invMoney(t.subtotal)}</b>${d.discount ? ` − خصم ${invMoney(d.discount)}` : ""} + توصيل ${d.delivery ? invMoney(d.delivery) : "مجاني"} = <b style="font-size:17px;">${invMoney(t.total)}</b>${!d.paid && t.paidAmt ? `<br>المدفوع ${invMoney(t.paidAmt)} — <b style="color:#963224;">المتبقي ${invMoney(t.remaining)}</b>` : d.paid ? `<br><b style="color:#2E7D57;">مدفوع بالكامل ✓</b>` : ""}`;
+  };
+  drawRows(); read();
+  m.addEventListener("input", read); m.addEventListener("change", e => { if(e.target.dataset.f === "pay" && e.target.value === "full") $('[data-f="bank"]').checked = false; read(); });
+  m.addEventListener("click", async e => {
+    if(e.target.closest("[data-x]") || e.target === m){ m.remove(); return; }
+    if(e.target.closest("[data-addrow]")){ read(); d.rows.push({ name: "", sub: "", qty: 1, unit: 0 }); drawRows(); read(); return; }
+    const del = e.target.closest("[data-del]"); if(del){ read(); d.rows.splice(+del.dataset.del, 1); drawRows(); read(); return; }
+    const go = e.target.closest("[data-go]"); if(!go) return;
+    read(); const st = $("[data-st]"); go.disabled = true; st.style.display = ""; st.className = "status info"; st.textContent = "جارِ الحفظ والتجهيز…";
+    try{
+      if(d.showBank){ d.bank = await invBank(d.country); if(!d.bank) st.textContent = "ما لقيت بيانات البنك — بتطلع الفاتورة بدونها."; }
+      await invSave(d);
+      await invDeliver(d);
+      st.className = "status ok"; st.textContent = "تم ✅ الفاتورة جاهزة" + (d.kind === "dist" ? " والطلب انحفظ بالأرقام الجديدة." : ".");
+      setTimeout(() => m.remove(), 1600);
+    }catch(err){ st.className = "status err"; st.textContent = "ما تم: " + err.message; go.disabled = false; }
+  });
+}
+// يحفظ التعديلات: التوزيعات (الأسعار + التوصيل + الخصم + الدفع)، والعطور (الدفع بس)
+async function invSave(d){
+  const token = getToken(); if(!token) throw new Error("لازم تدخل مفتاح الدخول أول.");
+  const t = invTotals(d), pay = { paid: d.paid, paidAmount: d.paid ? t.total : t.paidAmt };
+  if(d.kind === "dist"){
+    const dist = d.rows.find(r => r.key === "dist"), theme = d.rows.find(r => r.key === "theme");
+    distributionsData = await updateDistributionsWithRetry(token, obj => {
+      const idx = (obj.sales || []).findIndex(s => s.id === d.ref); if(idx === -1) throw new Error("الطلب ماعاد موجود. حدّث الصفحة.");
+      const s = Object.assign({}, obj.sales[idx]);
+      s.qty = dist.qty; s.unitPrice = dist.unit; s.base = Math.round(dist.qty * dist.unit * 100) / 100;
+      if(theme){ s.themeRuns = theme.qty; s.themeUnit = theme.unit; s.themeSurcharge = Math.round(theme.qty * theme.unit * 100) / 100; } else s.themeSurcharge = 0;
+      s.total = s.base + (s.themeSurcharge || 0); s.discount = d.discount; s.deliveryFee = d.delivery;
+      if(d.delivery === 0 && s.deliveryType !== "pickup") s.deliveryType = "pickup"; else if(d.delivery > 0 && s.deliveryType === "pickup") s.deliveryType = "custom";
+      s.netTotal = Math.max(0, s.total - d.discount) + d.delivery;
+      s.orderProfit = s.netTotal - (Number(s.orderCost) || 0);
+      s.paid = pay.paid; if(!pay.paid && pay.paidAmount > 0) s.paidAmount = pay.paidAmount; else delete s.paidAmount;
+      s.invoicedAt = new Date().toISOString();
+      obj.sales[idx] = s; return obj;
+    }, `Invoice ${d.no}: update distribution ${d.ref}`);
+    distRenderSalesLog();
+  } else {
+    const g = groupSalesData().find(x => x.key === d.ref), f0 = g && g.items[0];
+    if(f0 && (!!f0.paid !== pay.paid || (Number(f0.paidAmount) || 0) !== (pay.paid ? (Number(f0.paidAmount) || 0) : pay.paidAmount))) await slUpdateOrderPaid(d.ref, pay);
+  }
 }
 document.addEventListener("click", e => {
   const b = e.target.closest(".inv-order-btn, .inv-dist-btn"); if(!b) return;
   e.preventDefault();
-  invOpen(b.classList.contains("inv-order-btn") ? invFromOrder(b.dataset.key) : invFromDist(b.dataset.id), b);
+  invEditor(b.classList.contains("inv-order-btn") ? invFromOrder(b.dataset.key) : invFromDist(b.dataset.id));
 });
 </script>
 </body>
