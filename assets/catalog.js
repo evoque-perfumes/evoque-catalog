@@ -273,9 +273,18 @@ const ICONS = {
 
 // الحجم الوحيد المعروض للبيع هو 50مل (الـ10مل أُوقف بقرار المالك؛ حقوله تبقى بالبيانات
 // مخفية فقط). السعر يُقرأ من data.json حسب الدولة المختارة (null = ما فيه سعر بعد).
+// 15 نوفمبر 2026: عرض مؤقت (shipping-rates.json → offers.sale) — سعر موحّد للمستوحاة لين تاريخ معيّن، وخصم الكمية يتوقف خلاله
+function dubaiToday(){ return new Date(Date.now() + 4 * 3600 * 1000).toISOString().slice(0, 10); }
+function saleIsActive(sale){
+  if(!sale || sale.on === false || !(Number(sale.aed) > 0) || !sale.end) return false;
+  const t = dubaiToday(); return t <= sale.end && (!sale.start || t >= sale.start);
+}
+let SALE = null;
 function priceFor(p, size){
+  if(SALE && !isSig(p) && p.price50) return country === "OM" ? (Number(SALE.omr) || p.price50Om) : Number(SALE.aed);
   return country === "OM" ? p.price50Om : p.price50;
 }
+function regularPriceFor(p){ return country === "OM" ? p.price50Om : p.price50; }
 function currencyLabel(){
   return lang==="ar" ? COUNTRIES[country].currencyAr : COUNTRIES[country].currencyEn;
 }
@@ -718,7 +727,9 @@ const arDigits = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
 function applyOffersSetting(o){
   const pct = Number(o && o.discountPct), min = Math.round(Number(o && o.minQty));
   if(!(pct >= 0 && pct <= 90) || !(min >= 1 && min <= 20)) return;
-  OFFERS_CONFIG = pct > 0 ? [{ size:"50", minQty:min, discountPct:pct, reward:{ ar:`خصم ${arDigits(pct)}٪ على الطلب`, en:`${pct}% off your order` } }] : [];
+  SALE = saleIsActive(o && o.sale) ? o.sale : null;
+  window.EVOQUE_SALE = SALE;
+  OFFERS_CONFIG = pct > 0 && !SALE ? [{ size:"50", minQty:min, discountPct:pct, reward:{ ar:`خصم ${arDigits(pct)}٪ على الطلب`, en:`${pct}% off your order` } }] : [];
   I18N.ar.shipDiscount = `خصم ${arDigits(pct)}٪ (${arDigits(min)} عطور فأكثر)`;
   I18N.en.shipDiscount = `${pct}% off (${min}+ perfumes)`;
   window.EVOQUE_OFFERS = { discountPct: pct, minQty: min }; // يقرأها home-motion.js لنصوص العروض
@@ -2123,7 +2134,8 @@ function renderGrid(explicitList){
       if(p.comingSoon) return `<div class="size-row"><div class="size-pill active disabled sig-soon">${t.comingSoon}</div></div>`;
       if(!p.price50) return `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${t.askPrice}</div>`;
       const shownPrice = priceFor(p, "50");
-      const priceHtml = shownPrice != null ? `${shownPrice} ${currencyLabel()}` : t.askPrice;
+      const wasPrice = SALE && !isSig(p) ? regularPriceFor(p) : null;
+      const priceHtml = shownPrice != null ? `${wasPrice && wasPrice > shownPrice ? `<s class="was-price">${wasPrice}</s> ` : ""}${shownPrice} ${currencyLabel()}` : t.askPrice;
       const qtyNum = Number(p.stock50) || 0;
       const inStock = qtyNum > 0;
       const stockNoteHtml = !inStock

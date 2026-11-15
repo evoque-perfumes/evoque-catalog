@@ -965,6 +965,21 @@
       <small class="hint" style="color:#9C6B1F;">⚠️ أول مرة قبل ما تغيّر الخصم: لازم يتحدّث سكربت «استقبال الطلبات» في Google (سطر واحد). لين يتحدّث، طلبات الموقع تنحسب على 15% مهما كتبت هنا.</small>
     </fieldset>
 
+    <fieldset>
+      <legend>🎉 عرض مؤقت — سعر موحّد لكل العطور المستوحاة لين تاريخ معيّن (يوقف لحاله)</legend>
+      <label class="sig-chk" style="margin-bottom:10px;"><input type="checkbox" id="ship_sale_on"> شغّل العرض</label>
+      <div class="grid2">
+        <div class="field"><label for="ship_sale_label">اسم العرض (يطلع بالشريط فوق)</label><input type="text" id="ship_sale_label" maxlength="40" placeholder="عرض اليوم الوطني"></div>
+        <div class="field"><label for="ship_sale_aed">سعر العطر بالعرض (درهم)</label><input type="number" id="ship_sale_aed" min="1" step="1" placeholder="55"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="ship_sale_omr">سعره في عُمان (ريال)</label><input type="number" id="ship_sale_omr" min="0.5" step="0.5" placeholder="5.5"></div>
+        <div class="field"><label for="ship_sale_start">يبدأ من</label><input type="date" id="ship_sale_start"></div>
+        <div class="field"><label for="ship_sale_end">آخر يوم بالعرض</label><input type="date" id="ship_sale_end"></div>
+      </div>
+      <small class="hint" id="ship_sale_hint" style="margin-top:0;"></small>
+    </fieldset>
+
     <div class="row">
       <button type="button" id="ship_saveBtn">احفظ التوصيل والخصم</button>
     </div>
@@ -3319,7 +3334,8 @@ document.getElementById("sl_clearCartBtn").addEventListener("click", () => {
 const NEW_RULES_START = "2026-10-18";
 const LEGACY_PRICE_50 = 50;
 // 7 نوفمبر 2026: نسبة الخصم وأقل عدد من إعداد «🚚 التوصيل والخصم» (shipping-rates.json → offers)
-const slOffer = () => shipOffers(shippingRatesData);
+const slSale = () => { const s = shippingRatesData && shippingRatesData.offers && shippingRatesData.offers.sale; return typeof saleIsActive === "function" && saleIsActive(s) ? s : null; };
+const slOffer = () => slSale() ? Object.assign({}, shipOffers(shippingRatesData), { discountPct: 0 }) : shipOffers(shippingRatesData);
 const OMR_TO_AED_EQ = 10; // نفس معادلة اللوحة: 1 ريال عُماني = 10 بالحسابات (سعر عُمان = سعر الإمارات ÷ 10)
 let slDiscountTouched = false, slCostTouched = false, slRatesLoaded = false;
 
@@ -3402,6 +3418,7 @@ function slSwitchDefaultPrices(){
   return changed;
 }
 function slPriceFor(p, size){
+  if(size === "50" && !slIsLegacy() && p.price50 != null && p.line !== "signature" && slSale() && document.getElementById("sl_date").value <= slSale().end) return Number(slSale().aed);
   if(size === "50") return (slIsLegacy() && p.price50 != null) ? LEGACY_PRICE_50 : (p.price50 != null ? p.price50 : "");
   return p.price10 != null ? p.price10 : "";
 }
@@ -8715,7 +8732,32 @@ function fillShippingForm(obj){
   document.getElementById("ship_offer_pct").value = String(of.discountPct);
   document.getElementById("ship_offer_min").value = String(of.minQty);
   shipOfferHint();
+  const sale = (obj && obj.offers && obj.offers.sale) || {};
+  document.getElementById("ship_sale_on").checked = sale.on === true;
+  document.getElementById("ship_sale_label").value = sale.label || "";
+  document.getElementById("ship_sale_aed").value = sale.aed || "";
+  document.getElementById("ship_sale_omr").value = sale.omr || "";
+  document.getElementById("ship_sale_start").value = sale.start || "";
+  document.getElementById("ship_sale_end").value = sale.end || "";
+  shipSaleHint();
 }
+// 15 نوفمبر 2026: عرض مؤقت (shipping-rates.json → offers.sale) — سعر موحّد للمستوحاة لين تاريخ معيّن، وخصم الكمية يتوقف خلاله
+function dubaiToday(){ return new Date(Date.now() + 4 * 3600 * 1000).toISOString().slice(0, 10); }
+function saleIsActive(sale){
+  if(!sale || sale.on === false || !(Number(sale.aed) > 0) || !sale.end) return false;
+  const t = dubaiToday(); return t <= sale.end && (!sale.start || t >= sale.start);
+}
+function shipSaleHint(){
+  const on = document.getElementById("ship_sale_on").checked, aed = Number(document.getElementById("ship_sale_aed").value), omr = Number(document.getElementById("ship_sale_omr").value);
+  const st = document.getElementById("ship_sale_start").value, en = document.getElementById("ship_sale_end").value, el = document.getElementById("ship_sale_hint");
+  if(!on){ el.textContent = "العرض مطفي — الأسعار العادية."; el.style.color = ""; return; }
+  if(!(aed > 0) || !en){ el.textContent = "⚠️ اكتب سعر العرض وآخر يوم عشان يشتغل."; el.style.color = "#963224"; return; }
+  const active = saleIsActive({ on: true, aed, end: en, start: st });
+  el.style.color = active ? "#1F6B41" : "#9C6B1F";
+  el.textContent = (active ? "✅ شغّال الحين: " : (st && dubaiToday() < st ? "⏳ بيبدأ يوم " + st + ": " : "⛔ انتهى: ")) +
+    `كل عطر مستوحى بـ ${aed} درهم${omr ? ` (عُمان ${omr} ريال)` : ""}، والسعر القديم يطلع مشطوب جنبه. خصم الكمية يوقف خلال العرض ويرجع لحاله بعد ${en}. عطور سيغنتشر ما تدخل.`;
+}
+["ship_sale_on","ship_sale_aed","ship_sale_omr","ship_sale_start","ship_sale_end"].forEach(id => { document.getElementById(id).addEventListener("input", shipSaleHint); document.getElementById(id).addEventListener("change", shipSaleHint); });
 // خصم الكمية: shipping-rates.json → offers (نفس الملف اللي يقرأه الموقع وسكربت استقبال الطلبات)
 function shipOffers(obj){
   const o = (obj && obj.offers) || {};
@@ -8742,7 +8784,15 @@ function readShippingForm(){
     },
     offers: {
       discountPct: Number(document.getElementById("ship_offer_pct").value) || 0,
-      minQty: Number(document.getElementById("ship_offer_min").value) || 3
+      minQty: Number(document.getElementById("ship_offer_min").value) || 3,
+      sale: {
+        on: document.getElementById("ship_sale_on").checked,
+        label: document.getElementById("ship_sale_label").value.trim() || "عرض خاص",
+        aed: Number(document.getElementById("ship_sale_aed").value) || 0,
+        omr: Number(document.getElementById("ship_sale_omr").value) || 0,
+        start: document.getElementById("ship_sale_start").value || "",
+        end: document.getElementById("ship_sale_end").value || ""
+      }
     }
   };
 }

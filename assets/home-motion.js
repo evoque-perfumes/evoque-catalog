@@ -55,8 +55,20 @@
     } else {
       T.ar.ann = "توصيل مجاني لكل الطلبات"; T.en.ann = "Free delivery on every order";
     }
+    var sale = o && o.sale, t = new Date(Date.now() + 4 * 3600 * 1000).toISOString().slice(0, 10);
+    var saleOn = sale && sale.on !== false && Number(sale.aed) > 0 && sale.end && t <= sale.end && (!sale.start || t >= sale.start);
+    if(saleOn){
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(sale.end) || [], months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+      var mEn = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      var dAr = m[3] ? ar(Number(m[3])) + " " + months[Number(m[2]) - 1] : "", dEn = m[3] ? Number(m[3]) + " " + mEn[Number(m[2]) - 1] : "";
+      var label = sale.label || "عرض خاص";
+      T.ar.ann = label + " · كل العطور " + ar(sale.aed) + " درهم لين " + dAr + " · توصيل مجاني";
+      T.en.ann = (sale.labelEn || "Special offer") + " · Every perfume " + sale.aed + " AED until " + dEn + " · Free delivery";
+      T.ar.o2t = "كل العطور " + ar(sale.aed) + " درهم"; T.ar.o2s = label + " — لين " + dAr;
+      T.en.o2t = "Every perfume " + sale.aed + " AED"; T.en.o2s = (sale.labelEn || "Special offer") + " — until " + dEn;
+    }
     var offer = document.querySelector('.offer [data-t="o2t"]');
-    if(offer && offer.closest(".offer")) offer.closest(".offer").style.display = pct > 0 ? "" : "none";
+    if(offer && offer.closest(".offer")) offer.closest(".offer").style.display = (pct > 0 || saleOn) ? "" : "none";
   }
   fetch("shipping-rates.json?t=" + Math.floor(Date.now() / 60000), { cache: "no-store" }).then(function(r){ return r.json(); }).then(function(d){ if(d && d.offers){ applyOfferTexts(d.offers); applyText(); } }).catch(function(){});
   function applyText(){

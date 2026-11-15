@@ -9,6 +9,14 @@
   },
   "offers": {
     "discountPct": 10,
-    "minQty": 3
+    "minQty": 3,
+    "sale": {
+      "on": false,
+      "label": "عرض اليوم الوطني",
+      "aed": 55,
+      "omr": 5.5,
+      "start": "",
+      "end": "2026-12-02"
+    }
   }
 }
